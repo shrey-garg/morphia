@@ -27,7 +27,7 @@ public class GeoQueriesTest extends TestBase {
         // given
         double latitude = 51.5286416;
         double longitude = -0.1015987;
-        Datastore datastore = getDs();
+        Datastore datastore = getDatastore();
         City london = new City("London", point(latitude, longitude));
         datastore.save(london);
         City manchester = new City("Manchester", point(53.4722454, -2.2235922));
@@ -35,7 +35,7 @@ public class GeoQueriesTest extends TestBase {
         City sevilla = new City("Sevilla", point(37.3753708, -5.9550582));
         datastore.save(sevilla);
 
-        getDs().ensureIndexes();
+        getDatastore().ensureIndexes();
 
         // when
         List<City> citiesOrderedByDistanceFromLondon = datastore.find(City.class)
@@ -55,20 +55,20 @@ public class GeoQueriesTest extends TestBase {
         double latitudeLondon = 51.5286416;
         double longitudeLondon = -0.1015987;
         City manchester = new City("Manchester", point(53.4722454, -2.2235922));
-        getDs().save(manchester);
+        getDatastore().save(manchester);
         City london = new City("London", point(latitudeLondon, longitudeLondon));
-        getDs().save(london);
+        getDatastore().save(london);
         City sevilla = new City("Sevilla", point(37.3753708, -5.9550582));
-        getDs().save(sevilla);
+        getDatastore().save(sevilla);
 
-        getDs().ensureIndexes();
+        getDatastore().ensureIndexes();
 
         // when
-        List<City> citiesOrderedByDistanceFromLondon = getDs().find(City.class)
-                                                              .field("location")
-                                                              .near(pointBuilder().latitude(latitudeLondon)
+        List<City> citiesOrderedByDistanceFromLondon = getDatastore().find(City.class)
+                                                                     .field("location")
+                                                                     .near(pointBuilder().latitude(latitudeLondon)
                                                                                   .longitude(latitudeLondon).build())
-                                                              .asList();
+                                                                     .asList();
 
         // then
         assertThat(citiesOrderedByDistanceFromLondon.size(), is(3));

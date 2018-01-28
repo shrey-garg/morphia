@@ -15,9 +15,9 @@ public class WildcardsTest extends TestBase {
     public void example() throws Exception {
         ChildEntity entity = new ChildEntity();
         entity.setEmbeddedList(asList(new ChildEmbedded("first"), new ChildEmbedded("second"), new AnotherChildEmbedded("third")));
-        getDs().save(entity);
+        getDatastore().save(entity);
 
-        ChildEntity childEntity = getDs().find(ChildEntity.class).get();
+        ChildEntity childEntity = getDatastore().find(ChildEntity.class).get();
 
         Assert.assertEquals(entity, childEntity);
     }

@@ -1,8 +1,7 @@
 package org.mongodb.morphia.query;
 
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.mapping.MappedClass;
@@ -11,7 +10,6 @@ import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.utils.ReflectionUtils;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.mongodb.morphia.query.QueryValidator.validateQuery;
@@ -84,27 +82,27 @@ class FieldCriteria extends AbstractCriteria {
 
     @Override
     @SuppressWarnings("unchecked")
-    public void addTo(final DBObject obj) {
+    public void addTo(final Document obj) {
         if (FilterOperator.EQUAL.equals(operator)) {
             // no operator, prop equals (or NOT equals) value
             if (not) {
-                obj.put(field, new BasicDBObject("$not", value));
+                obj.put(field, new Document("$not", value));
             } else {
                 obj.put(field, value);
             }
 
         } else {
             final Object object = obj.get(field); // operator within inner object
-            Map<String, Object> inner;
+            Document inner;
             if (!(object instanceof Map)) {
-                inner = new HashMap<String, Object>();
+                inner = new Document();
                 obj.put(field, inner);
             } else {
-                inner = (Map<String, Object>) object;
+                inner = (Document) object;
             }
 
             if (not) {
-                inner.put("$not", new BasicDBObject(operator.val(), value));
+                inner.put("$not", new Document(operator.val(), value));
             } else {
                 inner.put(operator.val(), value);
             }

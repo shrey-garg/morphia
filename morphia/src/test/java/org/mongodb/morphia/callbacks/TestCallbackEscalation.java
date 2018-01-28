@@ -30,13 +30,13 @@ public class TestCallbackEscalation extends TestBase {
         Assert.assertFalse(a.b.isPostLoad());
         Assert.assertFalse(a.bs.get(0).isPostLoad());
 
-        getDs().save(a);
+        getDatastore().save(a);
 
         Assert.assertFalse(a.isPreLoad());
         Assert.assertFalse(a.b.isPreLoad());
         Assert.assertFalse(a.bs.get(0).isPreLoad());
 
-        a = getDs().find(A.class).filter("_id", a.id).get();
+        a = getDatastore().find(A.class).filter("_id", a.id).get();
 
         Assert.assertTrue(a.isPostLoad());
         Assert.assertTrue(a.b.isPostLoad());
@@ -54,7 +54,7 @@ public class TestCallbackEscalation extends TestBase {
         Assert.assertFalse(a.b.isPostPersist());
         Assert.assertFalse(a.bs.get(0).isPostPersist());
 
-        getDs().save(a);
+        getDatastore().save(a);
 
         Assert.assertTrue(a.isPreSave());
         Assert.assertTrue(a.isPostPersist());
@@ -74,13 +74,13 @@ public class TestCallbackEscalation extends TestBase {
         Assert.assertFalse(a.b.isPreLoad());
         Assert.assertFalse(a.bs.get(0).isPreLoad());
 
-        getDs().save(a);
+        getDatastore().save(a);
 
         Assert.assertFalse(a.isPreLoad());
         Assert.assertFalse(a.b.isPreLoad());
         Assert.assertFalse(a.bs.get(0).isPreLoad());
 
-        a = getDs().find(A.class).filter("_id", a.id).get();
+        a = getDatastore().find(A.class).filter("_id", a.id).get();
 
         Assert.assertTrue(a.isPreLoad());
         Assert.assertTrue(a.b.isPreLoad());
@@ -98,7 +98,7 @@ public class TestCallbackEscalation extends TestBase {
         Assert.assertFalse(a.b.isPrePersist());
         Assert.assertFalse(a.bs.get(0).isPrePersist());
 
-        getDs().save(a);
+        getDatastore().save(a);
 
         Assert.assertTrue(a.isPrePersist());
         Assert.assertTrue(a.b.isPrePersist());

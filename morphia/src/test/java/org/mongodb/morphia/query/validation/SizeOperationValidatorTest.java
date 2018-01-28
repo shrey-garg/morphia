@@ -3,8 +3,6 @@ package org.mongodb.morphia.query.validation;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 import org.mongodb.morphia.entities.EntityWithListsAndArrays;
-import org.mongodb.morphia.mapping.MappedClass;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.ArrayList;

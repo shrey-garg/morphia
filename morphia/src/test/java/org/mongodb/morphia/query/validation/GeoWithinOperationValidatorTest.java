@@ -2,8 +2,6 @@ package org.mongodb.morphia.query.validation;
 
 import com.mongodb.BasicDBObject;
 import org.junit.Test;
-import org.mongodb.morphia.mapping.MappedClass;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.ArrayList;

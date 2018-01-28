@@ -81,40 +81,40 @@ public class TestUpdateOps extends TestBase {
         parent.id = parentId;
         parent.children.add(new Child("Anthony", "Child"));
         parent.children.add(new Child(childName, "originalLastName"));
-        getDs().save(parent);
+        getDatastore().save(parent);
 
         // when
-        Query<Parent> query = getDs().find(Parent.class)
-                                     .field("_id").equal(parentId)
-                                     .field("children.first")
-                                     .equal(childName);
-        UpdateOperations<Parent> updateOps = getDs().createUpdateOperations(Parent.class)
-                                                    .set("children.$.last", updatedLastName);
-        UpdateResults updateResults = getDs().update(query, updateOps);
+        Query<Parent> query = getDatastore().find(Parent.class)
+                                            .field("_id").equal(parentId)
+                                            .field("children.first")
+                                            .equal(childName);
+        UpdateOperations<Parent> updateOps = getDatastore().createUpdateOperations(Parent.class)
+                                                           .set("children.$.last", updatedLastName);
+        UpdateResults updateResults = getDatastore().update(query, updateOps);
 
         // then
         assertThat(updateResults.getUpdatedCount(), is(1));
-        assertThat(getDs().find(Parent.class).filter("id", parentId).get().children, hasItem(new Child(childName, updatedLastName)));
+        assertThat(getDatastore().find(Parent.class).filter("id", parentId).get().children, hasItem(new Child(childName, updatedLastName)));
     }
 
     @Test
     public void testDisableValidation() {
         Child child1 = new Child("James", "Rigney");
 
-        validateClassName("children", getDs().createUpdateOperations(Parent.class)
-                                             .removeAll("children", child1), false);
+        validateClassName("children", getDatastore().createUpdateOperations(Parent.class)
+                                                    .removeAll("children", child1), false);
 
-        validateClassName("children", getDs().createUpdateOperations(Parent.class)
+        validateClassName("children", getDatastore().createUpdateOperations(Parent.class)
+                                                    .disableValidation()
+                                                    .removeAll("children", child1), false);
+
+        validateClassName("c", getDatastore().createUpdateOperations(Parent.class)
                                              .disableValidation()
-                                             .removeAll("children", child1), false);
-
-        validateClassName("c", getDs().createUpdateOperations(Parent.class)
-                                      .disableValidation()
-                                      .removeAll("c", child1), true);
+                                             .removeAll("c", child1), true);
     }
 
     private void validateClassName(final String path, final UpdateOperations<Parent> ops, final boolean expected) {
-        DBObject ops1 = ((UpdateOpsImpl) ops).getOps();
+        DBObject ops1 = ((UpdateOpsImpl) ops).getOperations();
         Map pull = (Map) ops1.get("$pull");
         Map children = (Map) pull.get(path);
         Assert.assertEquals(expected, children.containsKey("className"));
@@ -126,7 +126,7 @@ public class TestUpdateOps extends TestBase {
         checkMinServerVersion(2.6);
 
         ContainsIntArray cIntArray = new ContainsIntArray();
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         ds.save(cIntArray);
 
         assertThat(ds.get(cIntArray).values, is((new ContainsIntArray()).values));
@@ -190,60 +190,60 @@ public class TestUpdateOps extends TestBase {
 
         EntityLogs logs = new EntityLogs();
         logs.uuid = uuid;
-        getDs().save(logs);
+        getDatastore().save(logs);
 
-        Query<EntityLogs> finder = getDs().find(EntityLogs.class).field("uuid").equal(uuid);
+        Query<EntityLogs> finder = getDatastore().find(EntityLogs.class).field("uuid").equal(uuid);
 
         // both of these entries will have a className attribute
         List<EntityLog> latestLogs = asList(new EntityLog("whatever1", new Date()), new EntityLog("whatever2", new Date()));
-        UpdateOperations<EntityLogs> updateOperationsAll = getDs().createUpdateOperations(EntityLogs.class)
-                                                                  .addAll("logs", latestLogs, false);
-        getDs().update(finder, updateOperationsAll, true);
+        UpdateOperations<EntityLogs> updateOperationsAll = getDatastore().createUpdateOperations(EntityLogs.class)
+                                                                         .addAll("logs", latestLogs, false);
+        getDatastore().update(finder, updateOperationsAll, true);
         validateNoClassName(finder.get());
 
         // this entry will NOT have a className attribute
-        UpdateOperations<EntityLogs> updateOperations3 = getDs().createUpdateOperations(EntityLogs.class)
-                                                                .add("logs", new EntityLog("whatever3", new Date()), false);
-        getDs().update(finder, updateOperations3, true);
+        UpdateOperations<EntityLogs> updateOperations3 = getDatastore().createUpdateOperations(EntityLogs.class)
+                                                                       .add("logs", new EntityLog("whatever3", new Date()), false);
+        getDatastore().update(finder, updateOperations3, true);
         validateNoClassName(finder.get());
 
         // this entry will NOT have a className attribute
-        UpdateOperations<EntityLogs> updateOperations4 = getDs().createUpdateOperations(EntityLogs.class)
-                                                                .add("logs", new EntityLog("whatever4", new Date()), false);
-        getDs().update(finder, updateOperations4, true);
+        UpdateOperations<EntityLogs> updateOperations4 = getDatastore().createUpdateOperations(EntityLogs.class)
+                                                                       .add("logs", new EntityLog("whatever4", new Date()), false);
+        getDatastore().update(finder, updateOperations4, true);
         validateNoClassName(finder.get());
     }
 
     @Test
     public void testAddToSet() throws Exception {
         ContainsIntArray cIntArray = new ContainsIntArray();
-        getDs().save(cIntArray);
+        getDatastore().save(cIntArray);
 
-        assertThat(getDs().get(cIntArray).values, is((new ContainsIntArray()).values));
+        assertThat(getDatastore().get(cIntArray).values, is((new ContainsIntArray()).values));
 
-        assertUpdated(getDs().update(getDs().find(ContainsIntArray.class),
-                                     getDs().createUpdateOperations(ContainsIntArray.class)
-                                            .addToSet("values", 5)),
+        assertUpdated(getDatastore().update(getDatastore().find(ContainsIntArray.class),
+                                     getDatastore().createUpdateOperations(ContainsIntArray.class)
+                                                   .addToSet("values", 5)),
                       1);
-        assertThat(getDs().get(cIntArray).values, is(new Integer[]{1, 2, 3, 5}));
+        assertThat(getDatastore().get(cIntArray).values, is(new Integer[]{1, 2, 3, 5}));
 
-        assertUpdated(getDs().update(getDs().find(ContainsIntArray.class),
-                                     getDs().createUpdateOperations(ContainsIntArray.class)
-                                            .addToSet("values", 4)),
+        assertUpdated(getDatastore().update(getDatastore().find(ContainsIntArray.class),
+                                     getDatastore().createUpdateOperations(ContainsIntArray.class)
+                                                   .addToSet("values", 4)),
                       1);
-        assertThat(getDs().get(cIntArray).values, is(new Integer[]{1, 2, 3, 5, 4}));
+        assertThat(getDatastore().get(cIntArray).values, is(new Integer[]{1, 2, 3, 5, 4}));
 
-        assertUpdated(getDs().update(getDs().find(ContainsIntArray.class),
-                                     getDs().createUpdateOperations(ContainsIntArray.class)
-                                            .addToSet("values", asList(8, 9))),
+        assertUpdated(getDatastore().update(getDatastore().find(ContainsIntArray.class),
+                                     getDatastore().createUpdateOperations(ContainsIntArray.class)
+                                                   .addToSet("values", asList(8, 9))),
                       1);
-        assertThat(getDs().get(cIntArray).values, is(new Integer[]{1, 2, 3, 5, 4, 8, 9}));
+        assertThat(getDatastore().get(cIntArray).values, is(new Integer[]{1, 2, 3, 5, 4, 8, 9}));
 
-        assertUpdated(getDs().update(getDs().find(ContainsIntArray.class),
-                                     getDs().createUpdateOperations(ContainsIntArray.class)
-                                            .addToSet("values", asList(4, 5))),
+        assertUpdated(getDatastore().update(getDatastore().find(ContainsIntArray.class),
+                                     getDatastore().createUpdateOperations(ContainsIntArray.class)
+                                                   .addToSet("values", asList(4, 5))),
                       1);
-        assertThat(getDs().get(cIntArray).values, is(new Integer[]{1, 2, 3, 5, 4, 8, 9}));
+        assertThat(getDatastore().get(cIntArray).values, is(new Integer[]{1, 2, 3, 5, 4, 8, 9}));
     }
 
     @Test
@@ -251,7 +251,7 @@ public class TestUpdateOps extends TestBase {
     public void testUpdateFirst() throws Exception {
         ContainsIntArray cIntArray = new ContainsIntArray();
         ContainsIntArray control = new ContainsIntArray();
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         ds.save(cIntArray, control);
 
         assertThat(ds.get(cIntArray).values, is((new ContainsIntArray()).values));
@@ -279,34 +279,34 @@ public class TestUpdateOps extends TestBase {
     private void doUpdates(final ContainsIntArray updated, final ContainsIntArray control,
                            final Query<ContainsIntArray> query, final UpdateOperations<ContainsIntArray> operations,
                            final Integer[] target) {
-        assertUpdated(getDs().updateFirst(query, operations), 1);
-        assertThat(getDs().get(updated).values, is(target));
-        assertThat(getDs().get(control).values, is(new Integer[]{1, 2, 3}));
+        assertUpdated(getDatastore().updateFirst(query, operations), 1);
+        assertThat(getDatastore().get(updated).values, is(target));
+        assertThat(getDatastore().get(control).values, is(new Integer[]{1, 2, 3}));
 
-        assertUpdated(getDs().update(query, operations, new UpdateOptions()), 1);
-        assertThat(getDs().get(updated).values, is(target));
-        assertThat(getDs().get(control).values, is(new Integer[]{1, 2, 3}));
+        assertUpdated(getDatastore().update(query, operations, new UpdateOptions()), 1);
+        assertThat(getDatastore().get(updated).values, is(target));
+        assertThat(getDatastore().get(control).values, is(new Integer[]{1, 2, 3}));
     }
 
     @Test
     public void testExistingUpdates() throws Exception {
         Circle c = new Circle(100D);
-        getDs().save(c);
+        getDatastore().save(c);
         c = new Circle(12D);
-        getDs().save(c);
-        assertUpdated(getDs().update(getDs().find(Circle.class),
-                                     getDs().createUpdateOperations(Circle.class)
-                                            .inc("radius", 1D),
+        getDatastore().save(c);
+        assertUpdated(getDatastore().update(getDatastore().find(Circle.class),
+                                     getDatastore().createUpdateOperations(Circle.class)
+                                                   .inc("radius", 1D),
                                      new UpdateOptions()),
                       1);
 
-        assertUpdated(getDs().update(getDs().find(Circle.class),
-                                     getDs().createUpdateOperations(Circle.class)
-                                            .inc("radius")),
+        assertUpdated(getDatastore().update(getDatastore().find(Circle.class),
+                                     getDatastore().createUpdateOperations(Circle.class)
+                                                   .inc("radius")),
                       2);
 
         //test possible data type change.
-        final Circle updatedCircle = getDs().find(Circle.class).filter("radius", 13).get();
+        final Circle updatedCircle = getDatastore().find(Circle.class).filter("radius", 13).get();
         assertThat(updatedCircle, is(notNullValue()));
         assertThat(updatedCircle.getRadius(), is(13D));
     }
@@ -317,56 +317,56 @@ public class TestUpdateOps extends TestBase {
             new Rectangle(10, 10)};
 
         for (final Rectangle rect : array) {
-            getDs().save(rect);
+            getDatastore().save(rect);
         }
 
-        final Query<Rectangle> heightOf1 = getDs().find(Rectangle.class).filter("height", 1D);
-        final Query<Rectangle> heightOf2 = getDs().find(Rectangle.class).filter("height", 2D);
-        final Query<Rectangle> heightOf35 = getDs().find(Rectangle.class).filter("height", 3.5D);
+        final Query<Rectangle> heightOf1 = getDatastore().find(Rectangle.class).filter("height", 1D);
+        final Query<Rectangle> heightOf2 = getDatastore().find(Rectangle.class).filter("height", 2D);
+        final Query<Rectangle> heightOf35 = getDatastore().find(Rectangle.class).filter("height", 3.5D);
 
-        assertThat(getDs().getCount(heightOf1), is(3L));
-        assertThat(getDs().getCount(heightOf2), is(0L));
+        assertThat(getDatastore().getCount(heightOf1), is(3L));
+        assertThat(getDatastore().getCount(heightOf2), is(0L));
 
-        final UpdateResults results = getDs().update(heightOf1, getDs().createUpdateOperations(Rectangle.class)
-                                                                       .inc("height"));
+        final UpdateResults results = getDatastore().update(heightOf1, getDatastore().createUpdateOperations(Rectangle.class)
+                                                                                     .inc("height"));
         assertUpdated(results, 3);
 
-        assertThat(getDs().getCount(heightOf1), is(0L));
-        assertThat(getDs().getCount(heightOf2), is(3L));
+        assertThat(getDatastore().getCount(heightOf1), is(0L));
+        assertThat(getDatastore().getCount(heightOf2), is(3L));
 
-        getDs().update(heightOf2, getDs().createUpdateOperations(Rectangle.class).dec("height"));
-        assertThat(getDs().getCount(heightOf1), is(3L));
-        assertThat(getDs().getCount(heightOf2), is(0L));
+        getDatastore().update(heightOf2, getDatastore().createUpdateOperations(Rectangle.class).dec("height"));
+        assertThat(getDatastore().getCount(heightOf1), is(3L));
+        assertThat(getDatastore().getCount(heightOf2), is(0L));
 
-        getDs().update(heightOf1, getDs().createUpdateOperations(Rectangle.class).inc("height", 2.5D));
-        assertThat(getDs().getCount(heightOf1), is(0L));
-        assertThat(getDs().getCount(heightOf35), is(3L));
+        getDatastore().update(heightOf1, getDatastore().createUpdateOperations(Rectangle.class).inc("height", 2.5D));
+        assertThat(getDatastore().getCount(heightOf1), is(0L));
+        assertThat(getDatastore().getCount(heightOf35), is(3L));
 
-        getDs().update(heightOf35, getDs().createUpdateOperations(Rectangle.class).dec("height", 2.5D));
-        assertThat(getDs().getCount(heightOf1), is(3L));
-        assertThat(getDs().getCount(heightOf35), is(0L));
+        getDatastore().update(heightOf35, getDatastore().createUpdateOperations(Rectangle.class).dec("height", 2.5D));
+        assertThat(getDatastore().getCount(heightOf1), is(3L));
+        assertThat(getDatastore().getCount(heightOf35), is(0L));
 
-        getDs().update(getDs().find(Rectangle.class).filter("height", 1D),
-                       getDs().createUpdateOperations(Rectangle.class)
-                              .set("height", 1D)
-                              .inc("width", 20D));
+        getDatastore().update(getDatastore().find(Rectangle.class).filter("height", 1D),
+                       getDatastore().createUpdateOperations(Rectangle.class)
+                                     .set("height", 1D)
+                                     .inc("width", 20D));
 
-        assertThat(getDs().getCount(Rectangle.class), is(5L));
-        assertThat(getDs().find(Rectangle.class).filter("height", 1D).get(), is(notNullValue()));
-        assertThat(getDs().find(Rectangle.class).filter("width", 30D).get(), is(notNullValue()));
+        assertThat(getDatastore().getCount(Rectangle.class), is(5L));
+        assertThat(getDatastore().find(Rectangle.class).filter("height", 1D).get(), is(notNullValue()));
+        assertThat(getDatastore().find(Rectangle.class).filter("width", 30D).get(), is(notNullValue()));
 
-        getDs().update(getDs().find(Rectangle.class).filter("width", 30D),
-                       getDs().createUpdateOperations(Rectangle.class).set("height", 2D).set("width", 2D));
-        assertThat(getDs().find(Rectangle.class).filter("width", 1D).get(), is(nullValue()));
-        assertThat(getDs().find(Rectangle.class).filter("width", 2D).get(), is(notNullValue()));
+        getDatastore().update(getDatastore().find(Rectangle.class).filter("width", 30D),
+                       getDatastore().createUpdateOperations(Rectangle.class).set("height", 2D).set("width", 2D));
+        assertThat(getDatastore().find(Rectangle.class).filter("width", 1D).get(), is(nullValue()));
+        assertThat(getDatastore().find(Rectangle.class).filter("width", 2D).get(), is(notNullValue()));
 
-        getDs().update(heightOf35, getDs().createUpdateOperations(Rectangle.class).dec("height", 1));
-        getDs().update(heightOf35, getDs().createUpdateOperations(Rectangle.class).dec("height", Long.MAX_VALUE));
-        getDs().update(heightOf35, getDs().createUpdateOperations(Rectangle.class).dec("height", 1.5f));
-        getDs().update(heightOf35, getDs().createUpdateOperations(Rectangle.class).dec("height", Double.MAX_VALUE));
+        getDatastore().update(heightOf35, getDatastore().createUpdateOperations(Rectangle.class).dec("height", 1));
+        getDatastore().update(heightOf35, getDatastore().createUpdateOperations(Rectangle.class).dec("height", Long.MAX_VALUE));
+        getDatastore().update(heightOf35, getDatastore().createUpdateOperations(Rectangle.class).dec("height", 1.5f));
+        getDatastore().update(heightOf35, getDatastore().createUpdateOperations(Rectangle.class).dec("height", Double.MAX_VALUE));
         try {
-            getDs().update(heightOf35, getDs().createUpdateOperations(Rectangle.class)
-                    .dec("height", new AtomicInteger(1)));
+            getDatastore().update(heightOf35, getDatastore().createUpdateOperations(Rectangle.class)
+                                                            .dec("height", new AtomicInteger(1)));
             fail("Wrong data type not recognized.");
         } catch (IllegalArgumentException ignore) {}
     }
@@ -374,10 +374,10 @@ public class TestUpdateOps extends TestBase {
     @Test
     @SuppressWarnings("deprecation")
     public void testInsertUpdate() throws Exception {
-        assertInserted(getDs().update(getDs().find(Circle.class).field("radius").equal(0),
-                                      getDs().createUpdateOperations(Circle.class).inc("radius", 1D), true));
-        assertInserted(getDs().update(getDs().find(Circle.class).field("radius").equal(0),
-                                      getDs().createUpdateOperations(Circle.class).inc("radius", 1D),
+        assertInserted(getDatastore().update(getDatastore().find(Circle.class).field("radius").equal(0),
+                                      getDatastore().createUpdateOperations(Circle.class).inc("radius", 1D), true));
+        assertInserted(getDatastore().update(getDatastore().find(Circle.class).field("radius").equal(0),
+                                      getDatastore().createUpdateOperations(Circle.class).inc("radius", 1D),
                                       new UpdateOptions()
                                           .upsert(true)));
     }
@@ -386,23 +386,23 @@ public class TestUpdateOps extends TestBase {
     public void testInsertWithRef() throws Exception {
         final Pic pic = new Pic();
         pic.setName("fist");
-        final Key<Pic> picKey = getDs().save(pic);
+        final Key<Pic> picKey = getDatastore().save(pic);
 
-        assertInserted(getDs().update(getDs().find(ContainsPic.class).filter("name", "first").filter("pic", picKey),
-                                           getDs().createUpdateOperations(ContainsPic.class)
-                                                  .set("name", "A"),
+        assertInserted(getDatastore().update(getDatastore().find(ContainsPic.class).filter("name", "first").filter("pic", picKey),
+                                           getDatastore().createUpdateOperations(ContainsPic.class)
+                                                         .set("name", "A"),
                                            new UpdateOptions().upsert(true)));
-        assertThat(getDs().find(ContainsPic.class).count(), is(1L));
-        getDs().delete(getDs().find(ContainsPic.class));
+        assertThat(getDatastore().find(ContainsPic.class).count(), is(1L));
+        getDatastore().delete(getDatastore().find(ContainsPic.class));
 
-        assertInserted(getDs().update(getDs().find(ContainsPic.class).filter("name", "first").filter("pic", pic),
-                                           getDs().createUpdateOperations(ContainsPic.class).set("name", "second"),
+        assertInserted(getDatastore().update(getDatastore().find(ContainsPic.class).filter("name", "first").filter("pic", pic),
+                                           getDatastore().createUpdateOperations(ContainsPic.class).set("name", "second"),
                                       new UpdateOptions()
                                           .upsert(true)));
-        assertThat(getDs().find(ContainsPic.class).count(), is(1L));
+        assertThat(getDatastore().find(ContainsPic.class).count(), is(1L));
 
         //test reading the object.
-        final ContainsPic cp = getDs().find(ContainsPic.class).get();
+        final ContainsPic cp = getDatastore().find(ContainsPic.class).get();
         assertThat(cp, is(notNullValue()));
         assertThat(cp.getName(), is("second"));
         assertThat(cp.getPic(), is(notNullValue()));
@@ -416,7 +416,7 @@ public class TestUpdateOps extends TestBase {
         final ObjectId id = new ObjectId();
         final double originalValue = 2D;
 
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         assertInserted(ds.update(ds.find(Circle.class)
                                    .field("id").equal(id),
                                  ds.createUpdateOperations(Circle.class)
@@ -442,15 +442,15 @@ public class TestUpdateOps extends TestBase {
         final ObjectId id = new ObjectId();
         final double originalValue = 3D;
 
-        assertInserted(getDs().update(getDs().find(Circle.class).field("id").equal(id),
-                                      getDs().createUpdateOperations(Circle.class).setOnInsert("radius", originalValue),
+        assertInserted(getDatastore().update(getDatastore().find(Circle.class).field("id").equal(id),
+                                      getDatastore().createUpdateOperations(Circle.class).setOnInsert("radius", originalValue),
                                       new UpdateOptions().upsert(true)));
 
-        assertUpdated(getDs().update(getDs().find(Circle.class).field("id").equal(id),
-                                     getDs().createUpdateOperations(Circle.class).min("radius", 5D),
+        assertUpdated(getDatastore().update(getDatastore().find(Circle.class).field("id").equal(id),
+                                     getDatastore().createUpdateOperations(Circle.class).min("radius", 5D),
                                      new UpdateOptions().upsert(true)), 1);
 
-        final Circle updatedCircle = getDs().get(Circle.class, id);
+        final Circle updatedCircle = getDatastore().get(Circle.class, id);
         assertThat(updatedCircle, is(notNullValue()));
         assertThat(updatedCircle.getRadius(), is(originalValue));
     }
@@ -461,16 +461,16 @@ public class TestUpdateOps extends TestBase {
         final ObjectId id = new ObjectId();
         final double newLowerValue = 2D;
 
-        assertInserted(getDs().update(getDs().find(Circle.class).field("id").equal(id),
-                                      getDs().createUpdateOperations(Circle.class).setOnInsert("radius", 3D),
+        assertInserted(getDatastore().update(getDatastore().find(Circle.class).field("id").equal(id),
+                                      getDatastore().createUpdateOperations(Circle.class).setOnInsert("radius", 3D),
                                       new UpdateOptions().upsert(true)));
 
 
-        assertUpdated(getDs().update(getDs().find(Circle.class).field("id").equal(id),
-                                     getDs().createUpdateOperations(Circle.class).min("radius", newLowerValue),
+        assertUpdated(getDatastore().update(getDatastore().find(Circle.class).field("id").equal(id),
+                                     getDatastore().createUpdateOperations(Circle.class).min("radius", newLowerValue),
                                      new UpdateOptions().upsert(true)), 1);
 
-        final Circle updatedCircle = getDs().get(Circle.class, id);
+        final Circle updatedCircle = getDatastore().get(Circle.class, id);
         assertThat(updatedCircle, is(notNullValue()));
         assertThat(updatedCircle.getRadius(), is(newLowerValue));
     }
@@ -479,49 +479,49 @@ public class TestUpdateOps extends TestBase {
     public void testPush() throws Exception {
         checkMinServerVersion(2.6);
         ContainsIntArray cIntArray = new ContainsIntArray();
-        getDs().save(cIntArray);
-        assertThat(getDs().get(cIntArray).values, is((new ContainsIntArray()).values));
+        getDatastore().save(cIntArray);
+        assertThat(getDatastore().get(cIntArray).values, is((new ContainsIntArray()).values));
 
-        getDs().update(getDs().find(ContainsIntArray.class),
-                       getDs().createUpdateOperations(ContainsIntArray.class)
-                              .push("values", 4),
+        getDatastore().update(getDatastore().find(ContainsIntArray.class),
+                       getDatastore().createUpdateOperations(ContainsIntArray.class)
+                                     .push("values", 4),
                        new UpdateOptions()
                            .multi(false));
 
-        assertThat(getDs().get(cIntArray).values, is(new Integer[]{1, 2, 3, 4}));
+        assertThat(getDatastore().get(cIntArray).values, is(new Integer[]{1, 2, 3, 4}));
 
-        getDs().update(getDs().find(ContainsIntArray.class),
-                       getDs().createUpdateOperations(ContainsIntArray.class)
-                              .push("values", 4),
+        getDatastore().update(getDatastore().find(ContainsIntArray.class),
+                       getDatastore().createUpdateOperations(ContainsIntArray.class)
+                                     .push("values", 4),
                        new UpdateOptions()
                            .multi(false));
 
-        assertThat(getDs().get(cIntArray).values, is(new Integer[]{1, 2, 3, 4, 4}));
+        assertThat(getDatastore().get(cIntArray).values, is(new Integer[]{1, 2, 3, 4, 4}));
 
-        getDs().update(getDs().find(ContainsIntArray.class),
-                       getDs().createUpdateOperations(ContainsIntArray.class)
-                              .push("values", asList(5, 6)),
+        getDatastore().update(getDatastore().find(ContainsIntArray.class),
+                       getDatastore().createUpdateOperations(ContainsIntArray.class)
+                                     .push("values", asList(5, 6)),
                        new UpdateOptions()
                            .multi(false));
 
-        assertThat(getDs().get(cIntArray).values, is(new Integer[]{1, 2, 3, 4, 4, 5, 6}));
+        assertThat(getDatastore().get(cIntArray).values, is(new Integer[]{1, 2, 3, 4, 4, 5, 6}));
 
-        getDs().update(getDs().find(ContainsIntArray.class),
-                       getDs().createUpdateOperations(ContainsIntArray.class)
-                              .push("values", 12, options().position(2)),
+        getDatastore().update(getDatastore().find(ContainsIntArray.class),
+                       getDatastore().createUpdateOperations(ContainsIntArray.class)
+                                     .push("values", 12, options().position(2)),
                        new UpdateOptions()
                            .multi(false));
 
-        assertThat(getDs().get(cIntArray).values, is(new Integer[]{1, 2, 12, 3, 4, 4, 5, 6}));
+        assertThat(getDatastore().get(cIntArray).values, is(new Integer[]{1, 2, 12, 3, 4, 4, 5, 6}));
 
 
-        getDs().update(getDs().find(ContainsIntArray.class),
-                       getDs().createUpdateOperations(ContainsIntArray.class)
-                              .push("values", asList(99, 98, 97), options().position(4)),
+        getDatastore().update(getDatastore().find(ContainsIntArray.class),
+                       getDatastore().createUpdateOperations(ContainsIntArray.class)
+                                     .push("values", asList(99, 98, 97), options().position(4)),
                        new UpdateOptions()
                            .multi(false));
 
-        assertThat(getDs().get(cIntArray).values, is(new Integer[]{1, 2, 12, 3, 99, 98, 97, 4, 4, 5, 6}));
+        assertThat(getDatastore().get(cIntArray).values, is(new Integer[]{1, 2, 12, 3, 99, 98, 97, 4, 4, 5, 6}));
     }
 
     @Test
@@ -536,7 +536,7 @@ public class TestUpdateOps extends TestBase {
             new EntityLog("log2", date),
             new EntityLog("log3", date)));
 
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         ds.save(logs);
 
         UpdateOperations<EntityLogs> operations =
@@ -563,7 +563,7 @@ public class TestUpdateOps extends TestBase {
             new EntityLog("log2", date),
             new EntityLog("log3", date)));
 
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         ds.save(logs);
 
         UpdateOperations<EntityLogs> operations =
@@ -585,15 +585,15 @@ public class TestUpdateOps extends TestBase {
         dumbColl.fromArray = singletonList(new DumbArrayElement("something"));
         DumbColl dumbColl2 = new DumbColl("ID2");
         dumbColl2.fromArray = singletonList(new DumbArrayElement("something"));
-        getDs().save(asList(dumbColl, dumbColl2));
+        getDatastore().save(asList(dumbColl, dumbColl2));
 
-        UpdateResults deleteResults = getDs().update(
-            getDs().find(DumbColl.class).field("opaqueId").equalIgnoreCase("ID"),
+        UpdateResults deleteResults = getDatastore().update(
+            getDatastore().find(DumbColl.class).field("opaqueId").equalIgnoreCase("ID"),
             getAds().createUpdateOperations(DumbColl.class,
                 new BasicDBObject("$pull", new BasicDBObject("fromArray", new BasicDBObject("whereId", "not there")))));
 
-        getDs().update(
-            getDs().find(DumbColl.class).field("opaqueId").equalIgnoreCase("ID"),
+        getDatastore().update(
+            getDatastore().find(DumbColl.class).field("opaqueId").equalIgnoreCase("ID"),
             getAds().createUpdateOperations(DumbColl.class)
                 .removeAll("fromArray", new DumbArrayElement("something")));
     }
@@ -601,45 +601,45 @@ public class TestUpdateOps extends TestBase {
     @Test
     public void testElemMatchUpdate() {
         // setUp
-        Object id = getDs().save(new ContainsIntArray()).getId();
-        assertThat(getDs().get(ContainsIntArray.class, id).values, arrayContaining(1, 2, 3));
+        Object id = getDatastore().save(new ContainsIntArray()).getId();
+        assertThat(getDatastore().get(ContainsIntArray.class, id).values, arrayContaining(1, 2, 3));
 
         // do patch
-        Query<ContainsIntArray> q = getDs().createQuery(ContainsIntArray.class)
-                .filter("id", id)
-                .filter("values", 2);
+        Query<ContainsIntArray> q = getDatastore().createQuery(ContainsIntArray.class)
+                                                  .filter("id", id)
+                                                  .filter("values", 2);
 
-        UpdateOperations<ContainsIntArray> ops = getDs().createUpdateOperations(ContainsIntArray.class)
-                .set("values.$", 5);
-        getDs().update(q, ops);
+        UpdateOperations<ContainsIntArray> ops = getDatastore().createUpdateOperations(ContainsIntArray.class)
+                                                               .set("values.$", 5);
+        getDatastore().update(q, ops);
 
         // expected
-        assertThat(getDs().get(ContainsIntArray.class, id).values, arrayContaining(1, 5, 3));
+        assertThat(getDatastore().get(ContainsIntArray.class, id).values, arrayContaining(1, 5, 3));
     }
 
     @Test
     public void testRemoveFirst() throws Exception {
         final ContainsIntArray cIntArray = new ContainsIntArray();
-        getDs().save(cIntArray);
-        ContainsIntArray cIALoaded = getDs().get(cIntArray);
+        getDatastore().save(cIntArray);
+        ContainsIntArray cIALoaded = getDatastore().get(cIntArray);
         assertThat(cIALoaded.values.length, is(3));
         assertThat(cIALoaded.values, is((new ContainsIntArray()).values));
 
-        assertUpdated(getDs().update(getDs().find(ContainsIntArray.class),
-                                     getDs().createUpdateOperations(ContainsIntArray.class)
-                                            .removeFirst("values"),
+        assertUpdated(getDatastore().update(getDatastore().find(ContainsIntArray.class),
+                                     getDatastore().createUpdateOperations(ContainsIntArray.class)
+                                                   .removeFirst("values"),
                                      new UpdateOptions()
                                          .multi(false)),
                       1);
-        assertThat(getDs().get(cIntArray).values, is(new Integer[]{2, 3}));
+        assertThat(getDatastore().get(cIntArray).values, is(new Integer[]{2, 3}));
 
-        assertUpdated(getDs().update(getDs().find(ContainsIntArray.class),
-                                     getDs().createUpdateOperations(ContainsIntArray.class)
-                                            .removeLast("values"),
+        assertUpdated(getDatastore().update(getDatastore().find(ContainsIntArray.class),
+                                     getDatastore().createUpdateOperations(ContainsIntArray.class)
+                                                   .removeLast("values"),
                                      new UpdateOptions()
                                          .multi(false)),
                       1);
-        assertThat(getDs().get(cIntArray).values, is(new Integer[]{2}));
+        assertThat(getDatastore().get(cIntArray).values, is(new Integer[]{2}));
     }
 
     @Test
@@ -647,12 +647,12 @@ public class TestUpdateOps extends TestBase {
         checkMinServerVersion(2.4);
         ObjectId id = new ObjectId();
 
-        assertInserted(getDs().update(getDs().find(Circle.class).field("id").equal(id),
-                                      getDs().createUpdateOperations(Circle.class).setOnInsert("radius", 2D),
+        assertInserted(getDatastore().update(getDatastore().find(Circle.class).field("id").equal(id),
+                                      getDatastore().createUpdateOperations(Circle.class).setOnInsert("radius", 2D),
                                       new UpdateOptions()
                                           .upsert(true)));
 
-        final Circle updatedCircle = getDs().get(Circle.class, id);
+        final Circle updatedCircle = getDatastore().get(Circle.class, id);
 
         assertThat(updatedCircle, is(notNullValue()));
         assertThat(updatedCircle.getRadius(), is(2D));
@@ -663,18 +663,18 @@ public class TestUpdateOps extends TestBase {
         checkMinServerVersion(2.4);
         ObjectId id = new ObjectId();
 
-        assertInserted(getDs().update(getDs().find(Circle.class).field("id").equal(id),
-                                      getDs().createUpdateOperations(Circle.class).setOnInsert("radius", 1D),
+        assertInserted(getDatastore().update(getDatastore().find(Circle.class).field("id").equal(id),
+                                      getDatastore().createUpdateOperations(Circle.class).setOnInsert("radius", 1D),
                                       new UpdateOptions()
                                           .upsert(true)));
 
-        assertUpdated(getDs().update(getDs().find(Circle.class).field("id").equal(id),
-                                     getDs().createUpdateOperations(Circle.class).setOnInsert("radius", 2D),
+        assertUpdated(getDatastore().update(getDatastore().find(Circle.class).field("id").equal(id),
+                                     getDatastore().createUpdateOperations(Circle.class).setOnInsert("radius", 2D),
                                      new UpdateOptions()
                                          .upsert(true)),
                       1);
 
-        final Circle updatedCircle = getDs().get(Circle.class, id);
+        final Circle updatedCircle = getDatastore().get(Circle.class, id);
 
         assertThat(updatedCircle, is(notNullValue()));
         assertThat(updatedCircle.getRadius(), is(1D));
@@ -682,7 +682,7 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     public void testSetUnset() throws Exception {
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         final Key<Circle> key = ds.save(new Circle(1));
 
         assertUpdated(ds.update(ds.find(Circle.class).filter("radius", 1D),
@@ -717,20 +717,20 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     public void testUpdateFirstNoCreate() {
-        getDs().delete(getDs().find(EntityLogs.class));
+        getDatastore().delete(getDatastore().find(EntityLogs.class));
         List<EntityLogs> logs = new ArrayList<EntityLogs>();
         for (int i = 0; i < 100; i++) {
             logs.add(createEntryLogs("name", "logs" + i));
         }
         EntityLogs logs1 = logs.get(0);
-        Query<EntityLogs> query = getDs().find(EntityLogs.class);
-        UpdateOperations<EntityLogs> updateOperations = getDs().createUpdateOperations(EntityLogs.class);
+        Query<EntityLogs> query = getDatastore().find(EntityLogs.class);
+        UpdateOperations<EntityLogs> updateOperations = getDatastore().createUpdateOperations(EntityLogs.class);
         BasicDBObject object = new BasicDBObject("new", "value");
         updateOperations.set("raw", object);
 
-        getDs().update(query, updateOperations, new UpdateOptions());
+        getDatastore().update(query, updateOperations, new UpdateOptions());
 
-        List<EntityLogs> list = getDs().find(EntityLogs.class).asList();
+        List<EntityLogs> list = getDatastore().find(EntityLogs.class).asList();
         for (int i = 0; i < list.size(); i++) {
             final EntityLogs entityLogs = list.get(i);
             assertEquals(entityLogs.id.equals(logs1.id) ? object : logs.get(i).raw, entityLogs.raw);
@@ -746,14 +746,14 @@ public class TestUpdateOps extends TestBase {
         }
         EntityLogs logs1 = logs.get(0);
 
-        Query<EntityLogs> query = getDs().find(EntityLogs.class);
+        Query<EntityLogs> query = getDatastore().find(EntityLogs.class);
         BasicDBObject object = new BasicDBObject("new", "value");
         EntityLogs newLogs = new EntityLogs();
         newLogs.raw = object;
 
-        getDs().updateFirst(query, newLogs, false);
+        getDatastore().updateFirst(query, newLogs, false);
 
-        List<EntityLogs> list = getDs().find(EntityLogs.class).asList();
+        List<EntityLogs> list = getDatastore().find(EntityLogs.class).asList();
         for (int i = 0; i < list.size(); i++) {
             final EntityLogs entityLogs = list.get(i);
             assertEquals(entityLogs.id.equals(logs1.id) ? object : logs.get(i).raw, entityLogs.raw);
@@ -768,12 +768,12 @@ public class TestUpdateOps extends TestBase {
         }
         EntityLogs logs1 = logs.get(0);
 
-        getDs().update(getDs().find(EntityLogs.class),
-                       getDs().createUpdateOperations(EntityLogs.class)
-                              .set("raw", new BasicDBObject("new", "value")),
+        getDatastore().update(getDatastore().find(EntityLogs.class),
+                       getDatastore().createUpdateOperations(EntityLogs.class)
+                                     .set("raw", new BasicDBObject("new", "value")),
                        new UpdateOptions());
 
-        List<EntityLogs> list = getDs().find(EntityLogs.class).asList();
+        List<EntityLogs> list = getDatastore().find(EntityLogs.class).asList();
         for (int i = 0; i < list.size(); i++) {
             final EntityLogs entityLogs = list.get(i);
             assertEquals(entityLogs.id.equals(logs1.id) ? new BasicDBObject("new", "value") : logs.get(i).raw, entityLogs.raw);
@@ -785,7 +785,7 @@ public class TestUpdateOps extends TestBase {
         final ContainsPicKey cpk = new ContainsPicKey();
         cpk.name = "cpk one";
 
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         ds.save(cpk);
 
         final Pic pic = new Pic();
@@ -825,7 +825,7 @@ public class TestUpdateOps extends TestBase {
         final ContainsPicKey cpk = new ContainsPicKey();
         cpk.name = "cpk one";
 
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         ds.save(cpk);
 
         final Pic pic = new Pic();
@@ -853,37 +853,37 @@ public class TestUpdateOps extends TestBase {
         final ContainsPic cp = new ContainsPic();
         cp.setName("cp one");
 
-        getDs().save(cp);
+        getDatastore().save(cp);
 
         final Pic pic = new Pic();
         pic.setName("fist");
-        final Key<Pic> picKey = getDs().save(pic);
+        final Key<Pic> picKey = getDatastore().save(pic);
 
 
         //test with Key<Pic>
 
-        assertThat(getDs().update(getDs().find(ContainsPic.class).filter("name", cp.getName()),
-                                       getDs().createUpdateOperations(ContainsPic.class)
-                                              .set("pic", pic),
+        assertThat(getDatastore().update(getDatastore().find(ContainsPic.class).filter("name", cp.getName()),
+                                       getDatastore().createUpdateOperations(ContainsPic.class)
+                                                     .set("pic", pic),
                                        new UpdateOptions())
-                          .getUpdatedCount(),
+                                 .getUpdatedCount(),
                    is(1));
 
         //test reading the object.
-        final ContainsPic cp2 = getDs().find(ContainsPic.class).get();
+        final ContainsPic cp2 = getDatastore().find(ContainsPic.class).get();
         assertThat(cp2, is(notNullValue()));
         assertThat(cp.getName(), is(cp2.getName()));
         assertThat(cp2.getPic(), is(notNullValue()));
         assertThat(cp2.getPic().getName(), is(notNullValue()));
         assertThat(pic.getName(), is(cp2.getPic().getName()));
 
-        getDs().update(getDs().find(ContainsPic.class).filter("name", cp.getName()),
-                       getDs().createUpdateOperations(ContainsPic.class)
-                              .set("pic", picKey),
+        getDatastore().update(getDatastore().find(ContainsPic.class).filter("name", cp.getName()),
+                       getDatastore().createUpdateOperations(ContainsPic.class)
+                                     .set("pic", picKey),
                        new UpdateOptions());
 
         //test reading the object.
-        final ContainsPic cp3 = getDs().find(ContainsPic.class).get();
+        final ContainsPic cp3 = getDatastore().find(ContainsPic.class).get();
         assertThat(cp3, is(notNullValue()));
         assertThat(cp.getName(), is(cp3.getName()));
         assertThat(cp3.getPic(), is(notNullValue()));
@@ -895,32 +895,32 @@ public class TestUpdateOps extends TestBase {
     public void testUpdateWithDifferentType() throws Exception {
         final ContainsInt cInt = new ContainsInt();
         cInt.val = 21;
-        getDs().save(cInt);
+        getDatastore().save(cInt);
 
-        final UpdateResults res = getDs().update(getDs().find(ContainsInt.class),
-                                                 getDs().createUpdateOperations(ContainsInt.class).inc("val", 1.1D),
+        final UpdateResults res = getDatastore().update(getDatastore().find(ContainsInt.class),
+                                                 getDatastore().createUpdateOperations(ContainsInt.class).inc("val", 1.1D),
                                                  new UpdateOptions());
         assertUpdated(res, 1);
 
-        assertThat(getDs().find(ContainsInt.class).get().val, is(22));
+        assertThat(getDatastore().find(ContainsInt.class).get().val, is(22));
     }
 
     @Test(expected = ValidationException.class)
     public void testValidationBadFieldName() throws Exception {
-        getDs().update(getDs().find(Circle.class).field("radius").equal(0),
-                       getDs().createUpdateOperations(Circle.class).inc("r", 1D));
+        getDatastore().update(getDatastore().find(Circle.class).field("radius").equal(0),
+                       getDatastore().createUpdateOperations(Circle.class).inc("r", 1D));
     }
 
     @Test
     public void isolated() {
-        UpdateOperations<Circle> updates = getDs().createUpdateOperations(Circle.class)
-                                                  .inc("radius", 1D);
+        UpdateOperations<Circle> updates = getDatastore().createUpdateOperations(Circle.class)
+                                                         .inc("radius", 1D);
         assertFalse(updates.isIsolated());
         updates.isolated();
         assertTrue(updates.isIsolated());
 
-        getDs().update(getDs().find(Circle.class)
-                              .field("radius").equal(0),
+        getDatastore().update(getDatastore().find(Circle.class)
+                                            .field("radius").equal(0),
                        updates,
                        new UpdateOptions()
                            .upsert(true)
@@ -942,7 +942,7 @@ public class TestUpdateOps extends TestBase {
     private EntityLogs createEntryLogs(final String key, final String value) {
         EntityLogs logs = new EntityLogs();
         logs.raw = new BasicDBObject(key, value);
-        getDs().save(logs);
+        getDatastore().save(logs);
 
         return logs;
     }

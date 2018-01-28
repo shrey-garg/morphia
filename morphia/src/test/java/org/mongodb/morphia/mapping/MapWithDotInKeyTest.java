@@ -24,13 +24,13 @@ public class MapWithDotInKeyTest extends TestBase {
         e.mymap.put("c.e.g", "b");
 
         try {
-            getDs().save(e);
+            getDatastore().save(e);
         } catch (Exception ex) {
             return;
         }
 
         Assert.assertFalse("Should have got rejection for dot in field names", true);
-        e = getDs().get(e);
+        e = getDatastore().get(e);
         Assert.assertEquals("a", e.mymap.get("a.b"));
         Assert.assertEquals("b", e.mymap.get("c.e.g"));
     }

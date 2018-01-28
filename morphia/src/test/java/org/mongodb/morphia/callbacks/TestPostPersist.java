@@ -30,7 +30,7 @@ public class TestPostPersist extends TestBase {
     @Test
     public void testCallback() throws Exception {
         final ProblematicPostPersistEntity p = new ProblematicPostPersistEntity();
-        getDs().save(p);
+        getDatastore().save(p);
         Assert.assertTrue(p.called);
         Assert.assertTrue(p.i.innerCalled);
     }

@@ -20,20 +20,20 @@ public class ReferencesWIgnoreMissingTest extends TestBase {
     public void testMissingReference() throws Exception {
         final Container c = new Container();
         c.refs = new StringHolder[]{new StringHolder(), new StringHolder()};
-        getDs().save(c);
-        getDs().save(c.refs[0]);
+        getDatastore().save(c);
+        getDatastore().save(c.refs[0]);
 
-        Container reloadedContainer = getDs().find(Container.class).get();
+        Container reloadedContainer = getDatastore().find(Container.class).get();
         Assert.assertNotNull(reloadedContainer);
         Assert.assertNotNull(reloadedContainer.refs);
         Assert.assertEquals(1, reloadedContainer.refs.length);
 
-        reloadedContainer = getDs().get(c);
+        reloadedContainer = getDatastore().get(c);
         Assert.assertNotNull(reloadedContainer);
         Assert.assertNotNull(reloadedContainer.refs);
         Assert.assertEquals(1, reloadedContainer.refs.length);
 
-        final List<Container> cs = getDs().find(Container.class).asList();
+        final List<Container> cs = getDatastore().find(Container.class).asList();
         Assert.assertNotNull(cs);
         Assert.assertEquals(1, cs.size());
 

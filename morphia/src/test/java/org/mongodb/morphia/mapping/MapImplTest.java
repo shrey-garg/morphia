@@ -28,12 +28,12 @@ public class MapImplTest extends TestBase {
         final Goo g1 = new Goo("Scott");
         final ContainsMapOfEmbeddedGoos cmoeg = new ContainsMapOfEmbeddedGoos();
         cmoeg.values.put("first", g1);
-        getDs().save(cmoeg);
+        getDatastore().save(cmoeg);
         //check className in the map values.
 
-        final BasicDBObject goo = (BasicDBObject) ((BasicDBObject) getDs().getCollection(ContainsMapOfEmbeddedGoos.class)
-                                                                          .findOne()
-                                                                          .get("values")).get(
+        final BasicDBObject goo = (BasicDBObject) ((BasicDBObject) getDatastore().getCollection(ContainsMapOfEmbeddedGoos.class)
+                                                                                 .findOne()
+                                                                                 .get("values")).get(
                                                                                                  "first");
         final boolean hasF = goo.containsField(Mapper.CLASS_NAME_FIELDNAME);
         assertTrue(!hasF);
@@ -47,13 +47,13 @@ public class MapImplTest extends TestBase {
 
         final ContainsMapOfEmbeddedGoos cmoeg = new ContainsMapOfEmbeddedGoos();
         cmoeg.values.put("first", g1);
-        getDs().save(cmoeg);
-        getDs().update(cmoeg, getDs().createUpdateOperations(ContainsMapOfEmbeddedGoos.class).set("values.second", g2));
+        getDatastore().save(cmoeg);
+        getDatastore().update(cmoeg, getDatastore().createUpdateOperations(ContainsMapOfEmbeddedGoos.class).set("values.second", g2));
         //check className in the map values.
 
-        final BasicDBObject goo = (BasicDBObject) ((BasicDBObject) getDs().getCollection(ContainsMapOfEmbeddedGoos.class)
-                                                                          .findOne()
-                                                                          .get("values")).get(
+        final BasicDBObject goo = (BasicDBObject) ((BasicDBObject) getDatastore().getCollection(ContainsMapOfEmbeddedGoos.class)
+                                                                                 .findOne()
+                                                                                 .get("values")).get(
                                                                                                  "second");
         final boolean hasF = goo.containsField(Mapper.CLASS_NAME_FIELDNAME);
         assertTrue("className should not be here.", !hasF);
@@ -67,12 +67,12 @@ public class MapImplTest extends TestBase {
 
         final ContainsMapOfEmbeddedInterfaces cmoei = new ContainsMapOfEmbeddedInterfaces();
         cmoei.values.put("first", g1);
-        getDs().save(cmoei);
-        getDs().update(cmoei, getDs().createUpdateOperations(ContainsMapOfEmbeddedInterfaces.class).set("values.second", g2));
+        getDatastore().save(cmoei);
+        getDatastore().update(cmoei, getDatastore().createUpdateOperations(ContainsMapOfEmbeddedInterfaces.class).set("values.second", g2));
         //check className in the map values.
-        final BasicDBObject goo = (BasicDBObject) ((BasicDBObject) getDs().getCollection(ContainsMapOfEmbeddedInterfaces.class)
-                                                                          .findOne()
-                                                                          .get("values"))
+        final BasicDBObject goo = (BasicDBObject) ((BasicDBObject) getDatastore().getCollection(ContainsMapOfEmbeddedInterfaces.class)
+                                                                                 .findOne()
+                                                                                 .get("values"))
                                                       .get("second");
         final boolean hasF = goo.containsField(Mapper.CLASS_NAME_FIELDNAME);
         assertTrue("className should be here.", hasF);
@@ -85,11 +85,11 @@ public class MapImplTest extends TestBase {
 
         final ContainsMapOfEmbeddedInterfaces cmoei = new ContainsMapOfEmbeddedInterfaces();
         cmoei.values.put("first", g1);
-        getDs().save(cmoei);
+        getDatastore().save(cmoei);
         //check className in the map values.
-        final BasicDBObject goo = (BasicDBObject) ((BasicDBObject) getDs().getCollection(ContainsMapOfEmbeddedInterfaces.class)
-                                                                          .findOne()
-                                                                          .get("values"))
+        final BasicDBObject goo = (BasicDBObject) ((BasicDBObject) getDatastore().getCollection(ContainsMapOfEmbeddedInterfaces.class)
+                                                                                 .findOne()
+                                                                                 .get("values"))
                                                       .get("first");
         final boolean hasF = goo.containsField(Mapper.CLASS_NAME_FIELDNAME);
         assertTrue(hasF);
@@ -101,9 +101,9 @@ public class MapImplTest extends TestBase {
         e.mymap.put("1", "a");
         e.mymap.put("2", "b");
 
-        getDs().save(e);
+        getDatastore().save(e);
 
-        e = getDs().get(e);
+        e = getDatastore().get(e);
         Assert.assertEquals("a", e.mymap.get("1"));
         Assert.assertEquals("b", e.mymap.get("2"));
     }

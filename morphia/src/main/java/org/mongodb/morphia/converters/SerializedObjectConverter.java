@@ -3,7 +3,6 @@ package org.mongodb.morphia.converters;
 
 import org.bson.types.Binary;
 import org.mongodb.morphia.annotations.Serialized;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.MappingException;
 import org.mongodb.morphia.mapping.Serializer;
 

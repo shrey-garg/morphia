@@ -17,8 +17,8 @@ public class EnumBehindAnInterfaceTest extends TestBase {
     public void testEnumBehindAnInterfacePersistence() throws Exception {
         getMorphia().map(ContainerEntity.class);
         ContainerEntity n = new ContainerEntity();
-        getDs().save(n);
-        n = getDs().get(n);
+        getDatastore().save(n);
+        n = getDatastore().get(n);
         Assert.assertSame(EnumBehindAnInterface.A, n.foo);
     }
 

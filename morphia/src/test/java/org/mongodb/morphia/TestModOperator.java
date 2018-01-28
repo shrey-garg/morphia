@@ -14,56 +14,56 @@ public class TestModOperator extends TestBase {
     @Test
     public void mod() {
         getMorphia().map(Inventory.class);
-        getDs().save(new Inventory("Flowers", 8));
-        getDs().save(new Inventory("Candy", 2));
-        getDs().save(new Inventory("Basketballs", 12));
+        getDatastore().save(new Inventory("Flowers", 8));
+        getDatastore().save(new Inventory("Candy", 2));
+        getDatastore().save(new Inventory("Basketballs", 12));
 
-        List<Inventory> list = getDs().find(Inventory.class)
-                                      .filter("quantity mod", new Integer[]{4, 0})
-                                      .order("name")
-                                      .asList();
-
-        Assert.assertEquals(2, list.size());
-        Assert.assertEquals("Basketballs", list.get(0).name);
-        Assert.assertEquals("Flowers", list.get(1).name);
-
-        list = getDs().find(Inventory.class)
-                      .filter("quantity mod", new Integer[]{4, 2})
-                      .order("name")
-                      .asList();
-
-        Assert.assertEquals(1, list.size());
-        Assert.assertEquals("Candy", list.get(0).name);
-
-        list = getDs().find(Inventory.class)
-                      .filter("quantity mod", new Integer[]{6, 0})
-                      .order("name")
-                      .asList();
-
-        Assert.assertEquals(1, list.size());
-        Assert.assertEquals("Basketballs", list.get(0).name);
-
-        list = getDs().find(Inventory.class)
-                      .field("quantity").mod(4, 0)
-                      .order("name")
-                      .asList();
+        List<Inventory> list = getDatastore().find(Inventory.class)
+                                             .filter("quantity mod", new Integer[]{4, 0})
+                                             .order("name")
+                                             .asList();
 
         Assert.assertEquals(2, list.size());
         Assert.assertEquals("Basketballs", list.get(0).name);
         Assert.assertEquals("Flowers", list.get(1).name);
 
-        list = getDs().find(Inventory.class)
-                      .field("quantity").mod(4, 2)
-                      .order("name")
-                      .asList();
+        list = getDatastore().find(Inventory.class)
+                             .filter("quantity mod", new Integer[]{4, 2})
+                             .order("name")
+                             .asList();
 
         Assert.assertEquals(1, list.size());
         Assert.assertEquals("Candy", list.get(0).name);
 
-        list = getDs().find(Inventory.class)
-                      .field("quantity").mod(6, 0)
-                      .order("name")
-                      .asList();
+        list = getDatastore().find(Inventory.class)
+                             .filter("quantity mod", new Integer[]{6, 0})
+                             .order("name")
+                             .asList();
+
+        Assert.assertEquals(1, list.size());
+        Assert.assertEquals("Basketballs", list.get(0).name);
+
+        list = getDatastore().find(Inventory.class)
+                             .field("quantity").mod(4, 0)
+                             .order("name")
+                             .asList();
+
+        Assert.assertEquals(2, list.size());
+        Assert.assertEquals("Basketballs", list.get(0).name);
+        Assert.assertEquals("Flowers", list.get(1).name);
+
+        list = getDatastore().find(Inventory.class)
+                             .field("quantity").mod(4, 2)
+                             .order("name")
+                             .asList();
+
+        Assert.assertEquals(1, list.size());
+        Assert.assertEquals("Candy", list.get(0).name);
+
+        list = getDatastore().find(Inventory.class)
+                             .field("quantity").mod(6, 0)
+                             .order("name")
+                             .asList();
 
         Assert.assertEquals(1, list.size());
         Assert.assertEquals("Basketballs", list.get(0).name);

@@ -1,8 +1,6 @@
 package org.mongodb.morphia.mapping.validation.classrules;
 
 
-import org.mongodb.morphia.mapping.MappedField;
-
 import java.util.Arrays;
 import java.util.List;
 

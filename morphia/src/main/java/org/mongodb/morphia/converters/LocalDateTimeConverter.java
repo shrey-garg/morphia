@@ -16,8 +16,6 @@
 
 package org.mongodb.morphia.converters;
 
-import org.mongodb.morphia.mapping.MappedField;
-
 import java.time.LocalDateTime;
 import java.util.Date;
 

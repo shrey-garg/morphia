@@ -41,20 +41,20 @@ public class TestFrontPageExample extends TestBase {
     public void testIt() throws Exception {
         getMorphia().map(Employee.class);
 
-        getDs().save(new Employee("Mister", "GOD", null, 0));
+        getDatastore().save(new Employee("Mister", "GOD", null, 0));
 
-        final Employee boss = getDs().find(Employee.class).field("manager").equal(null).get(); // get an employee without a manager
+        final Employee boss = getDatastore().find(Employee.class).field("manager").equal(null).get(); // get an employee without a manager
         Assert.assertNotNull(boss);
-        final Key<Employee> key = getDs().save(new Employee("Scott", "Hernandez", getDs().getKey(boss), 150 * 1000));
+        final Key<Employee> key = getDatastore().save(new Employee("Scott", "Hernandez", getDatastore().getKey(boss), 150 * 1000));
         Assert.assertNotNull(key);
 
-        final UpdateResults res = getDs().update(boss, getDs().createUpdateOperations(Employee.class)
-                                                              .addToSet("underlings", key)); //add Scott as an employee of his manager
+        final UpdateResults res = getDatastore().update(boss, getDatastore().createUpdateOperations(Employee.class)
+                                                                            .addToSet("underlings", key)); //add Scott as an employee of his manager
         Assert.assertNotNull(res);
         Assert.assertTrue("Should update existing document", res.getUpdatedExisting());
         Assert.assertEquals("Should update one document", 1, res.getUpdatedCount());
 
-        final Employee scottsBoss = getDs().find(Employee.class).filter("underlings", key).get(); // get Scott's boss
+        final Employee scottsBoss = getDatastore().find(Employee.class).filter("underlings", key).get(); // get Scott's boss
         Assert.assertNotNull(scottsBoss);
         Assert.assertEquals(boss.id, scottsBoss.id);
     }

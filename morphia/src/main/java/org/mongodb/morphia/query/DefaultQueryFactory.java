@@ -15,7 +15,7 @@ public class DefaultQueryFactory extends AbstractQueryFactory {
         final QueryImpl<T> item = new QueryImpl<T>(type, collection, datastore);
 
         if (query != null) {
-            item.setQueryObject(query);
+            item.setQueryDocument(query);
         }
 
         return item;

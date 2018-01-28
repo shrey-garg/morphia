@@ -38,7 +38,6 @@ import org.mongodb.morphia.testmodel.Article;
 import org.mongodb.morphia.testmodel.Circle;
 import org.mongodb.morphia.testmodel.Hotel;
 import org.mongodb.morphia.testmodel.PhoneNumber;
-import org.mongodb.morphia.testmodel.Rectangle;
 import org.mongodb.morphia.testmodel.RecursiveChild;
 import org.mongodb.morphia.testmodel.RecursiveParent;
 import org.mongodb.morphia.testmodel.Translation;
@@ -73,17 +72,17 @@ import static org.junit.Assert.fail;
 public class TestMapping extends TestBase {
 
     @Test
-    public void testAlsoLoad() throws Exception {
+    public void testAlsoLoad() {
         final ContainsIntegerList cil = new ContainsIntegerList();
         cil.intList.add(1);
-        getDs().save(cil);
-        final ContainsIntegerList cilLoaded = getDs().get(cil);
+        getDatastore().save(cil);
+        final ContainsIntegerList cilLoaded = getDatastore().get(cil);
         assertNotNull(cilLoaded);
         assertNotNull(cilLoaded.intList);
         assertEquals(cilLoaded.intList.size(), cil.intList.size());
         assertEquals(cilLoaded.intList.get(0), cil.intList.get(0));
 
-        final ContainsIntegerListNew cilNew = getDs().get(ContainsIntegerListNew.class, cil.id);
+        final ContainsIntegerListNew cilNew = getDatastore().get(ContainsIntegerListNew.class, cil.id);
         assertNotNull(cilNew);
         assertNotNull(cilNew.integers);
         assertEquals(1, cilNew.integers.size());
@@ -91,7 +90,7 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testBadMappings() throws Exception {
+    public void testBadMappings() {
         try {
             getMorphia().map(MissingId.class);
             fail("Validation: Missing @Id field not caught");
@@ -136,19 +135,19 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testBaseEntityValidity() throws Exception {
+    public void testBaseEntityValidity() {
         getMorphia().map(UsesBaseEntity.class);
     }
 
     @Test
-    public void testBasicMapping() throws Exception {
+    public void testBasicMapping() {
         performBasicMappingTest();
         final DefaultCreator objectFactory = (DefaultCreator) getMorphia().getMapper().getOptions().getObjectFactory();
         assertTrue(objectFactory.getClassNameCache().isEmpty());
     }
 
     @Test
-    public void testBasicMappingWithCachedClasses() throws Exception {
+    public void testBasicMappingWithCachedClasses() {
         getMorphia().getMapper().getOptions().setCacheClassLookups(true);
         try {
             performBasicMappingTest();
@@ -161,23 +160,24 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testByteArrayMapping() throws Exception {
+    public void testByteArrayMapping() {
         getMorphia().map(ContainsByteArray.class);
-        final Key<ContainsByteArray> savedKey = getDs().save(new ContainsByteArray());
-        final ContainsByteArray loaded = getDs().get(ContainsByteArray.class, savedKey.getId());
+        final Key<ContainsByteArray> savedKey = getDatastore().save(new ContainsByteArray());
+        final ContainsByteArray loaded = getDatastore().get(ContainsByteArray.class, savedKey.getId());
         assertEquals(new String((new ContainsByteArray()).bytes), new String(loaded.bytes));
         assertNotNull(loaded.id);
     }
 
     @Test
-    public void testCollectionMapping() throws Exception {
+    public void testCollectionMapping() {
         getMorphia().map(ContainsCollection.class);
-        final Key<ContainsCollection> savedKey = getDs().save(new ContainsCollection());
-        final ContainsCollection loaded = getDs().get(ContainsCollection.class, savedKey.getId());
+        final Key<ContainsCollection> savedKey = getDatastore().save(new ContainsCollection());
+        final ContainsCollection loaded = getDatastore().get(ContainsCollection.class, savedKey.getId());
         assertEquals(loaded.coll, (new ContainsCollection()).coll);
         assertNotNull(loaded.id);
     }
 
+/*
     @Test
     public void testDbRefMapping() throws Exception {
         getMorphia().map(ContainsRef.class).map(Rectangle.class);
@@ -206,9 +206,10 @@ public class TestMapping extends TestBase {
         assertEquals(cRefLoaded.rect.getId(), cRef.rect.getId());
         assertEquals(cRefLoaded.rect.getCollectionName(), cRef.rect.getCollectionName());
     }
+*/
 
     @Test
-    public void testEmbeddedArrayElementHasNoClassname() throws Exception {
+    public void testEmbeddedArrayElementHasNoClassname() {
         getMorphia().map(ContainsEmbeddedArray.class);
         final ContainsEmbeddedArray cea = new ContainsEmbeddedArray();
         cea.res = new RenamedEmbedded[]{new RenamedEmbedded()};
@@ -218,17 +219,17 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testEmbeddedDBObject() throws Exception {
+    public void testEmbeddedDBObject() {
         getMorphia().map(ContainsDBObject.class);
-        getDs().save(new ContainsDBObject());
-        assertNotNull(getDs().find(ContainsDBObject.class).get());
+        getDatastore().save(new ContainsDBObject());
+        assertNotNull(getDatastore().find(ContainsDBObject.class).get());
     }
 
     @Test
-    public void testEmbeddedEntity() throws Exception {
+    public void testEmbeddedEntity() {
         getMorphia().map(ContainsEmbeddedEntity.class);
-        getDs().save(new ContainsEmbeddedEntity());
-        final ContainsEmbeddedEntity ceeLoaded = getDs().find(ContainsEmbeddedEntity.class).get();
+        getDatastore().save(new ContainsEmbeddedEntity());
+        final ContainsEmbeddedEntity ceeLoaded = getDatastore().find(ContainsEmbeddedEntity.class).get();
         assertNotNull(ceeLoaded);
         assertNotNull(ceeLoaded.id);
         assertNotNull(ceeLoaded.cil);
@@ -237,7 +238,7 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testEmbeddedEntityDBObjectHasNoClassname() throws Exception {
+    public void testEmbeddedEntityDBObjectHasNoClassname() {
         getMorphia().map(ContainsEmbeddedEntity.class);
         final ContainsEmbeddedEntity cee = new ContainsEmbeddedEntity();
         cee.cil = new ContainsIntegerList();
@@ -247,16 +248,16 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testEnumKeyedMap() throws Exception {
+    public void testEnumKeyedMap() {
         final ContainsEnum1KeyMap map = new ContainsEnum1KeyMap();
         map.values.put(Enum1.A, "I'm a");
         map.values.put(Enum1.B, "I'm b");
         map.embeddedValues.put(Enum1.A, "I'm a");
         map.embeddedValues.put(Enum1.B, "I'm b");
 
-        final Key<?> mapKey = getDs().save(map);
+        final Key<?> mapKey = getDatastore().save(map);
 
-        final ContainsEnum1KeyMap mapLoaded = getDs().get(ContainsEnum1KeyMap.class, mapKey.getId());
+        final ContainsEnum1KeyMap mapLoaded = getDatastore().get(ContainsEnum1KeyMap.class, mapKey.getId());
 
         assertNotNull(mapLoaded);
         assertEquals(2, mapLoaded.values.size());
@@ -268,31 +269,31 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testFinalField() throws Exception {
+    public void testFinalField() {
         getMorphia().map(ContainsFinalField.class);
-        final Key<ContainsFinalField> savedKey = getDs().save(new ContainsFinalField("blah"));
-        final ContainsFinalField loaded = getDs().get(ContainsFinalField.class, savedKey.getId());
+        final Key<ContainsFinalField> savedKey = getDatastore().save(new ContainsFinalField("blah"));
+        final ContainsFinalField loaded = getDatastore().get(ContainsFinalField.class, savedKey.getId());
         assertNotNull(loaded);
         assertNotNull(loaded.name);
         assertEquals("blah", loaded.name);
     }
 
     @Test
-    public void testFinalFieldNotPersisted() throws Exception {
+    public void testFinalFieldNotPersisted() {
         getMorphia().getMapper().getOptions().setIgnoreFinals(true);
         getMorphia().map(ContainsFinalField.class);
-        final Key<ContainsFinalField> savedKey = getDs().save(new ContainsFinalField("blah"));
-        final ContainsFinalField loaded = getDs().get(ContainsFinalField.class, savedKey.getId());
+        final Key<ContainsFinalField> savedKey = getDatastore().save(new ContainsFinalField("blah"));
+        final ContainsFinalField loaded = getDatastore().get(ContainsFinalField.class, savedKey.getId());
         assertNotNull(loaded);
         assertNotNull(loaded.name);
         assertEquals("foo", loaded.name);
     }
 
     @Test
-    public void testFinalIdField() throws Exception {
+    public void testFinalIdField() {
         getMorphia().map(HasFinalFieldId.class);
-        final Key<HasFinalFieldId> savedKey = getDs().save(new HasFinalFieldId(12));
-        final HasFinalFieldId loaded = getDs().get(HasFinalFieldId.class, savedKey.getId());
+        final Key<HasFinalFieldId> savedKey = getDatastore().save(new HasFinalFieldId(12));
+        final HasFinalFieldId loaded = getDatastore().get(HasFinalFieldId.class, savedKey.getId());
         assertNotNull(loaded);
         assertNotNull(loaded.id);
         assertEquals(12, loaded.id);
@@ -301,14 +302,14 @@ public class TestMapping extends TestBase {
     @Test
     @Ignore("need to add this feature")
     @SuppressWarnings("unchecked")
-    public void testGenericKeyedMap() throws Exception {
+    public void testGenericKeyedMap() {
         final ContainsXKeyMap<Integer> map = new ContainsXKeyMap<Integer>();
         map.values.put(1, "I'm 1");
         map.values.put(2, "I'm 2");
 
-        final Key<ContainsXKeyMap<Integer>> mapKey = getDs().save(map);
+        final Key<ContainsXKeyMap<Integer>> mapKey = getDatastore().save(map);
 
-        final ContainsXKeyMap<Integer> mapLoaded = getDs().get(ContainsXKeyMap.class, mapKey.getId());
+        final ContainsXKeyMap<Integer> mapLoaded = getDatastore().get(ContainsXKeyMap.class, mapKey.getId());
 
         assertNotNull(mapLoaded);
         assertEquals(2, mapLoaded.values.size());
@@ -317,19 +318,19 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testIdFieldWithUnderscore() throws Exception {
+    public void testIdFieldWithUnderscore() {
         getMorphia().map(StrangelyNamedIdField.class);
     }
 
     @Test
-    public void testIntKeySetStringMap() throws Exception {
+    public void testIntKeySetStringMap() {
         final ContainsIntKeySetStringMap map = new ContainsIntKeySetStringMap();
         map.values.put(1, Collections.singleton("I'm 1"));
         map.values.put(2, Collections.singleton("I'm 2"));
 
-        final Key<?> mapKey = getDs().save(map);
+        final Key<?> mapKey = getDatastore().save(map);
 
-        final ContainsIntKeySetStringMap mapLoaded = getDs().get(ContainsIntKeySetStringMap.class, mapKey.getId());
+        final ContainsIntKeySetStringMap mapLoaded = getDatastore().get(ContainsIntKeySetStringMap.class, mapKey.getId());
 
         assertNotNull(mapLoaded);
         assertEquals(2, mapLoaded.values.size());
@@ -337,38 +338,38 @@ public class TestMapping extends TestBase {
         assertNotNull(mapLoaded.values.get(2));
         assertEquals(1, mapLoaded.values.get(1).size());
 
-        assertNotNull(getDs().find(ContainsIntKeyMap.class).field("values.2").exists());
-        assertEquals(0, getDs().find(ContainsIntKeyMap.class).field("values.2").doesNotExist().count());
-        assertNotNull(getDs().find(ContainsIntKeyMap.class).field("values.4").doesNotExist());
-        assertEquals(0, getDs().find(ContainsIntKeyMap.class).field("values.4").exists().count());
+        assertNotNull(getDatastore().find(ContainsIntKeyMap.class).field("values.2").exists());
+        assertEquals(0, getDatastore().find(ContainsIntKeyMap.class).field("values.2").doesNotExist().count());
+        assertNotNull(getDatastore().find(ContainsIntKeyMap.class).field("values.4").doesNotExist());
+        assertEquals(0, getDatastore().find(ContainsIntKeyMap.class).field("values.4").exists().count());
     }
 
     @Test
-    public void testIntKeyedMap() throws Exception {
+    public void testIntKeyedMap() {
         final ContainsIntKeyMap map = new ContainsIntKeyMap();
         map.values.put(1, "I'm 1");
         map.values.put(2, "I'm 2");
 
-        final Key<?> mapKey = getDs().save(map);
+        final Key<?> mapKey = getDatastore().save(map);
 
-        final ContainsIntKeyMap mapLoaded = getDs().get(ContainsIntKeyMap.class, mapKey.getId());
+        final ContainsIntKeyMap mapLoaded = getDatastore().get(ContainsIntKeyMap.class, mapKey.getId());
 
         assertNotNull(mapLoaded);
         assertEquals(2, mapLoaded.values.size());
         assertNotNull(mapLoaded.values.get(1));
         assertNotNull(mapLoaded.values.get(2));
 
-        assertNotNull(getDs().find(ContainsIntKeyMap.class).field("values.2").exists());
-        assertEquals(0, getDs().find(ContainsIntKeyMap.class).field("values.2").doesNotExist().count());
-        assertNotNull(getDs().find(ContainsIntKeyMap.class).field("values.4").doesNotExist());
-        assertEquals(0, getDs().find(ContainsIntKeyMap.class).field("values.4").exists().count());
+        assertNotNull(getDatastore().find(ContainsIntKeyMap.class).field("values.2").exists());
+        assertEquals(0, getDatastore().find(ContainsIntKeyMap.class).field("values.2").doesNotExist().count());
+        assertNotNull(getDatastore().find(ContainsIntKeyMap.class).field("values.4").doesNotExist());
+        assertEquals(0, getDatastore().find(ContainsIntKeyMap.class).field("values.4").exists().count());
     }
 
     @Test
-    public void testIntLists() throws Exception {
+    public void testIntLists() {
         ContainsIntegerList cil = new ContainsIntegerList();
-        getDs().save(cil);
-        ContainsIntegerList cilLoaded = getDs().get(cil);
+        getDatastore().save(cil);
+        ContainsIntegerList cilLoaded = getDatastore().get(cil);
         assertNotNull(cilLoaded);
         assertNotNull(cilLoaded.intList);
         assertEquals(cilLoaded.intList.size(), cil.intList.size());
@@ -376,16 +377,16 @@ public class TestMapping extends TestBase {
 
         cil = new ContainsIntegerList();
         cil.intList = null;
-        getDs().save(cil);
-        cilLoaded = getDs().get(cil);
+        getDatastore().save(cil);
+        cilLoaded = getDatastore().get(cil);
         assertNotNull(cilLoaded);
         assertNotNull(cilLoaded.intList);
         assertEquals(0, cilLoaded.intList.size());
 
         cil = new ContainsIntegerList();
         cil.intList.add(1);
-        getDs().save(cil);
-        cilLoaded = getDs().get(cil);
+        getDatastore().save(cil);
+        cilLoaded = getDatastore().get(cil);
         assertNotNull(cilLoaded);
         assertNotNull(cilLoaded.intList);
         assertEquals(1, cilLoaded.intList.size());
@@ -393,18 +394,18 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testLongArrayMapping() throws Exception {
+    public void testLongArrayMapping() {
         getMorphia().map(ContainsLongAndStringArray.class);
-        getDs().save(new ContainsLongAndStringArray());
-        ContainsLongAndStringArray loaded = getDs().find(ContainsLongAndStringArray.class).get();
+        getDatastore().save(new ContainsLongAndStringArray());
+        ContainsLongAndStringArray loaded = getDatastore().find(ContainsLongAndStringArray.class).get();
         assertArrayEquals(loaded.longs, (new ContainsLongAndStringArray()).longs);
         assertArrayEquals(loaded.strings, (new ContainsLongAndStringArray()).strings);
 
         final ContainsLongAndStringArray array = new ContainsLongAndStringArray();
         array.strings = new String[]{"a", "B", "c"};
         array.longs = new Long[]{4L, 5L, 4L};
-        final Key<ContainsLongAndStringArray> k1 = getDs().save(array);
-        loaded = getDs().getByKey(ContainsLongAndStringArray.class, k1);
+        final Key<ContainsLongAndStringArray> k1 = getDatastore().save(array);
+        loaded = getDatastore().getByKey(ContainsLongAndStringArray.class, k1);
         assertArrayEquals(loaded.longs, array.longs);
         assertArrayEquals(loaded.strings, array.strings);
 
@@ -412,27 +413,27 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testMapLike() throws Exception {
+    public void testMapLike() {
         final ContainsMapLike ml = new ContainsMapLike();
         ml.m.put("first", "test");
-        getDs().save(ml);
-        final ContainsMapLike mlLoaded = getDs().find(ContainsMapLike.class).get();
+        getDatastore().save(ml);
+        final ContainsMapLike mlLoaded = getDatastore().find(ContainsMapLike.class).get();
         assertNotNull(mlLoaded);
         assertNotNull(mlLoaded.m);
         assertNotNull(mlLoaded.m.containsKey("first"));
     }
 
     @Test
-    public void testMapWithEmbeddedInterface() throws Exception {
+    public void testMapWithEmbeddedInterface() {
         final ContainsMapWithEmbeddedInterface aMap = new ContainsMapWithEmbeddedInterface();
         final Foo f1 = new Foo1();
         final Foo f2 = new Foo2();
 
         aMap.embeddedValues.put("first", f1);
         aMap.embeddedValues.put("second", f2);
-        getDs().save(aMap);
+        getDatastore().save(aMap);
 
-        final ContainsMapWithEmbeddedInterface mapLoaded = getDs().find(ContainsMapWithEmbeddedInterface.class).get();
+        final ContainsMapWithEmbeddedInterface mapLoaded = getDatastore().find(ContainsMapWithEmbeddedInterface.class).get();
 
         assertNotNull(mapLoaded);
         assertEquals(2, mapLoaded.embeddedValues.size());
@@ -442,7 +443,7 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testMaps() throws Exception {
+    public void testMaps() {
         final DBCollection articles = getDb().getCollection("articles");
         getMorphia().map(Article.class).map(Translation.class).map(Circle.class);
 
@@ -450,7 +451,7 @@ public class TestMapping extends TestBase {
         final BasicDBObject relatedDbObj = (BasicDBObject) getMorphia().toDBObject(related);
         articles.save(relatedDbObj);
 
-        final Article relatedLoaded = getMorphia().fromDBObject(getDs(), Article.class,
+        final Article relatedLoaded = getMorphia().fromDBObject(getDatastore(), Article.class,
                                                                 articles.findOne(new BasicDBObject(Mapper.ID_KEY,
                                                                                                    relatedDbObj.get(Mapper.ID_KEY))),
                                                                 new DefaultEntityCache());
@@ -468,7 +469,7 @@ public class TestMapping extends TestBase {
         final BasicDBObject articleDbObj = (BasicDBObject) getMorphia().toDBObject(article);
         articles.save(articleDbObj);
 
-        final Article articleLoaded = getMorphia().fromDBObject(getDs(), Article.class,
+        final Article articleLoaded = getMorphia().fromDBObject(getDatastore(), Article.class,
                                                                 articles.findOne(
                                                                                     new BasicDBObject(Mapper.ID_KEY,
                                                                                                       articleDbObj.get(Mapper.ID_KEY))),
@@ -486,7 +487,7 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testObjectIdKeyedMap() throws Exception {
+    public void testObjectIdKeyedMap() {
         getMorphia().map(ContainsObjectIdKeyMap.class);
         final ContainsObjectIdKeyMap map = new ContainsObjectIdKeyMap();
         final ObjectId o1 = new ObjectId("111111111111111111111111");
@@ -494,31 +495,31 @@ public class TestMapping extends TestBase {
         map.values.put(o1, "I'm 1s");
         map.values.put(o2, "I'm 2s");
 
-        final Key<?> mapKey = getDs().save(map);
+        final Key<?> mapKey = getDatastore().save(map);
 
-        final ContainsObjectIdKeyMap mapLoaded = getDs().get(ContainsObjectIdKeyMap.class, mapKey.getId());
+        final ContainsObjectIdKeyMap mapLoaded = getDatastore().get(ContainsObjectIdKeyMap.class, mapKey.getId());
 
         assertNotNull(mapLoaded);
         assertEquals(2, mapLoaded.values.size());
         assertNotNull(mapLoaded.values.get(o1));
         assertNotNull(mapLoaded.values.get(o2));
 
-        assertNotNull(getDs().find(ContainsIntKeyMap.class).field("values.111111111111111111111111").exists());
-        assertEquals(0, getDs().find(ContainsIntKeyMap.class).field("values.111111111111111111111111").doesNotExist().count());
-        assertNotNull(getDs().find(ContainsIntKeyMap.class).field("values.4").doesNotExist());
-        assertEquals(0, getDs().find(ContainsIntKeyMap.class).field("values.4").exists().count());
+        assertNotNull(getDatastore().find(ContainsIntKeyMap.class).field("values.111111111111111111111111").exists());
+        assertEquals(0, getDatastore().find(ContainsIntKeyMap.class).field("values.111111111111111111111111").doesNotExist().count());
+        assertNotNull(getDatastore().find(ContainsIntKeyMap.class).field("values.4").doesNotExist());
+        assertEquals(0, getDatastore().find(ContainsIntKeyMap.class).field("values.4").exists().count());
     }
 
     @Test
-    public void testPrimMap() throws Exception {
+    public void testPrimMap() {
         final ContainsPrimitiveMap primMap = new ContainsPrimitiveMap();
         primMap.embeddedValues.put("first", 1L);
         primMap.embeddedValues.put("second", 2L);
         primMap.values.put("first", 1L);
         primMap.values.put("second", 2L);
-        final Key<ContainsPrimitiveMap> primMapKey = getDs().save(primMap);
+        final Key<ContainsPrimitiveMap> primMapKey = getDatastore().save(primMap);
 
-        final ContainsPrimitiveMap primMapLoaded = getDs().get(ContainsPrimitiveMap.class, primMapKey.getId());
+        final ContainsPrimitiveMap primMapLoaded = getDatastore().get(ContainsPrimitiveMap.class, primMapKey.getId());
 
         assertNotNull(primMapLoaded);
         assertEquals(2, primMapLoaded.embeddedValues.size());
@@ -526,15 +527,15 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testPrimMapWithNullValue() throws Exception {
+    public void testPrimMapWithNullValue() {
         final ContainsPrimitiveMap primMap = new ContainsPrimitiveMap();
         primMap.embeddedValues.put("first", null);
         primMap.embeddedValues.put("second", 2L);
         primMap.values.put("first", null);
         primMap.values.put("second", 2L);
-        final Key<ContainsPrimitiveMap> primMapKey = getDs().save(primMap);
+        final Key<ContainsPrimitiveMap> primMapKey = getDatastore().save(primMap);
 
-        final ContainsPrimitiveMap primMapLoaded = getDs().get(ContainsPrimitiveMap.class, primMapKey.getId());
+        final ContainsPrimitiveMap primMapLoaded = getDatastore().get(ContainsPrimitiveMap.class, primMapKey.getId());
 
         assertNotNull(primMapLoaded);
         assertEquals(2, primMapLoaded.embeddedValues.size());
@@ -542,7 +543,7 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testRecursiveReference() throws Exception {
+    public void testRecursiveReference() {
         final DBCollection stuff = getDb().getCollection("stuff");
 
         getMorphia().map(RecursiveParent.class).map(RecursiveChild.class);
@@ -555,11 +556,11 @@ public class TestMapping extends TestBase {
         final DBObject childDbObj = getMorphia().toDBObject(child);
         stuff.save(childDbObj);
 
-        final RecursiveParent parentLoaded = getMorphia().fromDBObject(getDs(), RecursiveParent.class,
+        final RecursiveParent parentLoaded = getMorphia().fromDBObject(getDatastore(), RecursiveParent.class,
                                                                        stuff.findOne(new BasicDBObject(Mapper.ID_KEY,
                                                                                                        parentDbObj.get(Mapper.ID_KEY))),
                                                                        new DefaultEntityCache());
-        final RecursiveChild childLoaded = getMorphia().fromDBObject(getDs(), RecursiveChild.class,
+        final RecursiveChild childLoaded = getMorphia().fromDBObject(getDatastore(), RecursiveChild.class,
                                                                      stuff.findOne(new BasicDBObject(Mapper.ID_KEY,
                                                                                                      childDbObj.get(Mapper.ID_KEY))),
                                                                      new DefaultEntityCache());
@@ -570,12 +571,12 @@ public class TestMapping extends TestBase {
         stuff.save(getMorphia().toDBObject(parentLoaded));
         stuff.save(getMorphia().toDBObject(childLoaded));
 
-        final RecursiveParent finalParentLoaded = getMorphia().fromDBObject(getDs(), RecursiveParent.class,
+        final RecursiveParent finalParentLoaded = getMorphia().fromDBObject(getDatastore(), RecursiveParent.class,
                                                                             stuff.findOne(new BasicDBObject(Mapper.ID_KEY,
                                                                                                             parentDbObj.get(Mapper
                                                                                                                                 .ID_KEY))),
                                                                             new DefaultEntityCache());
-        final RecursiveChild finalChildLoaded = getMorphia().fromDBObject(getDs(), RecursiveChild.class,
+        final RecursiveChild finalChildLoaded = getMorphia().fromDBObject(getDatastore(), RecursiveChild.class,
                                                                           stuff.findOne(new BasicDBObject(Mapper.ID_KEY,
                                                                                                           childDbObj.get(Mapper.ID_KEY))),
                                                                           new DefaultEntityCache());
@@ -585,43 +586,43 @@ public class TestMapping extends TestBase {
     }
 
     @Test(expected = MappingException.class)
-    public void testReferenceWithoutIdValue() throws Exception {
+    public void testReferenceWithoutIdValue() {
         final RecursiveParent parent = new RecursiveParent();
         final RecursiveChild child = new RecursiveChild();
         child.setId(null);
         parent.setChild(child);
-        getDs().save(parent);
+        getDatastore().save(parent);
 
     }
 
     @Test
-    public void testSerializedMapping() throws Exception {
+    public void testSerializedMapping() {
         getMorphia().map(ContainsSerializedData.class);
-        final Key<ContainsSerializedData> savedKey = getDs().save(new ContainsSerializedData());
-        final ContainsSerializedData loaded = getDs().get(ContainsSerializedData.class, savedKey.getId());
+        final Key<ContainsSerializedData> savedKey = getDatastore().save(new ContainsSerializedData());
+        final ContainsSerializedData loaded = getDatastore().get(ContainsSerializedData.class, savedKey.getId());
         assertNotNull(loaded.data);
         assertEquals(loaded.data.someString, (new ContainsSerializedData()).data.someString);
         assertNotNull(loaded.id);
     }
 
     @Test
-    public void testTimestampMapping() throws Exception {
+    public void testTimestampMapping() {
         getMorphia().map(ContainsTimestamp.class);
         final ContainsTimestamp cts = new ContainsTimestamp();
-        final Key<ContainsTimestamp> savedKey = getDs().save(cts);
-        final ContainsTimestamp loaded = getDs().get(ContainsTimestamp.class, savedKey.getId());
+        final Key<ContainsTimestamp> savedKey = getDatastore().save(cts);
+        final ContainsTimestamp loaded = getDatastore().get(ContainsTimestamp.class, savedKey.getId());
         assertNotNull(loaded.ts);
         assertEquals(loaded.ts.getTime(), cts.ts.getTime());
 
     }
 
     @Test
-    public void testUUID() throws Exception {
+    public void testUUID() {
         //       getMorphia().map(ContainsUUID.class);
         final ContainsUUID uuid = new ContainsUUID();
         final UUID before = uuid.uuid;
-        getDs().save(uuid);
-        final ContainsUUID loaded = getDs().find(ContainsUUID.class).get();
+        getDatastore().save(uuid);
+        final ContainsUUID loaded = getDatastore().find(ContainsUUID.class).get();
         assertNotNull(loaded);
         assertNotNull(loaded.id);
         assertNotNull(loaded.uuid);
@@ -629,12 +630,12 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testUuidId() throws Exception {
+    public void testUuidId() {
         getMorphia().map(ContainsUuidId.class);
         final ContainsUuidId uuidId = new ContainsUuidId();
         final UUID before = uuidId.id;
-        getDs().save(uuidId);
-        final ContainsUuidId loaded = getDs().get(ContainsUuidId.class, before);
+        getDatastore().save(uuidId);
+        final ContainsUuidId loaded = getDatastore().get(ContainsUuidId.class, before);
         assertNotNull(loaded);
         assertNotNull(loaded.id);
         assertEquals(before, loaded.id);
@@ -670,7 +671,7 @@ public class TestMapping extends TestBase {
 
         hotels.save(hotelDbObj);
 
-        Hotel borgLoaded = getMorphia().fromDBObject(getDs(), Hotel.class, hotelDbObj, new DefaultEntityCache());
+        Hotel borgLoaded = getMorphia().fromDBObject(getDatastore(), Hotel.class, hotelDbObj, new DefaultEntityCache());
 
         assertEquals(borg.getName(), borgLoaded.getName());
         assertEquals(borg.getStars(), borgLoaded.getStars());
@@ -692,7 +693,7 @@ public class TestMapping extends TestBase {
         final BasicDBObject agencyDbObj = (BasicDBObject) getMorphia().toDBObject(agency);
         agencies.save(agencyDbObj);
 
-        final TravelAgency agencyLoaded = getMorphia().fromDBObject(getDs(), TravelAgency.class,
+        final TravelAgency agencyLoaded = getMorphia().fromDBObject(getDatastore(), TravelAgency.class,
                                                                     agencies.findOne(new BasicDBObject(Mapper.ID_KEY,
                                                                                                        agencyDbObj.get(Mapper.ID_KEY))),
                                                                     new DefaultEntityCache());
@@ -711,7 +712,7 @@ public class TestMapping extends TestBase {
 
         hotelDbObj = (BasicDBObject) hotels.findOne(new BasicDBObject(Mapper.ID_KEY, hotelDbObj.get(Mapper.ID_KEY)));
 
-        borgLoaded = getMorphia().fromDBObject(getDs(), Hotel.class, hotelDbObj, new DefaultEntityCache());
+        borgLoaded = getMorphia().fromDBObject(getDatastore(), Hotel.class, hotelDbObj, new DefaultEntityCache());
         assertNull(borgLoaded.getAddress());
         assertEquals(0, borgLoaded.getPhoneNumbers().size());
         assertNull(borgLoaded.getName());

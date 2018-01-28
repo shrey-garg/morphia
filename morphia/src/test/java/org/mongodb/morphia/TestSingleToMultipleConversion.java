@@ -16,16 +16,16 @@ import java.util.Set;
 public class TestSingleToMultipleConversion extends TestBase {
     @Test
     public void testBasicType() throws Exception {
-        getDs().delete(getDs().find(HasSingleString.class));
-        getDs().save(new HasSingleString());
-        Assert.assertNotNull(getDs().find(HasSingleString.class).get());
-        Assert.assertEquals(1, getDs().find(HasSingleString.class).count());
-        final HasManyStringsArray hms = getDs().find(HasManyStringsArray.class).get();
+        getDatastore().delete(getDatastore().find(HasSingleString.class));
+        getDatastore().save(new HasSingleString());
+        Assert.assertNotNull(getDatastore().find(HasSingleString.class).get());
+        Assert.assertEquals(1, getDatastore().find(HasSingleString.class).count());
+        final HasManyStringsArray hms = getDatastore().find(HasManyStringsArray.class).get();
         Assert.assertNotNull(hms);
         Assert.assertNotNull(hms.strings);
         Assert.assertEquals(1, hms.strings.length);
 
-        final HasManyStringsList hms2 = getDs().find(HasManyStringsList.class).get();
+        final HasManyStringsList hms2 = getDatastore().find(HasManyStringsList.class).get();
         Assert.assertNotNull(hms2);
         Assert.assertNotNull(hms2.strings);
         Assert.assertEquals(1, hms2.strings.size());
@@ -33,15 +33,15 @@ public class TestSingleToMultipleConversion extends TestBase {
 
     @Test
     public void testEmbeddedType() throws Exception {
-        getDs().save(new HasEmbeddedStringy());
-        Assert.assertNotNull(getDs().find(HasEmbeddedStringy.class).get());
-        Assert.assertEquals(1, getDs().find(HasEmbeddedStringy.class).count());
-        final HasEmbeddedStringyArray has = getDs().find(HasEmbeddedStringyArray.class).get();
+        getDatastore().save(new HasEmbeddedStringy());
+        Assert.assertNotNull(getDatastore().find(HasEmbeddedStringy.class).get());
+        Assert.assertEquals(1, getDatastore().find(HasEmbeddedStringy.class).count());
+        final HasEmbeddedStringyArray has = getDatastore().find(HasEmbeddedStringyArray.class).get();
         Assert.assertNotNull(has);
         Assert.assertNotNull(has.hss);
         Assert.assertEquals(1, has.hss.length);
 
-        final HasEmbeddedStringySet has2 = getDs().find(HasEmbeddedStringySet.class).get();
+        final HasEmbeddedStringySet has2 = getDatastore().find(HasEmbeddedStringySet.class).get();
         Assert.assertNotNull(has2);
         Assert.assertNotNull(has2.hss);
         Assert.assertEquals(1, has2.hss.size());

@@ -23,7 +23,6 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
-import org.mongodb.morphia.mapping.MappedClass;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -44,8 +43,8 @@ public class TestIndexInheritance extends TestBase {
         assertEquals(2, mc.getAnnotations(Indexes.class)
                           .size());
 
-        getDs().ensureIndexes();
-        final DBCollection coll = getDs().getCollection(Circle.class);
+        getDatastore().ensureIndexes();
+        final DBCollection coll = getDatastore().getCollection(Circle.class);
 
         assertEquals(4, coll.getIndexInfo()
                             .size());
@@ -58,8 +57,8 @@ public class TestIndexInheritance extends TestBase {
         getMorphia().getMapper()
                     .getMappedClass(Circle.class);
 
-        getDs().ensureIndexes();
-        final DBCollection coll = getDs().getCollection(Circle.class);
+        getDatastore().ensureIndexes();
+        final DBCollection coll = getDatastore().getCollection(Circle.class);
 
         assertEquals(4, coll.getIndexInfo()
                             .size());

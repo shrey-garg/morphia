@@ -44,18 +44,18 @@ public class TestIndexes extends TestBase {
     @Test
     public void testIndexes() {
 
-        final Datastore datastore = getDs();
+        final Datastore datastore = getDatastore();
         datastore.delete(datastore.find(TestWithIndexOption.class));
 
-        final DBCollection indexOptionColl = getDs().getCollection(TestWithIndexOption.class);
+        final DBCollection indexOptionColl = getDatastore().getCollection(TestWithIndexOption.class);
         indexOptionColl.drop();
         assertEquals(0, indexOptionColl.getIndexInfo().size());
 
-        final DBCollection depIndexColl = getDs().getCollection(TestWithDeprecatedIndex.class);
+        final DBCollection depIndexColl = getDatastore().getCollection(TestWithDeprecatedIndex.class);
         depIndexColl.drop();
         assertEquals(0, depIndexColl.getIndexInfo().size());
 
-        final DBCollection hashIndexColl = getDs().getCollection(TestWithHashedIndex.class);
+        final DBCollection hashIndexColl = getDatastore().getCollection(TestWithHashedIndex.class);
         hashIndexColl.drop();
         assertEquals(0, hashIndexColl.getIndexInfo().size());
 

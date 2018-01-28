@@ -30,13 +30,13 @@ public class LegacyCoordsTest extends TestBase {
     public void shouldCreateA2dIndexOnAnEntityWithArrayOfCoordinates() {
         // given
         PlaceWithLegacyCoords pointA = new PlaceWithLegacyCoords(new double[]{3.1, 5.2}, "Point A");
-        getDs().save(pointA);
+        getDatastore().save(pointA);
 
         // when
-        getDs().ensureIndexes();
+        getDatastore().ensureIndexes();
 
         // then
-        List<DBObject> indexes = getDs().getCollection(PlaceWithLegacyCoords.class).getIndexInfo();
+        List<DBObject> indexes = getDatastore().getCollection(PlaceWithLegacyCoords.class).getIndexInfo();
         assertThat(indexes, hasIndexNamed("location_2d"));
     }
 
@@ -44,14 +44,14 @@ public class LegacyCoordsTest extends TestBase {
     public void shouldFindPointWithExactMatch() {
         // given
         final PlaceWithLegacyCoords nearbyPlace = new PlaceWithLegacyCoords(new double[]{1.1, 2.3}, "Nearby Place");
-        getDs().save(nearbyPlace);
-        getDs().ensureIndexes();
+        getDatastore().save(nearbyPlace);
+        getDatastore().ensureIndexes();
 
         // when
-        List<PlaceWithLegacyCoords> found = getDs().find(PlaceWithLegacyCoords.class)
-                                                   .field("location")
-                                                   .equal(new double[]{1.1, 2.3})
-                                                   .asList();
+        List<PlaceWithLegacyCoords> found = getDatastore().find(PlaceWithLegacyCoords.class)
+                                                          .field("location")
+                                                          .equal(new double[]{1.1, 2.3})
+                                                          .asList();
 
         // then
         assertThat(found, is(notNullValue()));
@@ -63,12 +63,12 @@ public class LegacyCoordsTest extends TestBase {
     @SuppressWarnings("deprecation")
     public void shouldGenerateCorrectQueryForNearSphereWithRadius() {
         // when
-        Query<PlaceWithLegacyCoords> query = getDs().find(PlaceWithLegacyCoords.class)
-                                                    .field("location")
-                                                    .near(42.08563, -87.99822, 2, true);
+        Query<PlaceWithLegacyCoords> query = getDatastore().find(PlaceWithLegacyCoords.class)
+                                                           .field("location")
+                                                           .near(42.08563, -87.99822, 2, true);
 
         // then
-        assertThat(query.getQueryObject().toString(),
+        assertThat(query.getQueryDocument().toString(),
                    jsonEqual("{ \"location\" : "
                              + "{ \"$nearSphere\" : [ 42.08563 , -87.99822] , "
                              + "\"$maxDistance\" : 2.0}}"));
@@ -78,12 +78,12 @@ public class LegacyCoordsTest extends TestBase {
     @SuppressWarnings("deprecation")
     public void shouldGenerateCorrectQueryForNearWithMaxDistance() {
         // when
-        Query<PlaceWithLegacyCoords> query = getDs().find(PlaceWithLegacyCoords.class)
-                                                    .field("location")
-                                                    .near(42.08563, -87.99822, 2);
+        Query<PlaceWithLegacyCoords> query = getDatastore().find(PlaceWithLegacyCoords.class)
+                                                           .field("location")
+                                                           .near(42.08563, -87.99822, 2);
 
         // then
-        assertThat(query.getQueryObject().toString(),
+        assertThat(query.getQueryDocument().toString(),
                    jsonEqual("{ \"location\" : "
                              + "{ \"$near\" : [ 42.08563 , -87.99822] , "
                              + "\"$maxDistance\" : 2.0}}"));
@@ -94,13 +94,13 @@ public class LegacyCoordsTest extends TestBase {
     public void shouldNotReturnAnyResultsIfNoLocationsWithinGivenRadius() throws Exception {
         // given
         final PlaceWithLegacyCoords nearbyPlace = new PlaceWithLegacyCoords(new double[]{1.1, 2.3}, "Nearby Place");
-        getDs().save(nearbyPlace);
-        getDs().ensureIndexes();
+        getDatastore().save(nearbyPlace);
+        getDatastore().ensureIndexes();
 
         // when
-        Query<PlaceWithLegacyCoords> locationQuery = getDs().find(PlaceWithLegacyCoords.class)
-                                                            .field("location")
-                                                            .near(1.0, 2.0, 0.1);
+        Query<PlaceWithLegacyCoords> locationQuery = getDatastore().find(PlaceWithLegacyCoords.class)
+                                                                   .field("location")
+                                                                   .near(1.0, 2.0, 0.1);
         // then
         assertThat(locationQuery.asList().size(), is(0));
         assertThat(locationQuery.get(), is(nullValue()));
@@ -110,16 +110,16 @@ public class LegacyCoordsTest extends TestBase {
     public void shouldReturnAllLocationsOrderedByDistanceFromQueryLocationWhenPerformingNearQuery() throws Exception {
         // given
         final PlaceWithLegacyCoords nearbyPlace = new PlaceWithLegacyCoords(new double[]{1.1, 2.3}, "Nearby Place");
-        getDs().save(nearbyPlace);
+        getDatastore().save(nearbyPlace);
         final PlaceWithLegacyCoords furtherAwayPlace = new PlaceWithLegacyCoords(new double[]{10.1, 12.3}, "Further Away Place");
-        getDs().save(furtherAwayPlace);
-        getDs().ensureIndexes();
+        getDatastore().save(furtherAwayPlace);
+        getDatastore().ensureIndexes();
 
         // when
-        final List<PlaceWithLegacyCoords> found = getDs().find(PlaceWithLegacyCoords.class)
-                                                         .field("location")
-                                                         .near(1.0, 2.0)
-                                                         .asList();
+        final List<PlaceWithLegacyCoords> found = getDatastore().find(PlaceWithLegacyCoords.class)
+                                                                .field("location")
+                                                                .near(1.0, 2.0)
+                                                                .asList();
 
         // then
         assertThat(found, is(notNullValue()));
@@ -132,16 +132,16 @@ public class LegacyCoordsTest extends TestBase {
     public void shouldReturnOnlyThosePlacesWithinTheGivenRadius() throws Exception {
         // given
         final PlaceWithLegacyCoords nearbyPlace = new PlaceWithLegacyCoords(new double[]{1.1, 2.3}, "Nearby Place");
-        getDs().save(nearbyPlace);
+        getDatastore().save(nearbyPlace);
         final PlaceWithLegacyCoords furtherAwayPlace = new PlaceWithLegacyCoords(new double[]{10.1, 12.3}, "Further Away Place");
-        getDs().save(furtherAwayPlace);
-        getDs().ensureIndexes();
+        getDatastore().save(furtherAwayPlace);
+        getDatastore().ensureIndexes();
 
         // when
-        final List<PlaceWithLegacyCoords> found = getDs().find(PlaceWithLegacyCoords.class)
-                                                         .field("location")
-                                                         .near(1.0, 2.0, 1.5)
-                                                         .asList();
+        final List<PlaceWithLegacyCoords> found = getDatastore().find(PlaceWithLegacyCoords.class)
+                                                                .field("location")
+                                                                .near(1.0, 2.0, 1.5)
+                                                                .asList();
         // then
         assertThat(found, is(notNullValue()));
         assertThat(found.size(), is(1));
@@ -152,15 +152,15 @@ public class LegacyCoordsTest extends TestBase {
     public void shouldThrowAnExceptionIfQueryingWithoutA2dIndex() throws Exception {
         // given
         final PlaceWithLegacyCoords nearbyPlace = new PlaceWithLegacyCoords(new double[]{1.1, 2.3}, "Nearby Place");
-        getDs().save(nearbyPlace);
-        List<DBObject> indexes = getDs().getCollection(PlaceWithLegacyCoords.class).getIndexInfo();
+        getDatastore().save(nearbyPlace);
+        List<DBObject> indexes = getDatastore().getCollection(PlaceWithLegacyCoords.class).getIndexInfo();
         assertThat(indexes, doesNotHaveIndexNamed("location_2d"));
 
         // when
-        getDs().find(PlaceWithLegacyCoords.class)
-               .field("location")
-               .near(0, 0)
-               .get();
+        getDatastore().find(PlaceWithLegacyCoords.class)
+                      .field("location")
+                      .near(0, 0)
+                      .get();
 
         // then expect the Exception
     }

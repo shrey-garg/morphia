@@ -17,17 +17,14 @@ package org.mongodb.morphia;
 
 import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import org.mongodb.morphia.annotations.Embedded;
-import org.mongodb.morphia.annotations.Entity;
+import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.codecs.pojo.PojoCodecProvider.Builder;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.MappingException;
 import org.mongodb.morphia.mapping.cache.EntityCache;
-import org.mongodb.morphia.utils.ReflectionUtils;
 
-import java.io.IOException;
-import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.Set;
 
@@ -39,6 +36,7 @@ import java.util.Set;
 public class Morphia {
     private static final Logger LOG = MorphiaLoggerFactory.get(Morphia.class);
     private final Mapper mapper;
+    private final Builder providerBuilder = PojoCodecProvider.builder();
 
     /**
      * Creates a Morphia instance with a default Mapper and an empty class set.
@@ -78,6 +76,10 @@ public class Morphia {
         this(new Mapper(), classesToMap);
     }
 
+    Builder getProviderBuilder() {
+        return providerBuilder;
+    }
+
     /**
      * It is best to use a Mongo singleton instance here.
      *
@@ -97,8 +99,10 @@ public class Morphia {
      * @param mapper      a pre-configured Mapper for your POJOs
      * @param dbName      the name of the database
      * @return a Datastore that you can use to interact with MongoDB
+     * @deprecated use {@link #createDatastore(MongoClient, String)} instead
      */
     @SuppressWarnings("deprecation")
+    @Deprecated
     public Datastore createDatastore(final MongoClient mongoClient, final Mapper mapper, final String dbName) {
         return new DatastoreImpl(this, mapper, mongoClient, dbName);
     }
@@ -194,13 +198,7 @@ public class Morphia {
      * @return this
      */
     public synchronized Morphia map(final Class... entityClasses) {
-        if (entityClasses != null && entityClasses.length > 0) {
-            for (final Class entityClass : entityClasses) {
-                if (!mapper.isMapped(entityClass)) {
-                    mapper.addMappedClass(entityClass);
-                }
-            }
-        }
+        providerBuilder.register(entityClasses);
         return this;
     }
 
@@ -213,9 +211,7 @@ public class Morphia {
     public synchronized Morphia map(final Set<Class> entityClasses) {
         if (entityClasses != null && !entityClasses.isEmpty()) {
             for (final Class entityClass : entityClasses) {
-                if (!mapper.isMapped(entityClass)) {
-                    mapper.addMappedClass(entityClass);
-                }
+                providerBuilder.register(entityClass);
             }
         }
         return this;
@@ -239,27 +235,8 @@ public class Morphia {
      * @return the Morphia instance
      */
     public synchronized Morphia mapPackage(final String packageName, final boolean ignoreInvalidClasses) {
-        try {
-            for (final Class clazz : ReflectionUtils.getClasses(packageName, mapper.getOptions().isMapSubPackages())) {
-                try {
-                    final Embedded embeddedAnn = ReflectionUtils.getClassEmbeddedAnnotation(clazz);
-                    final Entity entityAnn = ReflectionUtils.getClassEntityAnnotation(clazz);
-                    final boolean isAbstract = Modifier.isAbstract(clazz.getModifiers());
-                    if ((entityAnn != null || embeddedAnn != null) && !isAbstract) {
-                        map(clazz);
-                    }
-                } catch (final MappingException ex) {
-                    if (!ignoreInvalidClasses) {
-                        throw ex;
-                    }
-                }
-            }
-            return this;
-        } catch (IOException e) {
-            throw new MappingException("Could not get map classes from package " + packageName, e);
-        } catch (ClassNotFoundException e) {
-            throw new MappingException("Could not get map classes from package " + packageName, e);
-        }
+        providerBuilder.register(packageName);
+        return this;
     }
 
     /**

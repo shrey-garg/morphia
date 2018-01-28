@@ -37,7 +37,6 @@ import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.annotations.Text;
-import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.MappingException;
 import org.mongodb.morphia.utils.IndexDirection;
@@ -109,13 +108,13 @@ public class IndexHelperTest extends TestBase {
     @Test
     public void createIndex() {
         checkMinServerVersion(3.4);
-        String collectionName = getDs().getCollection(IndexedClass.class).getName();
+        String collectionName = getDatastore().getCollection(IndexedClass.class).getName();
         MongoCollection<Document> collection = getDatabase().getCollection(collectionName);
         Mapper mapper = getMorphia().getMapper();
 
         indexHelper.createIndex(collection, mapper.getMappedClass(IndexedClass.class), false);
-        List<DBObject> indexInfo = getDs().getCollection(IndexedClass.class)
-                                          .getIndexInfo();
+        List<DBObject> indexInfo = getDatastore().getCollection(IndexedClass.class)
+                                                 .getIndexInfo();
         assertEquals("Should have 6 indexes", 6, indexInfo.size());
         for (DBObject dbObject : indexInfo) {
             String name = dbObject.get("name").toString();
@@ -139,9 +138,9 @@ public class IndexHelperTest extends TestBase {
             }
         }
 
-        collection = getDatabase().getCollection(getDs().getCollection(AbstractParent.class).getName());
+        collection = getDatabase().getCollection(getDatastore().getCollection(AbstractParent.class).getName());
         indexHelper.createIndex(collection, mapper.getMappedClass(AbstractParent.class), false);
-        indexInfo = getDs().getCollection(AbstractParent.class).getIndexInfo();
+        indexInfo = getDatastore().getCollection(AbstractParent.class).getIndexInfo();
         assertTrue("Shouldn't find any indexes: " + indexInfo, indexInfo.isEmpty());
 
     }
@@ -180,8 +179,8 @@ public class IndexHelperTest extends TestBase {
                         .type(IndexType.DESC))
             .options(indexOptions());
         indexHelper.createIndex(indexes, mappedClass, index, false);
-        List<DBObject> indexInfo = getDs().getCollection(IndexedClass.class)
-                                          .getIndexInfo();
+        List<DBObject> indexInfo = getDatastore().getCollection(IndexedClass.class)
+                                                 .getIndexInfo();
         for (DBObject dbObject : indexInfo) {
             if (dbObject.get("name").equals("indexName")) {
                 checkIndex(dbObject);
@@ -257,8 +256,8 @@ public class IndexHelperTest extends TestBase {
             .unique(true)
             .value("indexName, -text");
         indexHelper.createIndex(indexes, mappedClass, index, false);
-        List<DBObject> indexInfo = getDs().getCollection(IndexedClass.class)
-                                          .getIndexInfo();
+        List<DBObject> indexInfo = getDatastore().getCollection(IndexedClass.class)
+                                                 .getIndexInfo();
         for (DBObject dbObject : indexInfo) {
             if (dbObject.get("name").equals("index_indexName")) {
                 checkIndex(dbObject);
@@ -418,8 +417,8 @@ public class IndexHelperTest extends TestBase {
     }
 
     private void findPartialIndex(final BasicDBObject expected) {
-        List<DBObject> indexInfo = getDs().getCollection(IndexedClass.class)
-                                          .getIndexInfo();
+        List<DBObject> indexInfo = getDatastore().getCollection(IndexedClass.class)
+                                                 .getIndexInfo();
         for (DBObject dbObject : indexInfo) {
             if (!dbObject.get("name").equals("_id_")) {
                 Assert.assertEquals(expected, dbObject.get("partialFilterExpression"));

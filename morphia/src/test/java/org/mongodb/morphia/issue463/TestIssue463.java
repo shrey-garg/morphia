@@ -18,11 +18,11 @@ public class TestIssue463 extends TestBase {
         final Class2 class2 = new Class2();
         class2.setId(new ObjectId());
         class2.setText("hello world");
-        getDs().save(class2);
+        getDatastore().save(class2);
 
         final BasicDBObject query = new BasicDBObject("_id", class2.getId());
-        Assert.assertFalse(getDs().getCollection(Class1.class).find(query).hasNext());
-        Assert.assertTrue(getDs().getCollection(Class2.class).find(query).hasNext());
+        Assert.assertFalse(getDatastore().getCollection(Class1.class).find(query).hasNext());
+        Assert.assertTrue(getDatastore().getCollection(Class2.class).find(query).hasNext());
     }
 
     @Entity(value = "class1", noClassnameStored = true)

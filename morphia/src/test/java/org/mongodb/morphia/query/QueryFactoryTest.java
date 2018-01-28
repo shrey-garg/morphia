@@ -13,13 +13,13 @@ public class QueryFactoryTest extends TestBase {
 
     @Test
     public void changeQueryFactory() {
-        final QueryFactory current = getDs().getQueryFactory();
+        final QueryFactory current = getDatastore().getQueryFactory();
         final QueryFactory custom = new DefaultQueryFactory();
 
-        getDs().setQueryFactory(custom);
+        getDatastore().setQueryFactory(custom);
 
-        Assert.assertNotSame(current, getDs().getQueryFactory());
-        Assert.assertSame(custom, getDs().getQueryFactory());
+        Assert.assertNotSame(current, getDatastore().getQueryFactory());
+        Assert.assertSame(custom, getDatastore().getQueryFactory());
     }
 
     @Test
@@ -37,10 +37,10 @@ public class QueryFactoryTest extends TestBase {
             }
         };
 
-        getDs().setQueryFactory(queryFactory);
+        getDatastore().setQueryFactory(queryFactory);
 
-        final Query<String> query = getDs().find(String.class);
-        final Query<String> other = getDs().find(String.class);
+        final Query<String> query = getDatastore().find(String.class);
+        final Query<String> other = getDatastore().find(String.class);
 
         Assert.assertNotSame(other, query);
         Assert.assertEquals(2, counter.get());

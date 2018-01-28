@@ -18,12 +18,12 @@ public class TestMultipleCallbackMethods extends TestBase {
     @Test
     public void testMultipleCallbackAnnotation() throws Exception {
         final SomeEntity entity = new SomeEntity();
-        getDs().save(entity);
+        getDatastore().save(entity);
 
         Assert.assertEquals(4, entity.getFoo());
         Assert.assertEquals(0, loading);
 
-        final SomeEntity someEntity = getDs().find(SomeEntity.class).filter("_id", entity.getId()).get();
+        final SomeEntity someEntity = getDatastore().find(SomeEntity.class).filter("_id", entity.getId()).get();
 
         Assert.assertEquals(4, entity.getFoo());
 

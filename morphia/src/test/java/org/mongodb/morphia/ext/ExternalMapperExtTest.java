@@ -20,8 +20,6 @@ import org.mongodb.morphia.Key;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.mapping.MappedClass;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.lang.annotation.Annotation;
@@ -51,9 +49,9 @@ public class ExternalMapperExtTest extends TestBase {
 
         EntityWithNoAnnotations ent = new EntityWithNoAnnotations();
         ent.id = "test";
-        final Key<EntityWithNoAnnotations> k = getDs().save(ent);
+        final Key<EntityWithNoAnnotations> k = getDatastore().save(ent);
         assertNotNull(k);
-        ent = getDs().get(EntityWithNoAnnotations.class, "test");
+        ent = getDatastore().get(EntityWithNoAnnotations.class, "test");
         assertNotNull(ent);
         assertEquals("test", ent.id);
     }

@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mongodb.morphia.annotations.Validation;
 import org.mongodb.morphia.entities.DocumentValidation;
-import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
@@ -53,17 +52,17 @@ public class TestDocumentValidation extends TestBase {
     @Test
     public void createValidation() {
         getMorphia().map(DocumentValidation.class);
-        getDs().enableDocumentValidation();
+        getDatastore().enableDocumentValidation();
         assertEquals(Document.parse(DocumentValidation.class.getAnnotation(Validation.class).value()), getValidator());
 
         try {
-            getDs().save(new DocumentValidation("John", 1, new Date()));
+            getDatastore().save(new DocumentValidation("John", 1, new Date()));
             fail("Document should have failed validation");
         } catch (WriteConcernException e) {
             assertTrue(e.getMessage().contains("Document failed validation"));
         }
 
-        getDs().save(new DocumentValidation("Harold", 100, new Date()));
+        getDatastore().save(new DocumentValidation("Harold", 100, new Date()));
 
     }
 
@@ -84,7 +83,7 @@ public class TestDocumentValidation extends TestBase {
         }
 
         getMorphia().map(DocumentValidation.class);
-        getDs().enableDocumentValidation();
+        getDatastore().enableDocumentValidation();
         assertEquals(Document.parse(DocumentValidation.class.getAnnotation(Validation.class).value()), getValidator());
 
         try {
@@ -94,7 +93,7 @@ public class TestDocumentValidation extends TestBase {
         }
 
         try {
-            getDs().save(new DocumentValidation("John", 1, new Date()));
+            getDatastore().save(new DocumentValidation("John", 1, new Date()));
             fail("Document should have failed validation");
         } catch (WriteConcernException e) {
             assertTrue(e.getMessage().contains("Document failed validation"));
@@ -128,24 +127,24 @@ public class TestDocumentValidation extends TestBase {
     @Test
     public void findAndModify() {
         getMorphia().map(DocumentValidation.class);
-        getDs().enableDocumentValidation();
+        getDatastore().enableDocumentValidation();
 
-        getDs().save(new DocumentValidation("Harold", 100, new Date()));
+        getDatastore().save(new DocumentValidation("Harold", 100, new Date()));
 
-        Query<DocumentValidation> query = getDs().find(DocumentValidation.class);
-        UpdateOperations<DocumentValidation> updates = getDs().createUpdateOperations(DocumentValidation.class)
-                                                              .set("number", 5);
+        Query<DocumentValidation> query = getDatastore().find(DocumentValidation.class);
+        UpdateOperations<DocumentValidation> updates = getDatastore().createUpdateOperations(DocumentValidation.class)
+                                                                     .set("number", 5);
         FindAndModifyOptions options = new FindAndModifyOptions()
             .bypassDocumentValidation(false);
         try {
-            getDs().findAndModify(query, updates, options);
+            getDatastore().findAndModify(query, updates, options);
             fail("Document validation should have complained");
         } catch (MongoCommandException e) {
             // expected
         }
 
         options.bypassDocumentValidation(true);
-        getDs().findAndModify(query, updates, options);
+        getDatastore().findAndModify(query, updates, options);
 
         Assert.assertNotNull(query.field("number").equal(5).get());
     }
@@ -153,24 +152,24 @@ public class TestDocumentValidation extends TestBase {
     @Test
     public void update() {
         getMorphia().map(DocumentValidation.class);
-        getDs().enableDocumentValidation();
+        getDatastore().enableDocumentValidation();
 
-        getDs().save(new DocumentValidation("Harold", 100, new Date()));
+        getDatastore().save(new DocumentValidation("Harold", 100, new Date()));
 
-        Query<DocumentValidation> query = getDs().find(DocumentValidation.class);
-        UpdateOperations<DocumentValidation> updates = getDs().createUpdateOperations(DocumentValidation.class)
-                                                              .set("number", 5);
+        Query<DocumentValidation> query = getDatastore().find(DocumentValidation.class);
+        UpdateOperations<DocumentValidation> updates = getDatastore().createUpdateOperations(DocumentValidation.class)
+                                                                     .set("number", 5);
         UpdateOptions options = new UpdateOptions()
             .bypassDocumentValidation(false);
         try {
-            getDs().update(query, updates, options);
+            getDatastore().update(query, updates, options);
             fail("Document validation should have complained");
         } catch (WriteConcernException e) {
             // expected
         }
 
         options.bypassDocumentValidation(true);
-        getDs().update(query, updates, options);
+        getDatastore().update(query, updates, options);
 
         Assert.assertNotNull(query.field("number").equal(5).get());
     }
@@ -178,20 +177,20 @@ public class TestDocumentValidation extends TestBase {
     @Test
     public void save() {
         getMorphia().map(DocumentValidation.class);
-        getDs().enableDocumentValidation();
+        getDatastore().enableDocumentValidation();
 
         try {
-            getDs().save(new DocumentValidation("Harold", 8, new Date()));
+            getDatastore().save(new DocumentValidation("Harold", 8, new Date()));
             fail("Document validation should have complained");
         } catch (WriteConcernException e) {
             // expected
         }
 
-        getDs().save(new DocumentValidation("Harold", 8, new Date()), new InsertOptions()
+        getDatastore().save(new DocumentValidation("Harold", 8, new Date()), new InsertOptions()
                     .bypassDocumentValidation(true));
 
-        Query<DocumentValidation> query = getDs().find(DocumentValidation.class)
-                                                 .field("number").equal(8);
+        Query<DocumentValidation> query = getDatastore().find(DocumentValidation.class)
+                                                        .field("number").equal(8);
         Assert.assertNotNull(query.get());
 
         List<DocumentValidation> list = asList(new DocumentValidation("Harold", 8, new Date()),
@@ -200,13 +199,13 @@ public class TestDocumentValidation extends TestBase {
                                                new DocumentValidation("Harold", 8, new Date()),
                                                new DocumentValidation("Harold", 8, new Date()));
         try {
-            getDs().save(list);
+            getDatastore().save(list);
             fail("Document validation should have complained");
         } catch (WriteConcernException e) {
             // expected
         }
 
-        getDs().save(list, new InsertOptions().bypassDocumentValidation(true));
+        getDatastore().save(list, new InsertOptions().bypassDocumentValidation(true));
 
         Assert.assertFalse(query.field("number").equal(8).asList().isEmpty());
     }
@@ -236,7 +235,7 @@ public class TestDocumentValidation extends TestBase {
     @Test
     public void insert() {
         getMorphia().map(DocumentValidation.class);
-        getDs().enableDocumentValidation();
+        getDatastore().enableDocumentValidation();
 
         try {
             getAds().insert(new DocumentValidation("Harold", 8, new Date()));
@@ -248,8 +247,8 @@ public class TestDocumentValidation extends TestBase {
         getAds().insert(new DocumentValidation("Harold", 8, new Date()), new InsertOptions()
             .bypassDocumentValidation(true));
 
-        Query<DocumentValidation> query = getDs().find(DocumentValidation.class)
-                                                 .field("number").equal(8);
+        Query<DocumentValidation> query = getDatastore().find(DocumentValidation.class)
+                                                        .field("number").equal(8);
         Assert.assertNotNull(query.get());
 
         List<DocumentValidation> list = asList(new DocumentValidation("Harold", 8, new Date()),
@@ -301,8 +300,8 @@ public class TestDocumentValidation extends TestBase {
 
     @SuppressWarnings("deprecation")
     private void updateValidation(final MappedClass mappedClass, final ValidationLevel level, final ValidationAction action) {
-        ((DatastoreImpl) getDs()).process(mappedClass, new ValidationBuilder().value("{ jelly : { $ne : 'rhubarb' } }")
-                                                                              .level(level)
-                                                                              .action(action));
+        ((DatastoreImpl) getDatastore()).process(mappedClass, new ValidationBuilder().value("{ jelly : { $ne : 'rhubarb' } }")
+                                                                                     .level(level)
+                                                                                     .action(action));
     }
 }

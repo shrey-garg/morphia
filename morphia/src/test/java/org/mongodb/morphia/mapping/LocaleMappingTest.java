@@ -26,8 +26,8 @@ public class LocaleMappingTest extends TestBase {
         e.l2 = Arrays.asList(Locale.GERMANY, Locale.TRADITIONAL_CHINESE);
         e.l3 = new Locale[]{Locale.TRADITIONAL_CHINESE, Locale.FRENCH};
 
-        getDs().save(e);
-        e = getDs().get(e);
+        getDatastore().save(e);
+        e = getDatastore().get(e);
 
         Assert.assertEquals(Locale.CANADA_FRENCH, e.l1);
 

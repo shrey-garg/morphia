@@ -1,7 +1,5 @@
 package org.mongodb.morphia.converters;
 
-import org.mongodb.morphia.mapping.MappedField;
-
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;

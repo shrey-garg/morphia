@@ -1,6 +1,5 @@
 package org.mongodb.morphia.converters;
 
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import static java.lang.String.format;

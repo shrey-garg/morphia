@@ -22,7 +22,7 @@ public class TestArrayUpdates extends TestBase {
     @Test
     public void testStudents() {
         getMorphia().map(Student.class);
-        final Datastore datastore = getDs();
+        final Datastore datastore = getDatastore();
         datastore.ensureIndexes();
 
         datastore.save(new Student(1L, new Grade(80, singletonMap("name", "Homework")),
@@ -48,7 +48,7 @@ public class TestArrayUpdates extends TestBase {
     @Test
     public void testUpdatesWithArrayIndexPosition() {
         getMorphia().map(Student.class);
-        final Datastore datastore = getDs();
+        final Datastore datastore = getDatastore();
         datastore.ensureIndexes();
 
         datastore.save(new Student(1L, new Grade(80, singletonMap("name", "Homework")),
@@ -77,33 +77,33 @@ public class TestArrayUpdates extends TestBase {
         BatchData theBatch = new BatchData();
         theBatch.files.add(new Files(0, "fileName1", "fileHash1"));
         theBatch.files.add(new Files(0, "fileName2", "fileHash2"));
-        getDs().save(theBatch);
+        getDatastore().save(theBatch);
         ObjectId id = theBatch.id;
 
         theBatch = new BatchData();
         theBatch.files.add(new Files(0, "fileName3", "fileHash3"));
         theBatch.files.add(new Files(0, "fileName4", "fileHash4"));
-        getDs().save(theBatch);
+        getDatastore().save(theBatch);
         ObjectId id2 = theBatch.id;
 
-        UpdateOperations<BatchData> updateOperations = getDs().createUpdateOperations(BatchData.class)
-                                                              .set("files.$.fileHash", "new hash");
+        UpdateOperations<BatchData> updateOperations = getDatastore().createUpdateOperations(BatchData.class)
+                                                                     .set("files.$.fileHash", "new hash");
 
-        getDs().update(getDs().find(BatchData.class)
-                              .filter("_id", id)
-                              .filter("files.fileName", "fileName1"),
+        getDatastore().update(getDatastore().find(BatchData.class)
+                                            .filter("_id", id)
+                                            .filter("files.fileName", "fileName1"),
                        updateOperations);
 
-        BatchData data = getDs().find(BatchData.class)
-                                .filter("_id", id)
-                                .get();
+        BatchData data = getDatastore().find(BatchData.class)
+                                       .filter("_id", id)
+                                       .get();
 
         Assert.assertEquals("new hash", data.files.get(0).fileHash);
         Assert.assertEquals("fileHash2", data.files.get(1).fileHash);
 
-        data = getDs().find(BatchData.class)
-                      .filter("_id", id2)
-                      .get();
+        data = getDatastore().find(BatchData.class)
+                             .filter("_id", id2)
+                             .get();
 
         Assert.assertEquals("fileHash3", data.files.get(0).fileHash);
         Assert.assertEquals("fileHash4", data.files.get(1).fileHash);

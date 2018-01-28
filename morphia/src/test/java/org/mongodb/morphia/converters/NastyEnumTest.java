@@ -14,8 +14,8 @@ public class NastyEnumTest extends TestBase {
     @Test
     public void testNastyEnumPersistence() throws Exception {
         NastyEnumEntity n = new NastyEnumEntity();
-        getDs().save(n);
-        n = getDs().get(n);
+        getDatastore().save(n);
+        n = getDatastore().get(n);
         Assert.assertSame(NastyEnum.A, n.e1);
         Assert.assertSame(NastyEnum.B, n.e2);
         Assert.assertNull(n.e3);

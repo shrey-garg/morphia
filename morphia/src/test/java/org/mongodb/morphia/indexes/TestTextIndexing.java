@@ -32,16 +32,16 @@ public class TestTextIndexing extends TestBase {
     public void shouldNotAllowMultipleTextIndexes() {
         Class<MultipleTextIndexes> clazz = MultipleTextIndexes.class;
         getMorphia().map(clazz);
-        getDs().getCollection(clazz).drop();
-        getDs().ensureIndexes();
+        getDatastore().getCollection(clazz).drop();
+        getDatastore().ensureIndexes();
     }
 
     @Test
     public void testIndexAll() {
         getMorphia().map(TextIndexAll.class);
-        getDs().ensureIndexes();
+        getDatastore().ensureIndexes();
 
-        List<DBObject> indexInfo = getDs().getCollection(TextIndexAll.class).getIndexInfo();
+        List<DBObject> indexInfo = getDatastore().getCollection(TextIndexAll.class).getIndexInfo();
         Assert.assertEquals(2, indexInfo.size());
         for (DBObject dbObject : indexInfo) {
             if (!dbObject.get("name").equals("_id_")) {
@@ -55,10 +55,10 @@ public class TestTextIndexing extends TestBase {
     @Test
     public void testSingleAnnotation() {
         getMorphia().map(CompoundTextIndex.class);
-        getDs().getCollection(CompoundTextIndex.class).drop();
-        getDs().ensureIndexes();
+        getDatastore().getCollection(CompoundTextIndex.class).drop();
+        getDatastore().ensureIndexes();
 
-        List<DBObject> indexInfo = getDs().getCollection(CompoundTextIndex.class).getIndexInfo();
+        List<DBObject> indexInfo = getDatastore().getCollection(CompoundTextIndex.class).getIndexInfo();
         Assert.assertEquals(2, indexInfo.size());
         boolean found = false;
         for (DBObject dbObject : indexInfo) {
@@ -79,10 +79,10 @@ public class TestTextIndexing extends TestBase {
         Class<SingleFieldTextIndex> clazz = SingleFieldTextIndex.class;
 
         getMorphia().map(clazz);
-        getDs().getCollection(clazz).drop();
-        getDs().ensureIndexes();
+        getDatastore().getCollection(clazz).drop();
+        getDatastore().ensureIndexes();
 
-        List<DBObject> indexInfo = getDs().getCollection(clazz).getIndexInfo();
+        List<DBObject> indexInfo = getDatastore().getCollection(clazz).getIndexInfo();
         Assert.assertEquals(indexInfo.toString(), 2, indexInfo.size());
         boolean found = false;
         for (DBObject dbObject : indexInfo) {

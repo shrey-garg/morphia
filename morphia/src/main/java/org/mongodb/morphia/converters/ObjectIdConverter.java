@@ -2,7 +2,6 @@ package org.mongodb.morphia.converters;
 
 
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.mapping.MappedField;
 
 
 /**

@@ -24,8 +24,8 @@ public class SerializedMapTest extends TestBase {
         map1.shouldBeOk.put(3, new Foo("peter"));
         map1.shouldBeOk.put(27, new Foo("paul"));
 
-        getDs().save(map1);
-        map1 = getDs().get(map1);
+        getDatastore().save(map1);
+        map1 = getDatastore().get(map1);
 
         Assert.assertEquals("peter", map1.shouldBeOk.get(3).id);
         Assert.assertEquals("paul", map1.shouldBeOk.get(27).id);
@@ -38,8 +38,8 @@ public class SerializedMapTest extends TestBase {
         map2.shouldBeOk.put(3, new Foo("peter"));
         map2.shouldBeOk.put(27, new Foo("paul"));
 
-        getDs().save(map2);
-        map2 = getDs().get(map2);
+        getDatastore().save(map2);
+        map2 = getDatastore().get(map2);
 
         Assert.assertEquals("peter", map2.shouldBeOk.get(3).id);
         Assert.assertEquals("paul", map2.shouldBeOk.get(27).id);

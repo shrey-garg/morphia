@@ -21,8 +21,6 @@ import org.junit.Test;
 import org.mongodb.morphia.EntityInterceptor;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.mapping.MappedClass;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.lang.annotation.ElementType;
@@ -45,9 +43,9 @@ public class NewAnnotationTest extends TestBase {
         final User u = new User();
         u.email = "ScottHernandez@gmail.com";
 
-        getDs().save(u);
+        getDatastore().save(u);
 
-        final User uScott = getDs().find(User.class).disableValidation().filter("email_lowercase", u.email.toLowerCase()).get();
+        final User uScott = getDatastore().find(User.class).disableValidation().filter("email_lowercase", u.email.toLowerCase()).get();
         Assert.assertNotNull(uScott);
     }
 

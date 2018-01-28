@@ -25,8 +25,8 @@ public class FloatMappingTest extends TestBase {
         ent.wrapperArray = new Float[]{55.7f, 16.2f, 99.9999f};
         ent.nestedPrimitiveArray = new float[][]{{}, {5.0f, 93.5f}};
         ent.nestedWrapperArray = new Float[][]{{55.7f, 16.2f, 99.9999f}, {}};
-        getDs().save(ent);
-        final Floats loaded = getDs().get(ent);
+        getDatastore().save(ent);
+        final Floats loaded = getDatastore().get(ent);
 
         Assert.assertNotNull(loaded.id);
 

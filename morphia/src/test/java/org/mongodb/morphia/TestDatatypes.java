@@ -39,8 +39,8 @@ public class TestDatatypes extends TestBase {
     @Test
     public void testByte() throws Exception {
         final ContainsByte cb = new ContainsByte();
-        getDs().save(cb);
-        final ContainsByte loaded = getDs().get(cb);
+        getDatastore().save(cb);
+        final ContainsByte loaded = getDatastore().get(cb);
 
         assertNotNull(loaded);
         assertTrue(loaded.val0 == cb.val0);
@@ -50,8 +50,8 @@ public class TestDatatypes extends TestBase {
     @Test
     public void testFloat() throws Exception {
         final ContainsFloat cf = new ContainsFloat();
-        getDs().save(cf);
-        final ContainsFloat loaded = getDs().get(cf);
+        getDatastore().save(cf);
+        final ContainsFloat loaded = getDatastore().get(cf);
 
         assertNotNull(loaded);
         assertTrue(loaded.val0 == cf.val0);
@@ -61,8 +61,8 @@ public class TestDatatypes extends TestBase {
     @Test
     public void testShort() throws Exception {
         final ContainsShort cs = new ContainsShort();
-        getDs().save(cs);
-        final ContainsShort loaded = getDs().get(cs);
+        getDatastore().save(cs);
+        final ContainsShort loaded = getDatastore().get(cs);
 
         assertNotNull(loaded);
         assertTrue(loaded.val0 == cs.val0);

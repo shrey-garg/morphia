@@ -14,11 +14,11 @@ import static org.junit.Assert.assertEquals;
 public class LongIdEntityTest extends TestBase {
     @Test
     public void testMonoIncreasingId() throws Exception {
-        MyEntity ent = new MyEntity(getDs());
-        getDs().save(ent);
+        MyEntity ent = new MyEntity(getDatastore());
+        getDatastore().save(ent);
         assertEquals(1L, ent.getMyLongId(), 0);
-        ent = new MyEntity(getDs());
-        getDs().save(ent);
+        ent = new MyEntity(getDatastore());
+        getDatastore().save(ent);
         assertEquals(2L, ent.getMyLongId(), 0);
     }
 

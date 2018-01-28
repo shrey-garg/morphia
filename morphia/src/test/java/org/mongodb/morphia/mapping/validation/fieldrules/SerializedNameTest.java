@@ -19,7 +19,7 @@ public class SerializedNameTest extends TestBase {
     public void testCheck() {
 
         final E e = new E();
-        getDs().save(e);
+        getDatastore().save(e);
 
         Assert.assertTrue(e.document.contains("changedName"));
     }

@@ -2,7 +2,6 @@ package org.mongodb.morphia.issue646;
 
 import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
-import org.mongodb.morphia.mapping.MappedField;
 
 public class TriangleConverter extends TypeConverter implements SimpleValueConverter {
 

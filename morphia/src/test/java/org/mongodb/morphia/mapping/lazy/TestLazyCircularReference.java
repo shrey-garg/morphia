@@ -17,15 +17,15 @@ public class TestLazyCircularReference extends ProxyTestBase {
         ReferencedEntity first = new ReferencedEntity();
         ReferencedEntity second = new ReferencedEntity();
 
-        getDs().save(asList(root, first, second));
+        getDatastore().save(asList(root, first, second));
         root.r = first;
         root.secondReference = second;
         first.parent = root;
         second.parent = root;
 
-        getDs().save(asList(root, first, second));
+        getDatastore().save(asList(root, first, second));
 
-        RootEntity rootEntity = getDs().find(RootEntity.class).get();
+        RootEntity rootEntity = getDatastore().find(RootEntity.class).get();
         Assert.assertEquals(first.getId(), rootEntity.getR().getId());
         Assert.assertEquals(second.getId(), rootEntity.getSecondReference().getId());
         Assert.assertEquals(root.getId(), rootEntity.getR().getParent().getId());
@@ -45,17 +45,17 @@ public class TestLazyCircularReference extends ProxyTestBase {
         root.r = reference;
         reference.setFoo("bar");
 
-        final Key<ReferencedEntity> k = getDs().save(reference);
+        final Key<ReferencedEntity> k = getDatastore().save(reference);
         final String keyAsString = k.getId().toString();
-        getDs().save(root);
+        getDatastore().save(root);
 
-        root = getDs().get(root);
+        root = getDatastore().get(root);
 
         final ReferencedEntity p = root.r;
 
         assertIsProxy(p);
         assertNotFetched(p);
-        Assert.assertEquals(keyAsString, getDs().getKey(p).getId().toString());
+        Assert.assertEquals(keyAsString, getDatastore().getKey(p).getId().toString());
         // still not fetched?
         assertNotFetched(p);
         p.getFoo();

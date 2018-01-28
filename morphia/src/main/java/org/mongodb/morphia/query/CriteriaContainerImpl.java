@@ -4,6 +4,7 @@ package org.mongodb.morphia.query;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -60,7 +61,7 @@ public class CriteriaContainerImpl extends AbstractCriteria implements CriteriaC
     }
 
     @Override
-    public void addTo(final DBObject obj) {
+    public void addTo(final Document obj) {
         if (joinMethod == CriteriaJoin.AND) {
             final Set<String> fields = new HashSet<String>();
             int nonNullFieldNames = 0;
@@ -75,7 +76,7 @@ public class CriteriaContainerImpl extends AbstractCriteria implements CriteriaC
                 final BasicDBList and = new BasicDBList();
 
                 for (final Criteria child : children) {
-                    final BasicDBObject container = new BasicDBObject();
+                    final Document container = new Document();
                     child.addTo(container);
                     and.add(container);
                 }
@@ -91,7 +92,7 @@ public class CriteriaContainerImpl extends AbstractCriteria implements CriteriaC
             final BasicDBList or = new BasicDBList();
 
             for (final Criteria child : children) {
-                final BasicDBObject container = new BasicDBObject();
+                final Document container = new Document();
                 child.addTo(container);
                 or.add(container);
             }

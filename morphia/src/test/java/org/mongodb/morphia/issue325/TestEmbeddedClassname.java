@@ -21,7 +21,7 @@ public class TestEmbeddedClassname extends TestBase {
 
     @Test
     public final void testEmbeddedClassname() {
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
 
         Root r = new Root();
         r.singleA = new A();

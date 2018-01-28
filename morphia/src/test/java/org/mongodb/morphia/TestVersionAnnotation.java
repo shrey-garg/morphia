@@ -18,7 +18,6 @@ import org.junit.Test;
 import org.mongodb.morphia.entities.version.AbstractVersionedBase;
 import org.mongodb.morphia.entities.version.Versioned;
 import org.mongodb.morphia.entities.version.VersionedChildEntity;
-import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
@@ -39,7 +38,7 @@ public class TestVersionAnnotation extends TestBase {
 
     @Test
     public void testBulkUpdate() {
-        final Datastore datastore = getDs();
+        final Datastore datastore = getDatastore();
 
         Versioned entity = new Versioned();
         entity.setName("Value 1");
@@ -98,7 +97,7 @@ public class TestVersionAnnotation extends TestBase {
 
     @Test
     public void testEntityUpdate() {
-        final Datastore datastore = getDs();
+        final Datastore datastore = getDatastore();
 
         Versioned entity = new Versioned();
         entity.setName("Value 1");
@@ -137,12 +136,12 @@ public class TestVersionAnnotation extends TestBase {
     @Test
     @SuppressWarnings("deprecation")
     public void testUpdateFirst() {
-        final Datastore datastore = getDs();
+        final Datastore datastore = getDatastore();
 
         Versioned original = new Versioned();
         original.setName("Value 1");
         original.setCount(42);
-        getDs().save(original);
+        getDatastore().save(original);
 
         Versioned update = new Versioned();
         update.setName("Value 2");
@@ -166,18 +165,18 @@ public class TestVersionAnnotation extends TestBase {
     public void testIncVersionNotOverridingOtherInc() {
         final Versioned version1 = new Versioned();
         version1.setCount(0);
-        getDs().save(version1);
+        getDatastore().save(version1);
 
         assertEquals(new Long(1), version1.getVersion());
         assertEquals(0, version1.getCount());
 
-        Query<Versioned> query = getDs().find(Versioned.class);
+        Query<Versioned> query = getDatastore().find(Versioned.class);
         query.field("_id").equal(version1.getId());
-        UpdateOperations<Versioned> up = getDs().createUpdateOperations(Versioned.class).inc("count");
+        UpdateOperations<Versioned> up = getDatastore().createUpdateOperations(Versioned.class).inc("count");
 
-        getDs().update(query, up, new UpdateOptions().upsert(true));
+        getDatastore().update(query, up, new UpdateOptions().upsert(true));
 
-        final Versioned version2 = getDs().get(Versioned.class, version1.getId());
+        final Versioned version2 = getDatastore().get(Versioned.class, version1.getId());
 
         assertEquals(new Long(2), version2.getVersion());
         assertEquals(1, version2.getCount());
@@ -187,12 +186,12 @@ public class TestVersionAnnotation extends TestBase {
     public void testThrowsExceptionWhenTryingToSaveAnOldVersion() throws Exception {
         // given
         final Versioned version1 = new Versioned();
-        getDs().save(version1);
-        final Versioned version2 = getDs().get(Versioned.class, version1.getId());
-        getDs().save(version2);
+        getDatastore().save(version1);
+        final Versioned version2 = getDatastore().get(Versioned.class, version1.getId());
+        getDatastore().save(version2);
 
         // when
-        getDs().save(version1);
+        getDatastore().save(version1);
     }
 
     @Test
@@ -200,25 +199,25 @@ public class TestVersionAnnotation extends TestBase {
         final Versioned version1 = new Versioned();
         version1.setName("foo");
 
-        this.getDs().save(version1);
+        this.getDatastore().save(version1);
 
-        final Versioned version1Updated = getDs().get(Versioned.class, version1.getId());
+        final Versioned version1Updated = getDatastore().get(Versioned.class, version1.getId());
         version1Updated.setName("bar");
 
-        this.getDs().merge(version1Updated);
+        this.getDatastore().merge(version1Updated);
 
-        final Versioned versionedEntityFromDs = this.getDs().get(Versioned.class, version1.getId());
+        final Versioned versionedEntityFromDs = this.getDatastore().get(Versioned.class, version1.getId());
         assertEquals(version1Updated.getName(), versionedEntityFromDs.getName());
     }
 
     @Test
     public void testVersionNumbersIncrementWithEachSave() throws Exception {
         final Versioned version1 = new Versioned();
-        getDs().save(version1);
+        getDatastore().save(version1);
         assertEquals(new Long(1), version1.getVersion());
 
-        final Versioned version2 = getDs().get(Versioned.class, version1.getId());
-        getDs().save(version2);
+        final Versioned version2 = getDatastore().get(Versioned.class, version1.getId());
+        getDatastore().save(version2);
         assertEquals(new Long(2), version2.getVersion());
     }
 
@@ -233,7 +232,7 @@ public class TestVersionAnnotation extends TestBase {
 
     @Test
     public void testVersionedUpsert() {
-        final Datastore datastore = getDs();
+        final Datastore datastore = getDatastore();
 
         Versioned entity = new Versioned();
         entity.setName("Value 1");

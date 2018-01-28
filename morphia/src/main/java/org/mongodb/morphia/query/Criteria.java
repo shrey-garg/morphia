@@ -1,7 +1,7 @@
 package org.mongodb.morphia.query;
 
 
-import com.mongodb.DBObject;
+import org.bson.Document;
 
 
 /**
@@ -13,7 +13,7 @@ public interface Criteria {
      *
      * @param obj the DBObject to update
      */
-    void addTo(DBObject obj);
+    void addTo(Document obj);
 
     /**
      * Used to add this Criteria to a CriteriaContainer

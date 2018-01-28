@@ -1,10 +1,6 @@
 package org.mongodb.morphia.mapping.validation;
 
 
-import org.mongodb.morphia.mapping.MappedClass;
-import org.mongodb.morphia.mapping.MappedField;
-
-
 /**
  * @author Uwe Schaefer, (us@thomas-daily.de)
  */

@@ -24,15 +24,15 @@ public class TestLargeObjectsWithCursor extends TestBase {
         getMorphia().map(E.class);
         documentsNb = 1000;
         for (int i = 0; i < documentsNb; i++) {
-            getDs().save(new E(i));
+            getDatastore().save(new E(i));
         }
     }
 
     @Test
     public void testWithManyElementsInCollection() throws Exception {
-        Query<E> query = getDs().find(E.class);
+        Query<E> query = getDatastore().find(E.class);
         final long countAll = query.count();
-        query = getDs().find(E.class);
+        query = getDatastore().find(E.class);
         final List<E> list = query.asList();
         Assert.assertEquals(documentsNb, countAll);
         Assert.assertEquals(documentsNb, list.size());

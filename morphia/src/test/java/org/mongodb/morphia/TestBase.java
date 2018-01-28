@@ -37,7 +37,7 @@ public abstract class TestBase {
     }
 
     public AdvancedDatastore getAds() {
-        return (AdvancedDatastore) getDs();
+        return (AdvancedDatastore) getDatastore();
     }
 
     public DB getDb() {
@@ -48,7 +48,7 @@ public abstract class TestBase {
         return database;
     }
 
-    public Datastore getDs() {
+    public Datastore getDatastore() {
         return ds;
     }
 

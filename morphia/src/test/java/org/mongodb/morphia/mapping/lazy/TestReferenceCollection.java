@@ -31,21 +31,21 @@ public class TestReferenceCollection extends ProxyTestBase {
         final Endpoint endpoint2 = new Endpoint();
         endpoint2.setFoo("b2");
         origin.lazyList.add(endpoint2);
-        getDs().save(endpoint1);
-        getDs().save(endpoint2);
+        getDatastore().save(endpoint1);
+        getDatastore().save(endpoint2);
 
         Assert.assertEquals("b1", origin.lazyList.iterator().next().foo);
 
-        getDs().save(origin);
+        getDatastore().save(origin);
 
-        Origin reloaded = getDs().get(origin);
+        Origin reloaded = getDatastore().get(origin);
         Assert.assertEquals("b1", reloaded.lazyList.iterator().next().foo);
         Collections.swap(reloaded.lazyList, 0, 1);
         Assert.assertEquals("b2", reloaded.lazyList.iterator().next().foo);
 
-        getDs().save(reloaded);
+        getDatastore().save(reloaded);
 
-        reloaded = getDs().get(reloaded);
+        reloaded = getDatastore().get(reloaded);
         final Collection<Endpoint> lbs = reloaded.lazyList;
         Assert.assertEquals(2, lbs.size());
         final Iterator<Endpoint> iterator = lbs.iterator();

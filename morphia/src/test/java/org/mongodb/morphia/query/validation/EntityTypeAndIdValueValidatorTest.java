@@ -4,8 +4,6 @@ import org.bson.types.ObjectId;
 import org.junit.Test;
 import org.mongodb.morphia.entities.EntityWithNoId;
 import org.mongodb.morphia.entities.SimpleEntity;
-import org.mongodb.morphia.mapping.MappedClass;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.ArrayList;

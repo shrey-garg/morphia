@@ -17,10 +17,10 @@ public class TestCalendar extends TestBase {
         getMorphia().map(A.class);
         final A a = new A();
         a.c = Calendar.getInstance();
-        getDs().save(a, new InsertOptions()
+        getDatastore().save(a, new InsertOptions()
             .writeConcern(WriteConcern.ACKNOWLEDGED));
         // occasionally failed, so i suspected a race cond.
-        final A loaded = getDs().find(A.class).get();
+        final A loaded = getDatastore().find(A.class).get();
         Assert.assertNotNull(loaded.c);
         Assert.assertEquals(a.c, loaded.c);
     }

@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.mongodb.morphia.AdvancedDatastore;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
-import org.mongodb.morphia.mapping.MappedClass;
 
 @SuppressWarnings("deprecation")
 public abstract class TestBase {

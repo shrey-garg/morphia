@@ -1,9 +1,6 @@
 package org.mongodb.morphia.converters;
 
 
-import org.mongodb.morphia.mapping.MappedField;
-
-
 /**
  * @author Uwe Schaefer, (us@thomas-daily.de)
  * @author scotthernandez

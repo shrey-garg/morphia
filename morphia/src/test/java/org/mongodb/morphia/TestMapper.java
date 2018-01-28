@@ -12,7 +12,6 @@ import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.mapping.EmbeddedMappingTest.AnotherNested;
 import org.mongodb.morphia.mapping.EmbeddedMappingTest.Nested;
 import org.mongodb.morphia.mapping.EmbeddedMappingTest.NestedImpl;
-import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.lazy.LazyFeatureDependencies;
 
@@ -37,7 +36,7 @@ public class TestMapper extends TestBase {
         final UsesCustomIdObject object = new UsesCustomIdObject();
         object.id = cId;
         object.text = "hllo";
-        getDs().save(object);
+        getDatastore().save(object);
     }
 
     @Test
@@ -47,8 +46,8 @@ public class TestMapper extends TestBase {
         HoldsMultipleA holder = new HoldsMultipleA();
         holder.a1 = a;
         holder.a2 = a;
-        getDs().save(asList(a, holder));
-        holder = getDs().get(HoldsMultipleA.class, holder.id);
+        getDatastore().save(asList(a, holder));
+        holder = getDatastore().get(HoldsMultipleA.class, holder.id);
         Assert.assertEquals(1, A.loadCount);
         Assert.assertTrue(holder.a1 == holder.a2);
     }
@@ -66,9 +65,9 @@ public class TestMapper extends TestBase {
         holder.a1 = a;
         holder.a2 = a;
         holder.a3 = a;
-        getDs().save(asList(a, holder));
+        getDatastore().save(asList(a, holder));
         Assert.assertEquals(0, A.loadCount);
-        holder = getDs().get(HoldsMultipleALazily.class, holder.id);
+        holder = getDatastore().get(HoldsMultipleALazily.class, holder.id);
         Assert.assertNotNull(holder.a2);
         Assert.assertEquals(1, A.loadCount);
         Assert.assertFalse(holder.a1 == holder.a2);

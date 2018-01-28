@@ -26,8 +26,8 @@ public class ShortMappingTest extends TestBase {
         ent.wrapperArray = new Short[]{55, 16, 99};
         ent.nestedPrimitiveArray = new short[][]{{5, 93}, {88}};
         ent.nestedWrapperArray = new Short[][]{{55, 16, 99}, {-47}};
-        getDs().save(ent);
-        final Shorts loaded = getDs().get(ent);
+        getDatastore().save(ent);
+        final Shorts loaded = getDatastore().get(ent);
 
         Assert.assertNotNull(loaded.id);
 

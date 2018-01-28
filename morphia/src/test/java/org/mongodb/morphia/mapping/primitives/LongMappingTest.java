@@ -26,8 +26,8 @@ public class LongMappingTest extends TestBase {
         ent.wrapperArray = new Long[]{55L, 16L, 99L};
         ent.nestedPrimitiveArray = new long[][]{{0}, {5, 93}};
         ent.nestedWrapperArray = new Long[][]{{99L, 1L}, {55L, 16L, 99L}};
-        getDs().save(ent);
-        final Longs loaded = getDs().get(ent);
+        getDatastore().save(ent);
+        final Longs loaded = getDatastore().get(ent);
 
         Assert.assertNotNull(loaded.id);
 

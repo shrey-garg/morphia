@@ -20,9 +20,9 @@ public class TestGetByKeys extends TestBase {
         final A a1 = new A();
         final A a2 = new A();
 
-        final Iterable<Key<A>> keys = getDs().save(asList(a1, a2));
+        final Iterable<Key<A>> keys = getDatastore().save(asList(a1, a2));
 
-        final List<A> reloaded = getDs().getByKeys(keys);
+        final List<A> reloaded = getDatastore().getByKeys(keys);
 
         final Iterator<A> i = reloaded.iterator();
         Assert.assertNotNull(i.next());

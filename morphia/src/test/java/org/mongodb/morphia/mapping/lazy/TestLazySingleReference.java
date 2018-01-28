@@ -25,17 +25,17 @@ public class TestLazySingleReference extends ProxyTestBase {
         root.r = reference;
         reference.setFoo("bar");
 
-        final Key<ReferencedEntity> k = getDs().save(reference);
+        final Key<ReferencedEntity> k = getDatastore().save(reference);
         final String keyAsString = k.getId().toString();
-        getDs().save(root);
+        getDatastore().save(root);
 
-        root = getDs().get(root);
+        root = getDatastore().get(root);
 
         final ReferencedEntity p = root.r;
 
         assertIsProxy(p);
         assertNotFetched(p);
-        Assert.assertEquals(keyAsString, getDs().getKey(p).getId().toString());
+        Assert.assertEquals(keyAsString, getDatastore().getKey(p).getId().toString());
         // still not fetched?
         assertNotFetched(p);
         p.getFoo();
@@ -53,13 +53,13 @@ public class TestLazySingleReference extends ProxyTestBase {
         RootEntity root = new RootEntity();
         final ReferencedEntity reference = new ReferencedEntity();
         ObjectId id = reference.getId();
-        getDs().save(reference);
+        getDatastore().save(reference);
 
         root.r = reference;
         reference.setFoo("bar");
-        getDs().save(root);
+        getDatastore().save(root);
 
-        root = getDs().get(root);
+        root = getDatastore().get(root);
 
         final ReferencedEntity p = root.r;
 
@@ -93,10 +93,10 @@ public class TestLazySingleReference extends ProxyTestBase {
         root.secondReference = reference;
         reference.setFoo("bar");
 
-        getDs().save(reference);
-        getDs().save(root);
+        getDatastore().save(reference);
+        getDatastore().save(root);
 
-        root = getDs().get(root);
+        root = getDatastore().get(root);
         Assert.assertSame(root.r, root.secondReference);
     }
 
@@ -114,12 +114,12 @@ public class TestLazySingleReference extends ProxyTestBase {
         root.secondReference = second;
         reference.setFoo("bar");
 
-        final Key<ReferencedEntity> k = getDs().save(reference);
-        getDs().save(second);
+        final Key<ReferencedEntity> k = getDatastore().save(reference);
+        getDatastore().save(second);
         final Object key = k.getId();
-        getDs().save(root);
+        getDatastore().save(root);
 
-        root = getDs().get(root);
+        root = getDatastore().get(root);
 
         ReferencedEntity referenced = root.r;
 
@@ -136,10 +136,10 @@ public class TestLazySingleReference extends ProxyTestBase {
         root.secondReference.getFoo();
         assertFetched(root.secondReference);
 
-        root = getDs().get(root);
+        root = getDatastore().get(root);
         assertNotFetched(root.r);
         assertNotFetched(root.secondReference);
-        getDs().save(root);
+        getDatastore().save(root);
         assertNotFetched(root.r);
         assertNotFetched(root.secondReference);
     }

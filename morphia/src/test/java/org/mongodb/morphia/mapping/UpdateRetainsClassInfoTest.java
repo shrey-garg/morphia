@@ -25,16 +25,16 @@ public class UpdateRetainsClassInfoTest extends TestBase {
         e2.bar = "narf";
         x.map.put("k2", e2);
 
-        getDs().save(x);
+        getDatastore().save(x);
 
-        final Query<X> query = getDs().find(X.class);
-        final UpdateOperations<X> update = getDs().createUpdateOperations(X.class);
+        final Query<X> query = getDatastore().find(X.class);
+        final UpdateOperations<X> update = getDatastore().createUpdateOperations(X.class);
         update.set("map.k2", e2);
 
-        getDs().update(query, update);
+        getDatastore().update(query, update);
 
         // fails due to type now missing
-        getDs().find(X.class).get();
+        getDatastore().find(X.class).get();
     }
 
     public abstract static class E {

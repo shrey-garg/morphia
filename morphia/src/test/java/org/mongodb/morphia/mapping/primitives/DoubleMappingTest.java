@@ -25,9 +25,9 @@ public class DoubleMappingTest extends TestBase {
         ent.wrapperArray = new Double[]{55.7, 16.2, 99.9999};
         ent.nestedPrimitiveArray = new double[][]{{42.0, 49152.0}, {5.0, 93.5}};
         ent.nestedWrapperArray = new Double[][]{{42.0, 49152.0}, {5.0, 93.5}};
-        getDs().save(ent);
+        getDatastore().save(ent);
 
-        final Doubles loaded = getDs().get(ent);
+        final Doubles loaded = getDatastore().get(ent);
         Assert.assertNotNull(loaded.id);
 
         Assert.assertArrayEquals(ent.listWrapperArray.get(0), loaded.listWrapperArray.get(0));

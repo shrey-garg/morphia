@@ -47,11 +47,11 @@ public class EmbeddedMappingTest extends TestBase {
         after.put("after", 84);
 
         entry.delta = new Delta<String>(before, after);
-        getDs().save(entry);
+        getDatastore().save(entry);
 
-        final AuditEntry fetched = getDs().find(AuditEntry.class)
-                                          .filter("id = ", entry.id)
-                                          .get();
+        final AuditEntry fetched = getDatastore().find(AuditEntry.class)
+                                                 .filter("id = ", entry.id)
+                                                 .get();
 
         Assert.assertEquals(entry, fetched);
     }
@@ -59,9 +59,9 @@ public class EmbeddedMappingTest extends TestBase {
     @Test
     public void testNestedInterfaces() {
         getMorphia().map(WithNested.class, NestedImpl.class);
-        getDs().ensureIndexes();
+        getDatastore().ensureIndexes();
 
-        final List<DBObject> indexInfo = getDs().getCollection(WithNested.class).getIndexInfo();
+        final List<DBObject> indexInfo = getDatastore().getCollection(WithNested.class).getIndexInfo();
         boolean indexFound = false;
         for (DBObject dbObject : indexInfo) {
             indexFound |= "nested.field.fail".equals(((DBObject) dbObject.get("key")).keySet().iterator().next());
@@ -69,28 +69,28 @@ public class EmbeddedMappingTest extends TestBase {
         Assert.assertTrue("Should find the nested field index", indexFound);
         WithNested nested = new WithNested();
         nested.nested = new NestedImpl("nested value");
-        getDs().save(nested);
+        getDatastore().save(nested);
 
         WithNested found;
         try {
-            getDs().find(WithNested.class)
-                   .field("nested.field").equal("nested value")
-                   .get();
+            getDatastore().find(WithNested.class)
+                          .field("nested.field").equal("nested value")
+                          .get();
             Assert.fail("Querying against an interface should fail validation");
         } catch (ValidationException ignore) {
             // all good
         }
-        found = getDs().find(WithNested.class)
-                       .disableValidation()
-                       .field("nested.field").equal("nested value")
-                       .get();
+        found = getDatastore().find(WithNested.class)
+                              .disableValidation()
+                              .field("nested.field").equal("nested value")
+                              .get();
         Assert.assertNotNull(found);
         Assert.assertEquals(nested, found);
 
-        found = getDs().find(WithNested.class)
-                       .disableValidation()
-                       .field("nested.field.fails").equal("nested value")
-                       .get();
+        found = getDatastore().find(WithNested.class)
+                              .disableValidation()
+                              .field("nested.field.fails").equal("nested value")
+                              .get();
         Assert.assertNull(found);
     }
 
@@ -98,13 +98,13 @@ public class EmbeddedMappingTest extends TestBase {
     public void validateNestedInterfaces() {
         getMorphia().map(WithNestedValidated.class, Nested.class, NestedImpl.class, AnotherNested.class);
         try {
-            getDs().ensureIndexes();
+            getDatastore().ensureIndexes();
         } catch (MappingException e) {
             Assert.assertEquals("Could not resolve path 'nested.field.fail' against 'org.mongodb.morphia.mapping"
                                     + ".EmbeddedMappingTest$WithNestedValidated'.", e.getMessage());
         }
 
-        final List<DBObject> indexInfo = getDs().getCollection(WithNestedValidated.class).getIndexInfo();
+        final List<DBObject> indexInfo = getDatastore().getCollection(WithNestedValidated.class).getIndexInfo();
         boolean indexFound = false;
         for (DBObject dbObject : indexInfo) {
             indexFound |= "nested.field.fail".equals(((DBObject) dbObject.get("key")).keySet().iterator().next());

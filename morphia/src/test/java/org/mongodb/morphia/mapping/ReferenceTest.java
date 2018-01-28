@@ -50,25 +50,25 @@ public class ReferenceTest extends ProxyTestBase {
         parent.list = list;
         parent.lazyList = lazyList;
 
-        getDs().save(complex);
-        getDs().save(list);
-        getDs().save(lazyList);
-        getDs().save(parent);
+        getDatastore().save(complex);
+        getDatastore().save(list);
+        getDatastore().save(lazyList);
+        getDatastore().save(parent);
 
-        ComplexParent complexParent = getDs().get(ComplexParent.class, parent.id);
+        ComplexParent complexParent = getDatastore().get(ComplexParent.class, parent.id);
         assertEquals(parent, complexParent);
     }
 
     @Test
     public void testFindByEntityReference() {
         final Ref ref = new Ref("refId");
-        getDs().save(ref);
+        getDatastore().save(ref);
 
         final Container container = new Container();
         container.singleRef = ref;
-        getDs().save(container);
+        getDatastore().save(container);
 
-        Assert.assertNotNull(getDs().find(Container.class).filter("singleRef", ref).get());
+        Assert.assertNotNull(getDatastore().find(Container.class).filter("singleRef", ref).get());
     }
 
     @Test
@@ -77,11 +77,11 @@ public class ReferenceTest extends ProxyTestBase {
         final Container c = new Container(refs);
 
         // test that we can save it
-        final Key<Container> key = getDs().save(c);
-        getDs().save(refs);
+        final Key<Container> key = getDatastore().save(c);
+        getDatastore().save(refs);
 
         // ensure that we're not using DBRef
-        final DBCollection collection = getDs().getCollection(Container.class);
+        final DBCollection collection = getDatastore().getCollection(Container.class);
         final DBObject persisted = collection.findOne(key.getId());
         assertNotNull(persisted);
         assertEquals("foo", persisted.get("singleRef"));
@@ -102,7 +102,7 @@ public class ReferenceTest extends ProxyTestBase {
         assertEquals(expectedMap, persisted.get("lazyMapRef"));
 
         // ensure that we can retrieve it
-        final Container retrieved = getDs().getByKey(Container.class, key);
+        final Container retrieved = getDatastore().getByKey(Container.class, key);
 
         assertEquals(refs.get(0), retrieved.getSingleRef());
         if (testDependencyFullFilled()) {
@@ -136,36 +136,36 @@ public class ReferenceTest extends ProxyTestBase {
         container.lazyMapRef = null;
 
         getMorphia().getMapper().getOptions().setStoreNulls(true);
-        getDs().save(container);
+        getDatastore().save(container);
         allNull(container);
 
         getMorphia().getMapper().getOptions().setStoreNulls(false);
-        getDs().save(container);
+        getDatastore().save(container);
         allNull(container);
     }
 
     @Test
     public void testReferenceQueryWithoutValidation() {
         Ref ref = new Ref("no validation");
-        getDs().save(ref);
+        getDatastore().save(ref);
         final Container container = new Container(singletonList(ref));
-        getDs().save(container);
-        final Query<Container> query = getDs().find(Container.class)
-                                               .disableValidation()
-                                              .field("singleRef").equal(ref);
+        getDatastore().save(container);
+        final Query<Container> query = getDatastore().find(Container.class)
+                                                     .disableValidation()
+                                                     .field("singleRef").equal(ref);
         Assert.assertNotNull(query.get());
     }
 
     @Test
     public void testReferencesWithoutMapping() {
         Child child1 = new Child();
-        getDs().save(child1);
+        getDatastore().save(child1);
 
         Parent parent1 = new Parent();
         parent1.children.add(child1);
-        getDs().save(parent1);
+        getDatastore().save(parent1);
 
-        List<Parent> parentList = getDs().find(Parent.class).asList();
+        List<Parent> parentList = getDatastore().find(Parent.class).asList();
         Assert.assertEquals(1, parentList.size());
 
         // reset Datastore to reset internal Mapper cache, so Child class
@@ -181,9 +181,9 @@ public class ReferenceTest extends ProxyTestBase {
         List<Complex> list = asList(new Complex(new ChildId("Turk", 27), "Turk"),
                                     new Complex(new ChildId("JD", 26), "Dorian"),
                                     new Complex(new ChildId("Carla", 29), "Espinosa"));
-        getDs().save(list);
+        getDatastore().save(list);
 
-        MorphiaKeyIterator<Complex> keys = getDs().find(Complex.class).fetchKeys();
+        MorphiaKeyIterator<Complex> keys = getDatastore().find(Complex.class).fetchKeys();
         assertTrue(keys.hasNext());
         assertEquals(list.get(0).getId(), keys.next().getId());
         assertEquals(list.get(1).getId(), keys.next().getId());
@@ -196,9 +196,9 @@ public class ReferenceTest extends ProxyTestBase {
         List<Complex> list = asList(new Complex(new ChildId("Turk", 27), "Turk"),
                                     new Complex(new ChildId("JD", 26), "Dorian"),
                                     new Complex(new ChildId("Carla", 29), "Espinosa"));
-        getDs().save(list);
+        getDatastore().save(list);
 
-        Iterator<Complex> keys = getDs().find(Complex.class).fetchEmptyEntities();
+        Iterator<Complex> keys = getDatastore().find(Complex.class).fetchEmptyEntities();
         assertTrue(keys.hasNext());
         assertEquals(list.get(0).getId(), keys.next().getId());
         assertEquals(list.get(1).getId(), keys.next().getId());

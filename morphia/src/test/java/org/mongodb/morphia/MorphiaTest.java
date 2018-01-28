@@ -1,7 +1,6 @@
 package org.mongodb.morphia;
 
 import org.junit.Test;
-import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.testmappackage.SimpleEntity;
 import org.mongodb.morphia.testmappackage.testmapsubpackage.SimpleEntityInSubPackage;
 import org.mongodb.morphia.testmappackage.testmapsubpackage.testmapsubsubpackage.SimpleEntityInSubSubPackage;

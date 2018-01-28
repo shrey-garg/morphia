@@ -18,7 +18,7 @@ public class KeyMappingTest extends TestBase {
         getMorphia().map(User.class, Channel.class);
         insertData();
 
-        final Datastore datastore = getDs();
+        final Datastore datastore = getDatastore();
         User user = datastore.find(User.class).get();
         List<Key<Channel>> followedChannels = user.followedChannels;
 
@@ -31,9 +31,9 @@ public class KeyMappingTest extends TestBase {
     @Test
     public void testKeyComparisons() throws Exception {
         final User user = new User("Luke Skywalker");
-        getDs().save(user);
+        getDatastore().save(user);
         final Key<User> k1 = new Key<User>(User.class, "User", user.id);
-        final Key<User> k2 = getDs().getKey(user);
+        final Key<User> k2 = getDatastore().getKey(user);
 
         Assert.assertTrue(k1.equals(k2));
         Assert.assertTrue(k2.equals(k1));
@@ -41,7 +41,7 @@ public class KeyMappingTest extends TestBase {
     }
 
     private void insertData() {
-        final Datastore datastore = getDs();
+        final Datastore datastore = getDatastore();
 
         Channel sportChannel = new Channel("Sport channel");
         datastore.save(sportChannel);

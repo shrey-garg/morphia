@@ -23,8 +23,8 @@ public class ListOfStringArrayMappingTest extends TestBase {
         ent.arrayOfStrings = new String[]{"only", "the", "lonely"};
         ent.string = "raw string";
 
-        getDs().save(ent);
-        final ContainsListStringArray loaded = getDs().get(ent);
+        getDatastore().save(ent);
+        final ContainsListStringArray loaded = getDatastore().get(ent);
         Assert.assertNotNull(loaded.id);
         Assert.assertArrayEquals(ent.listOfStrings.get(0), loaded.listOfStrings.get(0));
         Assert.assertArrayEquals(ent.arrayOfStrings, loaded.arrayOfStrings);

@@ -10,7 +10,6 @@ import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
-import org.mongodb.morphia.mapping.MappedField;
 
 
 /**
@@ -23,8 +22,8 @@ public class EnumValueConverterTest extends TestBase {
     @Test
     public void testEnum() {
         final EnumEntity ee = new EnumEntity();
-        getDs().save(ee);
-        final DBObject dbObj = getDs().getCollection(EnumEntity.class).findOne();
+        getDatastore().save(ee);
+        final DBObject dbObj = getDatastore().getCollection(EnumEntity.class).findOne();
         Assert.assertEquals(1, dbObj.get("val"));
     }
 

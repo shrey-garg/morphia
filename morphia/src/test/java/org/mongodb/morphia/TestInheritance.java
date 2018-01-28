@@ -14,10 +14,10 @@ public class TestInheritance extends TestBase {
         // given
         final Child jimmy = new Child();
         jimmy.setName("jimmy");
-        getDs().save(jimmy);
+        getDatastore().save(jimmy);
 
         // when
-        final Child loaded = getDs().get(Child.class, jimmy.getId());
+        final Child loaded = getDatastore().get(Child.class, jimmy.getId());
 
         // then
         assertNotNull(loaded);

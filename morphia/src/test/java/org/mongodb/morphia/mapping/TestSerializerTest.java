@@ -49,8 +49,8 @@ public class TestSerializerTest extends TestBase {
         e.payload1 = test;
         e.payload2 = test;
 
-        getDs().save(e);
-        e = getDs().get(e);
+        getDatastore().save(e);
+        e = getDatastore().get(e);
 
         Assert.assertTrue(e.payload1.length == 2048);
         Assert.assertTrue(new String(e.payload1).startsWith(TEST_TEXT));

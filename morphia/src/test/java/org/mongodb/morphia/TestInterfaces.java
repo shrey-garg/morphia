@@ -50,7 +50,7 @@ public class TestInterfaces extends TestBase {
 
         final BasicDBObject rectangleDbObjLoaded = (BasicDBObject) shapes.findOne(new BasicDBObject(Mapper.ID_KEY,
                                                                                                     rectangleDbObj.get(Mapper.ID_KEY)));
-        final Shape rectangleLoaded = getMorphia().fromDBObject(getDs(), Shape.class, rectangleDbObjLoaded, new DefaultEntityCache());
+        final Shape rectangleLoaded = getMorphia().fromDBObject(getDatastore(), Shape.class, rectangleDbObjLoaded, new DefaultEntityCache());
 
         assertTrue(rectangle.getArea() == rectangleLoaded.getArea());
         assertTrue(rectangleLoaded instanceof Rectangle);
@@ -66,7 +66,7 @@ public class TestInterfaces extends TestBase {
 
         final BasicDBObject shifterDbObjLoaded = (BasicDBObject) shapeshifters.findOne(new BasicDBObject(Mapper.ID_KEY,
                                                                                                          shifterDbObj.get(Mapper.ID_KEY)));
-        final ShapeShifter shifterLoaded = getMorphia().fromDBObject(getDs(), ShapeShifter.class, shifterDbObjLoaded,
+        final ShapeShifter shifterLoaded = getMorphia().fromDBObject(getDatastore(), ShapeShifter.class, shifterDbObjLoaded,
                                                                      new DefaultEntityCache());
         assertNotNull(shifterLoaded);
         assertNotNull(shifterLoaded.getReferencedShape());

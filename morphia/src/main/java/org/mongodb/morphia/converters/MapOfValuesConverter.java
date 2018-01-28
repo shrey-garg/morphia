@@ -1,6 +1,5 @@
 package org.mongodb.morphia.converters;
 
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.utils.IterHelper;
 import org.mongodb.morphia.utils.IterHelper.MapIterCallback;
 import org.mongodb.morphia.utils.ReflectionUtils;

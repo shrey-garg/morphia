@@ -52,11 +52,11 @@ public class TestInheritanceMappings extends TestBase {
         getMorphia().map(MapLike.class);
         MapLike m = new MapLike();
         m.put("Name", "Scott");
-        getDs().save(m);
+        getDatastore().save(m);
         assertNotNull(m.id);
-        assertEquals(1, getDs().getCount(MapLike.class));
+        assertEquals(1, getDatastore().getCount(MapLike.class));
 
-        m = getDs().find(MapLike.class).get();
+        m = getDatastore().find(MapLike.class).get();
         assertNotNull(m.id);
         assertTrue(m.containsKey("Name"));
         assertEquals("Scott", m.get("Name"));
@@ -70,8 +70,8 @@ public class TestInheritanceMappings extends TestBase {
         c.setId("foo");
         c.b = "eh";
         c.setK(12L);
-        getDs().save(c);
-        c = getDs().get(ParameterizedEntity.class, "foo");
+        getDatastore().save(c);
+        c = getDatastore().get(ParameterizedEntity.class, "foo");
         assertNotNull(c.getId());
         assertNotNull(c.b);
         assertNotNull(c.getK());
@@ -79,7 +79,7 @@ public class TestInheritanceMappings extends TestBase {
         assertEquals("foo", c.getId());
         assertEquals("eh", c.b);
         assertEquals(12, c.getK().longValue());
-        assertEquals(1, getDs().getCount(ParameterizedEntity.class));
+        assertEquals(1, getDatastore().getCount(ParameterizedEntity.class));
     }
 
     @Test
@@ -87,12 +87,12 @@ public class TestInheritanceMappings extends TestBase {
         getMorphia().map(ParameterizedIdEntity.class);
         ParameterizedIdEntity c = new ParameterizedIdEntity();
         c.setId("foo");
-        getDs().save(c);
-        c = getDs().get(ParameterizedIdEntity.class, "foo");
+        getDatastore().save(c);
+        c = getDatastore().get(ParameterizedIdEntity.class, "foo");
         assertNotNull(c.getId());
 
         assertEquals("foo", c.getId());
-        assertEquals(1, getDs().getCount(ParameterizedIdEntity.class));
+        assertEquals(1, getDatastore().getCount(ParameterizedIdEntity.class));
     }
 
     @Test
@@ -100,22 +100,22 @@ public class TestInheritanceMappings extends TestBase {
         getMorphia().map(ParameterizedIdEntity2.class);
         ParameterizedIdEntity2 c = new ParameterizedIdEntity2();
         c.setId("foo");
-        getDs().save(c);
-        c = getDs().get(ParameterizedIdEntity2.class, "foo");
+        getDatastore().save(c);
+        c = getDatastore().get(ParameterizedIdEntity2.class, "foo");
         assertNotNull(c.getId());
 
         assertEquals("foo", c.getId());
-        assertEquals(1, getDs().getCount(ParameterizedIdEntity2.class));
+        assertEquals(1, getDatastore().getCount(ParameterizedIdEntity2.class));
     }
 
     @Test
     public void testSuperclassEntity() throws Exception {
         final Car c = new Car();
-        getDs().save(c);
+        getDatastore().save(c);
         assertNotNull(c.getId());
 
-        assertEquals(1, getDs().getCount(Car.class));
-        assertEquals(1, getDs().getCount(AbstractVehicle.class));
+        assertEquals(1, getDatastore().getCount(Car.class));
+        assertEquals(1, getDatastore().getCount(AbstractVehicle.class));
 
     }
 

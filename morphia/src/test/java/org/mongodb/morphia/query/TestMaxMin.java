@@ -23,18 +23,18 @@ public class TestMaxMin extends TestBase {
     public void setUp() {
         super.setUp();
         getMorphia().map(IndexedEntity.class);
-        getDs().ensureIndexes();
+        getDatastore().ensureIndexes();
     }
 
     @SuppressWarnings("deprecation")
     @Test(expected = MongoException.class)
     public void testExceptionForIndexMismatchOld() throws Exception {
-        getDs().find(IndexedEntity.class).lowerIndexBound(new BasicDBObject("doesNotExist", 1)).get();
+        getDatastore().find(IndexedEntity.class).lowerIndexBound(new BasicDBObject("doesNotExist", 1)).get();
     }
 
     @Test(expected = MongoException.class)
     public void testExceptionForIndexMismatch() throws Exception {
-        getDs().find(IndexedEntity.class).get(new FindOptions()
+        getDatastore().find(IndexedEntity.class).get(new FindOptions()
                                                     .modifier("$min", new BasicDBObject("doesNotExist", 1)));
     }
 
@@ -45,7 +45,7 @@ public class TestMaxMin extends TestBase {
         final IndexedEntity b = new IndexedEntity("b");
         final IndexedEntity c = new IndexedEntity("c");
 
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
 
         ds.save(a);
         ds.save(b);
@@ -73,7 +73,7 @@ public class TestMaxMin extends TestBase {
         final IndexedEntity c1 = new IndexedEntity("c");
         final IndexedEntity c2 = new IndexedEntity("c");
 
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
 
         ds.save(a1);
         ds.save(a2);
@@ -103,7 +103,7 @@ public class TestMaxMin extends TestBase {
         final IndexedEntity b = new IndexedEntity("b");
         final IndexedEntity c = new IndexedEntity("c");
 
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
 
         ds.save(a);
         ds.save(b);
@@ -127,7 +127,7 @@ public class TestMaxMin extends TestBase {
         final IndexedEntity c1 = new IndexedEntity("c");
         final IndexedEntity c2 = new IndexedEntity("c");
 
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
 
         ds.save(a1);
         ds.save(a2);

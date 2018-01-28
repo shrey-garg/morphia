@@ -23,11 +23,11 @@ public class TestMapping extends TestBase {
 
         //Old way
         final DBObject wrapObj = getMorphia().toDBObject(sp);  //the error points here from the user
-        getDs().getDB().getCollection("testColl").save(wrapObj);
+        getDatastore().getDatabase().getCollection("testColl").save(wrapObj);
 
 
         //better way
-        getDs().save(sp);
+        getDatastore().save(sp);
 
     }
 

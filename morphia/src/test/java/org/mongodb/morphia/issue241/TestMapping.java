@@ -17,7 +17,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testMapping() {
-        final BasicDAO<Message, ObjectId> messageDAO = new BasicDAO<Message, ObjectId>(Message.class, getDs());
+        final BasicDAO<Message, ObjectId> messageDAO = new BasicDAO<Message, ObjectId>(Message.class, getDatastore());
         Assert.assertNotNull(messageDAO);
     }
 

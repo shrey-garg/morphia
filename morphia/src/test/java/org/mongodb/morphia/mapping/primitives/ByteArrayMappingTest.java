@@ -18,8 +18,8 @@ public class ByteArrayMappingTest extends TestBase {
         final ContainsByteArray entity = new ContainsByteArray();
         final Byte[] test = new Byte[]{6, 9, 1, -122};
         entity.ba = test;
-        getDs().save(entity);
-        final ContainsByteArray loaded = getDs().get(entity);
+        getDatastore().save(entity);
+        final ContainsByteArray loaded = getDatastore().get(entity);
 
         for (int i = 0; i < test.length; i++) {
             final Byte c = test[i];

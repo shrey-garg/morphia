@@ -33,8 +33,8 @@ public class TestConstructorArgs extends TestBase {
         Normal n = new Normal();
         final ObjectId acId = n.ac.id;
 
-        getDs().save(n);
-        n = getDs().find(Normal.class).get();
+        getDatastore().save(n);
+        n = getDatastore().find(Normal.class).get();
         Assert.assertNotNull(n);
         Assert.assertNotNull(n.ac);
         Assert.assertEquals(acId, n.ac.id);

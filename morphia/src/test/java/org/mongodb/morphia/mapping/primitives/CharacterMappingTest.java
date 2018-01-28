@@ -56,9 +56,9 @@ public class CharacterMappingTest extends TestBase {
         entity.wrapperArray = new Character[]{'X', 'y', 'Z'};
         entity.nestedPrimitiveArray = new char[][]{{'5', '-'}, {'a', 'b'}};
         entity.nestedWrapperArray = new Character[][]{{'*', '$', '\u4824'}, {'X', 'y', 'Z'}};
-        getDs().save(entity);
+        getDatastore().save(entity);
 
-        final Characters loaded = getDs().get(entity);
+        final Characters loaded = getDatastore().get(entity);
         Assert.assertNotNull(loaded.id);
         Assert.assertArrayEquals(entity.listWrapperArray.get(0), loaded.listWrapperArray.get(0));
         Assert.assertArrayEquals(entity.listPrimitiveArray.get(0), loaded.listPrimitiveArray.get(0));
@@ -81,7 +81,7 @@ public class CharacterMappingTest extends TestBase {
     public void singleCharToPrimitiveArray() {
         final Characters characters = testMapping("primitiveArray", "a");
         Assert.assertArrayEquals("a".toCharArray(), characters.primitiveArray);
-        getDs().save(characters);
+        getDatastore().save(characters);
     }
 
     @Test
@@ -128,10 +128,10 @@ public class CharacterMappingTest extends TestBase {
     private Characters testMapping(final String field, final String value) {
         getMorphia().map(Characters.class);
 
-        final DBCollection collection = getDs().getCollection(Characters.class);
+        final DBCollection collection = getDatastore().getCollection(Characters.class);
         collection.insert(new BasicDBObject(field, value));
 
-        return getDs().find(Characters.class).get();
+        return getDatastore().find(Characters.class).get();
     }
 
     public static class Characters {

@@ -10,7 +10,6 @@ import org.mongodb.morphia.aggregation.zipcode.Population;
 import org.mongodb.morphia.aggregation.zipcode.State;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
-import org.mongodb.morphia.query.MorphiaIterator;
 import org.mongodb.morphia.query.Query;
 import org.zeroturnaround.exec.ProcessExecutor;
 
@@ -58,9 +57,9 @@ public class ZipCodeDataSetTest extends TestBase {
     public void averageCitySizeByState() throws InterruptedException, TimeoutException, IOException {
         Assume.assumeTrue(new File(MONGO_IMPORT).exists());
         installSampleData();
-        AggregationPipeline pipeline = getDs().createAggregation(City.class)
-                                              .group(id(grouping("state"), grouping("city")), grouping("pop", sum("pop")))
-                                              .group("_id.state", grouping("avgCityPop", average("pop")));
+        AggregationPipeline pipeline = getDatastore().createAggregation(City.class)
+                                                     .group(id(grouping("state"), grouping("city")), grouping("pop", sum("pop")))
+                                                     .group("_id.state", grouping("avgCityPop", average("pop")));
         validate(pipeline.aggregate(Population.class), "MN", 5372);
     }
 
@@ -87,12 +86,12 @@ public class ZipCodeDataSetTest extends TestBase {
     public void populationsAbove10M() throws IOException, TimeoutException, InterruptedException {
         Assume.assumeTrue(new File(MONGO_IMPORT).exists());
         installSampleData();
-        Query<Object> query = getDs().getQueryFactory().createQuery(getDs());
+        Query<Object> query = getDatastore().getQueryFactory().createQuery(getDatastore());
 
         AggregationPipeline pipeline
-            = getDs().createAggregation(City.class)
-                     .group("state", grouping("totalPop", sum("pop")))
-                     .match(query.field("totalPop").greaterThanOrEq(10000000));
+            = getDatastore().createAggregation(City.class)
+                            .group("state", grouping("totalPop", sum("pop")))
+                            .match(query.field("totalPop").greaterThanOrEq(10000000));
 
 
         validate(pipeline.aggregate(Population.class), "CA", 29754890);
@@ -104,19 +103,19 @@ public class ZipCodeDataSetTest extends TestBase {
         Assume.assumeTrue(new File(MONGO_IMPORT).exists());
         installSampleData();
         getMorphia().mapPackage(getClass().getPackage().getName());
-        AggregationPipeline pipeline = getDs().createAggregation(City.class)
+        AggregationPipeline pipeline = getDatastore().createAggregation(City.class)
 
-                                              .group(id(grouping("state"), grouping("city")), grouping("pop", sum("pop")))
+                                                     .group(id(grouping("state"), grouping("city")), grouping("pop", sum("pop")))
 
-                                              .sort(ascending("pop"))
+                                                     .sort(ascending("pop"))
 
-                                              .group("_id.state",
+                                                     .group("_id.state",
                                                      grouping("biggestCity", last("_id.city")),
                                                      grouping("biggestPop", last("pop")),
                                                      grouping("smallestCity", first("_id.city")),
                                                      grouping("smallestPop", first("pop")))
 
-                                              .project(projection("_id").suppress(),
+                                                     .project(projection("_id").suppress(),
                                                        projection("state", "_id"),
                                                        projection("biggestCity",
                                                                   projection("name", "biggestCity"),

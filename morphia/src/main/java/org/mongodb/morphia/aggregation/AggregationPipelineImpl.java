@@ -3,16 +3,15 @@ package org.mongodb.morphia.aggregation;
 import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
-import com.mongodb.Cursor;
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.ReadPreference;
+import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.geo.GeometryShapeConverter;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
-import org.mongodb.morphia.mapping.MappedField;
-import org.mongodb.morphia.mapping.Mapper;
-import org.mongodb.morphia.query.MorphiaIterator;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.Sort;
 
@@ -27,25 +26,19 @@ import java.util.List;
 public class AggregationPipelineImpl implements AggregationPipeline {
     private static final Logger LOG = MorphiaLoggerFactory.get(AggregationPipelineImpl.class);
 
-    private final DBCollection collection;
-    private final Class source;
-    private final List<DBObject> stages = new ArrayList<DBObject>();
-    private final Mapper mapper;
-    private final org.mongodb.morphia.DatastoreImpl datastore;
-    private boolean firstStage = false;
+    private final MongoCollection<?> collection;
+    private final List<Document> stages = new ArrayList<Document>();
+    private final Datastore datastore;
 
     /**
      * Creates an AggregationPipeline
      *
      * @param datastore the datastore to use
      * @param collection the database collection on which to operate
-     * @param source    the source type to aggregate
      */
-    public AggregationPipelineImpl(final org.mongodb.morphia.DatastoreImpl datastore, final DBCollection collection, final Class source) {
+    public AggregationPipelineImpl(final Datastore datastore, final MongoCollection<?> collection) {
         this.datastore = datastore;
         this.collection = collection;
-        mapper = datastore.getMapper();
-        this.source = source;
     }
 
     /**
@@ -54,7 +47,7 @@ public class AggregationPipelineImpl implements AggregationPipeline {
      *
      * @return the list of stages
      */
-    public List<DBObject> getStages() {
+    public List<Document> getStages() {
         return stages;
     }
 
@@ -70,7 +63,7 @@ public class AggregationPipelineImpl implements AggregationPipeline {
 
     @Override
     public <U> Iterator<U> aggregate(final Class<U> target, final AggregationOptions options, final ReadPreference readPreference) {
-        return aggregate(datastore.getCollection(target).getName(), target, options, readPreference);
+        return aggregate(datastore.getCollection(target).getNamespace().getCollectionName(), target, options, readPreference);
     }
 
     @Override
@@ -78,8 +71,8 @@ public class AggregationPipelineImpl implements AggregationPipeline {
                                      final ReadPreference readPreference) {
         LOG.debug("stages = " + stages);
 
-        Cursor cursor = collection.aggregate(stages, options, readPreference);
-        return new MorphiaIterator<U, U>(datastore, cursor, mapper, target, collectionName, mapper.createEntityCache());
+        AggregateIterable<U> cursor = collection.aggregate(stages, target);
+        return new MorphiaIterator<U>(cursor);
     }
 
     @Override
@@ -95,7 +88,7 @@ public class AggregationPipelineImpl implements AggregationPipeline {
         putIfNull(geo, "num", geoNear.getMaxDocuments());
         putIfNull(geo, "maxDistance", geoNear.getMaxDistance());
         if (geoNear.getQuery() != null) {
-            geo.put("query", geoNear.getQuery().getQueryObject());
+            geo.put("query", geoNear.getQuery().getQueryDocument());
         }
         putIfNull(geo, "spherical", geoNear.getSpherical());
         putIfNull(geo, "distanceMultiplier", geoNear.getDistanceMultiplier());
@@ -158,7 +151,7 @@ public class AggregationPipelineImpl implements AggregationPipeline {
 
     @Override
     public AggregationPipeline match(final Query query) {
-        stages.add(new BasicDBObject("$match", query.getQueryObject()));
+        stages.add(new BasicDBObject("$match", query.getQueryDocument()));
         return this;
     }
 
@@ -225,14 +218,7 @@ public class AggregationPipelineImpl implements AggregationPipeline {
      */
     @SuppressWarnings("unchecked")
     private DBObject toDBObject(final Projection projection) {
-        String target;
-        if (firstStage) {
-            MappedField field = mapper.getMappedClass(source).getMappedField(projection.getTarget());
-            target = field != null ? field.getNameToStore() : projection.getTarget();
-        } else {
-            target = projection.getTarget();
-        }
-
+        String target = projection.getTarget();
         if (projection.getProjections() != null) {
             List<Projection> list = projection.getProjections();
             DBObject projections = new BasicDBObject();

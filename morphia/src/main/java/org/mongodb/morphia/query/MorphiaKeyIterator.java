@@ -1,8 +1,8 @@
 package org.mongodb.morphia.query;
 
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import org.mongodb.morphia.Datastore;
+import com.mongodb.ServerAddress;
+import com.mongodb.ServerCursor;
+import com.mongodb.client.MongoCursor;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.mapping.Mapper;
 
@@ -10,30 +10,54 @@ import org.mongodb.morphia.mapping.Mapper;
  * Defines an Iterator across the Key values for a given type.
  *
  * @param <T> the entity type
- * @author Scott Hernandez
  */
-public class MorphiaKeyIterator<T> extends MorphiaIterator<T, Key<T>> {
+public class MorphiaKeyIterator<T> implements MongoCursor<Key<T>> {
+    private final MongoCursor<T> cursor;
+    private final Mapper mapper;
+
     /**
      * Create
-     * @param datastore  the Datastore to use when fetching this reference
      * @param cursor     the cursor to use
      * @param mapper     the Mapper to use
-     * @param clazz      the original type being iterated
-     * @param collection the mongodb collection
      */
-    public MorphiaKeyIterator(final Datastore datastore, final DBCursor cursor, final Mapper mapper,
-                              final Class<T> clazz, final String collection) {
-        super(datastore, cursor, mapper, clazz, collection, null);
+    MorphiaKeyIterator(final MongoCursor<T> cursor, final Mapper mapper) {
+        this.cursor = cursor;
+        this.mapper = mapper;
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    protected Key<T> convertItem(final DBObject dbObj) {
-        Object id = dbObj.get(Mapper.ID_KEY);
-        if (id instanceof DBObject) {
-            Class type = getMapper().getMappedClass(getClazz()).getMappedIdField().getType();
-            id = getMapper().fromDBObject(getDatastore(), type, (DBObject) id, getMapper().createEntityCache());
-        }
-        return new Key<T>(getClazz(), getCollection(), id);
+    public void close() {
+        cursor.close();
+    }
+
+    @Override
+    public boolean hasNext() {
+        return cursor.hasNext();
+    }
+
+    @Override
+    public Key<T> next() {
+
+        return mapper.getKey(cursor.next());
+    }
+
+    @Override
+    public Key<T> tryNext() {
+        return mapper.getKey(cursor.tryNext()) ;
+    }
+
+    @Override
+    public ServerCursor getServerCursor() {
+        return cursor.getServerCursor();
+    }
+
+    @Override
+    public ServerAddress getServerAddress() {
+        return cursor.getServerAddress();
+    }
+
+    @Override
+    public void remove() {
+        cursor.remove();
     }
 }

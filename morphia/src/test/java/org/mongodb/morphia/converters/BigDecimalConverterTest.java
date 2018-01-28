@@ -93,9 +93,9 @@ public class BigDecimalConverterTest extends ConverterTest<BigDecimal, Decimal12
     public void testEntity() {
         Foo foo = new Foo();
         foo.setNumber(new BigDecimal("0.92348237942346239"));
-        getDs().save(foo);
+        getDatastore().save(foo);
 
-        assertEquals(foo, getDs().find(Foo.class).get());
+        assertEquals(foo, getDatastore().find(Foo.class).get());
     }
 
     @Entity

@@ -10,8 +10,8 @@ import org.mongodb.morphia.TestMapping.MissingId;
 public class TestMandatoryId extends TestBase {
     @Test(expected = ValidationException.class)
     public final void testMissingIdNoImplicitMapCall() {
-        final Key<MissingId> save = getDs().save(new MissingId());
+        final Key<MissingId> save = getDatastore().save(new MissingId());
 
-        getDs().getByKey(MissingId.class, save);
+        getDatastore().getByKey(MissingId.class, save);
     }
 }

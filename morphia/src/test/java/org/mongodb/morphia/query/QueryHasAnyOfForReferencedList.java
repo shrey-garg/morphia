@@ -25,8 +25,8 @@ public class QueryHasAnyOfForReferencedList extends TestBase {
         Plan plan2 = new Plan();
         plan2.name = "Trial";
 
-        getDs().save(plan1);
-        getDs().save(plan2);
+        getDatastore().save(plan1);
+        getDatastore().save(plan2);
 
         Org org1 = new Org();
         org1.plan = plan1;
@@ -36,23 +36,23 @@ public class QueryHasAnyOfForReferencedList extends TestBase {
         org2.plan = plan2;
         org2.name = "Test Org2";
 
-        getDs().save(org1);
-        getDs().save(org2);
+        getDatastore().save(org1);
+        getDatastore().save(org2);
 
-        long count = getDs().find(Org.class).field("name").equal("Test Org1").count();
+        long count = getDatastore().find(Org.class).field("name").equal("Test Org1").count();
         assertEquals(1, count);
 
         List<Plan> plans = new ArrayList<Plan>();
         plans.add(plan1);
 
-        count = getDs().find(Org.class).field("plan").hasAnyOf(plans).count();
+        count = getDatastore().find(Org.class).field("plan").hasAnyOf(plans).count();
         assertEquals(1, count);
 
         plans = new ArrayList<Plan>();
         plans.add(plan1);
         plans.add(plan2);
 
-        count = getDs().find(Org.class).field("plan").hasAnyOf(plans).count();
+        count = getDatastore().find(Org.class).field("plan").hasAnyOf(plans).count();
         assertEquals(2, count);
     }
 

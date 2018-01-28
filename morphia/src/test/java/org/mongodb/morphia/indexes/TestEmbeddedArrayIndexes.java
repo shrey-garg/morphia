@@ -23,7 +23,6 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
-import org.mongodb.morphia.mapping.MappedClass;
 
 import java.util.Set;
 
@@ -41,8 +40,8 @@ public class TestEmbeddedArrayIndexes extends TestBase {
 
         assertEquals(1, mc.getAnnotations(Indexes.class).size());
 
-        getDs().ensureIndexes(A.class);
-        final DBCollection coll = getDs().getCollection(A.class);
+        getDatastore().ensureIndexes(A.class);
+        final DBCollection coll = getDatastore().getCollection(A.class);
 
         assertEquals("indexes found: coll.getIndexInfo()" + coll.getIndexInfo(), 3, coll.getIndexInfo().size());
 

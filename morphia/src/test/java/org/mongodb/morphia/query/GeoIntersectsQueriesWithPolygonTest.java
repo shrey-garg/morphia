@@ -33,22 +33,22 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
     public void shouldFindAPointThatLiesInAQueryPolygon() {
         // given
         City manchester = new City("Manchester", point(53.4722454, -2.2235922));
-        getDs().save(manchester);
+        getDatastore().save(manchester);
         City london = new City("London", point(51.5286416, -0.1015987));
-        getDs().save(london);
+        getDatastore().save(london);
         City sevilla = new City("Sevilla", point(37.4057731, -5.966287));
-        getDs().save(sevilla);
+        getDatastore().save(sevilla);
 
-        getDs().ensureIndexes();
+        getDatastore().ensureIndexes();
 
         // when
-        List<City> matchingCity = getDs().find(City.class)
-                                         .field("location")
-                                         .intersects(polygon(point(37.40759155713022, -5.964911067858338),
+        List<City> matchingCity = getDatastore().find(City.class)
+                                                .field("location")
+                                                .intersects(polygon(point(37.40759155713022, -5.964911067858338),
                                                              point(37.40341208875179, -5.9643941558897495),
                                                              point(37.40297396667302, -5.970452763140202),
                                                              point(37.40759155713022, -5.964911067858338)))
-                                         .asList();
+                                                .asList();
 
         // then
         assertThat(matchingCity.size(), is(1));
@@ -64,29 +64,29 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
                                         point(37.40297396667302, -5.970452763140202),
                                         point(37.40759155713022, -5.964911067858338))
         );
-        getDs().save(sevilla);
+        getDatastore().save(sevilla);
         Area newYork = new Area("New York",
                                 polygon(point(40.75981395319104, -73.98302106186748),
                                         point(40.7636824529618, -73.98049869574606),
                                         point(40.76962974853814, -73.97964206524193),
                                         point(40.75981395319104, -73.98302106186748)));
-        getDs().save(newYork);
+        getDatastore().save(newYork);
         Area london = new Area("London",
                                polygon(point(51.507780365645885, -0.21786745637655258),
                                        point(51.50802478194237, -0.21474729292094707),
                                        point(51.5086863655597, -0.20895397290587425),
                                        point(51.507780365645885, -0.21786745637655258)));
-        getDs().save(london);
-        getDs().ensureIndexes();
+        getDatastore().save(london);
+        getDatastore().ensureIndexes();
 
         // when
-        List<Area> areaContainingPoint = getDs().find(Area.class)
-                                                .field("area")
-                                                .intersects(polygon(point(37.4056048, -5.9666089),
+        List<Area> areaContainingPoint = getDatastore().find(Area.class)
+                                                       .field("area")
+                                                       .intersects(polygon(point(37.4056048, -5.9666089),
                                                                     point(37.404497, -5.9640557),
                                                                     point(37.407239, -5.962988),
                                                                     point(37.4056048, -5.9666089)))
-                                                .asList();
+                                                       .asList();
 
         // then
         assertThat(areaContainingPoint.size(), is(1));
@@ -109,7 +109,7 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
                                                                                        point(37.385990973562, -6.002588979899883),
                                                                                        point(37.386126928031445, -6.002463921904564),
                                                                                        point(37.38744598813355, -6.001141928136349))));
-        getDs().save(sevilla);
+        getDatastore().save(sevilla);
 
         // insert something that's not a geocollection
         Regions usa = new Regions("US", multiPolygon(polygon(point(40.75981395319104, -73.98302106186748),
@@ -120,7 +120,7 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
                                                              point(28.327541397884488, -81.6022228449583),
                                                              point(28.32950334995985, -81.60564735531807),
                                                              point(28.326568258926272, -81.60542246885598))));
-        getDs().save(usa);
+        getDatastore().save(usa);
 
         AllTheThings london = new AllTheThings("London", geometryCollection(
                                                                                point(53.4722454, -2.2235922),
@@ -132,17 +132,17 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
                                                                                        point(51.492886897176504, 0.05523204803466797),
                                                                                        point(51.49393044412136, 0.06663135252892971),
                                                                                        point(51.498216362670064, 0.0074849557131528854))));
-        getDs().save(london);
-        getDs().ensureIndexes();
+        getDatastore().save(london);
+        getDatastore().ensureIndexes();
 
         // when
-        List<AllTheThings> everythingInTheUK = getDs().find(AllTheThings.class)
-                                                      .field("everything")
-                                                      .intersects(polygon(point(37.4056048, -5.9666089),
+        List<AllTheThings> everythingInTheUK = getDatastore().find(AllTheThings.class)
+                                                             .field("everything")
+                                                             .intersects(polygon(point(37.4056048, -5.9666089),
                                                                           point(37.404497, -5.9640557),
                                                                           point(37.407239, -5.962988),
                                                                           point(37.4056048, -5.9666089)))
-                                                      .asList();
+                                                             .asList();
 
         // then
         assertThat(everythingInTheUK.size(), is(1));
@@ -161,7 +161,7 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
                                                                     point(37.385990973562, -6.002588979899883),
                                                                     point(37.386126928031445, -6.002463921904564),
                                                                     point(37.38744598813355, -6.001141928136349))));
-        getDs().save(sevilla);
+        getDatastore().save(sevilla);
 
         Regions usa = new Regions("US", multiPolygon(polygon(point(40.75981395319104, -73.98302106186748),
                                                              point(40.7636824529618, -73.98049869574606),
@@ -171,7 +171,7 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
                                                              point(28.327541397884488, -81.6022228449583),
                                                              point(28.32950334995985, -81.60564735531807),
                                                              point(28.326568258926272, -81.60542246885598))));
-        getDs().save(usa);
+        getDatastore().save(usa);
 
         Regions london = new Regions("London", multiPolygon(polygon(point(51.507780365645885, -0.21786745637655258),
                                                                     point(51.50802478194237, -0.21474729292094707),
@@ -182,17 +182,17 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
                                                                     point(51.492886897176504, 0.05523204803466797),
                                                                     point(51.49393044412136, 0.06663135252892971),
                                                                     point(51.498216362670064, 0.0074849557131528854))));
-        getDs().save(london);
-        getDs().ensureIndexes();
+        getDatastore().save(london);
+        getDatastore().ensureIndexes();
 
         // when
-        List<Regions> regionsInTheUK = getDs().find(Regions.class)
-                                              .field("regions")
-                                              .intersects(polygon(point(37.4056048, -5.9666089),
+        List<Regions> regionsInTheUK = getDatastore().find(Regions.class)
+                                                     .field("regions")
+                                                     .intersects(polygon(point(37.4056048, -5.9666089),
                                                                   point(37.404497, -5.9640557),
                                                                   point(37.407239, -5.962988),
                                                                   point(37.4056048, -5.9666089)))
-                                              .asList();
+                                                     .asList();
 
         // then
         assertThat(regionsInTheUK.size(), is(1));
@@ -204,28 +204,28 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
         // given
         Route sevilla = new Route("Spain", lineString(point(37.4056048, -5.9666089),
                                                       point(37.404497, -5.9640557)));
-        getDs().save(sevilla);
+        getDatastore().save(sevilla);
         Route newYork = new Route("New York", lineString(point(40.75981395319104, -73.98302106186748),
                                                          point(40.7636824529618, -73.98049869574606),
                                                          point(40.76962974853814, -73.97964206524193)));
-        getDs().save(newYork);
+        getDatastore().save(newYork);
         Route london = new Route("London", lineString(point(51.507780365645885, -0.21786745637655258),
                                                       point(51.50802478194237, -0.21474729292094707),
                                                       point(51.5086863655597, -0.20895397290587425)));
-        getDs().save(london);
+        getDatastore().save(london);
         Route londonToParis = new Route("London To Paris", lineString(point(51.5286416, -0.1015987),
                                                                       point(48.858859, 2.3470599)));
-        getDs().save(londonToParis);
-        getDs().ensureIndexes();
+        getDatastore().save(londonToParis);
+        getDatastore().ensureIndexes();
 
         // when
-        List<Route> routeContainingPoint = getDs().find(Route.class)
-                                                  .field("route")
-                                                  .intersects(polygon(point(37.40759155713022, -5.964911067858338),
+        List<Route> routeContainingPoint = getDatastore().find(Route.class)
+                                                         .field("route")
+                                                         .intersects(polygon(point(37.40759155713022, -5.964911067858338),
                                                                       point(37.40341208875179, -5.9643941558897495),
                                                                       point(37.40297396667302, -5.970452763140202),
                                                                       point(37.40759155713022, -5.964911067858338)))
-                                                  .asList();
+                                                         .asList();
 
         // then
         assertThat(routeContainingPoint.size(), is(1));

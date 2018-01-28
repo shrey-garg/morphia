@@ -19,7 +19,7 @@ public class ByteMappingTest extends TestBase {
         final String data = "{ \"primitiveArray\": BinData(0, "
                             + "\"V2hlbiBpbiB0aGUgY291cnNlIG9mIGh1bWFuIGV2ZW50cyBpdCBiZWNvbWVzIG5lY2Vzc2FyeSB0byBzdWJzY3JpYmUu\") }";
         getDb().eval("db.Bytes.insert(" + data + ")");
-        final Bytes loaded = getDs().find(Bytes.class).get();
+        final Bytes loaded = getDatastore().find(Bytes.class).get();
     }
 
     @Test
@@ -35,8 +35,8 @@ public class ByteMappingTest extends TestBase {
         ent.wrapperArray = new Byte[]{55, 16, 99};
         ent.nestedPrimitiveArray = new byte[][]{{1, 2}, {3, 4}};
         ent.nestedWrapperArray = new Byte[][]{{1, 2}, {3, 4}};
-        getDs().save(ent);
-        final Bytes loaded = getDs().get(ent);
+        getDatastore().save(ent);
+        final Bytes loaded = getDatastore().get(ent);
 
         Assert.assertNotNull(loaded.id);
 

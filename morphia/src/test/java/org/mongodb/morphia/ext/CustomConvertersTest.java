@@ -34,7 +34,6 @@ import org.mongodb.morphia.converters.IntegerConverter;
 import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
 import org.mongodb.morphia.entities.EntityWithListsAndArrays;
-import org.mongodb.morphia.mapping.MappedField;
 
 import javax.activation.MimeType;
 import javax.activation.MimeTypeParseException;
@@ -66,26 +65,26 @@ public class CustomConvertersTest extends TestBase {
         getMorphia().map(EntityWithListsAndArrays.class);
         final EntityWithListsAndArrays entity = new EntityWithListsAndArrays();
         entity.setListOfStrings(Arrays.asList("string 1", "string 2", "string 3"));
-        getDs().save(entity);
+        getDatastore().save(entity);
 
-        final DBObject dbObject = getDs().getCollection(EntityWithListsAndArrays.class).findOne();
+        final DBObject dbObject = getDatastore().getCollection(EntityWithListsAndArrays.class).findOne();
         Assert.assertFalse(dbObject.get("listOfStrings") instanceof BasicDBList);
 
-        final EntityWithListsAndArrays loaded = getDs().find(EntityWithListsAndArrays.class).get();
+        final EntityWithListsAndArrays loaded = getDatastore().find(EntityWithListsAndArrays.class).get();
         Assert.assertEquals(entity.getListOfStrings(), loaded.getListOfStrings());
     }
 
     @Test
     public void mimeType() throws UnknownHostException, MimeTypeParseException {
         getMorphia().map(MimeTyped.class);
-        getDs().ensureIndexes();
+        getDatastore().ensureIndexes();
         MimeTyped entity = new MimeTyped();
         entity.name = "test name";
         entity.mimeType = new MimeType("text/plain"); //MimeTypeParseException
         final DBObject dbObject = getMorphia().toDBObject(entity);
         assertEquals("text/plain", dbObject.get("mimeType"));
 
-        getDs().save(entity); // FAILS WITH ERROR HERE
+        getDatastore().save(entity); // FAILS WITH ERROR HERE
     }
 
     @Before
@@ -99,15 +98,15 @@ public class CustomConvertersTest extends TestBase {
         getMorphia().map(CharEntity.class);
 
         // when
-        getDs().save(new CharEntity());
+        getDatastore().save(new CharEntity());
 
         // then check the representation in the database is a number
-        final BasicDBObject dbObj = (BasicDBObject) getDs().getCollection(CharEntity.class).findOne();
+        final BasicDBObject dbObj = (BasicDBObject) getDatastore().getCollection(CharEntity.class).findOne();
         assertThat(dbObj.get("c"), is(instanceOf(int.class)));
         assertThat(dbObj.getInt("c"), is((int) 'a'));
 
         // then check CharEntity can be decoded from the database
-        final CharEntity ce = getDs().find(CharEntity.class).get();
+        final CharEntity ce = getDatastore().find(CharEntity.class).get();
         assertThat(ce.c, is(notNullValue()));
         assertThat(ce.c.charValue(), is('a'));
     }
@@ -124,7 +123,7 @@ public class CustomConvertersTest extends TestBase {
         final DBObject dbObject = getMorphia().toDBObject(entity);
 
         assertEquals(new BasicDBObject("_id", 1L).append("valueObject", 2L), dbObject);
-        assertEquals(entity, getMorphia().fromDBObject(getDs(), MyEntity.class, dbObject));
+        assertEquals(entity, getMorphia().fromDBObject(getDatastore(), MyEntity.class, dbObject));
     }
 
     /**
@@ -138,7 +137,7 @@ public class CustomConvertersTest extends TestBase {
         final byte[] data = new DefaultDBEncoder().encode(dbObject);
 
         final DBObject decoded = new DefaultDBDecoder().decode(data, (DBCollection) null);
-        final MyEntity actual = getMorphia().fromDBObject(getDs(), MyEntity.class, decoded);
+        final MyEntity actual = getMorphia().fromDBObject(getDatastore(), MyEntity.class, decoded);
         assertEquals(entity, actual);
     }
 

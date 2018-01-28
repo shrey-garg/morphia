@@ -42,7 +42,7 @@ public class MapReduceOptions<T> {
     private String map;
     private String reduce;
     private OutputType outputType;
-    private Query query;
+    private Query<T> query;
     private String finalize;
     private ReadPreference readPreference;
     private int limit;
@@ -253,7 +253,7 @@ public class MapReduceOptions<T> {
         return outputType;
     }
 
-    Query getQuery() {
+    Query<T> getQuery() {
         return query;
     }
 
@@ -263,7 +263,7 @@ public class MapReduceOptions<T> {
 
     @SuppressWarnings("deprecation")
     MapReduceCommand toCommand(final Mapper mapper) {
-        if (query.getOffset() != 0 || query.getFieldsObject() != null) {
+        if (query.getOffset() != 0 || query.getFields() != null) {
             throw new QueryException("mapReduce does not allow the offset/retrievedFields query ");
         }
 
@@ -271,7 +271,7 @@ public class MapReduceOptions<T> {
                                                             : query.getCollection();
         final String target = outputCollection != null ? outputCollection : mapper.getMappedClass(resultType).getCollectionName();
 
-        final MapReduceCommand command = new MapReduceCommand(dbColl, map, reduce, target, outputType, query.getQueryObject());
+        final MapReduceCommand command = new MapReduceCommand(dbColl, map, reduce, target, outputType, query.getQueryDocument());
         command.setBypassDocumentValidation(bypassDocumentValidation);
         command.setCollation(collation);
         command.setFinalize(finalize);
@@ -281,7 +281,7 @@ public class MapReduceOptions<T> {
         command.setOutputDB(outputDB);
         command.setReadPreference(readPreference);
         command.setScope(scope);
-        command.setSort(query.getSortObject());
+        command.setSort(query.getSortDocument());
         command.setVerbose(verbose);
 
         return command;

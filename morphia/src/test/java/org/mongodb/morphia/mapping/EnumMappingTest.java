@@ -22,11 +22,11 @@ public class EnumMappingTest extends TestBase {
     public void getMapOfEnum() throws Exception {
         Class1 entity = new Class1();
         entity.getMap().put("key", Foo.BAR);
-        getDs().save(entity);
+        getDatastore().save(entity);
 
         getMorphia().map(Class1.class);
 
-        entity = getDs().find(Class1.class).get();
+        entity = getDatastore().find(Class1.class).get();
         final Map<String, Foo> map = entity.getMap();
         Foo b = map.get("key");
         Assert.assertNotNull(b);
@@ -38,8 +38,8 @@ public class EnumMappingTest extends TestBase {
         customer.add(WebTemplateType.CrewContract, new WebTemplate("template #1"));
         customer.add(WebTemplateType.CrewContractHeader, new WebTemplate("template #2"));
 
-        getDs().save(customer);
-        Customer loaded = getDs().get(customer);
+        getDatastore().save(customer);
+        Customer loaded = getDatastore().get(customer);
         Assert.assertEquals(customer.map, loaded.map);
     }
 
@@ -61,8 +61,8 @@ public class EnumMappingTest extends TestBase {
         templates1.add(new WebTemplate("template #2.2"));
         customer.add(WebTemplateType.CrewContractHeader, templates2);
 
-        getDs().save(customer);
-        CustomerWithArrayList loaded = getDs().get(customer);
+        getDatastore().save(customer);
+        CustomerWithArrayList loaded = getDatastore().get(customer);
 
         Assert.assertEquals(customer.mapWithArrayList, loaded.mapWithArrayList);
     }
@@ -84,25 +84,25 @@ public class EnumMappingTest extends TestBase {
         templates1.add(new WebTemplate("template #2.2"));
         customer.add(WebTemplateType.CrewContractHeader, templates2);
 
-        getDs().save(customer);
-        CustomerWithList loaded = getDs().get(customer);
+        getDatastore().save(customer);
+        CustomerWithList loaded = getDatastore().get(customer);
 
         Assert.assertEquals(customer.mapWithList, loaded.mapWithList);
     }
 
     @Test
     public void testEnumMapping() throws Exception {
-        getDs().getDB().dropDatabase();
+        getDatastore().getDatabase().dropDatabase();
 
         getMorphia().map(ContainsEnum.class);
 
-        getDs().save(new ContainsEnum());
-        Assert.assertEquals(1, getDs().find(ContainsEnum.class).field("foo").equal(Foo.BAR)
-                                      .count());
-        Assert.assertEquals(1, getDs().find(ContainsEnum.class).filter("foo", Foo.BAR)
-                                      .count());
-        Assert.assertEquals(1, getDs().find(ContainsEnum.class).disableValidation().filter("foo", Foo.BAR)
-                                      .count());
+        getDatastore().save(new ContainsEnum());
+        Assert.assertEquals(1, getDatastore().find(ContainsEnum.class).field("foo").equal(Foo.BAR)
+                                             .count());
+        Assert.assertEquals(1, getDatastore().find(ContainsEnum.class).filter("foo", Foo.BAR)
+                                             .count());
+        Assert.assertEquals(1, getDatastore().find(ContainsEnum.class).disableValidation().filter("foo", Foo.BAR)
+                                             .count());
     }
 
     enum Foo {

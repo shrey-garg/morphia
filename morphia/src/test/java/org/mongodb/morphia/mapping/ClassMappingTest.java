@@ -23,9 +23,9 @@ public class ClassMappingTest extends TestBase {
         E e = new E();
 
         e.testClass2 = LinkedList.class;
-        getDs().save(e);
+        getDatastore().save(e);
 
-        Assert.assertNull(getDs().find(E.class).field("testClass2").equal(ArrayList.class).get());
+        Assert.assertNull(getDatastore().find(E.class).field("testClass2").equal(ArrayList.class).get());
     }
 
     @Test
@@ -33,9 +33,9 @@ public class ClassMappingTest extends TestBase {
         E e = new E();
 
         e.testClass = LinkedList.class;
-        getDs().save(e);
+        getDatastore().save(e);
 
-        e = getDs().get(e);
+        e = getDatastore().get(e);
         Assert.assertEquals(LinkedList.class, e.testClass);
     }
 
@@ -44,9 +44,9 @@ public class ClassMappingTest extends TestBase {
         E e = new E();
 
         e.testClass2 = LinkedList.class;
-        getDs().save(e);
+        getDatastore().save(e);
 
-        e = getDs().get(e);
+        e = getDatastore().get(e);
         Assert.assertEquals(LinkedList.class, e.testClass2);
     }
 

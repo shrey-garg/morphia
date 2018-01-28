@@ -47,31 +47,31 @@ public class GeoWithinQueriesWithPolygonTest extends TestBase {
                                                  pointBuilder().latitude(37.40297396667302).longitude(-5.970452763140202).build(),
                                                  pointBuilder().latitude(37.40759155713022).longitude(-5.964911067858338).build())
         );
-        getDs().save(sevilla);
+        getDatastore().save(sevilla);
         Area newYork = new Area("New York", polygon(pointBuilder().latitude(40.75981395319104).longitude(-73.98302106186748).build(),
                                                     pointBuilder().latitude(40.7636824529618).longitude(-73.98049869574606).build(),
                                                     pointBuilder().latitude(40.76962974853814).longitude(-73.97964206524193).build(),
                                                     pointBuilder().latitude(40.75981395319104).longitude(-73.98302106186748).build()));
-        getDs().save(newYork);
+        getDatastore().save(newYork);
         Area london = new Area("London", polygon(pointBuilder().latitude(51.507780365645885).longitude(-0.21786745637655258).build(),
                                                  pointBuilder().latitude(51.50802478194237).longitude(-0.21474729292094707).build(),
                                                  pointBuilder().latitude(51.5086863655597).longitude(-0.20895397290587425).build(),
                                                  pointBuilder().latitude(51.507780365645885).longitude(-0.21786745637655258).build()));
-        getDs().save(london);
+        getDatastore().save(london);
         Area europe = new Area("Europe", polygon(
                                                     pointBuilder().latitude(58.0).longitude(-10.0).build(),
                                                     pointBuilder().latitude(58.0).longitude(3).build(),
                                                     pointBuilder().latitude(48.858859).longitude(3).build(),
                                                     pointBuilder().latitude(48.858859).longitude(-10).build(),
                                                     pointBuilder().latitude(58.0).longitude(-10.0).build()));
-        getDs().save(europe);
-        getDs().ensureIndexes();
+        getDatastore().save(europe);
+        getDatastore().ensureIndexes();
 
         // when
-        List<Area> areasInTheUK = getDs().find(Area.class)
-                                         .field("area")
-                                         .within(uk)
-                                         .asList();
+        List<Area> areasInTheUK = getDatastore().find(Area.class)
+                                                .field("area")
+                                                .within(uk)
+                                                .asList();
 
         // then
         assertThat(areasInTheUK.size(), is(1));
@@ -79,10 +79,10 @@ public class GeoWithinQueriesWithPolygonTest extends TestBase {
 
         if (serverIsAtLeastVersion(3.0)) {
             // should not error
-            getDs().find(Area.class)
-                   .field("area")
-                   .within(uk, NamedCoordinateReferenceSystem.EPSG_4326_STRICT_WINDING)
-                   .asList();
+            getDatastore().find(Area.class)
+                          .field("area")
+                          .within(uk, NamedCoordinateReferenceSystem.EPSG_4326_STRICT_WINDING)
+                          .asList();
         }
     }
 
@@ -95,20 +95,20 @@ public class GeoWithinQueriesWithPolygonTest extends TestBase {
                              pointBuilder().latitude(59).longitude(-10.5).build(),
                              pointBuilder().latitude(49.78).longitude(-10.5).build());
         City manchester = new City("Manchester", point(53.4722454, -2.2235922));
-        getDs().save(manchester);
+        getDatastore().save(manchester);
         City london = new City("London", point(51.5286416, -0.1015987));
-        getDs().save(london);
+        getDatastore().save(london);
         City sevilla = new City("Sevilla", point(37.3753708, -5.9550582));
-        getDs().save(sevilla);
+        getDatastore().save(sevilla);
 
-        getDs().ensureIndexes();
+        getDatastore().ensureIndexes();
 
         // when
         List<City> citiesInTheUK;
-        citiesInTheUK = getDs().find(City.class)
-                               .field("location")
-                               .within(uk)
-                               .asList();
+        citiesInTheUK = getDatastore().find(City.class)
+                                      .field("location")
+                                      .within(uk)
+                                      .asList();
 
         // then
         assertThat(citiesInTheUK.size(), is(2));
@@ -136,7 +136,7 @@ public class GeoWithinQueriesWithPolygonTest extends TestBase {
                                                                                     point(37.385990973562, -6.002588979899883),
                                                                                     point(37.386126928031445, -6.002463921904564),
                                                                                     point(37.38744598813355, -6.001141928136349))));
-        getDs().save(sevilla);
+        getDatastore().save(sevilla);
 
         // insert something that's not a geocollection
         Regions usa = new Regions("US", multiPolygon(polygon(point(40.75981395319104, -73.98302106186748),
@@ -147,7 +147,7 @@ public class GeoWithinQueriesWithPolygonTest extends TestBase {
                                                              point(28.327541397884488, -81.6022228449583),
                                                              point(28.32950334995985, -81.60564735531807),
                                                              point(28.326568258926272, -81.60542246885598))));
-        getDs().save(usa);
+        getDatastore().save(usa);
 
         AllTheThings london = new AllTheThings("London", geometryCollection(point(53.4722454, -2.2235922),
                                                                             lineString(point(51.507780365645885, -0.21786745637655258),
@@ -158,14 +158,14 @@ public class GeoWithinQueriesWithPolygonTest extends TestBase {
                                                                                     point(51.492886897176504, 0.05523204803466797),
                                                                                     point(51.49393044412136, 0.06663135252892971),
                                                                                     point(51.498216362670064, 0.0074849557131528854))));
-        getDs().save(london);
-        getDs().ensureIndexes();
+        getDatastore().save(london);
+        getDatastore().ensureIndexes();
 
         // when
-        List<AllTheThings> everythingInTheUK = getDs().find(AllTheThings.class)
-                                                      .field("everything")
-                                                      .within(uk)
-                                                      .asList();
+        List<AllTheThings> everythingInTheUK = getDatastore().find(AllTheThings.class)
+                                                             .field("everything")
+                                                             .within(uk)
+                                                             .asList();
 
         // then
         assertThat(everythingInTheUK.size(), is(1));
@@ -190,7 +190,7 @@ public class GeoWithinQueriesWithPolygonTest extends TestBase {
                                                                     point(37.385990973562, -6.002588979899883),
                                                                     point(37.386126928031445, -6.002463921904564),
                                                                     point(37.38744598813355, -6.001141928136349))));
-        getDs().save(sevilla);
+        getDatastore().save(sevilla);
 
         Regions usa = new Regions("US", multiPolygon(polygon(point(40.75981395319104, -73.98302106186748),
                                                              point(40.7636824529618, -73.98049869574606),
@@ -200,7 +200,7 @@ public class GeoWithinQueriesWithPolygonTest extends TestBase {
                                                              point(28.327541397884488, -81.6022228449583),
                                                              point(28.32950334995985, -81.60564735531807),
                                                              point(28.326568258926272, -81.60542246885598))));
-        getDs().save(usa);
+        getDatastore().save(usa);
 
         Regions london = new Regions("London", multiPolygon(polygon(point(51.507780365645885, -0.21786745637655258),
                                                                     point(51.50802478194237, -0.21474729292094707),
@@ -211,14 +211,14 @@ public class GeoWithinQueriesWithPolygonTest extends TestBase {
                                                                     point(51.492886897176504, 0.05523204803466797),
                                                                     point(51.49393044412136, 0.06663135252892971),
                                                                     point(51.498216362670064, 0.0074849557131528854))));
-        getDs().save(london);
-        getDs().ensureIndexes();
+        getDatastore().save(london);
+        getDatastore().ensureIndexes();
 
         // when
-        List<Regions> regionsInTheUK = getDs().find(Regions.class)
-                                              .field("regions")
-                                              .within(uk)
-                                              .asList();
+        List<Regions> regionsInTheUK = getDatastore().find(Regions.class)
+                                                     .field("regions")
+                                                     .within(uk)
+                                                     .asList();
 
         // then
         assertThat(regionsInTheUK.size(), is(1));
@@ -236,25 +236,25 @@ public class GeoWithinQueriesWithPolygonTest extends TestBase {
         Route sevilla = new Route("Spain", lineString(pointBuilder().latitude(37.40759155713022).longitude(-5.964911067858338).build(),
                                                       pointBuilder().latitude(37.40341208875179).longitude(-5.9643941558897495).build(),
                                                       pointBuilder().latitude(37.40297396667302).longitude(-5.970452763140202).build()));
-        getDs().save(sevilla);
+        getDatastore().save(sevilla);
         Route newYork = new Route("New York", lineString(pointBuilder().latitude(40.75981395319104).longitude(-73.98302106186748).build(),
                                                          pointBuilder().latitude(40.7636824529618).longitude(-73.98049869574606).build(),
                                                          pointBuilder().latitude(40.76962974853814).longitude(-73.97964206524193).build()));
-        getDs().save(newYork);
+        getDatastore().save(newYork);
         Route london = new Route("London", lineString(pointBuilder().latitude(51.507780365645885).longitude(-0.21786745637655258).build(),
                                                       pointBuilder().latitude(51.50802478194237).longitude(-0.21474729292094707).build(),
                                                       pointBuilder().latitude(51.5086863655597).longitude(-0.20895397290587425).build()));
-        getDs().save(london);
+        getDatastore().save(london);
         Route londonToParis = new Route("London To Paris", lineString(pointBuilder().latitude(51.5286416).longitude(-0.1015987).build(),
                                                                       pointBuilder().latitude(48.858859).longitude(2.3470599).build()));
-        getDs().save(londonToParis);
-        getDs().ensureIndexes();
+        getDatastore().save(londonToParis);
+        getDatastore().ensureIndexes();
 
         // when
-        List<Route> routesInTheUK = getDs().find(Route.class)
-                                           .field("route")
-                                           .within(uk)
-                                           .asList();
+        List<Route> routesInTheUK = getDatastore().find(Route.class)
+                                                  .field("route")
+                                                  .within(uk)
+                                                  .asList();
 
         // then
         assertThat(routesInTheUK.size(), is(1));

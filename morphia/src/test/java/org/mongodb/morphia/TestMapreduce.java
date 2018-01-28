@@ -42,7 +42,7 @@ public class TestMapreduce extends TestBase {
         final String reduce = "function (key, values) { var total = 0; for ( var i=0; i<values.length; i++ ) {total += values[i].count;} "
                               + "return { count : total }; }";
 
-        getDs().mapReduce(new MapReduceOptions<ResultEntity>()
+        getDatastore().mapReduce(new MapReduceOptions<ResultEntity>()
                               .resultType(ResultEntity.class)
                               .outputType(OutputType.REPLACE)
                               .query(getAds().find(Shape.class))
@@ -65,13 +65,13 @@ public class TestMapreduce extends TestBase {
                               + "return { count : total }; }";
 
         final MapreduceResults<ResultEntity> mrRes =
-            getDs().mapReduce(MapreduceType.REPLACE, getAds().find(Shape.class), map, reduce, null, null, ResultEntity.class);
+            getDatastore().mapReduce(MapreduceType.REPLACE, getAds().find(Shape.class), map, reduce, null, null, ResultEntity.class);
         Assert.assertEquals(2, mrRes.createQuery().countAll());
         Assert.assertEquals(100, mrRes.createQuery().get().getValue().count, 0);
 
 
         final MapreduceResults<ResultEntity> inline =
-            getDs().mapReduce(MapreduceType.INLINE, getAds().find(Shape.class), map, reduce, null, null, ResultEntity.class);
+            getDatastore().mapReduce(MapreduceType.INLINE, getAds().find(Shape.class), map, reduce, null, null, ResultEntity.class);
         final Iterator<ResultEntity> iterator = inline.iterator();
         Assert.assertEquals(2, count(iterator));
         Assert.assertEquals(100, inline.iterator().next().getValue().count, 0);
@@ -91,7 +91,7 @@ public class TestMapreduce extends TestBase {
                               + "return { count : total }; }";
 
         final MapreduceResults<ResultEntity> mrRes =
-            getDs().mapReduce(new MapReduceOptions<ResultEntity>()
+            getDatastore().mapReduce(new MapReduceOptions<ResultEntity>()
                                   .outputType(OutputType.REPLACE)
                                   .query(getAds().find(Shape.class))
                                   .map(map)
@@ -102,7 +102,7 @@ public class TestMapreduce extends TestBase {
 
 
         final MapreduceResults<ResultEntity> inline =
-            getDs().mapReduce(new MapReduceOptions<ResultEntity>()
+            getDatastore().mapReduce(new MapReduceOptions<ResultEntity>()
                                   .outputType(OutputType.INLINE)
                                   .query(getAds().find(Shape.class)).map(map).reduce(reduce)
                                   .resultType(ResultEntity.class));
@@ -114,7 +114,7 @@ public class TestMapreduce extends TestBase {
     @Test
     public void testCollation() {
         checkMinServerVersion(3.4);
-        getDs().save(asList(new Book("The Banquet", "Dante", 2),
+        getDatastore().save(asList(new Book("The Banquet", "Dante", 2),
                             new Book("Divine Comedy", "Dante", 1),
                             new Book("Eclogues", "Dante", 2),
                             new Book("The Odyssey", "Homer", 10),
@@ -131,7 +131,7 @@ public class TestMapreduce extends TestBase {
             .query(query)
             .map(map)
             .reduce(reduce);
-        Iterator<CountResult> iterator = getDs().mapReduce(options).getInlineResults();
+        Iterator<CountResult> iterator = getDatastore().mapReduce(options).getInlineResults();
 
         Assert.assertEquals(0, count(iterator));
 
@@ -141,7 +141,7 @@ public class TestMapreduce extends TestBase {
                          .locale("en")
                          .collationStrength(CollationStrength.SECONDARY)
                          .build());
-        iterator = getDs().mapReduce(options).getInlineResults();
+        iterator = getDatastore().mapReduce(options).getInlineResults();
         CountResult result = iterator.next();
         Assert.assertEquals("Dante", result.getAuthor());
         Assert.assertEquals(3D, result.getCount(), 0);
@@ -150,7 +150,7 @@ public class TestMapreduce extends TestBase {
     @Test
     public void testBypassDocumentValidation() {
         checkMinServerVersion(3.4);
-        getDs().save(asList(new Book("The Banquet", "Dante", 2),
+        getDatastore().save(asList(new Book("The Banquet", "Dante", 2),
                             new Book("Divine Comedy", "Dante", 1),
                             new Book("Eclogues", "Dante", 2),
                             new Book("The Odyssey", "Homer", 10),
@@ -170,20 +170,20 @@ public class TestMapreduce extends TestBase {
         final String reduce = "function (key, values) { return values.length }";
 
         MapReduceOptions<CountResult> options = new MapReduceOptions<CountResult>()
-            .query(getDs().find(Book.class))
+            .query(getDatastore().find(Book.class))
             .resultType(CountResult.class)
             .outputType(OutputType.REPLACE)
             .map(map)
             .reduce(reduce);
         try {
-            getDs().mapReduce(options);
+            getDatastore().mapReduce(options);
             fail("Document validation should have complained.");
         } catch (MongoCommandException e) {
             // expected
         }
 
-        getDs().mapReduce(options.bypassDocumentValidation(true));
-        Assert.assertEquals(2, count(getDs().find(CountResult.class).iterator()));
+        getDatastore().mapReduce(options.bypassDocumentValidation(true));
+        Assert.assertEquals(2, count(getDatastore().find(CountResult.class).iterator()));
     }
 
     @Entity("mr_results")

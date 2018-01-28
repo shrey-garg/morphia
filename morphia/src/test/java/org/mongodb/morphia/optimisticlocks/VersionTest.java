@@ -9,7 +9,6 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Version;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.validation.ConstraintViolationException;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
@@ -33,35 +32,35 @@ public class VersionTest extends TestBase {
 
         final ALongPrimitive a = new ALongPrimitive();
         Assert.assertEquals(0, a.version);
-        getDs().save(a);
+        getDatastore().save(a);
 
-        getDs().save(getDs().get(a));
+        getDatastore().save(getDatastore().get(a));
 
-        getDs().save(a);
+        getDatastore().save(a);
     }
 
     @Test(expected = ConcurrentModificationException.class)
     public void testConcurrentModDetectionLong() throws Exception {
         final ALong a = new ALong();
         Assert.assertEquals(null, a.v);
-        getDs().save(a);
+        getDatastore().save(a);
 
-        getDs().save(getDs().get(a));
+        getDatastore().save(getDatastore().get(a));
 
-        getDs().save(a);
+        getDatastore().save(a);
     }
 
     @Test(expected = ConcurrentModificationException.class)
     public void testConcurrentModDetectionLongWithMerge() throws Exception {
         final ALong a = new ALong();
         Assert.assertEquals(null, a.v);
-        getDs().save(a);
+        getDatastore().save(a);
 
         a.text = " foosdfds ";
-        final ALong a2 = getDs().get(a);
-        getDs().save(a2);
+        final ALong a2 = getDatastore().get(a);
+        getDatastore().save(a2);
 
-        getDs().merge(a);
+        getDatastore().merge(a);
     }
 
     @Test(expected = ConstraintViolationException.class)
@@ -81,7 +80,7 @@ public class VersionTest extends TestBase {
 
         final VersionInHashcode model = new VersionInHashcode();
         model.data = "whatever";
-        getDs().save(model);
+        getDatastore().save(model);
         Assert.assertNotNull(model.version);
     }
 
@@ -89,11 +88,11 @@ public class VersionTest extends TestBase {
     public void testVersions() throws Exception {
         final ALongPrimitive a = new ALongPrimitive();
         Assert.assertEquals(0, a.version);
-        getDs().save(a);
+        getDatastore().save(a);
         Assert.assertTrue(a.version > 0);
         final long version1 = a.version;
 
-        getDs().save(a);
+        getDatastore().save(a);
         Assert.assertTrue(a.version > 0);
         final long version2 = a.version;
 
@@ -103,7 +102,7 @@ public class VersionTest extends TestBase {
     @Test
     public void testVersionsWithFindAndModify() {
         final ALongPrimitive initial = new ALongPrimitive();
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         ds.save(initial);
 
         Query<ALongPrimitive> query = ds.find(ALongPrimitive.class)
@@ -118,7 +117,7 @@ public class VersionTest extends TestBase {
     @Test
     public void testVersionsWithUpdate() {
         final ALongPrimitive initial = new ALongPrimitive();
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         ds.save(initial);
 
         Query<ALongPrimitive> query = ds.find(ALongPrimitive.class)

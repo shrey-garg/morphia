@@ -41,8 +41,8 @@ public class TestJavaLists extends TestBase {
         model.text = "text";
         model.wrapped = new TestEmptyModel.Wrapped();
         model.wrapped.text = "textWrapper";
-        getDs().save(model);
-        TestEmptyModel model2 = getDs().find(TestEmptyModel.class).filter("id", model.id).get();
+        getDatastore().save(model);
+        TestEmptyModel model2 = getDatastore().find(TestEmptyModel.class).filter("id", model.id).get();
         assertNull(model.wrapped.others);
         assertNull(model2.wrapped.others);
     }
@@ -69,7 +69,7 @@ public class TestJavaLists extends TestBase {
     }
 
     private void empties() {
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         ds.delete(ds.find(Employee.class));
         Employee employee = new Employee();
         employee.byteList = asList((byte) 1, (byte) 2);

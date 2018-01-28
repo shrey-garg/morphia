@@ -22,7 +22,7 @@ public class TestEntityInterceptorMoment extends TestBase {
         getMorphia().map(E.class);
         getMorphia().getMapper().addInterceptor(new Interceptor());
 
-        getDs().save(new E());
+        getDatastore().save(new E());
     }
 
     static class E {

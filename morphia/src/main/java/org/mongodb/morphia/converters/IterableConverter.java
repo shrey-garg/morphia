@@ -4,7 +4,6 @@ package org.mongodb.morphia.converters;
 import com.mongodb.DBObject;
 import org.mongodb.morphia.ObjectFactory;
 import org.mongodb.morphia.mapping.EphemeralMappedField;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.utils.ReflectionUtils;
 
 import java.lang.reflect.Array;

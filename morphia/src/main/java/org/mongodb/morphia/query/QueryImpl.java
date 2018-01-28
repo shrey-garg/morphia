@@ -1,16 +1,15 @@
 package org.mongodb.morphia.query;
 
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBCursor;
-import com.mongodb.DBObject;
-import com.mongodb.ReadPreference;
-import com.mongodb.client.model.DBCollectionFindOptions;
-import org.bson.BSONObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.model.CountOptions;
+import com.mongodb.client.model.FindOptions;
 import org.bson.Document;
 import org.bson.types.CodeWScope;
 import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.DatastoreImpl;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.logging.Logger;
@@ -18,9 +17,9 @@ import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
-import org.mongodb.morphia.mapping.cache.EntityCache;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +27,6 @@ import java.util.concurrent.TimeUnit;
 import static com.mongodb.CursorType.NonTailable;
 import static com.mongodb.CursorType.Tailable;
 import static com.mongodb.CursorType.TailableAwait;
-import static java.lang.String.format;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.mongodb.morphia.query.QueryValidator.validateQuery;
 
@@ -42,14 +40,13 @@ import static org.mongodb.morphia.query.QueryValidator.validateQuery;
 @SuppressWarnings("deprecation")
 public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     private static final Logger LOG = MorphiaLoggerFactory.get(QueryImpl.class);
-    private final org.mongodb.morphia.DatastoreImpl ds;
-    private final DBCollection dbColl;
+    private final DatastoreImpl ds;
+    private final MongoCollection<T> collection;
     private final Class<T> clazz;
-    private EntityCache cache;
     private boolean validateName = true;
     private boolean validateType = true;
     private Boolean includeFields;
-    private BasicDBObject baseQuery;
+    private Document baseQuery;
     private FindOptions options;
 
     FindOptions getOptions() {
@@ -63,25 +60,16 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
      * Creates a Query for the given type and collection
      *
      * @param clazz the type to return
-     * @param coll  the collection to query
+     * @param collection  the collection to query
      * @param ds    the Datastore to use
      */
-    public QueryImpl(final Class<T> clazz, final DBCollection coll, final Datastore ds) {
+    public QueryImpl(final Class<T> clazz, final MongoCollection<T> collection, final Datastore ds) {
         super(CriteriaJoin.AND);
 
         setQuery(this);
         this.clazz = clazz;
-        this.ds = ((org.mongodb.morphia.DatastoreImpl) ds);
-        dbColl = coll;
-        cache = this.ds.getMapper().createEntityCache();
-
-        final MappedClass mc = this.ds.getMapper().getMappedClass(clazz);
-        final Entity entAn = mc == null ? null : mc.getEntityAnnotation();
-        if (entAn != null) {
-            getOptions().readPreference(this.ds.getMapper().getMappedClass(clazz).getEntityAnnotation().queryNonPrimary()
-                       ? ReadPreference.secondaryPreferred()
-                       : null);
-        }
+        this.ds = ((DatastoreImpl) ds);
+        this.collection = collection;
     }
 
     /**
@@ -93,8 +81,8 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
      * @param validate true if the results should be validated
      * @return the DBObject
      */
-    public static BasicDBObject parseFieldsString(final String str, final Class clazz, final Mapper mapper, final boolean validate) {
-        BasicDBObject ret = new BasicDBObject();
+    private static Document parseFieldsString(final String str, final Class clazz, final Mapper mapper, final boolean validate) {
+        Document ret = new Document();
         final String[] parts = str.split(",");
         for (String s : parts) {
             s = s.trim();
@@ -125,8 +113,8 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         final List<Key<T>> results = new ArrayList<Key<T>>();
         MorphiaKeyIterator<T> keys = fetchKeys(options);
         try {
-            for (final Key<T> key : keys) {
-                results.add(key);
+            while (keys.hasNext()) {
+                results.add(keys.next());
             }
         } finally {
             keys.close();
@@ -142,19 +130,13 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     @Override
     public List<T> asList(final FindOptions options) {
         final List<T> results = new ArrayList<T>();
-        final MorphiaIterator<T, T> iter = fetch(options);
+        final MongoCursor<T> entities = fetch(options);
         try {
-            for (final T ent : iter) {
-                results.add(ent);
+            while (entities.hasNext()) {
+                results.add(entities.next());
             }
         } finally {
-            iter.close();
-        }
-
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(format("asList: %s \t %d entities, iterator time: driver %d ms, mapper %d ms %n\t cache: %s %n\t for %s",
-                             dbColl.getName(), results.size(), iter.getDriverTime(), iter.getMapperTime(), cache.stats(),
-                             getQueryObject()));
+            entities.close();
         }
 
         return results;
@@ -163,47 +145,47 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     @Override
     @Deprecated
     public long countAll() {
-        final DBObject query = getQueryObject();
+        final Document query = getQueryDocument();
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Executing count(" + dbColl.getName() + ") for query: " + query);
+            LOG.trace("Executing count(" + collection.getNamespace().getCollectionName() + ") for query: " + query);
         }
-        return dbColl.getCount(query);
+        return collection.count(query);
     }
 
     @Override
     public long count() {
-        return dbColl.getCount(getQueryObject());
+        return collection.count(getQueryDocument());
     }
 
     @Override
     public long count(final CountOptions options) {
-        return dbColl.getCount(getQueryObject(), options.getOptions());
+        return collection.count(getQueryDocument(), options);
     }
 
     @Override
-    public MorphiaIterator<T, T> fetch() {
+    public MongoCursor<T> fetch() {
         return fetch(getOptions());
     }
 
     @Override
-    public MorphiaIterator<T, T> fetch(final FindOptions options) {
-        final DBCursor cursor = prepareCursor(options);
+    public MongoCursor<T> fetch(final FindOptions options) {
+        final FindIterable<T> cursor = prepareCursor(options);
         if (LOG.isTraceEnabled()) {
-            LOG.trace("Getting cursor(" + dbColl.getName() + ")  for query:" + cursor.getQuery());
+            LOG.trace("Getting cursor(" + collection.getNamespace().getCollectionName() + ")  for query:" + getQuery());
         }
 
-        return new MorphiaIterator<T, T>(ds, cursor, ds.getMapper(), clazz, dbColl.getName(), cache);
+        return cursor.iterator();
     }
 
     @Override
-    public MorphiaIterator<T, T> fetchEmptyEntities() {
+    public MongoCursor<T> fetchEmptyEntities() {
         return fetchEmptyEntities(getOptions());
     }
 
     @Override
-    public MorphiaIterator<T, T> fetchEmptyEntities(final FindOptions options) {
+    public MongoCursor<T> fetchEmptyEntities(final FindOptions options) {
         QueryImpl<T> cloned = cloneQuery();
-        cloned.getOptions().projection(new BasicDBObject(Mapper.ID_KEY, 1));
+        cloned.getOptions().projection(new Document(Mapper.ID_KEY, 1));
         cloned.includeFields = true;
         return cloned.fetch();
     }
@@ -216,10 +198,10 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     @Override
     public MorphiaKeyIterator<T> fetchKeys(final FindOptions options) {
         QueryImpl<T> cloned = cloneQuery();
-        cloned.getOptions().projection(new BasicDBObject(Mapper.ID_KEY, 1));
+        cloned.getOptions().projection(new Document(Mapper.ID_KEY, 1));
         cloned.includeFields = true;
 
-        return new MorphiaKeyIterator<T>(ds, cloned.prepareCursor(options), ds.getMapper(), clazz, dbColl.getName());
+        return new MorphiaKeyIterator<T>(cloned.prepareCursor(options).iterator(), ds.getMapper());
     }
 
     @Override
@@ -229,8 +211,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public T get(final FindOptions options) {
-        final MorphiaIterator<T, T> it = fetch(options
-                                                   .copy()
+        final MongoCursor<T> it = fetch(new FindOptions(options)
                                                    .limit(1));
         try {
             return (it.hasNext()) ? it.next() : null;
@@ -246,8 +227,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public Key<T> getKey(final FindOptions options) {
-        final MorphiaIterator<T, Key<T>> it = fetchKeys(options
-                                                            .copy()
+        final MorphiaKeyIterator<T> it = fetchKeys(new FindOptions(options)
                                                             .limit(1));
         Key<T> key = (it.hasNext()) ? it.next() : null;
         it.close();
@@ -256,35 +236,26 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     @Deprecated
-    public MorphiaIterator<T, T> tail() {
+    public MongoCursor<T> tail() {
         return tail(true);
     }
 
     @Override
     @Deprecated
-    public MorphiaIterator<T, T> tail(final boolean awaitData) {
-        return fetch(getOptions()
-                         .copy()
+    public MongoCursor<T> tail(final boolean awaitData) {
+        return fetch(new FindOptions(getOptions())
                          .cursorType(awaitData ? TailableAwait : Tailable));
     }
 
     @Override
-    @Deprecated
-    public Query<T> batchSize(final int value) {
-        getOptions().batchSize(value);
-        return this;
-    }
-
-    @Override
     public QueryImpl<T> cloneQuery() {
-        final QueryImpl<T> n = new QueryImpl<T>(clazz, dbColl, ds);
-        n.cache = ds.getMapper().createEntityCache(); // fresh cache
+        final QueryImpl<T> n = new QueryImpl<T>(clazz, collection, ds);
         n.includeFields = includeFields;
         n.setQuery(n); // feels weird, correct?
         n.validateName = validateName;
         n.validateType = validateType;
         n.baseQuery = copy(baseQuery);
-        n.options = options != null ? options.copy() : null;
+        n.options = options != null ? new FindOptions(options) : null;
 
         // fields from superclass
         n.setAttachedTo(getAttachedTo());
@@ -292,15 +263,8 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         return n;
     }
 
-    protected BasicDBObject copy(final DBObject dbObject) {
-        return dbObject == null ? null : new BasicDBObject(dbObject.toMap());
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> comment(final String comment) {
-        getOptions().modifier("$comment", comment);
-        return this;
+    protected Document copy(final Document document) {
+        return document == null ? null : new Document(document);
     }
 
     @Override
@@ -312,38 +276,9 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     @Override
-    @Deprecated
-    public Query<T> disableCursorTimeout() {
-        getOptions().noCursorTimeout(true);
-        return this;
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> disableSnapshotMode() {
-        getOptions().getModifiers().removeField("$snapshot");
-
-        return this;
-    }
-
-    @Override
     public Query<T> disableValidation() {
         validateName = false;
         validateType = false;
-        return this;
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> enableCursorTimeout() {
-        getOptions().noCursorTimeout(false);
-        return this;
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> enableSnapshotMode() {
-        getOptions().modifier("$snapshot", true);
         return this;
     }
 
@@ -363,7 +298,8 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> explain(final FindOptions options) {
-        return prepareCursor(options).explain().toMap();
+        return new LinkedHashMap<String, Object>(getDatastore().getDatabase()
+                                                               .runCommand(getQueryDocument()));
     }
 
     @Override
@@ -387,15 +323,8 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     @Override
-    @Deprecated
-    public int getBatchSize() {
-        return getOptions().getBatchSize();
-    }
-
-    @Override
-    @Deprecated
-    public DBCollection getCollection() {
-        return dbColl;
+    public MongoCollection<T> getCollection() {
+        return collection;
     }
 
     @Override
@@ -404,9 +333,8 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     @Override
-    @Deprecated
-    public DBObject getFieldsObject() {
-        DBObject projection = getOptions().getProjection();
+    public Document getFields() {
+        Document projection = (Document) getOptions().getProjection();
         if (projection == null || projection.keySet().size() == 0) {
             return null;
         }
@@ -414,7 +342,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         final MappedClass mc = ds.getMapper().getMappedClass(clazz);
 
         Entity entityAnnotation = mc.getEntityAnnotation();
-        final BasicDBObject fieldsFilter = copy(projection);
+        final Document fieldsFilter = copy(projection);
 
         if (includeFields && entityAnnotation != null && !entityAnnotation.noClassnameStored()) {
             fieldsFilter.put(Mapper.CLASS_NAME_FIELDNAME, 1);
@@ -424,24 +352,11 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     @Override
-    @Deprecated
-    public int getLimit() {
-        return getOptions().getLimit();
-    }
-
-    @Override
-    @Deprecated
-    public int getOffset() {
-        return getOptions().getSkip();
-    }
-
-    @Override
-    @Deprecated
-    public DBObject getQueryObject() {
-        final DBObject obj = new BasicDBObject();
+    public Document getQueryDocument() {
+        final Document obj = new Document();
 
         if (baseQuery != null) {
-            obj.putAll((BSONObject) baseQuery);
+            obj.putAll(baseQuery);
         }
 
         addTo(obj);
@@ -452,69 +367,21 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     /**
      * Sets query structure directly
      *
-     * @param query the DBObject containing the query
+     * @param query the Document containing the query
      */
-    public void setQueryObject(final DBObject query) {
-        baseQuery = new BasicDBObject(query.toMap());
+    public void setQueryDocument(final Document query) {
+        baseQuery = new Document(query);
     }
 
     @Override
-    @Deprecated
-    public DBObject getSortObject() {
-        DBObject sort = getOptions().getSortDBObject();
-        return (sort == null) ? null : new BasicDBObject(sort.toMap());
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> hintIndex(final String idxName) {
-        getOptions().modifier("$hint", idxName);
-        return this;
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> limit(final int value) {
-        getOptions().limit(value);
-        return this;
-    }
-
-    @Override
-    @Deprecated
-    @SuppressWarnings("unchecked")
-    public Query<T> lowerIndexBound(final DBObject lowerBound) {
-        if (lowerBound != null) {
-            getOptions().modifier("$min", new Document(lowerBound.toMap()));
-        }
-        return this;
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> maxScan(final int value) {
-        if (value > 0) {
-            getOptions().modifier("$maxScan", value);
-        }
-        return this;
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> maxTime(final long value, final TimeUnit unit) {
-        getOptions().modifier("$maxTimeMS", MILLISECONDS.convert(value, unit));
-        return this;
+    public Document getSortDocument() {
+        Document sort = (Document) getOptions().getSort();
+        return (sort == null) ? null : new Document(sort);
     }
 
     long getMaxTime(final TimeUnit unit) {
-        Long maxTime = (Long) getOptions().getModifiers().get("$maxTimeMS");
-        return unit.convert(maxTime != null ? maxTime : 0, MILLISECONDS);
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> offset(final int value) {
-        getOptions().skip(value);
-        return this;
+        long maxTime = getOptions().getMaxTime(unit);
+        return unit.convert(maxTime, MILLISECONDS);
     }
 
     @Override
@@ -534,7 +401,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public Query<T> order(final Sort... sorts) {
-        BasicDBObject sortList = new BasicDBObject();
+        Document sortList = new Document();
         for (Sort sort : sorts) {
             String s = sort.getField();
             if (validateName) {
@@ -549,27 +416,10 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     @Override
-    @Deprecated
-    public Query<T> queryNonPrimary() {
-        getOptions().readPreference(ReadPreference.secondaryPreferred());
-        return this;
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> queryPrimaryOnly() {
-        getOptions().readPreference(ReadPreference.primary());
-        return this;
-    }
-
-    @Override
     public Query<T> retrieveKnownFields() {
-        final MappedClass mc = ds.getMapper().getMappedClass(clazz);
-        final List<String> fields = new ArrayList<String>(mc.getPersistenceFields().size() + 1);
-        for (final MappedField mf : mc.getPersistenceFields()) {
-            fields.add(mf.getNameToStore());
+        for (final MappedField mf : ds.getMapper().getMappedClass(clazz).getPersistenceFields()) {
+            project(mf.getNameToStore(), true);
         }
-        retrievedFields(true, fields.toArray(new String[fields.size()]));
         return this;
     }
 
@@ -584,18 +434,18 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     private void project(final String fieldName, final Object value) {
-        DBObject projection = getOptions().getProjection();
+        Document projection = (Document) getOptions().getProjection();
         if (projection == null) {
-            projection = new BasicDBObject();
+            projection = new Document();
             getOptions().projection(projection);
         }
         projection.put(fieldName, value);
     }
 
-    private void project(final DBObject value) {
-        DBObject projection = getOptions().getProjection();
+    private void project(final Document value) {
+        Document projection = (Document) getOptions().getProjection();
         if (projection == null) {
-            projection = new BasicDBObject();
+            projection = new Document();
             getOptions().projection(projection);
         }
         projection.putAll(value);
@@ -634,59 +484,17 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     @Override
-    @Deprecated
-    public Query<T> retrievedFields(final boolean include, final String... list) {
-        if (includeFields != null && include != includeFields) {
-            throw new IllegalStateException("You cannot mix included and excluded fields together");
-        }
-        for (String field : list) {
-            project(field, include);
-        }
-        return this;
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> returnKey() {
-        getOptions().getModifiers().put("$returnKey", true);
-        return this;
-    }
-
-    @Override
     public Query<T> search(final String search) {
-
-        final BasicDBObject op = new BasicDBObject("$search", search);
-
+        final Document op = new Document("$search", search);
         this.criteria("$text").equal(op);
-
         return this;
     }
 
     @Override
     public Query<T> search(final String search, final String language) {
-
-        final BasicDBObject op = new BasicDBObject("$search", search)
+        final Document op = new Document("$search", search)
                                      .append("$language", language);
-
         this.criteria("$text").equal(op);
-
-        return this;
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> upperIndexBound(final DBObject upperBound) {
-        if (upperBound != null) {
-            getOptions().getModifiers().put("$max", new BasicDBObject(upperBound.toMap()));
-        }
-
-        return this;
-    }
-
-    @Override
-    @Deprecated
-    public Query<T> useReadPreference(final ReadPreference readPref) {
-        getOptions().readPreference(readPref);
         return this;
     }
 
@@ -709,10 +517,8 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     /**
      * @return the Datastore
-     * @deprecated this is an internal method that exposes an internal type and will likely go away soon
      */
-    @Deprecated
-    public org.mongodb.morphia.DatastoreImpl getDatastore() {
+    public DatastoreImpl getDatastore() {
         return ds;
     }
 
@@ -731,7 +537,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     @Override
-    public MorphiaIterator<T, T> iterator() {
+    public MongoCursor<T> iterator() {
         return fetch();
     }
 
@@ -742,44 +548,42 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
      * @deprecated this is an internal method.  no replacement is planned.
      */
     @Deprecated
-    public DBCursor prepareCursor() {
+    public FindIterable<T> prepareCursor() {
         return prepareCursor(getOptions());
     }
 
-    private DBCursor prepareCursor(final FindOptions findOptions) {
-        final DBObject query = getQueryObject();
+    private FindIterable<T> prepareCursor(final FindOptions findOptions) {
+        final Document query = getQueryDocument();
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace(String.format("Running query(%s) : %s, options: %s,", dbColl.getName(), query, findOptions));
+            LOG.trace(String.format("Running query(%s) : %s, options: %s,", collection.getNamespace().getCollectionName(), query, findOptions));
         }
 
-        if (findOptions.isSnapshot() && (findOptions.getSortDBObject() != null || findOptions.hasHint())) {
+        if (findOptions.isSnapshot() && (findOptions.getSort() != null || findOptions.getHint() != null)) {
             LOG.warning("Snapshotted query should not have hint/sort.");
         }
 
-        if (findOptions.getCursorType() != NonTailable && (findOptions.getSortDBObject() != null)) {
+        if (findOptions.getCursorType() != NonTailable && (findOptions.getSort() != null)) {
             LOG.warning("Sorting on tail is not allowed.");
         }
 
-        return dbColl.find(query, findOptions.getOptions()
-                                             .copy()
-                                             .sort(getSortObject())
-                                             .projection(getFieldsObject()))
-                     .setDecoderFactory(ds.getDecoderFact());
+        return collection.find(query)
+                         .projection(getFields())
+                         .sort(getSortDocument());
     }
 
     @Override
     public String toString() {
-        return String.format("{ query: %s %s }", getQueryObject(), getOptions().getProjection() == null
+        return String.format("{ query: %s %s }", getQueryDocument(), getOptions().getProjection() == null
                                                                    ? ""
-                                                                   : ", projection: " + getFieldsObject());
+                                                                   : ", projection: " + getFields());
     }
 
     /**
      * Converts the textual operator (">", "<=", etc) into a FilterOperator. Forgiving about the syntax; != and <> are NOT_EQUAL, = and ==
      * are EQUAL.
      */
-    protected FilterOperator translate(final String operator) {
+    private FilterOperator translate(final String operator) {
         return FilterOperator.fromString(operator);
     }
 
@@ -800,7 +604,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         if (validateType != query.validateType) {
             return false;
         }
-        if (!dbColl.equals(query.dbColl)) {
+        if (!collection.equals(query.collection)) {
             return false;
         }
         if (!clazz.equals(query.clazz)) {
@@ -824,54 +628,43 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
             return true;
         }
 
-        DBCollectionFindOptions dbOptions = these.getOptions();
-        DBCollectionFindOptions that = those.getOptions();
-
-        if (dbOptions.getBatchSize() != that.getBatchSize()) {
+        if (these.getBatchSize() != those.getBatchSize()) {
             return false;
         }
-        if (dbOptions.getLimit() != that.getLimit()) {
+        if (these.getLimit() != those.getLimit()) {
             return false;
         }
-        if (dbOptions.getMaxTime(MILLISECONDS) != that.getMaxTime(MILLISECONDS)) {
+        if (these.getMaxTime(MILLISECONDS) != those.getMaxTime(MILLISECONDS)) {
             return false;
         }
-        if (dbOptions.getMaxAwaitTime(MILLISECONDS) != that.getMaxAwaitTime(MILLISECONDS)) {
+        if (these.getMaxAwaitTime(MILLISECONDS) != those.getMaxAwaitTime(MILLISECONDS)) {
             return false;
         }
-        if (dbOptions.getSkip() != that.getSkip()) {
+        if (these.getSkip() != those.getSkip()) {
             return false;
         }
-        if (dbOptions.isNoCursorTimeout() != that.isNoCursorTimeout()) {
+        if (these.isNoCursorTimeout() != those.isNoCursorTimeout()) {
             return false;
         }
-        if (dbOptions.isOplogReplay() != that.isOplogReplay()) {
+        if (these.isOplogReplay() != those.isOplogReplay()) {
             return false;
         }
-        if (dbOptions.isPartial() != that.isPartial()) {
+        if (these.isPartial() != those.isPartial()) {
             return false;
         }
-        if (dbOptions.getModifiers() != null ? !dbOptions.getModifiers().equals(that.getModifiers()) : that.getModifiers() != null) {
+        if (these.getModifiers() != null ? !these.getModifiers().equals(those.getModifiers()) : those.getModifiers() != null) {
             return false;
         }
-        if (dbOptions.getProjection() != null ? !dbOptions.getProjection().equals(that.getProjection()) : that.getProjection() != null) {
+        if (these.getProjection() != null ? !these.getProjection().equals(those.getProjection()) : those.getProjection() != null) {
             return false;
         }
-        if (dbOptions.getSort() != null ? !dbOptions.getSort().equals(that.getSort()) : that.getSort() != null) {
+        if (these.getSort() != null ? !these.getSort().equals(those.getSort()) : those.getSort() != null) {
             return false;
         }
-        if (dbOptions.getCursorType() != that.getCursorType()) {
+        if (these.getCursorType() != those.getCursorType()) {
             return false;
         }
-        if (dbOptions.getReadPreference() != null ? !dbOptions.getReadPreference().equals(that.getReadPreference())
-                                                  : that.getReadPreference() != null) {
-            return false;
-        }
-        if (dbOptions.getReadConcern() != null ? !dbOptions.getReadConcern().equals(that.getReadConcern())
-                                               : that.getReadConcern() != null) {
-            return false;
-        }
-        return dbOptions.getCollation() != null ? dbOptions.getCollation().equals(that.getCollation()) : that.getCollation() == null;
+        return these.getCollation() != null ? these.getCollation().equals(those.getCollation()) : those.getCollation() == null;
 
     }
 
@@ -880,26 +673,24 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
             return 0;
         }
         int result = options.getBatchSize();
-        result = 31 * result + getLimit();
+        result = 31 * result + options.getLimit();
         result = 31 * result + (options.getModifiers() != null ? options.getModifiers().hashCode() : 0);
         result = 31 * result + (options.getProjection() != null ? options.getProjection().hashCode() : 0);
         result = 31 * result + (int) (options.getMaxTime(MILLISECONDS) ^ options.getMaxTime(MILLISECONDS) >>> 32);
         result = 31 * result + (int) (options.getMaxAwaitTime(MILLISECONDS) ^ options.getMaxAwaitTime(MILLISECONDS) >>> 32);
         result = 31 * result + options.getSkip();
-        result = 31 * result + (options.getSortDBObject() != null ? options.getSortDBObject().hashCode() : 0);
+        result = 31 * result + (options.getSort() != null ? options.getSort().hashCode() : 0);
         result = 31 * result + (options.getCursorType() != null ? options.getCursorType().hashCode() : 0);
         result = 31 * result + (options.isNoCursorTimeout() ? 1 : 0);
         result = 31 * result + (options.isOplogReplay() ? 1 : 0);
         result = 31 * result + (options.isPartial() ? 1 : 0);
-        result = 31 * result + (options.getReadPreference() != null ? options.getReadPreference().hashCode() : 0);
-        result = 31 * result + (options.getReadConcern() != null ? options.getReadConcern().hashCode() : 0);
         result = 31 * result + (options.getCollation() != null ? options.getCollation().hashCode() : 0);
         return result;
     }
 
     @Override
     public int hashCode() {
-        int result = dbColl.hashCode();
+        int result = collection.hashCode();
         result = 31 * result + clazz.hashCode();
         result = 31 * result + (validateName ? 1 : 0);
         result = 31 * result + (validateType ? 1 : 0);

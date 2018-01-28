@@ -3,7 +3,6 @@ package org.mongodb.morphia.converters;
 
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
-import org.mongodb.morphia.mapping.MappedField;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

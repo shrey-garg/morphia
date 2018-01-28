@@ -36,7 +36,7 @@ public final class QuickTour {
 
         // create the Datastore connecting to the database running on the default port on the local host
         final Datastore datastore = morphia.createDatastore(new MongoClient(), "morphia_example");
-        datastore.getDB().dropDatabase();
+        datastore.getDatabase().dropDatabase();
         datastore.ensureIndexes();
 
         final Employee elmer = new Employee("Elmer Fudd", 50000.0);

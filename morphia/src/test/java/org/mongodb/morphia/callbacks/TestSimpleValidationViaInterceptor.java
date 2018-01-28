@@ -10,8 +10,6 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.PrePersist;
 import org.mongodb.morphia.callbacks.TestSimpleValidationViaInterceptor.NonNullValidation.NonNullValidationException;
-import org.mongodb.morphia.mapping.MappedClass;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.lang.annotation.ElementType;
@@ -38,9 +36,9 @@ public class TestSimpleValidationViaInterceptor extends TestBase {
         getMorphia().map(E.class);
         getMorphia().map(E2.class);
 
-        getDs().save(new E());
+        getDatastore().save(new E());
         try {
-            getDs().save(new E2());
+            getDatastore().save(new E2());
             Assert.fail();
         } catch (NonNullValidationException e) {
             // expected

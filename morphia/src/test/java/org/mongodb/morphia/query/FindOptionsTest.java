@@ -18,10 +18,8 @@ package org.mongodb.morphia.query;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
-import com.mongodb.ReadConcern;
-import com.mongodb.ReadPreference;
 import com.mongodb.client.model.Collation;
-import com.mongodb.client.model.DBCollectionFindOptions;
+import com.mongodb.client.model.FindOptions;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -36,11 +34,9 @@ public class FindOptionsTest {
                                        .locale("en")
                                        .caseLevel(true)
                                        .build();
-        DBCollectionFindOptions options = new FindOptions()
+        FindOptions options = new FindOptions()
             .batchSize(42)
             .limit(18)
-            .modifier("i'm a", "modifier")
-            .modifier("i am", 2)
             .projection(new BasicDBObject("field", "value"))
             .maxTime(15, TimeUnit.MINUTES)
             .maxAwaitTime(45, TimeUnit.SECONDS)
@@ -50,14 +46,10 @@ public class FindOptionsTest {
             .noCursorTimeout(true)
             .oplogReplay(true)
             .partial(true)
-            .readPreference(ReadPreference.secondaryPreferred(2, TimeUnit.MINUTES))
-            .readConcern(ReadConcern.LOCAL)
-            .collation(collation).getOptions();
+            .collation(collation);
 
         assertEquals(42, options.getBatchSize());
         assertEquals(18, options.getLimit());
-        assertEquals(new BasicDBObject("i'm a", "modifier")
-                         .append("i am", 2), options.getModifiers());
         assertEquals(new BasicDBObject("field", "value"), options.getProjection());
         assertEquals(15, options.getMaxTime(TimeUnit.MINUTES));
         assertEquals(45, options.getMaxAwaitTime(TimeUnit.SECONDS));
@@ -67,8 +59,6 @@ public class FindOptionsTest {
         assertTrue(options.isNoCursorTimeout());
         assertTrue(options.isOplogReplay());
         assertTrue(options.isPartial());
-        assertEquals(ReadPreference.secondaryPreferred(2, TimeUnit.MINUTES), options.getReadPreference());
-        assertEquals(ReadConcern.LOCAL, options.getReadConcern());
         assertEquals(collation, options.getCollation());
     }
 }

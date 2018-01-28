@@ -2,8 +2,6 @@ package org.mongodb.morphia.mapping.validation.fieldrules;
 
 
 import org.mongodb.morphia.annotations.Reference;
-import org.mongodb.morphia.mapping.MappedClass;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.lazy.LazyFeatureDependencies;
 import org.mongodb.morphia.mapping.validation.ConstraintViolation;

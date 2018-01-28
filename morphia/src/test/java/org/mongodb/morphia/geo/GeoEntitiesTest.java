@@ -59,10 +59,10 @@ public class GeoEntitiesTest extends TestBase {
         GeometryCollection geometryCollection = GeoJson.geometryCollection(point, lineString, polygonWithHoles, multiPoint,
                                                                            multiLineString, multiPolygon);
         AllTheThings allTheThings = new AllTheThings(name, geometryCollection);
-        getDs().save(allTheThings);
+        getDatastore().save(allTheThings);
 
         // when
-        AllTheThings found = getDs().find(AllTheThings.class).field("name").equal(name).get();
+        AllTheThings found = getDatastore().find(AllTheThings.class).field("name").equal(name).get();
 
         // then
         assertThat(found, is(notNullValue()));
@@ -73,10 +73,10 @@ public class GeoEntitiesTest extends TestBase {
     public void shouldRetrieveGeoJsonLineString() {
         // given
         Route route = new Route("My Route", lineString(point(1, 2), point(3, 5), point(19, 13)));
-        getDs().save(route);
+        getDatastore().save(route);
 
         // when
-        Route found = getDs().find(Route.class).field("name").equal("My Route").get();
+        Route found = getDatastore().find(Route.class).field("name").equal("My Route").get();
 
         // then
         assertThat(found, is(notNullValue()));
@@ -92,10 +92,10 @@ public class GeoEntitiesTest extends TestBase {
                                                                          point(1.9, 2.0),
                                                                          point(1.9, 1.8),
                                                                          point(1.5, 2.0))));
-        getDs().save(paths);
+        getDatastore().save(paths);
 
         // when
-        Paths found = getDs().find(Paths.class).field("name").equal(name).get();
+        Paths found = getDatastore().find(Paths.class).field("name").equal(name).get();
 
         // then
         assertThat(found, is(notNullValue()));
@@ -107,10 +107,10 @@ public class GeoEntitiesTest extends TestBase {
         // given
         String name = "My stores";
         Stores stores = new Stores(name, GeoJson.multiPoint(point(1, 2), point(3, 5), point(19, 13)));
-        getDs().save(stores);
+        getDatastore().save(stores);
 
         // when
-        Stores found = getDs().find(Stores.class).field("name").equal(name).get();
+        Stores found = getDatastore().find(Stores.class).field("name").equal(name).get();
 
         // then
         assertThat(found, is(notNullValue()));
@@ -126,10 +126,10 @@ public class GeoEntitiesTest extends TestBase {
                                            lineString(point(2.2, 2.1), point(2.4, 1.9), point(2.4, 1.7), point(2.1, 1.8), point(2.2, 2.1)));
         Regions regions = new Regions(name, multiPolygon(polygon(point(1.1, 2.0), point(2.3, 3.5), point(3.7, 1.0), point(1.1, 2.0)),
                                                          polygonWithHoles));
-        getDs().save(regions);
+        getDatastore().save(regions);
 
         // when
-        Regions found = getDs().find(Regions.class).field("name").equal(name).get();
+        Regions found = getDatastore().find(Regions.class).field("name").equal(name).get();
 
         // then
         assertThat(found, is(notNullValue()));
@@ -144,10 +144,10 @@ public class GeoEntitiesTest extends TestBase {
                                            lineString(point(1.5, 2.0), point(1.9, 2.0), point(1.9, 1.8), point(1.5, 2.0)),
                                            lineString(point(2.2, 2.1), point(2.4, 1.9), point(2.4, 1.7), point(2.1, 1.8), point(2.2, 2.1)));
         Area area = new Area(polygonName, polygonWithHoles);
-        getDs().save(area);
+        getDatastore().save(area);
 
         // when
-        Area found = getDs().find(Area.class).field("name").equal(polygonName).get();
+        Area found = getDatastore().find(Area.class).field("name").equal(polygonName).get();
 
         // then
         assertThat(found, is(notNullValue()));
@@ -158,10 +158,10 @@ public class GeoEntitiesTest extends TestBase {
     public void shouldRetrieveGeoJsonPoint() {
         // given
         City city = new City("New City", point(3.0, 7.0));
-        getDs().save(city);
+        getDatastore().save(city);
 
         // when
-        City found = getDs().find(City.class).field("name").equal("New City").get();
+        City found = getDatastore().find(City.class).field("name").equal("New City").get();
 
         // then
         assertThat(found, is(notNullValue()));
@@ -172,10 +172,10 @@ public class GeoEntitiesTest extends TestBase {
     public void shouldRetrieveGeoJsonPolygon() {
         // given
         Area area = new Area("The Area", polygon(point(1.1, 2.0), point(2.3, 3.5), point(3.7, 1.0), point(1.1, 2.0)));
-        getDs().save(area);
+        getDatastore().save(area);
 
         // when
-        Area found = getDs().find(Area.class).field("name").equal("The Area").get();
+        Area found = getDatastore().find(Area.class).field("name").equal("The Area").get();
 
         // then
         assertThat(found, is(notNullValue()));
@@ -206,10 +206,10 @@ public class GeoEntitiesTest extends TestBase {
         AllTheThings allTheThings = new AllTheThings(name, geometryCollection);
 
         // when
-        getDs().save(allTheThings);
+        getDatastore().save(allTheThings);
 
         // then use the underlying driver to ensure it was persisted correctly to the database
-        DBObject storedArea = getDs().getCollection(AllTheThings.class).findOne(new BasicDBObject("name", name),
+        DBObject storedArea = getDatastore().getCollection(AllTheThings.class).findOne(new BasicDBObject("name", name),
                                                                                 new BasicDBObject("_id", 0)
                                                                                     .append("className", 0));
         assertThat(storedArea, is(notNullValue()));
@@ -302,10 +302,10 @@ public class GeoEntitiesTest extends TestBase {
         Route route = new Route("My Route", lineString(point(1, 2), point(3, 5), point(19, 13)));
 
         // when
-        getDs().save(route);
+        getDatastore().save(route);
 
         // then use the underlying driver to ensure it was persisted correctly to the database
-        DBObject storedRoute = getDs().getCollection(Route.class).findOne(new BasicDBObject("name", "My Route"),
+        DBObject storedRoute = getDatastore().getCollection(Route.class).findOne(new BasicDBObject("name", "My Route"),
                                                                           new BasicDBObject("_id", 0).append("className", 0));
         assertThat(storedRoute, is(notNullValue()));
         // lat/long is always long/lat on the server
@@ -328,10 +328,10 @@ public class GeoEntitiesTest extends TestBase {
         Stores stores = new Stores(name, GeoJson.multiPoint(point(1, 2), point(3, 5), point(19, 13)));
 
         // when
-        getDs().save(stores);
+        getDatastore().save(stores);
 
         // then use the underlying driver to ensure it was persisted correctly to the database
-        DBObject storedObject = getDs().getCollection(Stores.class).findOne(new BasicDBObject("name", name),
+        DBObject storedObject = getDatastore().getCollection(Stores.class).findOne(new BasicDBObject("name", name),
                                                                             new BasicDBObject("_id", 0).append("className", 0));
         assertThat(storedObject, is(notNullValue()));
         assertThat(storedObject.toString(), JSONMatcher.jsonEqual("  {"
@@ -352,10 +352,10 @@ public class GeoEntitiesTest extends TestBase {
         City city = new City("New City", point(3.0, 7.0));
 
         // when
-        getDs().save(city);
+        getDatastore().save(city);
 
         // then use the underlying driver to ensure it was persisted correctly to the database
-        DBObject storedCity = getDs().getCollection(City.class).findOne(new BasicDBObject("name", "New City"),
+        DBObject storedCity = getDatastore().getCollection(City.class).findOne(new BasicDBObject("name", "New City"),
                                                                         new BasicDBObject("_id", 0).append("className", 0));
         assertThat(storedCity, is(notNullValue()));
         assertThat(storedCity.toString(), JSONMatcher.jsonEqual("  {"
@@ -379,10 +379,10 @@ public class GeoEntitiesTest extends TestBase {
                                                                          point(1.5, 2.0))));
 
         // when
-        getDs().save(paths);
+        getDatastore().save(paths);
 
         // then use the underlying driver to ensure it was persisted correctly to the database
-        DBObject storedPaths = getDs().getCollection(Paths.class).findOne(new BasicDBObject("name", name),
+        DBObject storedPaths = getDatastore().getCollection(Paths.class).findOne(new BasicDBObject("name", name),
                                                                           new BasicDBObject("_id", 0).append("className", 0));
         assertThat(storedPaths, is(notNullValue()));
         // lat/long is always long/lat on the server
@@ -418,10 +418,10 @@ public class GeoEntitiesTest extends TestBase {
                                                          polygonWithHoles));
 
         // when
-        getDs().save(regions);
+        getDatastore().save(regions);
 
         // then use the underlying driver to ensure it was persisted correctly to the database
-        DBObject storedRegions = getDs().getCollection(Regions.class).findOne(new BasicDBObject("name", name),
+        DBObject storedRegions = getDatastore().getCollection(Regions.class).findOne(new BasicDBObject("name", name),
                                                                               new BasicDBObject("_id", 0)
                                                                                   .append("className", 0));
         assertThat(storedRegions, is(notNullValue()));
@@ -468,10 +468,10 @@ public class GeoEntitiesTest extends TestBase {
         Area area = new Area(polygonName, polygonWithHoles);
 
         // when
-        getDs().save(area);
+        getDatastore().save(area);
 
         // then use the underlying driver to ensure it was persisted correctly to the database
-        DBObject storedArea = getDs().getCollection(Area.class).findOne(new BasicDBObject("name", polygonName),
+        DBObject storedArea = getDatastore().getCollection(Area.class).findOne(new BasicDBObject("name", polygonName),
                                                                         new BasicDBObject("_id", 0)
                                                                             .append("className", 0)
                                                                             .append("area.className", 0));
@@ -509,10 +509,10 @@ public class GeoEntitiesTest extends TestBase {
         Area area = new Area("The Area", polygon(point(1.1, 2.0), point(2.3, 3.5), point(3.7, 1.0), point(1.1, 2.0)));
 
         // when
-        getDs().save(area);
+        getDatastore().save(area);
 
         // then use the underlying driver to ensure it was persisted correctly to the database
-        DBObject storedArea = getDs().getCollection(Area.class).findOne(new BasicDBObject("name", "The Area"),
+        DBObject storedArea = getDatastore().getCollection(Area.class).findOne(new BasicDBObject("name", "The Area"),
                                                                         new BasicDBObject("_id", 0)
                                                                             .append("className", 0)
                                                                             .append("area.className", 0));
@@ -532,10 +532,10 @@ public class GeoEntitiesTest extends TestBase {
 
     @Test
     public void shouldSaveAnEntityWithNullPoints() {
-        getDs().save(new City("New City", null));
+        getDatastore().save(new City("New City", null));
 
-        DBObject storedCity = getDs().getCollection(City.class)
-                                     .findOne(new BasicDBObject("name", "New City"),
+        DBObject storedCity = getDatastore().getCollection(City.class)
+                                            .findOne(new BasicDBObject("name", "New City"),
                                               new BasicDBObject("_id", 0)
                                                   .append("className", 0));
         assertThat(storedCity, is(notNullValue()));

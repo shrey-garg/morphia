@@ -2,17 +2,16 @@ package org.mongodb.morphia.query;
 
 
 import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
-import com.mongodb.ReadPreference;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.FindOptions;
+import org.bson.Document;
 import org.bson.types.CodeWScope;
 
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 
 /**
- * @param <T> The java type to query against
- * @author Scott Hernandez
+ * @param <T> The type to query against
  */
 public interface Query<T> extends QueryResults<T>, Cloneable {
     /**
@@ -24,35 +23,11 @@ public interface Query<T> extends QueryResults<T>, Cloneable {
     CriteriaContainer and(Criteria... criteria);
 
     /**
-     * Batch-size of the fetched result (cursor).
-     *
-     * @param value must be >= 0.  A value of 0 indicates the server default.
-     * @return this
-     * @deprecated use the methods that accept Options directly
-     * @see FindOptions#batchSize(int)
-     */
-    @Deprecated
-    Query<T> batchSize(int value);
-
-    /**
      * Creates and returns a copy of this {@link Query}.
      *
      * @return this
      */
     Query<T> cloneQuery();
-
-    /**
-     * This makes it possible to attach a comment to a query. Because these comments propagate to the profile log, adding comments can make
-     * your profile data much easier to interpret and trace.
-     *
-     * @param comment the comment to add
-     * @return the Query to enable chaining of commands
-     * @mongodb.driver.manual reference/operator/meta/comment $comment
-     * @see FindOptions#modifier(String, Object)
-     * @deprecated use the methods that accept Options directly. This can be replicated with {@code options.modifier("$comment", comment)}
-     */
-    @Deprecated
-    Query<T> comment(String comment);
 
     /**
      * Creates a criteria to apply against a field
@@ -63,52 +38,11 @@ public interface Query<T> extends QueryResults<T>, Cloneable {
     FieldEnd<? extends CriteriaContainerImpl> criteria(String field);
 
     /**
-     * Disables cursor timeout on server.
-     *
-     * @return this
-     * @deprecated use the methods that accept Options directly
-     * @see FindOptions#noCursorTimeout(boolean)
-     */
-    @Deprecated
-    Query<T> disableCursorTimeout();
-
-    /**
-     * Disable snapshotted mode (default mode). This will be faster but changes made during the cursor may cause duplicates.
-     *
-     * @return this
-     * @deprecated use the methods that accept Options directly.  This can be replicated using {@code options.modifier("$snapshot", false)}
-     * @see FindOptions#modifier(String, Object)
-     */
-    @Deprecated
-    Query<T> disableSnapshotMode();
-
-    /**
      * Turns off validation (for all calls made after)
      *
      * @return this
      */
     Query<T> disableValidation();
-
-    /**
-     * Enables cursor timeout on server.
-     *
-     * @return this
-     * @deprecated use the methods that accept Options directly
-     * @see FindOptions#noCursorTimeout(boolean)
-     */
-    @Deprecated
-    Query<T> enableCursorTimeout();
-
-    /**
-     * Enables snapshotted mode where duplicate results (which may be updated during the lifetime of the cursor) will not be returned. Not
-     * compatible with order/sort and hint.
-     *
-     * @return this
-     * @deprecated use the methods that accept Options directly.  This can be replicated using {@code options.modifier("$snapshot", true)}
-     * @see FindOptions#modifier(String, Object)
-     */
-    @Deprecated
-    Query<T> enableSnapshotMode();
 
     /**
      * Turns on validation (for all calls made after); by default validation is on
@@ -176,21 +110,9 @@ public interface Query<T> extends QueryResults<T>, Cloneable {
     Query<T> filter(String condition, Object value);
 
     /**
-     * @return the batch size
-     * @see #batchSize(int)
-     * @deprecated use the methods that accept Options directly
-     * @see FindOptions#batchSize(int)
-     */
-    @Deprecated
-    int getBatchSize();
-
-    /**
      * @return the {@link DBCollection} of the {@link Query}.
-     *
-     * @deprecated This is an internal method and subject to change or removal.  Do not use.
      */
-    @Deprecated
-    DBCollection getCollection();
+    MongoCollection<T> getCollection();
 
     /**
      * @return the entity {@link Class}.
@@ -198,117 +120,19 @@ public interface Query<T> extends QueryResults<T>, Cloneable {
     Class<T> getEntityClass();
 
     /**
-     * @return the Mongo fields {@link DBObject}.
-     * @deprecated This is an internal method and subject to change or removal.  Do not use.
+     * @return the Mongo fields {@link Document}.
      */
-    @Deprecated
-    DBObject getFieldsObject();
+    Document getFields();
 
     /**
-     * @return the limit
-     * @see #limit(int)
-     * @deprecated use the methods that accept Options directly
-     * @see FindOptions#limit(int)
+     * @return the Mongo query {@link Document}.
      */
-    @Deprecated
-    int getLimit();
+    Document getQueryDocument();
 
     /**
-     * @return the offset.
-     * @see #offset(int)
-     * @deprecated use the methods that accept Options directly
-     * @see FindOptions#getSkip()
+     * @return the Mongo sort {@link Document}.
      */
-    @Deprecated
-    int getOffset();
-
-    /**
-     * @return the Mongo query {@link DBObject}.
-     * @deprecated This is an internal method and subject to change or removal.  Do not use.
-     */
-    @Deprecated
-    DBObject getQueryObject();
-
-    /**
-     * @return the Mongo sort {@link DBObject}.
-     * @deprecated This is an internal method and subject to change or removal.  Do not use.
-     */
-    @Deprecated
-    DBObject getSortObject();
-
-    /**
-     * Hints as to which index should be used.
-     *
-     * @param idxName the index name to hint
-     * @return this
-     * @deprecated use the methods that accept Options directly. This can be replicated with {@code options.modifier("$hint", idxName)}
-     * @see FindOptions#modifier(String, Object)
-     */
-    @Deprecated
-    Query<T> hintIndex(String idxName);
-
-    /**
-     * Limit the fetched result set to a certain number of values.
-     *
-     * @param value must be >= 0.  A value of 0 indicates no limit.  For values < 0, use {@link FindOptions#batchSize(int)} which
-     *              is the preferred method
-     * @return this
-     * @deprecated use the methods that accept Options directly
-     * @see FindOptions#limit(int)
-     */
-    @Deprecated
-    Query<T> limit(int value);
-
-    /**
-     * <p> Specify the inclusive lower bound for a specific index in order to constrain the results of this query. <p/> You can chain
-     * key/value pairs to build a constraint for a compound index. For instance: </p> <p> {@code query.lowerIndexBound(new
-     * BasicDBObject("a", 1).append("b", 2)); } </p> <p> to build a constraint on index {@code {"a", "b"}} </p>
-     *
-     * @param lowerBound The inclusive lower bound.
-     * @return this
-     * @mongodb.driver.manual reference/operator/meta/min/ $min
-     * @deprecated use the methods that accept Options directly.  This can be replicated using
-     * {@code options.modifier("$min", new Document(...)) }
-     * @see FindOptions#modifier(String, Object)
-     */
-    @Deprecated
-    Query<T> lowerIndexBound(DBObject lowerBound);
-
-    /**
-     * Constrains the query to only scan the specified number of documents when fulfilling the query.
-     *
-     * @param value must be > 0.  A value < 0 indicates no limit
-     * @return this
-     * @mongodb.driver.manual reference/operator/meta/maxScan/#op._S_maxScan $maxScan
-     * @deprecated use the methods that accept Options directly.  This can be replicated using {@code options.modifier("$maxScan", value) }
-     * @see FindOptions#modifier(String, Object)
-     */
-    @Deprecated
-    Query<T> maxScan(int value);
-
-    /**
-     * Specifies a time limit for executing the query. Requires server version 2.6 or above.
-     *
-     * @param maxTime     must be > 0.  A value < 0 indicates no limit
-     * @param maxTimeUnit the unit of time to use
-     * @return this
-     * @deprecated use the methods that accept Options directly. This can be replicated using {@code options.modifier("$maxTimeMS",
-     * MILLISECONDS.convert(value, unit)) }
-     * @see FindOptions#modifier(String, Object)
-     */
-    @Deprecated
-    Query<T> maxTime(long maxTime, TimeUnit maxTimeUnit);
-
-    /**
-     * Starts the query results at a particular zero-based offset.
-     *
-     * @param value must be >= 0
-     * @return this
-     * @deprecated use the methods that accept Options directly
-     * @see FindOptions#skip(int)
-     */
-    @Deprecated
-    Query<T> offset(int value);
+    Document getSortDocument();
 
     /**
      * Creates a container to hold 'or' clauses
@@ -383,61 +207,11 @@ public interface Query<T> extends QueryResults<T>, Cloneable {
     Query<T> project(Meta meta);
 
     /**
-     * Route query to non-primary node
-     *
-     * @return this
-     * @see ReadPreference#secondary()
-     * @see ReadPreference#secondaryPreferred()
-     * @deprecated use the methods that accept Options directly
-     * @see FindOptions#readPreference(ReadPreference)
-     * @see ReadPreference#secondary()
-     * @see ReadPreference#secondaryPreferred()
-     */
-    @Deprecated
-    Query<T> queryNonPrimary();
-
-    /**
-     * Route query to primary node
-     *
-     * @return this
-     * @see ReadPreference#primary()
-     * @deprecated use the methods that accept Options directly.
-     * @see FindOptions#readPreference(ReadPreference)
-     * @see ReadPreference#primary()
-     * @see ReadPreference#primaryPreferred()
-     */
-    @Deprecated
-    Query<T> queryPrimaryOnly();
-
-    /**
      * Limits the fields retrieved to those of the query type -- dangerous with interfaces and abstract classes
      *
      * @return this
      */
     Query<T> retrieveKnownFields();
-
-    /**
-     * Limits the fields retrieved
-     *
-     * @param include true if the fields should be included in the results.  false to exclude them.
-     * @param fields  the fields in question
-     * @return this
-     * @deprecated use {@link #project(String, boolean)} instead
-     */
-    @Deprecated
-    Query<T> retrievedFields(boolean include, String... fields);
-
-    /**
-     * Only return the index field or fields for the results of the query. If $returnKey is set to true and the query does not use an index
-     * to perform the read operation, the returned documents will not contain any fields
-     *
-     * @return the Query to enable chaining of commands
-     * @mongodb.driver.manual reference/operator/meta/returnKey/#op._S_returnKey $returnKey
-     * @deprecated use the methods that accept Options directly. This can be replicated using {@code options.modifier("$returnKey", true) }
-     * @see FindOptions#modifier(String, Object)
-     */
-    @Deprecated
-    Query<T> returnKey();
 
     /**
      * Perform a text search on the content of the fields indexed with a text index..
@@ -457,33 +231,6 @@ public interface Query<T> extends QueryResults<T>, Cloneable {
      * @mongodb.driver.manual reference/operator/query/text/ $text
      */
     Query<T> search(String text, String language);
-
-    /**
-     * <p> Specify the exclusive upper bound for a specific index in order to constrain the results of this query. <p/> You can chain
-     * key/value pairs to build a constraint for a compound index. For instance: </p> <p> {@code query.upperIndexBound(new
-     * BasicDBObject("a", 1).append("b", 2)); } </p> <p> to build a constraint on index {@code {"a", "b"}} </p>
-     *
-     * @param upperBound The exclusive upper bound.
-     * @return this
-     * @mongodb.driver.manual reference/operator/meta/max/ $max
-     * @deprecated use the methods that accept Options directly.  This can be replicated using
-     * {@code options.modifier("$max", new Document(...)) }
-     * @see FindOptions#modifier(String, Object)
-     */
-    @Deprecated
-    Query<T> upperIndexBound(DBObject upperBound);
-
-    /**
-     * Updates the ReadPreference to use
-     *
-     * @param readPref the ReadPreference to use
-     * @return this
-     * @see ReadPreference
-     * @deprecated use the methods that accept Options directly
-     * @see FindOptions#readPreference(ReadPreference)
-     */
-    @Deprecated
-    Query<T> useReadPreference(ReadPreference readPref);
 
     /**
      * Limit the query using this javascript block; only one per query

@@ -46,9 +46,9 @@ public class CollectionInheritanceTest extends TestBase {
     @Test
     public void testSavingBook() throws Exception {
         // Test saving
-        getDs().save(newBook());
+        getDatastore().save(newBook());
 
-        assertEquals(1, getDs().getCollection(Book.class).count());
+        assertEquals(1, getDatastore().getCollection(Book.class).count());
     }
 
     private static class Author {

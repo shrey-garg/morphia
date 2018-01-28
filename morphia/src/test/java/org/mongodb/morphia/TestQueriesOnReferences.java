@@ -16,15 +16,15 @@ public class TestQueriesOnReferences extends TestBase {
         final ContainsPic cpk = new ContainsPic();
         final Pic p = new Pic();
         cpk.setPic(p);
-        getDs().save(p);
-        getDs().save(cpk);
+        getDatastore().save(p);
+        getDatastore().save(cpk);
 
-        Assert.assertNotNull(getDs().find(ContainsPic.class)
-                                    .field("pic").exists()
-                                    .project("pic", true).get());
-        Assert.assertNull(getDs().find(ContainsPic.class)
-                                 .field("pic").doesNotExist()
-                                 .project("pic", true).get());
+        Assert.assertNotNull(getDatastore().find(ContainsPic.class)
+                                           .field("pic").exists()
+                                           .project("pic", true).get());
+        Assert.assertNull(getDatastore().find(ContainsPic.class)
+                                        .field("pic").doesNotExist()
+                                        .project("pic", true).get());
     }
 
     @Test(expected = MappingException.class)
@@ -32,12 +32,12 @@ public class TestQueriesOnReferences extends TestBase {
         final ContainsPic cpk = new ContainsPic();
         final Pic p = new Pic();
         cpk.setPic(p);
-        getDs().save(p);
-        getDs().save(cpk);
+        getDatastore().save(p);
+        getDatastore().save(cpk);
 
-        getDs().delete(p);
+        getDatastore().delete(p);
 
-        getDs().find(ContainsPic.class).asList();
+        getDatastore().find(ContainsPic.class).asList();
     }
 
     @Test
@@ -45,19 +45,19 @@ public class TestQueriesOnReferences extends TestBase {
 
         final ContainsPic cpk = new ContainsPic();
         final Pic p = new Pic();
-        getDs().save(p);
+        getDatastore().save(p);
         final PicWithObjectId withObjectId = new PicWithObjectId();
-        getDs().save(withObjectId);
+        getDatastore().save(withObjectId);
         cpk.setLazyPic(p);
         cpk.setLazyObjectIdPic(withObjectId);
-        getDs().save(cpk);
+        getDatastore().save(cpk);
 
-        Query<ContainsPic> query = getDs().find(ContainsPic.class);
+        Query<ContainsPic> query = getDatastore().find(ContainsPic.class);
         Assert.assertNotNull(query.field("lazyPic")
                                   .equal(p)
                                   .get());
 
-        query = getDs().find(ContainsPic.class);
+        query = getDatastore().find(ContainsPic.class);
         Assert.assertNotNull(query.field("lazyObjectIdPic")
                                   .equal(withObjectId)
                                   .get());
@@ -68,11 +68,11 @@ public class TestQueriesOnReferences extends TestBase {
 
         final ContainsPic cpk = new ContainsPic();
         final Pic p = new Pic();
-        getDs().save(p);
+        getDatastore().save(p);
         cpk.setPic(p);
-        getDs().save(cpk);
+        getDatastore().save(cpk);
 
-        final Query<ContainsPic> query = getDs().find(ContainsPic.class);
+        final Query<ContainsPic> query = getDatastore().find(ContainsPic.class);
         final ContainsPic object = query.field("pic")
                                         .equal(p)
                                         .get();
@@ -85,15 +85,15 @@ public class TestQueriesOnReferences extends TestBase {
         final ContainsPic cpk = new ContainsPic();
         final Pic p = new Pic();
         cpk.setPic(p);
-        getDs().save(p);
-        getDs().save(cpk);
+        getDatastore().save(p);
+        getDatastore().save(cpk);
 
-        ContainsPic containsPic = getDs().find(ContainsPic.class)
-                                         .field("pic").equal(new Key<Pic>(Pic.class, "Pic", p.getId()))
-                                         .get();
+        ContainsPic containsPic = getDatastore().find(ContainsPic.class)
+                                                .field("pic").equal(new Key<Pic>(Pic.class, "Pic", p.getId()))
+                                                .get();
         Assert.assertEquals(cpk.getId(), containsPic.getId());
 
-        containsPic = getDs().find(ContainsPic.class).field("pic").equal(new Key<Pic>(Pic.class, "Pic", p.getId())).get();
+        containsPic = getDatastore().find(ContainsPic.class).field("pic").equal(new Key<Pic>(Pic.class, "Pic", p.getId())).get();
         Assert.assertEquals(cpk.getId(), containsPic.getId());
     }
 }

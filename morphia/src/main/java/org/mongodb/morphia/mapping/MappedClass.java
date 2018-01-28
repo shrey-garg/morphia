@@ -533,7 +533,7 @@ public class MappedClass {
     /**
      * Discovers interesting (that we care about) things about the class.
      */
-    protected void discover(final Mapper mapper) {
+    private void discover(final Mapper mapper) {
         for (final Class<? extends Annotation> c : INTERESTING_ANNOTATIONS) {
             addAnnotation(c);
         }

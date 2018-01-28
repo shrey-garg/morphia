@@ -1,7 +1,5 @@
 package org.mongodb.morphia.query.validation;
 
-import org.mongodb.morphia.mapping.MappedField;
-
 final class MappedFieldTypeValidator implements Validator {
     private MappedFieldTypeValidator() {
     }

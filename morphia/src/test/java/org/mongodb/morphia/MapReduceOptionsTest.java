@@ -34,7 +34,7 @@ public class MapReduceOptionsTest extends TestBase {
     @Test
     @SuppressWarnings("deprecation")
     public void mapReduceCommand() {
-        Query<FacebookUser> query = getDs().find(FacebookUser.class);
+        Query<FacebookUser> query = getDatastore().find(FacebookUser.class);
         MapReduceOptions<FacebookUser> options = new MapReduceOptions<FacebookUser>()
             .bypassDocumentValidation(true)
             .collation(Collation.builder().locale("en").build())
@@ -62,8 +62,8 @@ public class MapReduceOptionsTest extends TestBase {
         assertEquals(42000, command.getMaxTime(TimeUnit.MILLISECONDS));
         assertEquals("output collection", command.getOutputTarget());
         assertEquals("output db", command.getOutputDB());
-        assertEquals(query.getQueryObject(), command.getQuery());
-        assertEquals(query.getSortObject(), command.getSort());
+        assertEquals(query.getQueryDocument(), command.getQuery());
+        assertEquals(query.getSortDocument(), command.getSort());
         assertEquals(ReadPreference.primaryPreferred(), command.getReadPreference());
         assertEquals("i'm a map function", command.getMap());
         assertEquals("i'm a reduce function", command.getReduce());

@@ -28,9 +28,9 @@ public class BooleanMappingTest extends TestBase {
         ent.nestedPrimitiveArray = new boolean[][]{{false, false}, {false, true}};
         ent.nestedWrapperArray = new Boolean[][]{{Boolean.FALSE, Boolean.TRUE, Boolean.FALSE},
                                                  {Boolean.FALSE, Boolean.FALSE, Boolean.TRUE}};
-        getDs().save(ent);
+        getDatastore().save(ent);
 
-        final Booleans loaded = getDs().get(ent);
+        final Booleans loaded = getDatastore().get(ent);
 
         Assert.assertNotNull(loaded.id);
 

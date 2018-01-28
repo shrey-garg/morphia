@@ -43,7 +43,7 @@ public class TestAdvancedDatastore extends TestBase {
     public void testBulkInsertOld() {
         this.getAds().insert(asList(new TestEntity(), new TestEntity(), new TestEntity(), new TestEntity(), new TestEntity()),
                              new InsertOptions().writeConcern(WriteConcern.ACKNOWLEDGED));
-        Assert.assertEquals(5, getDs().getCollection(TestEntity.class).count());
+        Assert.assertEquals(5, getDatastore().getCollection(TestEntity.class).count());
         String name = "some_collection";
         MongoCollection<Document> collection = getMongoClient().getDatabase(TEST_DB_NAME).getCollection(name);
         this.getAds().insert(name, asList(new TestEntity(), new TestEntity(), new TestEntity(), new TestEntity(), new TestEntity()),
@@ -59,7 +59,7 @@ public class TestAdvancedDatastore extends TestBase {
     public void testBulkInsert() {
         this.getAds().insert(asList(new TestEntity(), new TestEntity(), new TestEntity(), new TestEntity(), new TestEntity()),
                              new InsertOptions().writeConcern(WriteConcern.ACKNOWLEDGED));
-        Assert.assertEquals(5, getDs().getCollection(TestEntity.class).count());
+        Assert.assertEquals(5, getDatastore().getCollection(TestEntity.class).count());
         String name = "some_collection";
         MongoCollection<Document> collection = getMongoClient().getDatabase(TEST_DB_NAME).getCollection(name);
         this.getAds().insert(name, asList(new TestEntity(), new TestEntity(), new TestEntity(), new TestEntity(), new TestEntity()),
@@ -76,7 +76,7 @@ public class TestAdvancedDatastore extends TestBase {
     public void testBulkInsertWithNullWC() {
         this.getAds().insert(asList(new TestEntity(), new TestEntity(), new TestEntity(), new TestEntity(), new TestEntity()),
                              new InsertOptions());
-        Assert.assertEquals(5, getDs().getCollection(TestEntity.class).count());
+        Assert.assertEquals(5, getDatastore().getCollection(TestEntity.class).count());
 
         String name = "some_collection";
         this.getAds().insert(name, asList(new TestEntity(), new TestEntity(), new TestEntity(), new TestEntity(), new TestEntity()),

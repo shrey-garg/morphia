@@ -13,46 +13,6 @@ import java.util.List;
  */
 public interface UpdateOperations<T> {
     /**
-     * adds the value to an array field
-     *
-     * @param field the field to update
-     * @param value the value to add
-     * @return this
-     * @mongodb.driver.manual reference/operator/update/addToSet/ $addToSet
-     * @deprecated use {@link #addToSet(String, Object)} instead
-     */
-    @Deprecated
-    UpdateOperations<T> add(String field, Object value);
-
-    /**
-     * adds the value to an array field
-     *
-     * @param field   the field to update
-     * @param value   the value to add
-     * @param addDups if true, the value will be added even if it already exists in the array ($push)
-     * @return this
-     * @mongodb.driver.manual reference/operator/update/addToSet/ $addToSet
-     * @mongodb.driver.manual reference/operator/update/push/ $push
-     * @deprecated use {@link #push(String, Object)} if addDups is false or {@link #addToSet(String, Object)} instead
-     */
-    @Deprecated
-    UpdateOperations<T> add(String field, Object value, boolean addDups);
-
-    /**
-     * adds the values to an array field
-     *
-     * @param field   the field to update
-     * @param values  the values to add
-     * @param addDups if true, the values will be added even if they already exists in the array ($push)
-     * @return this
-     * @mongodb.driver.manual reference/operator/update/addToSet/ $addToSet
-     * @mongodb.driver.manual reference/operator/update/push/ $push
-     * @deprecated use {@link #push(String, List)} if addDups is false or {@link #addToSet(String, List)}
-     */
-    @Deprecated
-    UpdateOperations<T> addAll(String field, List<?> values, boolean addDups);
-
-    /**
      * adds the value to an array field if it doesn't already exist in the array
      *
      * @param field the field to update

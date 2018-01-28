@@ -23,14 +23,14 @@ public class CompoundIdTest extends TestBase {
         final CompoundIdEntity entity = new CompoundIdEntity();
         entity.id = new CompoundId("test");
 
-        getDs().save(entity);
-        getDs().delete(CompoundIdEntity.class, entity.id);
+        getDatastore().save(entity);
+        getDatastore().delete(CompoundIdEntity.class, entity.id);
     }
 
     @Test
     public void testFetchKey() {
-        getDs().save(new ConfigEntry(new ConfigKey("env", "key", "subenv")));
-        BasicDAO<ConfigEntry, ConfigKey> innerDAO = new BasicDAO<ConfigEntry, ConfigKey>(ConfigEntry.class, getDs());
+        getDatastore().save(new ConfigEntry(new ConfigKey("env", "key", "subenv")));
+        BasicDAO<ConfigEntry, ConfigKey> innerDAO = new BasicDAO<ConfigEntry, ConfigKey>(ConfigEntry.class, getDatastore());
         ConfigEntry entry = innerDAO.find().get();
         entry.setValue("something");
         innerDAO.save(entry);
@@ -41,8 +41,8 @@ public class CompoundIdTest extends TestBase {
         CompoundIdEntity entity = new CompoundIdEntity();
         entity.id = new CompoundId("test");
 
-        getDs().save(entity);
-        entity = getDs().get(entity);
+        getDatastore().save(entity);
+        entity = getDatastore().get(entity);
         Assert.assertEquals("test", entity.id.name);
         Assert.assertNotNull(entity.id.id);
     }
@@ -52,26 +52,26 @@ public class CompoundIdTest extends TestBase {
         final CompoundIdEntity entity = new CompoundIdEntity();
         entity.id = new CompoundId("test");
 
-        getDs().save(entity);
-        ((AdvancedDatastore) getDs()).delete(getDs().getCollection(CompoundIdEntity.class).getName(), CompoundIdEntity.class, entity.id);
+        getDatastore().save(entity);
+        ((AdvancedDatastore) getDatastore()).delete(getDatastore().getCollection(CompoundIdEntity.class).getName(), CompoundIdEntity.class, entity.id);
     }
 
     @Test
     public void testReference() {
         getMorphia().map(CompoundIdEntity.class, CompoundId.class);
-        getDs().getCollection(CompoundIdEntity.class).drop();
+        getDatastore().getCollection(CompoundIdEntity.class).drop();
 
         final CompoundIdEntity sibling = new CompoundIdEntity();
         sibling.id = new CompoundId("sibling ID");
-        getDs().save(sibling);
+        getDatastore().save(sibling);
 
         final CompoundIdEntity entity = new CompoundIdEntity();
         entity.id = new CompoundId("entity ID");
         entity.e = "some value";
         entity.sibling = sibling;
-        getDs().save(entity);
+        getDatastore().save(entity);
 
-        final CompoundIdEntity loaded = getDs().get(entity);
+        final CompoundIdEntity loaded = getDatastore().get(entity);
         Assert.assertEquals(entity, loaded);
     }
 

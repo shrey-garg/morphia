@@ -2,16 +2,13 @@ package org.mongodb.morphia.query;
 
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.mongodb.morphia.internal.PathTarget;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static java.util.Collections.singletonList;
 
@@ -23,7 +20,7 @@ import static java.util.Collections.singletonList;
 public class UpdateOpsImpl<T> implements UpdateOperations<T> {
     private final Mapper mapper;
     private final Class<T> clazz;
-    private Map<String, Map<String, Object>> ops = new HashMap<String, Map<String, Object>>();
+    private Document operations = new Document();
     private boolean validateNames = true;
     private boolean isolated;
 
@@ -36,39 +33,6 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
     public UpdateOpsImpl(final Class<T> type, final Mapper mapper) {
         this.mapper = mapper;
         clazz = type;
-    }
-
-    @Override
-    @Deprecated
-    public UpdateOperations<T> add(final String field, final Object value) {
-        return addToSet(field, value);
-    }
-
-    @Override
-    @Deprecated
-    public UpdateOperations<T> add(final String field, final Object value, final boolean addDups) {
-        if (value == null) {
-            throw new QueryException("Value cannot be null.");
-        }
-
-        if (addDups) {
-            List<?> values = value instanceof List ? (List<?>) value : singletonList(value);
-            push(field, values);
-        } else {
-            List<?> values = value instanceof List ? (List<?>) value : singletonList(value);
-            addToSet(field, values);
-        }
-        return this;
-    }
-
-    @Override
-    @Deprecated
-    public UpdateOperations<T> addAll(final String field, final List<?> values, final boolean addDups) {
-        if (values == null || values.isEmpty()) {
-            throw new QueryException("Values cannot be null or empty.");
-        }
-
-        return (addDups) ? push(field, values) : addToSet(field, values);
     }
 
     @Override
@@ -243,18 +207,18 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
     /**
      * @return the operations listed
      */
-    public DBObject getOps() {
-        return new BasicDBObject(ops);
+    public Document getOperations() {
+        return new Document(operations);
     }
 
     /**
      * Sets the operations for this UpdateOpsImpl
      *
-     * @param ops the operations
+     * @param operations the operations
      */
     @SuppressWarnings("unchecked")
-    public void setOps(final DBObject ops) {
-        this.ops = (Map<String, Map<String, Object>>) ops;
+    public void setOperations(final Document operations) {
+        this.operations = operations;
     }
 
     /**
@@ -297,10 +261,12 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
     private void addOperation(final UpdateOperator op, final String fieldName, final Object val) {
         final String opString = op.val();
 
-        if (!ops.containsKey(opString)) {
-            ops.put(opString, new LinkedHashMap<String, Object>());
+        Document operation = (Document) operations.get(opString);
+        if (operation == null) {
+            operation = new Document();
+            operations.put(opString, operation);
         }
-        ops.get(opString).put(fieldName, val);
+        operation.put(fieldName, val);
     }
 
     protected UpdateOperations<T> remove(final String fieldExpr, final boolean firstNotLast) {
@@ -308,7 +274,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
         return this;
     }
 
-    protected List<Object> toDBObjList(final MappedField mf, final List<?> values) {
+    private List<Object> toDBObjList(final MappedField mf, final List<?> values) {
         final List<Object> list = new ArrayList<Object>(values.size());
         for (final Object obj : values) {
             list.add(mapper.toMongoObject(mf, null, obj));

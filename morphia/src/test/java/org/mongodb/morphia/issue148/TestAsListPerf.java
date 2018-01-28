@@ -14,7 +14,6 @@ import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
 import org.mongodb.morphia.mapping.cache.EntityCache;
-import org.mongodb.morphia.query.FindOptions;
 import org.mongodb.morphia.query.Query;
 
 import java.util.ArrayList;
@@ -113,14 +112,14 @@ public class TestAsListPerf extends TestBase {
 
     private double driverQueryAndMorphiaConverter(final int nbOfHits) {
         final long start = System.nanoTime();
-        final List<DBObject> list = getDs().getDB().getCollection("Address")
-                                           .find()
-                                           .sort(new BasicDBObject("name", 1))
-                                           .toArray();
+        final List<DBObject> list = getDatastore().getDatabase().getCollection("Address")
+                                                  .find()
+                                                  .sort(new BasicDBObject("name", 1))
+                                                  .toArray();
         final EntityCache entityCache = new DefaultEntityCache();
         final List<Address> resultList = new LinkedList<Address>();
         for (final DBObject dbObject : list) {
-            final Address address = getMorphia().fromDBObject(getDs(), Address.class, dbObject, entityCache);
+            final Address address = getMorphia().fromDBObject(getDatastore(), Address.class, dbObject, entityCache);
             resultList.add(address);
         }
         final long duration = (System.nanoTime() - start) / 1000000; //ns -> ms
@@ -149,7 +148,7 @@ public class TestAsListPerf extends TestBase {
     }
 
     private double morphiaQueryAndMorphiaConverter(final int nbOfHits) {
-        final Query<Address> query = getDs().find(Address.class).
+        final Query<Address> query = getDatastore().find(Address.class).
                                                                            order("name");
         final long start = System.nanoTime();
         final List<Address> resultList = query.asList();
@@ -180,13 +179,13 @@ public class TestAsListPerf extends TestBase {
     public void setUp() {
         super.setUp();
         getMorphia().map(Address.class);
-        if (getDs().getCount(Address.class) == 0) {
+        if (getDatastore().getCount(Address.class) == 0) {
             for (int i = 0; i < nbOfAddresses; i++) {
                 final Address address = new Address(i);
-                getDs().save(address);
+                getDatastore().save(address);
             }
-            getDs().find(Address.class).filter("name", "random")
-                   .fetch(new FindOptions()
+            getDatastore().find(Address.class).filter("name", "random")
+                          .fetch(new FindOptions()
                               .limit(-1));
         }
     }

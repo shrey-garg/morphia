@@ -30,18 +30,18 @@ public class TestNotSaved extends TestBase {
 
     @Test
     public void testBasic() throws Exception {
-        getDs().save(new Normal("value"));
-        Normal n = getDs().find(Normal.class).get();
+        getDatastore().save(new Normal("value"));
+        Normal n = getDatastore().find(Normal.class).get();
         Assert.assertNotNull(n);
         Assert.assertNotNull(n.name);
-        getDs().delete(n);
-        getDs().save(new NormalWithNotSaved());
-        n = getDs().find(Normal.class).get();
+        getDatastore().delete(n);
+        getDatastore().save(new NormalWithNotSaved());
+        n = getDatastore().find(Normal.class).get();
         Assert.assertNotNull(n);
         Assert.assertNull(n.name);
-        getDs().delete(n);
-        getDs().save(new Normal("value21"));
-        final NormalWithNotSaved notSaved = getDs().find(NormalWithNotSaved.class).get();
+        getDatastore().delete(n);
+        getDatastore().save(new Normal("value21"));
+        final NormalWithNotSaved notSaved = getDatastore().find(NormalWithNotSaved.class).get();
         Assert.assertNotNull(notSaved);
         Assert.assertNotNull(notSaved.name);
         Assert.assertEquals("never", notSaved.name);

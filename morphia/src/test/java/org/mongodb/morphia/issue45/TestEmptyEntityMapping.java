@@ -19,10 +19,10 @@ public class TestEmptyEntityMapping extends TestBase {
         A a = new A();
         a.b = new B();
 
-        getDs().save(a);
+        getDatastore().save(a);
         Assert.assertNotNull(a.b);
 
-        a = getDs().find(A.class).filter("_id", a.getId()).get();
+        a = getDatastore().find(A.class).filter("_id", a.getId()).get();
         Assert.assertNull(a.b);
     }
 
@@ -31,22 +31,22 @@ public class TestEmptyEntityMapping extends TestBase {
         User u = new User();
         u.setFullName("User Name");
         u.setUserId("USERID");
-        getDs().save(u);
+        getDatastore().save(u);
 
-        Assert.assertNull("Should not find the user.", getDs().find(User.class).filter("rights size", 0).get());
-        Assert.assertNull("Should not find the user.", getDs().find(User.class).field("rights").sizeEq(0).get());
-        Assert.assertNotNull("Should find the user.", getDs().find(User.class).field("rights").doesNotExist().get());
-        getDs().delete(getDs().find(User.class));
+        Assert.assertNull("Should not find the user.", getDatastore().find(User.class).filter("rights size", 0).get());
+        Assert.assertNull("Should not find the user.", getDatastore().find(User.class).field("rights").sizeEq(0).get());
+        Assert.assertNotNull("Should find the user.", getDatastore().find(User.class).field("rights").doesNotExist().get());
+        getDatastore().delete(getDatastore().find(User.class));
 
         u = new User();
         u.setFullName("User Name");
         u.setUserId("USERID");
         u.getRights().add(Rights.ADMIN);
-        getDs().save(u);
+        getDatastore().save(u);
 
-        Assert.assertNotNull("Should find the user.", getDs().find(User.class).filter("rights size", 1).get());
-        Assert.assertNotNull("Should find the user.", getDs().find(User.class).field("rights").sizeEq(1).get());
-        Assert.assertNotNull("Should find the user.", getDs().find(User.class).field("rights").exists().get());
+        Assert.assertNotNull("Should find the user.", getDatastore().find(User.class).filter("rights size", 1).get());
+        Assert.assertNotNull("Should find the user.", getDatastore().find(User.class).field("rights").sizeEq(1).get());
+        Assert.assertNotNull("Should find the user.", getDatastore().find(User.class).field("rights").exists().get());
     }
 
 

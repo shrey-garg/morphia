@@ -20,9 +20,9 @@ public class TestReferenceArray extends TestBase {
         a.bs[0] = b1;
         a.bs[1] = b2;
 
-        getDs().save(asList(b2, b1, a));
+        getDatastore().save(asList(b2, b1, a));
 
-        getDs().get(a);
+        getDatastore().get(a);
     }
 
 

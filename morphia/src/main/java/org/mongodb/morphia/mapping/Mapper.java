@@ -15,13 +15,16 @@ import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.DBRef;
+import com.mongodb.client.MongoCollection;
 import org.bson.BSONEncoder;
 import org.bson.BasicBSONEncoder;
+import org.bson.codecs.pojo.ClassModel;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.EntityInterceptor;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.NotSaved;
 import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PreLoad;
@@ -49,7 +52,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -254,7 +256,7 @@ public class Mapper {
 
         if (dbObject.containsField(ID_KEY) && getMappedClass(entity).getIdField() != null
             && getMappedClass(entity).getEntityAnnotation() != null) {
-            final Key<T> key = new Key(entity.getClass(), getCollectionName(entity.getClass()), dbObject.get(ID_KEY));
+            final Key<T> key = new Key(entity.getClass(), getCollectionName((Object) entity.getClass()), dbObject.get(ID_KEY));
             final T cachedInstance = cache.getEntity(key);
             if (cachedInstance != null) {
                 return cachedInstance;
@@ -285,11 +287,11 @@ public class Mapper {
                 Object id = dbObject.get(ID_KEY);
                 String entityName = entity.getClass().getName();
                 throw new MappingException(format("Could not map %s with ID: %s in database '%s'", entityName, id,
-                                                  datastore.getDB().getName()), e);
+                                                  datastore.getDatabase().getName()), e);
             }
 
             if (updated.containsField(ID_KEY) && getMappedClass(entity).getIdField() != null) {
-                final Key key = new Key(entity.getClass(), getCollectionName(entity.getClass()), updated.get(ID_KEY));
+                final Key key = new Key(entity.getClass(), getCollectionName((Object) entity.getClass()), updated.get(ID_KEY));
                 cache.putEntity(key, entity);
             }
             mc.callLifecycleMethods(PostLoad.class, entity, updated, this);
@@ -319,16 +321,54 @@ public class Mapper {
     /**
      * Gets the mapped collection for an object instance or Class reference.
      *
-     * @param object the object to process
+     * @param classModel the classModel to process
      * @return the collection name
      */
-    public String getCollectionName(final Object object) {
-        if (object == null) {
+    public String getCollectionName(final ClassModel classModel) {
+        if (classModel == null) {
             throw new IllegalArgumentException();
         }
 
-        final MappedClass mc = getMappedClass(object);
-        return mc.getCollectionName();
+        return getCollectionName(classModel.getType());
+    }
+
+    public String getCollectionName(final Class type) {
+        final Entity entityAn = (Entity) type.getAnnotation(Entity.class);
+        if (entityAn == null || entityAn.value().equals(Mapper.IGNORED_FIELDNAME)) {
+            return getOptions().isUseLowerCaseCollectionNames()
+                   ? type.getSimpleName().toLowerCase()
+                   : type.getSimpleName();
+        }
+        return entityAn.value();
+    }
+
+    /**
+     * Gets the mapped collection for an object instance or Class reference.
+     *
+     * @param classModel the classModel to process
+     * @return the collection name
+     */
+    public <T> MongoCollection<T> getCollection(final ClassModel classModel) {
+        if (classModel == null) {
+            throw new IllegalArgumentException();
+        }
+
+        return getCollection(classModel.getType());
+    }
+
+    public <T> MongoCollection<T> getCollection(final Class<T> type) {
+        if (type == null) {
+            throw new IllegalArgumentException();
+        }
+
+
+        final Entity entityAn = (Entity) type.getAnnotation(Entity.class);
+        if (entityAn == null || entityAn.value().equals(Mapper.IGNORED_FIELDNAME)) {
+            return getOptions().isUseLowerCaseCollectionNames()
+                   ? type.getSimpleName().toLowerCase()
+                   : type.getSimpleName();
+        }
+        return entityAn.value();
     }
 
     /**
@@ -394,7 +434,7 @@ public class Mapper {
 
         final Object id = getId(unwrapped);
         final Class<T> aClass = (Class<T>) unwrapped.getClass();
-        return id == null ? null : new Key<T>(aClass, getCollectionName(aClass), id);
+        return id == null ? null : new Key<T>(aClass, getCollectionName((Object) aClass), id);
     }
 
     /**
@@ -431,7 +471,7 @@ public class Mapper {
      * @return the list of Keys
      */
     public <T> List<Key<T>> getKeysByManualRefs(final Class<T> clazz, final List<Object> refs) {
-        final String collection = getCollectionName(clazz);
+        final String collection = getCollectionName((Object) clazz);
         final List<Key<T>> keys = new ArrayList<Key<T>>(refs.size());
         for (final Object ref : refs) {
             keys.add(this.<T>manualRefToKey(collection, ref));
@@ -454,13 +494,6 @@ public class Mapper {
             keys.add(testKey);
         }
         return keys;
-    }
-
-    /**
-     * @return map of MappedClasses by class name
-     */
-    public Map<String, MappedClass> getMCMap() {
-        return Collections.unmodifiableMap(mappedClasses);
     }
 
     /**
@@ -611,7 +644,7 @@ public class Mapper {
         Object mappedValue = value;
 
         if (value instanceof Query) {
-            mappedValue = ((QueryImpl) value).getQueryObject();
+            mappedValue = ((QueryImpl) value).getQueryDocument();
         } else if (isAssignable(mf, value) || isEntity(mc)) {
             //convert the value to Key (DBRef) if the field is @Reference or type is Key/DBRef, or if the destination class is an @Entity
             try {
@@ -996,7 +1029,7 @@ public class Mapper {
     }
 
     <T> Key<T> createKey(final Class<T> clazz, final Serializable id) {
-        return new Key<T>(clazz, getCollectionName(clazz), id);
+        return new Key<T>(clazz, getCollectionName((Object) clazz), id);
     }
 
     <T> Key<T> createKey(final Class<T> clazz, final Object id) {
@@ -1006,7 +1039,7 @@ public class Mapper {
 
         //TODO: cache the encoders, maybe use the pool version of the buffer that the driver does.
         final BSONEncoder enc = new BasicBSONEncoder();
-        return new Key<T>(clazz, getCollectionName(clazz), enc.encode(toDBObject(id)));
+        return new Key<T>(clazz, getCollectionName((Object) clazz), enc.encode(toDBObject(id)));
     }
 
 }

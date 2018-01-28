@@ -32,7 +32,7 @@ public class TestJavaMaps extends TestBase {
     }
 
     private void empties() {
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         ds.delete(ds.find(Employee.class));
         Employee employee = new Employee();
         HashMap<String, Byte> byteMap = new HashMap<String, Byte>();
@@ -55,8 +55,8 @@ public class TestJavaMaps extends TestBase {
         model.text = "text";
         model.wrapped = new TestEmptyModel.Wrapped();
         model.wrapped.text = "textWrapper";
-        getDs().save(model);
-        TestEmptyModel model2 = getDs().find(TestEmptyModel.class).filter("id", model.id).get();
+        getDatastore().save(model);
+        TestEmptyModel model2 = getDatastore().find(TestEmptyModel.class).filter("id", model.id).get();
         Assert.assertNull(model.wrapped.others);
         Assert.assertNull(model2.wrapped.others);
     }
@@ -68,8 +68,8 @@ public class TestJavaMaps extends TestBase {
         for (int i = 100; i >= 0; i--) {
             expectedEntity.getLinkedHashMap().put(i, "a" + i);
         }
-        getDs().save(expectedEntity);
-        LinkedHashMapTestEntity storedEntity = getDs().find(LinkedHashMapTestEntity.class).get();
+        getDatastore().save(expectedEntity);
+        LinkedHashMapTestEntity storedEntity = getDatastore().find(LinkedHashMapTestEntity.class).get();
         Assert.assertNotNull(storedEntity);
         Assert.assertEquals(expectedEntity.getLinkedHashMap(), storedEntity.getLinkedHashMap());
     }

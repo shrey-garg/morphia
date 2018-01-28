@@ -2,7 +2,6 @@ package org.mongodb.morphia.converters;
 
 import com.mongodb.DBRef;
 import org.mongodb.morphia.Key;
-import org.mongodb.morphia.mapping.MappedField;
 
 /**
  * @author Uwe Schaefer, (us@thomas-daily.de)

@@ -23,11 +23,11 @@ public class TestExpireAfterSeconds extends TestBase {
     @Test
     public void testClassAnnotation() {
         getMorphia().map(ClassAnnotation.class);
-        getDs().ensureIndexes();
+        getDatastore().ensureIndexes();
 
-        getDs().save(new ClassAnnotation());
+        getDatastore().save(new ClassAnnotation());
 
-        final DB db = getDs().getDB();
+        final DB db = getDatastore().getDatabase();
         final DBCollection dbCollection = db.getCollection("ClassAnnotation");
         final List<DBObject> indexes = dbCollection.getIndexInfo();
 
@@ -47,11 +47,11 @@ public class TestExpireAfterSeconds extends TestBase {
     @Test
     public void testIndexedField() {
         getMorphia().map(HasExpiryField.class);
-        getDs().ensureIndexes();
+        getDatastore().ensureIndexes();
 
-        getDs().save(new HasExpiryField());
+        getDatastore().save(new HasExpiryField());
 
-        final DB db = getDs().getDB();
+        final DB db = getDatastore().getDatabase();
         final DBCollection dbCollection = db.getCollection("HasExpiryField");
         final List<DBObject> indexes = dbCollection.getIndexInfo();
 

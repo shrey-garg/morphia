@@ -27,9 +27,9 @@ public class IntegerMappingTest extends TestBase {
         ent.wrapperArray = new Integer[]{55, 16, 99};
         ent.nestedPrimitiveArray = new int[][]{{}, {5, 93}};
         ent.nestedWrapperArray = new Integer[][]{{55, 16, 99}, {1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {0}};
-        getDs().save(ent);
+        getDatastore().save(ent);
 
-        final Integers loaded = getDs().get(ent);
+        final Integers loaded = getDatastore().get(ent);
 
         Assert.assertNotNull(loaded.id);
 

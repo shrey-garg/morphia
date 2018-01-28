@@ -17,7 +17,6 @@
 package org.mongodb.morphia.converters;
 
 import org.bson.types.Decimal128;
-import org.mongodb.morphia.mapping.MappedField;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

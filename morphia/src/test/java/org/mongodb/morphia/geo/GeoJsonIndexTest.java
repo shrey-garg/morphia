@@ -10,10 +10,10 @@ public class GeoJsonIndexTest extends TestBase {
     public void shouldErrorWhenCreatingA2dIndexOnGeoJson() {
         // given
         Place pointB = new Place(GeoJson.point(3.1, 7.5), "Point B");
-        getDs().save(pointB);
+        getDatastore().save(pointB);
 
         // when
-        getDs().ensureIndexes();
+        getDatastore().ensureIndexes();
         //"location object expected, location array not in correct format", code : 13654
     }
 

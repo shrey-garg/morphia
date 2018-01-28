@@ -37,11 +37,11 @@ public class IterableConverterNullPointerExceptionTest extends TestBase {
     public void testIt() throws Exception {
         final TestEntity te = new TestEntity();
         te.array = new String[]{null, "notNull", null};
-        getDs().save(te);
+        getDatastore().save(te);
 
         TestEntity te2 = null;
         try {
-            te2 = getDs().find(TestEntity.class).get();
+            te2 = getDatastore().find(TestEntity.class).get();
         } catch (RuntimeException e) {
             fail(e.getMessage());
         }

@@ -37,8 +37,8 @@ public class CollectionOfValuesTest extends TestBase {
             }
         }
 
-        getDs().save(city);
-        City loaded = getDs().get(city);
+        getDatastore().save(city);
+        City loaded = getDatastore().get(city);
         Assert.assertEquals(city.name, loaded.name);
         compare(city.array, loaded.array);
         for (int i = 0; i < city.cells.length; i++) {
@@ -50,7 +50,7 @@ public class CollectionOfValuesTest extends TestBase {
     @SuppressWarnings("unchecked")
     public void testCreateEntityWithBasicDBList() throws Exception {
         BasicDAO<TestEntity, ObjectId> dao;
-        dao = new BasicDAO<TestEntity, ObjectId>(TestEntity.class, getDs());
+        dao = new BasicDAO<TestEntity, ObjectId>(TestEntity.class, getDatastore());
 
         TestEntity entity = new TestEntity();
 
@@ -68,7 +68,7 @@ public class CollectionOfValuesTest extends TestBase {
     @Test
     public void testListOfListMapping() throws Exception {
         getMorphia().map(ContainsListOfList.class);
-        getDs().delete(getDs().find(ContainsListOfList.class));
+        getDatastore().delete(getDatastore().find(ContainsListOfList.class));
         final ContainsListOfList entity = new ContainsListOfList();
 
         entity.strings = new ArrayList<List<String>>();
@@ -77,9 +77,9 @@ public class CollectionOfValuesTest extends TestBase {
         entity.integers = new ArrayList<List<Integer>>();
         entity.integers.add(Arrays.asList(1, 2));
         entity.integers.add(Collections.singletonList(3));
-        getDs().save(entity);
+        getDatastore().save(entity);
 
-        final ContainsListOfList loaded = getDs().get(entity);
+        final ContainsListOfList loaded = getDatastore().get(entity);
 
         Assert.assertNotNull(loaded.strings);
         Assert.assertEquals(entity.strings, loaded.strings);
@@ -100,8 +100,8 @@ public class CollectionOfValuesTest extends TestBase {
         final ContainsTwoDimensionalArray entity = new ContainsTwoDimensionalArray();
         entity.oneDimArray = "Joseph".getBytes();
         entity.twoDimArray = new byte[][]{"Joseph".getBytes(), "uwe".getBytes()};
-        getDs().save(entity);
-        final ContainsTwoDimensionalArray loaded = getDs().get(ContainsTwoDimensionalArray.class, entity.id);
+        getDatastore().save(entity);
+        final ContainsTwoDimensionalArray loaded = getDatastore().get(ContainsTwoDimensionalArray.class, entity.id);
         Assert.assertNotNull(loaded.id);
         Assert.assertNotNull(loaded.oneDimArray);
         Assert.assertNotNull(loaded.twoDimArray);

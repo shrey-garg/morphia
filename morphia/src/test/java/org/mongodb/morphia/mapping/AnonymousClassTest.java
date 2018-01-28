@@ -22,8 +22,8 @@ public class AnonymousClassTest extends TestBase {
         final E e = new E();
         e.id = new CId("test");
 
-        final Key<E> key = getDs().save(e);
-        getDs().delete(E.class, e.id);
+        final Key<E> key = getDatastore().save(e);
+        getDatastore().delete(E.class, e.id);
     }
 
     @Test
@@ -31,8 +31,8 @@ public class AnonymousClassTest extends TestBase {
         E e = new E();
         e.id = new CId("test");
 
-        getDs().save(e);
-        e = getDs().get(e);
+        getDatastore().save(e);
+        e = getDatastore().get(e);
         Assert.assertEquals("test", e.id.name);
         Assert.assertNotNull(e.id.id);
     }
@@ -42,8 +42,8 @@ public class AnonymousClassTest extends TestBase {
         final E e = new E();
         e.id = new CId("test");
 
-        getDs().save(e);
-        getAds().delete(getDs().getCollection(E.class).getName(), E.class, e.id);
+        getDatastore().save(e);
+        getAds().delete(getDatastore().getCollection(E.class).getName(), E.class, e.id);
     }
 
     @Embedded

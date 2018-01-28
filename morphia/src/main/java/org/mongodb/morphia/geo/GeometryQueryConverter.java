@@ -3,7 +3,6 @@ package org.mongodb.morphia.geo;
 import com.mongodb.BasicDBObject;
 import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 /**

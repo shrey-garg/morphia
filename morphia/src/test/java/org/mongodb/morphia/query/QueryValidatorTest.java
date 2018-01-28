@@ -10,8 +10,6 @@ import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.entities.EntityWithListsAndArrays;
 import org.mongodb.morphia.entities.SimpleEntity;
-import org.mongodb.morphia.mapping.MappedClass;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.query.validation.ValidationFailure;
 

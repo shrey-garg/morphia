@@ -2,8 +2,6 @@ package org.mongodb.morphia.mapping.validation.classrules;
 
 
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.mapping.MappedClass;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.validation.ClassConstraint;
 import org.mongodb.morphia.mapping.validation.ConstraintViolation;

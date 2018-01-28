@@ -42,7 +42,7 @@ public class TestEmbeddedValidation extends TestBase {
     @SuppressWarnings("unchecked")
     public void testCreateEntityWithBasicDBList() throws Exception {
         getMorphia().map(TestEntity.class);
-        BasicDAO<TestEntity, ObjectId> dao = new BasicDAO<TestEntity, ObjectId>(TestEntity.class, getDs());
+        BasicDAO<TestEntity, ObjectId> dao = new BasicDAO<TestEntity, ObjectId>(TestEntity.class, getDatastore());
         TestEntity entity = new TestEntity();
 
         Map<String, Object> map = mapOf("type", "text");
@@ -74,7 +74,7 @@ public class TestEmbeddedValidation extends TestBase {
         embedded.setFlag(true);
         parentType.setEmbedded(embedded);
 
-        Datastore ds = getDs();
+        Datastore ds = getDatastore();
         ds.save(parentType);
 
         Query<ParentType> query = ds.find(ParentType.class)
@@ -89,25 +89,25 @@ public class TestEmbeddedValidation extends TestBase {
         EntityWithListsAndArrays entity = new EntityWithListsAndArrays();
         EmbeddedType fortyTwo = new EmbeddedType(42L, "forty-two");
         entity.setListEmbeddedType(asList(fortyTwo, new EmbeddedType(1L, "one")));
-        getDs().save(entity);
+        getDatastore().save(entity);
 
-        Query<EntityWithListsAndArrays> query = getDs().find(EntityWithListsAndArrays.class)
-                                                          .field("listEmbeddedType.number").equal(42L);
+        Query<EntityWithListsAndArrays> query = getDatastore().find(EntityWithListsAndArrays.class)
+                                                              .field("listEmbeddedType.number").equal(42L);
         List<EntityWithListsAndArrays> list = query.asList();
 
         Assert.assertEquals(1, list.size());
         Assert.assertEquals(fortyTwo, list.get(0).getListEmbeddedType().get(0));
 
-        UpdateOperations<EntityWithListsAndArrays> operations = getDs()
+        UpdateOperations<EntityWithListsAndArrays> operations = getDatastore()
             .createUpdateOperations(EntityWithListsAndArrays.class)
             .set("listEmbeddedType.$.number", 0);
-        getDs().update(query, operations);
+        getDatastore().update(query, operations);
 
         Assert.assertEquals(0, query.count());
 
         fortyTwo.setNumber(0L);
-        query = getDs().find(EntityWithListsAndArrays.class)
-                       .field("listEmbeddedType.number").equal(0);
+        query = getDatastore().find(EntityWithListsAndArrays.class)
+                              .field("listEmbeddedType.number").equal(0);
         list = query.asList();
 
         Assert.assertEquals(1, list.size());

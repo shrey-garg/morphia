@@ -3,7 +3,6 @@ package org.mongodb.morphia.issue173;
 
 import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
-import org.mongodb.morphia.mapping.MappedField;
 
 import java.util.ArrayList;
 import java.util.Calendar;

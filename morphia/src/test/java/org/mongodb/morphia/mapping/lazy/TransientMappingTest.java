@@ -42,8 +42,8 @@ public class TransientMappingTest extends TestBase {
         entity.javaTransientSerializable = serializable;
         entity.morphiaTransientSerializable = serializable;
 
-        getDs().save(entity);
-        DBObject dbObj = getDs().getCollection(HasTransientFields.class).findOne();
+        getDatastore().save(entity);
+        DBObject dbObj = getDatastore().getCollection(HasTransientFields.class).findOne();
         Assert.assertFalse("morphiaTransientString", dbObj.containsField("morphiaTransientString"));
         Assert.assertFalse("morphiaTransientInt", dbObj.containsField("morphiaTransientInt"));
         Assert.assertFalse("morphiaTransientSerializable", dbObj.containsField("morphiaTransientSerializable"));

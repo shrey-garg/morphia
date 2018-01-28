@@ -16,11 +16,11 @@ public class TestTypeCriteria extends TestBase {
     public void getStringTypeData() throws Exception {
         Class1 entity = new Class1();
         entity.firstName = "first_name";
-        getDs().save(entity);
+        getDatastore().save(entity);
 
         getMorphia().map(Class1.class);
 
-        Query<Class1> query = getDs().find(Class1.class);
+        Query<Class1> query = getDatastore().find(Class1.class);
         query.criteria("first_name").type(Type.STRING);
         Assert.assertTrue(query.asList().size() > 0);
     }

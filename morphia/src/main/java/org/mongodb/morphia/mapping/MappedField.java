@@ -121,7 +121,6 @@ public class MappedField {
     MappedField(final Field field, final Type type, final Mapper mapper) {
         this.field = field;
         genericType = type;
-        discoverType(mapper);
     }
 
     /**
@@ -486,8 +485,6 @@ public class MappedField {
 
         //type must be discovered before the constructor.
         discoverType(mapper);
-        constructor = discoverConstructor();
-        discoverMultivalued();
 
         // check the main type
         isMongoType = ReflectionUtils.isPropertyType(realType);
@@ -505,74 +502,6 @@ public class MappedField {
             }
             isMongoType = true;
         }
-    }
-
-    @SuppressWarnings("unchecked")
-    protected void discoverType(final Mapper mapper) {
-        if (genericType instanceof TypeVariable) {
-            realType = extractTypeVariable((TypeVariable) genericType);
-        } else if (genericType instanceof ParameterizedType) {
-            ParameterizedType pt = (ParameterizedType) genericType;
-            final Type[] types = pt.getActualTypeArguments();
-            realType = toClass(pt);
-
-            for (Type type : types) {
-                if (type instanceof ParameterizedType) {
-                    typeParameters.add(new EphemeralMappedField((ParameterizedType) type, this, mapper));
-                } else {
-                    if (type instanceof WildcardType) {
-                        type = ((WildcardType) type).getUpperBounds()[0];
-                    }
-                    typeParameters.add(new EphemeralMappedField(type, this, mapper));
-                }
-            }
-        } else if (genericType instanceof WildcardType) {
-            final WildcardType wildcardType = (WildcardType) genericType;
-            final Type[] types = wildcardType.getUpperBounds();
-            realType = toClass(types[0]);
-        } else if (genericType instanceof Class) {
-            realType = (Class) genericType;
-        } else if (genericType instanceof GenericArrayType) {
-            final Type genericComponentType = ((GenericArrayType) genericType).getGenericComponentType();
-            if (genericComponentType instanceof ParameterizedType) {
-                ParameterizedType pt = (ParameterizedType) genericComponentType;
-                realType = toClass(genericType);
-
-                final Type[] types = pt.getActualTypeArguments();
-                for (Type type : types) {
-                    if (type instanceof ParameterizedType) {
-                        typeParameters.add(new EphemeralMappedField((ParameterizedType) type, this, mapper));
-                    } else {
-                        if (type instanceof WildcardType) {
-                            type = ((WildcardType) type).getUpperBounds()[0];
-                        }
-                        typeParameters.add(new EphemeralMappedField(type, this, mapper));
-                    }
-                }
-            } else {
-                if (genericComponentType instanceof TypeVariable) {
-                    realType = toClass(genericType);
-                } else {
-                    realType = (Class) genericComponentType;
-                }
-            }
-        }
-
-        if (Object.class.equals(realType) || Object[].class.equals(realType)) {
-            if (LOG.isWarningEnabled()) {
-                LOG.warning(format("Parameterized types are treated as untyped Objects. See field '%s' on %s", field.getName(),
-                                   field.getDeclaringClass()));
-            }
-        }
-
-        if (realType == null) {
-            throw new MappingException(format("A type could not be found for the field %s.%s", getType(), getField()));
-        }
-    }
-
-    private Class extractTypeVariable(final TypeVariable<?> type) {
-        final Class typeArgument = ReflectionUtils.getTypeArgument(persistedClass, type);
-        return typeArgument != null ? typeArgument : Object.class;
     }
 
     /**
@@ -609,95 +538,6 @@ public class MappedField {
         }
 
         return field.getName();
-    }
-
-    protected Class toClass(final Type t) {
-        if (t == null) {
-            return null;
-        } else if (t instanceof Class) {
-            return (Class) t;
-        } else if (t instanceof GenericArrayType) {
-            final Type type = ((GenericArrayType) t).getGenericComponentType();
-            Class aClass;
-            if (type instanceof ParameterizedType) {
-                aClass = (Class) ((ParameterizedType) type).getRawType();
-            } else if (type instanceof TypeVariable) {
-                aClass = ReflectionUtils.getTypeArgument(persistedClass, (TypeVariable<?>) type);
-                if (aClass == null) {
-                    aClass = Object.class;
-                }
-            } else {
-                aClass = (Class) type;
-            }
-            return Array.newInstance(aClass, 0).getClass();
-        } else if (t instanceof ParameterizedType) {
-            return (Class) ((ParameterizedType) t).getRawType();
-        } else if (t instanceof WildcardType) {
-            return (Class) ((WildcardType) t).getUpperBounds()[0];
-        }
-
-        throw new RuntimeException("Generic TypeVariable not supported!");
-
-    }
-
-    private Constructor discoverConstructor() {
-        Class<?> type = null;
-        // get the first annotation with a concreteClass that isn't Object.class
-        for (final Annotation an : foundAnnotations.values()) {
-            try {
-                final Method m = an.getClass().getMethod("concreteClass");
-                m.setAccessible(true);
-                final Object o = m.invoke(an);
-                //noinspection EqualsBetweenInconvertibleTypes
-                if (o != null && !(o.equals(Object.class))) {
-                    type = (Class) o;
-                    break;
-                }
-            } catch (NoSuchMethodException e) {
-                // do nothing
-            } catch (IllegalArgumentException e) {
-                if (LOG.isWarningEnabled()) {
-                    LOG.warning("There should not be an argument", e);
-                }
-            } catch (Exception e) {
-                if (LOG.isWarningEnabled()) {
-                    LOG.warning("", e);
-                }
-            }
-        }
-
-        if (type != null) {
-            try {
-                constructor = type.getDeclaredConstructor();
-                constructor.setAccessible(true);
-            } catch (NoSuchMethodException e) {
-                if (!hasAnnotation(ConstructorArgs.class)) {
-                    if (LOG.isWarningEnabled()) {
-                        LOG.warning("No usable constructor for " + type.getName(), e);
-                    }
-                }
-            }
-        } else {
-            // see if we can create instances of the type used for declaration
-            type = getType();
-
-            // short circuit to avoid wasting time throwing an exception trying to get a constructor we know doesnt exist
-            if (type == List.class || type == Map.class) {
-                return null;
-            }
-
-            if (type != null) {
-                try {
-                    constructor = type.getDeclaredConstructor();
-                    constructor.setAccessible(true);
-                } catch (NoSuchMethodException e) {
-                    // never mind.
-                } catch (SecurityException e) {
-                    // never mind.
-                }
-            }
-        }
-        return constructor;
     }
 
     private void discoverMultivalued() {

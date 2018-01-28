@@ -34,12 +34,12 @@ public class TestLazyCollectionReference extends ProxyTestBase {
         root.references = references;
 
         // save to DB
-        getDs().save(referenced1);
-        getDs().save(referenced2);
-        getDs().save(root);
+        getDatastore().save(referenced1);
+        getDatastore().save(referenced2);
+        getDatastore().save(root);
 
         // read root entity from DB
-        root = getDs().get(root);
+        root = getDatastore().get(root);
         assertNotFetched(root.references);
 
         // use the lazy collection
@@ -51,11 +51,11 @@ public class TestLazyCollectionReference extends ProxyTestBase {
         Assert.assertEquals("bar2", it.next().getFoo());
 
         // read root entity from DB again
-        root = getDs().get(root);
+        root = getDatastore().get(root);
         assertNotFetched(root.references);
 
         // remove the first referenced entity from DB
-        getDs().delete(referenced1);
+        getDatastore().delete(referenced1);
 
         // must fail
         root.references.size();

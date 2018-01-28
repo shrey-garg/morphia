@@ -8,7 +8,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Converters;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.testutil.TestEntity;
 
 import java.util.HashMap;
@@ -31,7 +30,7 @@ public class CustomConverterInEmbedTest extends TestBase {
         getMorphia().getMapper().getConverters().addConverter(fc);
         final E1 e = new E1();
         e.foo.add(new Foo("bar"));
-        getDs().save(e);
+        getDatastore().save(e);
         Assert.assertTrue(fc.didConversion());
     }
 
@@ -41,11 +40,11 @@ public class CustomConverterInEmbedTest extends TestBase {
         getMorphia().getMapper().getConverters().addConverter(fc);
         E2 e = new E2();
         e.foo.put("bar", new Foo("bar"));
-        getDs().save(e);
+        getDatastore().save(e);
 
         Assert.assertTrue(fc.didConversion());
 
-        e = getDs().find(E2.class).get();
+        e = getDatastore().find(E2.class).get();
         Assert.assertNotNull(e.foo);
         Assert.assertFalse(e.foo.isEmpty());
         Assert.assertTrue(e.foo.containsKey("bar"));
@@ -56,9 +55,9 @@ public class CustomConverterInEmbedTest extends TestBase {
     public void testEmbeddedComplexArrayType() throws Exception {
         ArrayBar bar = new ArrayBar();
         bar.foo = new ArrayFoo("firstValue", "secondValue");
-        getDs().save(bar);
+        getDatastore().save(bar);
 
-        ArrayBar fromDb = getDs().get(ArrayBar.class, bar.getId());
+        ArrayBar fromDb = getDatastore().get(ArrayBar.class, bar.getId());
         assertThat("bar is not null", fromDb, notNullValue());
         assertThat("foo is not null", fromDb.foo, notNullValue());
         assertThat("foo has the correct first value", fromDb.foo.first(), equalTo("firstValue"));
@@ -69,9 +68,9 @@ public class CustomConverterInEmbedTest extends TestBase {
     public void testEmbeddedComplexType() throws Exception {
         ComplexBar bar = new ComplexBar();
         bar.foo = new ComplexFoo("firstValue", "secondValue");
-        getDs().save(bar);
+        getDatastore().save(bar);
 
-        ComplexBar fromDb = getDs().get(ComplexBar.class, bar.getId());
+        ComplexBar fromDb = getDatastore().get(ComplexBar.class, bar.getId());
         assertThat("bar is not null", fromDb, notNullValue());
         assertThat("foo is not null", fromDb.foo, notNullValue());
         assertThat("foo has the correct first value", fromDb.foo.first(), equalTo("firstValue"));

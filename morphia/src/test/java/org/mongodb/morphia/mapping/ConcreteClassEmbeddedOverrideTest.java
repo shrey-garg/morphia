@@ -20,9 +20,9 @@ public class ConcreteClassEmbeddedOverrideTest extends TestBase {
         Assert.assertEquals("A", e1.a1.s);
         Assert.assertEquals("A", e1.a2.s);
 
-        getDs().save(e1);
+        getDatastore().save(e1);
 
-        final E e2 = getDs().get(e1);
+        final E e2 = getDatastore().get(e1);
 
         Assert.assertEquals("A", e2.a1.s);
         Assert.assertEquals("A", e2.a2.s);

@@ -22,8 +22,6 @@ import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.mapping.MappedClass;
-import org.mongodb.morphia.mapping.MappedField;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -49,9 +47,9 @@ public class IgnoreFieldsAnnotationTest extends TestBase {
         final User u = new User();
         u.email = "ScottHernandez@gmail.com";
         u.ignored = "test";
-        getDs().save(u);
+        getDatastore().save(u);
 
-        final User uLoaded = getDs().find(User.class).get();
+        final User uLoaded = getDatastore().find(User.class).get();
         Assert.assertEquals("never, never", uLoaded.ignored);
     }
 

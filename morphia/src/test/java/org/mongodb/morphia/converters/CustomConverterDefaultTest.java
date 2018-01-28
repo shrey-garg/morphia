@@ -5,7 +5,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Property;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.testutil.TestEntity;
 
 public class CustomConverterDefaultTest extends TestBase {
@@ -17,11 +16,11 @@ public class CustomConverterDefaultTest extends TestBase {
         getMorphia().map(E.class);
         E e = new E();
         e.foo = new Foo("test");
-        getDs().save(e);
+        getDatastore().save(e);
 
         Assert.assertTrue(fc.didConversion());
 
-        e = getDs().find(E.class).get();
+        e = getDatastore().find(E.class).get();
         Assert.assertNotNull(e.foo);
         Assert.assertEquals("test", e.foo.string);
     }

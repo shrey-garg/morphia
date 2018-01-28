@@ -17,8 +17,8 @@ public class EnumSetTest extends TestBase {
     @Test
     public void testNastyEnumPersistence() throws Exception {
         NastyEnumEntity n = new NastyEnumEntity();
-        getDs().save(n);
-        n = getDs().get(n);
+        getDatastore().save(n);
+        n = getDatastore().get(n);
 
         Assert.assertNull(n.isNull);
         Assert.assertNotNull(n.empty);
@@ -39,9 +39,9 @@ public class EnumSetTest extends TestBase {
         Assert.assertFalse(n.out.contains(NastyEnum.C));
         Assert.assertFalse(n.out.contains(NastyEnum.D));
 
-        Query<NastyEnumEntity> q = getDs().find(NastyEnumEntity.class).filter("in", NastyEnum.C);
+        Query<NastyEnumEntity> q = getDatastore().find(NastyEnumEntity.class).filter("in", NastyEnum.C);
         Assert.assertEquals(1, q.count());
-        q = getDs().find(NastyEnumEntity.class).filter("out", NastyEnum.C);
+        q = getDatastore().find(NastyEnumEntity.class).filter("out", NastyEnum.C);
         Assert.assertEquals(0, q.count());
 
     }

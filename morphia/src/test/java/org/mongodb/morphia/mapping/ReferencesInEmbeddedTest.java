@@ -18,15 +18,15 @@ public class ReferencesInEmbeddedTest extends TestBase {
     public void testLazyReferencesInEmbedded() throws Exception {
         final Container container = new Container();
         container.name = "lazy";
-        getDs().save(container);
+        getDatastore().save(container);
         final ReferencedEntity referencedEntity = new ReferencedEntity();
-        getDs().save(referencedEntity);
+        getDatastore().save(referencedEntity);
 
         container.embed = new EmbedContainingReference();
         container.embed.lazyRef = referencedEntity;
-        getDs().save(container);
+        getDatastore().save(container);
 
-        final Container reloadedContainer = getDs().get(container);
+        final Container reloadedContainer = getDatastore().get(container);
         Assert.assertNotNull(reloadedContainer);
     }
 
@@ -40,15 +40,15 @@ public class ReferencesInEmbeddedTest extends TestBase {
     public void testNonLazyReferencesInEmbedded() throws Exception {
         final Container container = new Container();
         container.name = "nonLazy";
-        getDs().save(container);
+        getDatastore().save(container);
         final ReferencedEntity referencedEntity = new ReferencedEntity();
-        getDs().save(referencedEntity);
+        getDatastore().save(referencedEntity);
 
         container.embed = new EmbedContainingReference();
         container.embed.ref = referencedEntity;
-        getDs().save(container);
+        getDatastore().save(container);
 
-        final Container reloadedContainer = getDs().get(container);
+        final Container reloadedContainer = getDatastore().get(container);
         Assert.assertNotNull(reloadedContainer);
     }
 

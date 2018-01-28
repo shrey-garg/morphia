@@ -3,7 +3,6 @@ package org.mongodb.morphia.geo;
 import com.mongodb.DBObject;
 import org.mongodb.morphia.converters.SimpleValueConverter;
 import org.mongodb.morphia.converters.TypeConverter;
-import org.mongodb.morphia.mapping.MappedField;
 
 /**
  * A Morphia TypeConverter that knows how to turn things that are labelled with the Geometry interface into the correct concrete class,
