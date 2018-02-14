@@ -12,7 +12,6 @@ import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.mapping.validation.ConstraintViolationException;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
-import org.mongodb.morphia.query.UpdateResults;
 import org.mongodb.morphia.testutil.TestEntity;
 
 import java.util.ConcurrentModificationException;

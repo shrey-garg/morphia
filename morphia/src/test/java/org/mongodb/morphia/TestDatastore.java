@@ -13,11 +13,15 @@
 
 package org.mongodb.morphia;
 
-import com.mongodb.BasicDBObject;
+import com.mongodb.Document;
 import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.CollationStrength;
+import com.mongodb.client.model.InsertOneOptions;
+import com.mongodb.client.model.UpdateManyModel;
+import com.mongodb.client.result.UpdateResult;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
@@ -36,7 +40,6 @@ import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateException;
 import org.mongodb.morphia.query.UpdateOperations;
-import org.mongodb.morphia.query.UpdateResults;
 import org.mongodb.morphia.testmodel.Address;
 import org.mongodb.morphia.testmodel.Hotel;
 import org.mongodb.morphia.testmodel.Rectangle;
@@ -60,10 +63,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Scott Hernandez
- */
-//@RunWith(Parameterized.class)
 public class TestDatastore extends TestBase {
 
     @Test(expected = UpdateException.class)
@@ -101,12 +100,12 @@ public class TestDatastore extends TestBase {
     }
 
     @Test
-    public void testCollectionNames() throws Exception {
+    public void testCollectionNames() {
         assertEquals("facebook_users", getMorphia().getMapper().getCollectionName(FacebookUser.class));
     }
 
     @Test
-    public void testDoesNotExistAfterDelete() throws Exception {
+    public void testDoesNotExistAfterDelete() {
         // given
         long id = System.currentTimeMillis();
         final Key<FacebookUser> key = getDatastore().save(new FacebookUser(id, "user 1"));
@@ -119,7 +118,7 @@ public class TestDatastore extends TestBase {
     }
 
     @Test
-    public void testEmbedded() throws Exception {
+    public void testEmbedded() {
         getDatastore().delete(getDatastore().find(Hotel.class));
         final Hotel borg = new Hotel();
         borg.setName("Hotel Borg");
@@ -143,7 +142,7 @@ public class TestDatastore extends TestBase {
     }
 
     @Test
-    public void testExistsWhenItemSaved() throws Exception {
+    public void testExistsWhenItemSaved() {
         // given
         long id = System.currentTimeMillis();
         final Key<FacebookUser> key = getDatastore().save(new FacebookUser(id, "user 1"));
@@ -155,7 +154,7 @@ public class TestDatastore extends TestBase {
 
     @Test
     @SuppressWarnings("deprecation")
-    public void testExistsWhenSecondaryPreferredOld() throws Exception {
+    public void testExistsWhenSecondaryPreferredOld() {
         if (isReplicaSet()) {
             final Key<FacebookUser> key = getDatastore().save(new FacebookUser(System.currentTimeMillis(), "user 1"), W2);
             assertNotNull("Should exist when using secondaryPreferred", getAds().exists(key, secondaryPreferred()));
@@ -163,17 +162,24 @@ public class TestDatastore extends TestBase {
     }
 
     @Test
-    public void testExistsWhenSecondaryPreferred() throws Exception {
+    public void testExistsWhenSecondaryPreferred() {
         if (isReplicaSet()) {
-            final Key<FacebookUser> key = getDatastore().save(new FacebookUser(System.currentTimeMillis(), "user 1"),
-                                                       new InsertOptions().writeConcern(W2));
-            assertNotNull("Should exist when using secondaryPreferred", getAds().exists(key, secondaryPreferred()));
+            final Datastore datastore = getDatastore();
+            final WriteConcern defaultWriteConcern = datastore.getDefaultWriteConcern();
+            try {
+                datastore.setDefaultWriteConcern(W2);
+                final Key<FacebookUser> key = datastore.save(new FacebookUser(System.currentTimeMillis(), "user 1"),
+                    new InsertOneOptions());
+                assertNotNull("Should exist when using secondaryPreferred", getAds().exists(key, secondaryPreferred()));
+            } finally {
+                datastore.setDefaultWriteConcern(defaultWriteConcern);
+            }
         }
     }
 
 
     @Test
-    public void testExistsWithEntity() throws Exception {
+    public void testExistsWithEntity() {
         final FacebookUser facebookUser = new FacebookUser(1, "user one");
         getDatastore().save(facebookUser);
         assertEquals(1, getDatastore().getCount(FacebookUser.class));
@@ -185,7 +191,7 @@ public class TestDatastore extends TestBase {
     }
 
     @Test
-    public void testGet() throws Exception {
+    public void testGet() {
         getMorphia().map(FacebookUser.class);
         List<FacebookUser> fbUsers = new ArrayList<FacebookUser>();
         fbUsers.add(new FacebookUser(1, "user 1"));
@@ -203,7 +209,7 @@ public class TestDatastore extends TestBase {
         assertNotNull(res.get(1));
         assertNotNull(res.get(1).username);
 
-        getDatastore().getCollection(FacebookUser.class).remove(new BasicDBObject());
+        getDatastore().getCollection(FacebookUser.class).deleteMany(new Document());
         getAds().insert(fbUsers);
         assertEquals(4, getDatastore().getCount(FacebookUser.class));
         assertNotNull(getDatastore().get(FacebookUser.class, 1));
@@ -216,14 +222,14 @@ public class TestDatastore extends TestBase {
     }
 
     @Test
-    public void testIdUpdatedOnSave() throws Exception {
+    public void testIdUpdatedOnSave() {
         final Rectangle rect = new Rectangle(10, 10);
         getDatastore().save(rect);
         assertNotNull(rect.getId());
     }
 
     @Test
-    public void testLifecycle() throws Exception {
+    public void testLifecycle() {
         final LifecycleTestObj life1 = new LifecycleTestObj();
         getMorphia().getMapper().addMappedClass(LifecycleTestObj.class);
         getDatastore().save(life1);
@@ -242,7 +248,7 @@ public class TestDatastore extends TestBase {
     }
 
     @Test
-    public void testLifecycleListeners() throws Exception {
+    public void testLifecycleListeners() {
         final LifecycleTestObj life1 = new LifecycleTestObj();
         getMorphia().getMapper().addMappedClass(LifecycleTestObj.class);
         getDatastore().save(life1);
@@ -251,12 +257,12 @@ public class TestDatastore extends TestBase {
     }
 
     @Test
-    public void testMorphiaDS() throws Exception {
+    public void testMorphiaDS() {
         new Morphia().createDatastore(getMongoClient(), "test");
     }
 
     @Test
-    public void testMultipleDatabasesSingleThreaded() throws InterruptedException, TimeoutException, ExecutionException {
+    public void testMultipleDatabasesSingleThreaded() {
         getMorphia().map(FacebookUser.class);
 
         final Datastore ds1 = getMorphia().createDatastore(getMongoClient(), "db1");
@@ -358,18 +364,18 @@ public class TestDatastore extends TestBase {
                                                   .field("username").equal("john doe");
         UpdateOperations<FacebookUser> updateOperations = getDatastore().createUpdateOperations(FacebookUser.class)
                                                                         .inc("loginCount");
-        UpdateResults results = getDatastore().update(query, updateOperations);
-        assertEquals(1, results.getUpdatedCount());
+        UpdateResult results = getDatastore().update(query, updateOperations);
+        assertEquals(1, results.getModifiedCount());
         assertEquals(0, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
         assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
 
-        results = getDatastore().update(query, updateOperations, new UpdateOptions()
+        results = getDatastore().update(query, updateOperations, new UpdateManyModel<>()
             .multi(true)
             .collation(Collation.builder()
                                 .locale("en")
                                 .collationStrength(CollationStrength.SECONDARY)
                                 .build()));
-        assertEquals(2, results.getUpdatedCount());
+        assertEquals(2, results.getModifiedCount());
         assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
         assertEquals(2, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
     }
@@ -571,7 +577,7 @@ public class TestDatastore extends TestBase {
     }
 
     @Test
-    public void entityWriteConcern() throws Exception {
+    public void entityWriteConcern() {
         ensureEntityWriteConcern();
 
         getDatastore().setDefaultWriteConcern(WriteConcern.UNACKNOWLEDGED);
@@ -779,7 +785,7 @@ public class TestDatastore extends TestBase {
 
         @PreLoad
         DBObject preLoadWithParamAndReturn(final DBObject dbObj) {
-            final BasicDBObject retObj = new BasicDBObject();
+            final Document retObj = new Document();
             retObj.putAll(dbObj);
             retObj.put("preLoadWithParamAndReturn", true);
             return retObj;

@@ -3,7 +3,6 @@ package org.mongodb.morphia.issue173;
 import com.mongodb.WriteConcern;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mongodb.morphia.InsertOptions;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.testutil.TestEntity;

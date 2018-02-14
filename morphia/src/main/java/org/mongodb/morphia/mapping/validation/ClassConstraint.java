@@ -1,6 +1,7 @@
 package org.mongodb.morphia.mapping.validation;
 
 
+import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.Set;

@@ -1,44 +1,32 @@
 package org.mongodb.morphia;
 
-import com.mongodb.DBDecoderFactory;
-import com.mongodb.DBObject;
 import com.mongodb.DBRef;
 import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
-import com.mongodb.WriteResult;
+import com.mongodb.client.model.DeleteOptions;
+import com.mongodb.client.model.InsertManyOptions;
+import com.mongodb.client.model.InsertOneOptions;
+import com.mongodb.client.result.DeleteResult;
 import org.bson.Document;
 import org.mongodb.morphia.aggregation.AggregationPipeline;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
+import java.util.List;
+
 /**
- * This interface exposes advanced {@link Datastore} features, like interacting with DBObject and low-level options. It implements matching
- * methods from the {@code Datastore} interface but with a specified kind (collection name), or raw types (DBObject).
+ * This interface exposes advanced {@link Datastore} features, like interacting with Document and low-level options. It implements matching
+ * methods from the {@code Datastore} interface but with a specified kind (collection name), or raw types (Document).
  *
  * @author ScottHernandez
  */
 public interface AdvancedDatastore extends Datastore {
 
     /**
-     * Returns the DBDecoderFactory used by this Datastore
-     *
-     * @return the decoder factory
-     * @see DBDecoderFactory
-     */
-    DBDecoderFactory getDecoderFact();
-
-    /**
-     * Sets the DBDecoderFactory to use in this Datastore
-     *
-     * @param fact the DBDecoderFactory to use
-     */
-    void setDecoderFact(DBDecoderFactory fact);
-
-    /**
      * Returns an {@link AggregationPipeline} bound to the given collection and class.
      *
      * @param collection the collection to query
-     * @param clazz The class to create aggregation against
+     * @param clazz      The class to create aggregation against
      * @return the aggregation pipeline
      */
     AggregationPipeline createAggregation(String collection, Class<?> clazz);
@@ -57,7 +45,7 @@ public interface AdvancedDatastore extends Datastore {
      * @param q     the query which will be passed to a {@link org.mongodb.morphia.query.QueryFactory}
      * @return Query for the specified class clazz
      */
-    <T> Query<T> createQuery(Class<T> clazz, DBObject q);
+    <T> Query<T> createQuery(Class<T> clazz, Document q);
 
     /**
      * @param <T>        The type of the entity
@@ -66,34 +54,14 @@ public interface AdvancedDatastore extends Datastore {
      * @param q          the query which will be passed to a {@link org.mongodb.morphia.query.QueryFactory}
      * @return Query for the specified class clazz
      */
-    <T> Query<T> createQuery(String collection, Class<T> clazz, DBObject q);
-
-    /**
-     * Creates a reference to the entity (using the current DB -can be null-, the collectionName, and id)
-     *
-     * @param clazz The type of the entity
-     * @param id    The ID value of the entity
-     * @param <T>   The type of the entity
-     * @param <V>   The type of the ID value
-     * @return the DBRef for the entity
-     */
-    <T, V> DBRef createRef(Class<T> clazz, V id);
-
-    /**
-     * Creates a reference to the entity (using the current DB -can be null-, the collectionName, and id)
-     *
-     * @param <T>    The type of the entity
-     * @param entity the entity to create a DBRef for
-     * @return the DBRef for the entity
-     */
-    <T> DBRef createRef(T entity);
+    <T> Query<T> createQuery(String collection, Class<T> clazz, Document q);
 
     /**
      * Creates an UpdateOperations instance for the given type.
      *
-     * @param <T>  The type of the entity
-     * @param type The type of the entity
-     * @param operations  The operations to perform
+     * @param <T>        The type of the entity
+     * @param type       The type of the entity
+     * @param operations The operations to perform
      * @return the UpdateOperations instance
      */
     <T> UpdateOperations<T> createUpdateOperations(Class<T> type, Document operations);
@@ -112,7 +80,7 @@ public interface AdvancedDatastore extends Datastore {
      * @param <V>   is the type of the ID, for example ObjectId
      * @return the result of this delete operation.
      */
-    <T, V> WriteResult delete(String kind, Class<T> clazz, V id);
+    <T, V> DeleteResult delete(String kind, Class<T> clazz, V id);
 
     /**
      * Deletes an entity of the given type T, with the given {@code id}, from the collection with the name in the {@code kind} param.
@@ -130,7 +98,7 @@ public interface AdvancedDatastore extends Datastore {
      * @return the result of this delete operation.
      * @since 1.3
      */
-    <T, V> WriteResult delete(String kind, Class<T> clazz, V id, DeleteOptions options);
+    <T, V> DeleteResult delete(String kind, Class<T> clazz, V id, DeleteOptions options);
 
     /**
      * Ensures (creating if necessary) the indexes found during class mapping (using {@code @Indexed, @Indexes)} on the given collection
@@ -238,7 +206,7 @@ public interface AdvancedDatastore extends Datastore {
      * @return the new key of the inserted entity
      * @since 1.3
      */
-    <T> Key<T> insert(T entity, InsertOptions options);
+    <T> Key<T> insert(T entity, InsertOneOptions options);
 
     /**
      * Inserts an entity in to the named collection.
@@ -260,7 +228,7 @@ public interface AdvancedDatastore extends Datastore {
      * @return the new key of the inserted entity
      * @since 1.3
      */
-    <T> Key<T> insert(String collection, T entity, InsertOptions options);
+    <T> Key<T> insert(String collection, T entity, InsertOneOptions options);
 
     /**
      * Inserts entities in to the mapped collection.
@@ -269,7 +237,7 @@ public interface AdvancedDatastore extends Datastore {
      * @param <T>      the type of the entities
      * @return the new keys of the inserted entities
      */
-    <T> Iterable<Key<T>> insert(Iterable<T> entities);
+    <T> List<Key<T>> insert(List<T> entities);
 
     /**
      * Inserts entities in to the mapped collection.
@@ -280,7 +248,7 @@ public interface AdvancedDatastore extends Datastore {
      * @return the new keys of the inserted entities
      * @since 1.3
      */
-    <T> Iterable<Key<T>> insert(Iterable<T> entities, InsertOptions options);
+    <T> List<Key<T>> insert(List<T> entities, InsertManyOptions options);
 
     /**
      * Inserts an entity in to the named collection.
@@ -291,7 +259,7 @@ public interface AdvancedDatastore extends Datastore {
      * @return the new keys of the inserted entities
      * @see WriteConcern
      */
-    <T> Iterable<Key<T>> insert(String collection, Iterable<T> entities);
+    <T> List<Key<T>> insert(String collection, List<T> entities);
 
     /**
      * Inserts entities in to the named collection.
@@ -303,7 +271,7 @@ public interface AdvancedDatastore extends Datastore {
      * @return the new keys of the inserted entities
      * @since 1.3
      */
-    <T> Iterable<Key<T>> insert(String collection, Iterable<T> entities, InsertOptions options);
+    <T> List<Key<T>> insert(String collection, List<T> entities, InsertManyOptions options);
 
     /**
      * Returns a new query based on the example object
@@ -334,6 +302,6 @@ public interface AdvancedDatastore extends Datastore {
      * @param <T>        the type of the entity
      * @return the new key of the inserted entity
      */
-    <T> Key<T> save(String collection, T entity, InsertOptions options);
+    <T> Key<T> save(String collection, T entity, InsertOneOptions options);
 
 }

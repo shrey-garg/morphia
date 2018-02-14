@@ -69,7 +69,7 @@ public class TestIndexed extends TestBase {
         ds.save(new NoIndexes());
 
         // then
-        List<DBObject> indexes = getDb().getCollection("NoIndexes").getIndexInfo();
+        List<DBObject> indexes = getDatabase().getCollection("NoIndexes").getIndexInfo();
         assertEquals(1, indexes.size());
     }
 
@@ -142,9 +142,9 @@ public class TestIndexed extends TestBase {
     public void testEmbeddedIndex() {
         final MappedClass mc = getMorphia().getMapper().addMappedClass(ContainsIndexedEmbed.class);
 
-        assertThat(getDb().getCollection(mc.getCollectionName()).getIndexInfo(), doesNotHaveIndexNamed("e.name_-1"));
+        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), doesNotHaveIndexNamed("e.name_-1"));
         getDatastore().ensureIndexes(ContainsIndexedEmbed.class);
-        assertThat(getDb().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("e.name_-1"));
+        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("e.name_-1"));
     }
 
     @Test
@@ -161,16 +161,16 @@ public class TestIndexed extends TestBase {
     public void testIndexedRecursiveEntity() throws Exception {
         final MappedClass mc = getMorphia().getMapper().getMappedClass(CircularEmbeddedEntity.class);
         getDatastore().ensureIndexes();
-        assertThat(getDb().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("a_1"));
+        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("a_1"));
     }
 
     @Test
     public void testIndexes() {
         final MappedClass mc = getMorphia().getMapper().addMappedClass(Ad2.class);
 
-        assertThat(getDb().getCollection(mc.getCollectionName()).getIndexInfo(), doesNotHaveIndexNamed("active_1_lastMod_-1"));
+        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), doesNotHaveIndexNamed("active_1_lastMod_-1"));
         getDatastore().ensureIndexes(Ad2.class);
-        assertThat(getDb().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("active_1_lastMod_-1"));
+        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("active_1_lastMod_-1"));
     }
 
     @Test
@@ -179,9 +179,9 @@ public class TestIndexed extends TestBase {
         final MappedClass mc = getMorphia().getMapper().getMappedClass(Ad.class);
         getMorphia().map(Ad.class);
 
-        assertThat(getDb().getCollection(mc.getCollectionName()).getIndexInfo(), doesNotHaveIndexNamed("lastMod_1_active_-1"));
+        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), doesNotHaveIndexNamed("lastMod_1_active_-1"));
         getDatastore().ensureIndex(Ad.class, "lastMod, -active");
-        assertThat(getDb().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("lastMod_1_active_-1"));
+        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("lastMod_1_active_-1"));
     }
 
     @Test

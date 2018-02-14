@@ -1,6 +1,8 @@
 package org.mongodb.morphia.query;
 
 
+import com.mongodb.ReadConcern;
+import com.mongodb.ReadPreference;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
@@ -22,12 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
-import static com.mongodb.CursorType.NonTailable;
-import static com.mongodb.CursorType.Tailable;
-import static com.mongodb.CursorType.TailableAwait;
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.mongodb.morphia.query.QueryValidator.validateQuery;
 
 
@@ -47,14 +44,10 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     private boolean validateType = true;
     private Boolean includeFields;
     private Document baseQuery;
-    private FindOptions options;
-
-    FindOptions getOptions() {
-        if (options == null) {
-            options = new FindOptions();
-        }
-        return options;
-    }
+    private Document projection = new Document();
+    private Document sort = new Document();
+    private ReadConcern readConcern;
+    private ReadPreference readPreference;
 
     /**
      * Creates a Query for the given type and collection
@@ -70,6 +63,20 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         this.clazz = clazz;
         this.ds = ((DatastoreImpl) ds);
         this.collection = collection;
+        readPreference = getDatastore().getDatabase().getReadPreference();
+        readConcern = getDatastore().getDatabase().getReadConcern();
+    }
+
+    @Override
+    public Query<T> setReadConcern(final ReadConcern readConcern) {
+        this.readConcern = readConcern;
+        return this;
+    }
+
+    @Override
+    public Query<T> setReadPreference(final ReadPreference readPreference) {
+        this.readPreference = readPreference;
+        return this;
     }
 
     /**
@@ -105,7 +112,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public List<Key<T>> asKeyList() {
-        return asKeyList(getOptions());
+        return asKeyList(new FindOptions());
     }
 
     @Override
@@ -124,7 +131,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public List<T> asList() {
-        return asList(getOptions());
+        return asList(new FindOptions());
     }
 
     @Override
@@ -164,7 +171,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public MongoCursor<T> fetch() {
-        return fetch(getOptions());
+        return fetch(new FindOptions());
     }
 
     @Override
@@ -179,34 +186,34 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public MongoCursor<T> fetchEmptyEntities() {
-        return fetchEmptyEntities(getOptions());
+        return fetchEmptyEntities(new FindOptions());
     }
 
     @Override
     public MongoCursor<T> fetchEmptyEntities(final FindOptions options) {
         QueryImpl<T> cloned = cloneQuery();
-        cloned.getOptions().projection(new Document(Mapper.ID_KEY, 1));
         cloned.includeFields = true;
-        return cloned.fetch();
+        return cloned.fetch(new FindOptions(options)
+                                .projection(new Document(Mapper.ID_KEY, 1)));
     }
 
     @Override
     public MorphiaKeyIterator<T> fetchKeys() {
-        return fetchKeys(getOptions());
+        return fetchKeys(new FindOptions());
     }
 
     @Override
     public MorphiaKeyIterator<T> fetchKeys(final FindOptions options) {
-        QueryImpl<T> cloned = cloneQuery();
-        cloned.getOptions().projection(new Document(Mapper.ID_KEY, 1));
-        cloned.includeFields = true;
 
-        return new MorphiaKeyIterator<T>(cloned.prepareCursor(options).iterator(), ds.getMapper());
+        return new MorphiaKeyIterator<T>(
+            prepareCursor(new FindOptions(options)
+                              .projection(new Document(Mapper.ID_KEY, 1)))
+                .iterator(), ds.getMapper());
     }
 
     @Override
     public T get() {
-        return get(getOptions());
+        return get(new FindOptions());
     }
 
     @Override
@@ -222,7 +229,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public Key<T> getKey() {
-        return getKey(getOptions());
+        return getKey(new FindOptions());
     }
 
     @Override
@@ -235,19 +242,6 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     @Override
-    @Deprecated
-    public MongoCursor<T> tail() {
-        return tail(true);
-    }
-
-    @Override
-    @Deprecated
-    public MongoCursor<T> tail(final boolean awaitData) {
-        return fetch(new FindOptions(getOptions())
-                         .cursorType(awaitData ? TailableAwait : Tailable));
-    }
-
-    @Override
     public QueryImpl<T> cloneQuery() {
         final QueryImpl<T> n = new QueryImpl<T>(clazz, collection, ds);
         n.includeFields = includeFields;
@@ -255,7 +249,6 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         n.validateName = validateName;
         n.validateType = validateType;
         n.baseQuery = copy(baseQuery);
-        n.options = options != null ? new FindOptions(options) : null;
 
         // fields from superclass
         n.setAttachedTo(getAttachedTo());
@@ -292,7 +285,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> explain() {
-        return explain(getOptions());
+        return explain(new FindOptions());
     }
 
     @Override
@@ -334,7 +327,6 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public Document getFields() {
-        Document projection = (Document) getOptions().getProjection();
         if (projection == null || projection.keySet().size() == 0) {
             return null;
         }
@@ -342,7 +334,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         final MappedClass mc = ds.getMapper().getMappedClass(clazz);
 
         Entity entityAnnotation = mc.getEntityAnnotation();
-        final Document fieldsFilter = copy(projection);
+        final Document fieldsFilter = new Document(projection);
 
         if (includeFields && entityAnnotation != null && !entityAnnotation.noClassnameStored()) {
             fieldsFilter.put(Mapper.CLASS_NAME_FIELDNAME, 1);
@@ -375,26 +367,20 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public Document getSortDocument() {
-        Document sort = (Document) getOptions().getSort();
-        return (sort == null) ? null : new Document(sort);
-    }
-
-    long getMaxTime(final TimeUnit unit) {
-        long maxTime = getOptions().getMaxTime(unit);
-        return unit.convert(maxTime, MILLISECONDS);
+        return sort == null ? new Document() : new Document(sort);
     }
 
     @Override
-    public Query<T> order(final String sort) {
-        getOptions().sort(parseFieldsString(sort, clazz, ds.getMapper(), validateName));
+    public Query<T> order(final String order) {
+        sort.putAll(parseFieldsString(order, clazz, ds.getMapper(), validateName));
         return this;
     }
 
     @Override
-    public Query<T> order(final Meta sort) {
-        validateQuery(clazz, ds.getMapper(), new StringBuilder(sort.getField()), FilterOperator.IN, "", false, false);
+    public Query<T> order(final Meta meta) {
+        validateQuery(clazz, ds.getMapper(), new StringBuilder(meta.getField()), FilterOperator.IN, "", false, false);
 
-        getOptions().sort(sort.toDatabase());
+        sort.putAll(meta.toDatabase());
 
         return this;
     }
@@ -411,7 +397,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
             }
             sortList.put(s, sort.getOrder());
         }
-        getOptions().sort(sortList);
+        sort.putAll(sortList);
         return this;
     }
 
@@ -434,20 +420,10 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     private void project(final String fieldName, final Object value) {
-        Document projection = (Document) getOptions().getProjection();
-        if (projection == null) {
-            projection = new Document();
-            getOptions().projection(projection);
-        }
         projection.put(fieldName, value);
     }
 
     private void project(final Document value) {
-        Document projection = (Document) getOptions().getProjection();
-        if (projection == null) {
-            projection = new Document();
-            getOptions().projection(projection);
-        }
         projection.putAll(value);
     }
 
@@ -541,17 +517,6 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         return fetch();
     }
 
-    /**
-     * Prepares cursor for iteration
-     *
-     * @return the cursor
-     * @deprecated this is an internal method.  no replacement is planned.
-     */
-    @Deprecated
-    public FindIterable<T> prepareCursor() {
-        return prepareCursor(getOptions());
-    }
-
     private FindIterable<T> prepareCursor(final FindOptions findOptions) {
         final Document query = getQueryDocument();
 
@@ -559,24 +524,17 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
             LOG.trace(String.format("Running query(%s) : %s, options: %s,", collection.getNamespace().getCollectionName(), query, findOptions));
         }
 
-        if (findOptions.isSnapshot() && (findOptions.getSort() != null || findOptions.getHint() != null)) {
-            LOG.warning("Snapshotted query should not have hint/sort.");
-        }
-
-        if (findOptions.getCursorType() != NonTailable && (findOptions.getSort() != null)) {
-            LOG.warning("Sorting on tail is not allowed.");
-        }
-
-        return collection.find(query)
+        return collection
+                   .withReadPreference(readPreference)
+                   .withReadConcern(readConcern)
+                   .find(query)
                          .projection(getFields())
                          .sort(getSortDocument());
     }
 
     @Override
     public String toString() {
-        return String.format("{ query: %s %s }", getQueryDocument(), getOptions().getProjection() == null
-                                                                   ? ""
-                                                                   : ", projection: " + getFields());
+        return String.format("{ query: %s %s }", getQueryDocument(), ", projection: " + getFields());
     }
 
     /**
@@ -592,7 +550,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         if (this == o) {
             return true;
         }
-        if (!(o instanceof QueryImpl)) {
+        if (o == null || getClass() != o.getClass()) {
             return false;
         }
 
@@ -604,10 +562,10 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         if (validateType != query.validateType) {
             return false;
         }
-        if (!collection.equals(query.collection)) {
+        if (collection != null ? !collection.equals(query.collection) : query.collection != null) {
             return false;
         }
-        if (!clazz.equals(query.clazz)) {
+        if (clazz != null ? !clazz.equals(query.clazz) : query.clazz != null) {
             return false;
         }
         if (includeFields != null ? !includeFields.equals(query.includeFields) : query.includeFields != null) {
@@ -616,87 +574,30 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         if (baseQuery != null ? !baseQuery.equals(query.baseQuery) : query.baseQuery != null) {
             return false;
         }
-        return compare(options, query.options);
-
-    }
-
-    private boolean compare(final FindOptions these, final FindOptions those) {
-        if (these == null && those != null || these != null && those == null) {
+        if (projection != null ? !projection.equals(query.projection) : query.projection != null) {
             return false;
         }
-        if (these == null) {
-            return true;
-        }
-
-        if (these.getBatchSize() != those.getBatchSize()) {
+        if (sort != null ? !sort.equals(query.sort) : query.sort != null) {
             return false;
         }
-        if (these.getLimit() != those.getLimit()) {
+        if (readConcern != null ? !readConcern.equals(query.readConcern) : query.readConcern != null) {
             return false;
         }
-        if (these.getMaxTime(MILLISECONDS) != those.getMaxTime(MILLISECONDS)) {
-            return false;
-        }
-        if (these.getMaxAwaitTime(MILLISECONDS) != those.getMaxAwaitTime(MILLISECONDS)) {
-            return false;
-        }
-        if (these.getSkip() != those.getSkip()) {
-            return false;
-        }
-        if (these.isNoCursorTimeout() != those.isNoCursorTimeout()) {
-            return false;
-        }
-        if (these.isOplogReplay() != those.isOplogReplay()) {
-            return false;
-        }
-        if (these.isPartial() != those.isPartial()) {
-            return false;
-        }
-        if (these.getModifiers() != null ? !these.getModifiers().equals(those.getModifiers()) : those.getModifiers() != null) {
-            return false;
-        }
-        if (these.getProjection() != null ? !these.getProjection().equals(those.getProjection()) : those.getProjection() != null) {
-            return false;
-        }
-        if (these.getSort() != null ? !these.getSort().equals(those.getSort()) : those.getSort() != null) {
-            return false;
-        }
-        if (these.getCursorType() != those.getCursorType()) {
-            return false;
-        }
-        return these.getCollation() != null ? these.getCollation().equals(those.getCollation()) : those.getCollation() == null;
-
-    }
-
-    private int hash(final FindOptions options) {
-        if (options == null) {
-            return 0;
-        }
-        int result = options.getBatchSize();
-        result = 31 * result + options.getLimit();
-        result = 31 * result + (options.getModifiers() != null ? options.getModifiers().hashCode() : 0);
-        result = 31 * result + (options.getProjection() != null ? options.getProjection().hashCode() : 0);
-        result = 31 * result + (int) (options.getMaxTime(MILLISECONDS) ^ options.getMaxTime(MILLISECONDS) >>> 32);
-        result = 31 * result + (int) (options.getMaxAwaitTime(MILLISECONDS) ^ options.getMaxAwaitTime(MILLISECONDS) >>> 32);
-        result = 31 * result + options.getSkip();
-        result = 31 * result + (options.getSort() != null ? options.getSort().hashCode() : 0);
-        result = 31 * result + (options.getCursorType() != null ? options.getCursorType().hashCode() : 0);
-        result = 31 * result + (options.isNoCursorTimeout() ? 1 : 0);
-        result = 31 * result + (options.isOplogReplay() ? 1 : 0);
-        result = 31 * result + (options.isPartial() ? 1 : 0);
-        result = 31 * result + (options.getCollation() != null ? options.getCollation().hashCode() : 0);
-        return result;
+        return readPreference != null ? readPreference.equals(query.readPreference) : query.readPreference == null;
     }
 
     @Override
     public int hashCode() {
-        int result = collection.hashCode();
-        result = 31 * result + clazz.hashCode();
+        int result = collection != null ? collection.hashCode() : 0;
+        result = 31 * result + (clazz != null ? clazz.hashCode() : 0);
         result = 31 * result + (validateName ? 1 : 0);
         result = 31 * result + (validateType ? 1 : 0);
         result = 31 * result + (includeFields != null ? includeFields.hashCode() : 0);
         result = 31 * result + (baseQuery != null ? baseQuery.hashCode() : 0);
-        result = 31 * result + hash(options);
+        result = 31 * result + (projection != null ? projection.hashCode() : 0);
+        result = 31 * result + (sort != null ? sort.hashCode() : 0);
+        result = 31 * result + (readConcern != null ? readConcern.hashCode() : 0);
+        result = 31 * result + (readPreference != null ? readPreference.hashCode() : 0);
         return result;
     }
 }

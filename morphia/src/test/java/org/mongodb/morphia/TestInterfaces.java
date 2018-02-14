@@ -38,8 +38,8 @@ public class TestInterfaces extends TestBase {
 
     @Test
     public void testDynamicInstantiation() throws Exception {
-        final DBCollection shapes = getDb().getCollection("shapes");
-        final DBCollection shapeshifters = getDb().getCollection("shapeshifters");
+        final DBCollection shapes = getDatabase().getCollection("shapes");
+        final DBCollection shapeshifters = getDatabase().getCollection("shapeshifters");
 
         getMorphia().map(Circle.class).map(Rectangle.class).map(ShapeShifter.class);
 

@@ -1,7 +1,7 @@
 package org.mongodb.morphia.query;
 
-import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
+import org.bson.Document;
 import org.mongodb.morphia.Datastore;
 
 /**
@@ -11,14 +11,14 @@ public interface QueryFactory {
 
     /**
      * Creates and returns a {@link Query} for the given arguments. Default implementations of this method will simply delegate to {@link
-     * #createQuery(Datastore, MongoCollection, Class, DBObject)} with the last argument being {@code null}.
+     * #createQuery(Datastore, MongoCollection, Class, Document)} with the last argument being {@code null}.
      *
      * @param datastore  the Datastore to use
      * @param collection the collection to query
      * @param type       the type of the result
      * @param <T>        the type of the result
      * @return the query
-     * @see #createQuery(Datastore, MongoCollection, Class, DBObject)
+     * @see #createQuery(Datastore, MongoCollection, Class, Document)
      */
     <T> Query<T> createQuery(Datastore datastore, MongoCollection<T> collection, Class<T> type);
 
@@ -28,11 +28,11 @@ public interface QueryFactory {
      * @param datastore  the Datastore to use
      * @param collection the collection to query
      * @param type       the type of the result
-     * @param query      the DBObject containing the query structure
+     * @param query      the document containing the query structure
      * @param <T>        the type of the result
      * @return the query
      */
-    <T> Query<T> createQuery(Datastore datastore, MongoCollection<T> collection, Class<T> type, DBObject query);
+    <T> Query<T> createQuery(Datastore datastore, MongoCollection<T> collection, Class<T> type, Document query);
 
     /**
      * Creates an unvalidated {@link Query} typically for use in aggregation pipelines.

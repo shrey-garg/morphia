@@ -102,7 +102,7 @@ public class TestTextIndexing extends TestBase {
         getMorphia().map(TextIndexAll.class);
         getAds().ensureIndexes("randomCollection", TextIndexAll.class);
 
-        List<DBObject> indexInfo = getDb().getCollection("randomCollection").getIndexInfo();
+        List<DBObject> indexInfo = getDatabase().getCollection("randomCollection").getIndexInfo();
         Assert.assertEquals(2, indexInfo.size());
         for (DBObject dbObject : indexInfo) {
             if (!dbObject.get("name").equals("_id_")) {

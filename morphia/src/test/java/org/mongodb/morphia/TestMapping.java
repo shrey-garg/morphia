@@ -444,7 +444,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testMaps() {
-        final DBCollection articles = getDb().getCollection("articles");
+        final DBCollection articles = getDatabase().getCollection("articles");
         getMorphia().map(Article.class).map(Translation.class).map(Circle.class);
 
         final Article related = new Article();
@@ -544,7 +544,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testRecursiveReference() {
-        final DBCollection stuff = getDb().getCollection("stuff");
+        final DBCollection stuff = getDatabase().getCollection("stuff");
 
         getMorphia().map(RecursiveParent.class).map(RecursiveChild.class);
 
@@ -642,8 +642,8 @@ public class TestMapping extends TestBase {
     }
 
     private void performBasicMappingTest() {
-        final DBCollection hotels = getDb().getCollection("hotels");
-        final DBCollection agencies = getDb().getCollection("agencies");
+        final DBCollection hotels = getDatabase().getCollection("hotels");
+        final DBCollection agencies = getDatabase().getCollection("agencies");
 
         getMorphia().map(Hotel.class);
         getMorphia().map(TravelAgency.class);

@@ -170,7 +170,7 @@ public class ReferenceTest extends ProxyTestBase {
 
         // reset Datastore to reset internal Mapper cache, so Child class
         // already cached by previous save is cleared
-        Datastore localDs = getMorphia().createDatastore(getMongoClient(), new Mapper(), getDb().getName());
+        Datastore localDs = getMorphia().createDatastore(getMongoClient(), new Mapper(), getDatabase().getName());
 
         parentList = localDs.find(Parent.class).asList();
         Assert.assertEquals(1, parentList.size());

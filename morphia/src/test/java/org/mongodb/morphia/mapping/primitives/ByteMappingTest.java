@@ -18,7 +18,7 @@ public class ByteMappingTest extends TestBase {
         getMorphia().map(Bytes.class);
         final String data = "{ \"primitiveArray\": BinData(0, "
                             + "\"V2hlbiBpbiB0aGUgY291cnNlIG9mIGh1bWFuIGV2ZW50cyBpdCBiZWNvbWVzIG5lY2Vzc2FyeSB0byBzdWJzY3JpYmUu\") }";
-        getDb().eval("db.Bytes.insert(" + data + ")");
+        getDatabase().eval("db.Bytes.insert(" + data + ")");
         final Bytes loaded = getDatastore().find(Bytes.class).get();
     }
 

@@ -10,18 +10,9 @@ import org.mongodb.morphia.mapping.cache.EntityCacheFactory;
 
 /**
  * Options to control mapping behavior.
- *
- * @author Scott Hernandez
  */
-@SuppressWarnings("deprecation")
 public class MapperOptions {
     private static final Logger LOG = MorphiaLoggerFactory.get(MapperOptions.class);
-    /**
-     * @deprecated this is actually the default and proper behavior.  this setting is redundant
-     */
-    @Deprecated
-    private boolean actLikeSerializer;
-    private boolean ignoreFinals; //ignore final fields.
     private boolean storeNulls;
     private boolean storeEmpties;
     private boolean useLowerCaseCollectionNames;
@@ -29,11 +20,6 @@ public class MapperOptions {
     private boolean mapSubPackages = false;
     private ObjectFactory objectFactory = new DefaultCreator(this);
     private EntityCacheFactory cacheFactory = new DefaultEntityCacheFactory();
-    private CustomMapper embeddedMapper = new EmbeddedMapper();
-    private CustomMapper defaultMapper = embeddedMapper;
-    private CustomMapper referenceMapper = new ReferenceMapper();
-    private CustomMapper valueMapper = new ValueMapper();
-    private org.mongodb.morphia.mapping.lazy.DatastoreProvider datastoreProvider = null;
 
     /**
      * Creates a default options instance.
@@ -47,18 +33,12 @@ public class MapperOptions {
      * @param options the MapperOptions to copy
      */
     public MapperOptions(final MapperOptions options) {
-        setActLikeSerializer(options.isActLikeSerializer());
-        setIgnoreFinals(options.isIgnoreFinals());
         setStoreNulls(options.isStoreNulls());
         setStoreEmpties(options.isStoreEmpties());
         setUseLowerCaseCollectionNames(options.isUseLowerCaseCollectionNames());
         setCacheClassLookups(options.isCacheClassLookups());
         setObjectFactory(options.getObjectFactory());
         setCacheFactory(options.getCacheFactory());
-        setEmbeddedMapper(options.getEmbeddedMapper());
-        setDefaultMapper(options.getDefaultMapper());
-        setReferenceMapper(options.getReferenceMapper());
-        setValueMapper(options.getValueMapper());
     }
 
     /**
@@ -75,59 +55,6 @@ public class MapperOptions {
      */
     public void setCacheFactory(final EntityCacheFactory cacheFactory) {
         this.cacheFactory = cacheFactory;
-    }
-
-    /**
-     * @return the DatastoreProvider Morphia should use
-     * @deprecated unused
-     */
-    @Deprecated
-    public org.mongodb.morphia.mapping.lazy.DatastoreProvider getDatastoreProvider() {
-        return datastoreProvider;
-    }
-
-    /**
-     * Sets the DatastoreProvider Morphia should use
-     *
-     * @param datastoreProvider the DatastoreProvider to use
-     * @deprecated unused
-     */
-    @Deprecated
-    public void setDatastoreProvider(final org.mongodb.morphia.mapping.lazy.DatastoreProvider datastoreProvider) {
-        LOG.warning("DatastoreProviders are no longer needed or used.");
-        this.datastoreProvider = datastoreProvider;
-    }
-
-    /**
-     * @return the mapper to use for top level entities
-     */
-    public CustomMapper getDefaultMapper() {
-        return defaultMapper;
-    }
-
-    /**
-     * Sets the mapper to use for top level entities
-     *
-     * @param pDefaultMapper the mapper to use
-     */
-    public void setDefaultMapper(final CustomMapper pDefaultMapper) {
-        defaultMapper = pDefaultMapper;
-    }
-
-    /**
-     * @return the mapper to use for embedded entities
-     */
-    public CustomMapper getEmbeddedMapper() {
-        return embeddedMapper;
-    }
-
-    /**
-     * Sets the mapper to use for embedded entities
-     *
-     * @param pEmbeddedMapper the mapper to use
-     */
-    public void setEmbeddedMapper(final CustomMapper pEmbeddedMapper) {
-        embeddedMapper = pEmbeddedMapper;
     }
 
     /**
@@ -148,60 +75,6 @@ public class MapperOptions {
     }
 
     /**
-     * @return the mapper to use for references
-     * @see Reference
-     */
-    public CustomMapper getReferenceMapper() {
-        return referenceMapper;
-    }
-
-    /**
-     * Sets the mapper to use for references
-     *
-     * @param pReferenceMapper the mapper to use
-     * @see Reference
-     */
-    public void setReferenceMapper(final CustomMapper pReferenceMapper) {
-        referenceMapper = pReferenceMapper;
-    }
-
-    /**
-     * @return the mapper to use when processing values
-     */
-    public CustomMapper getValueMapper() {
-        return valueMapper;
-    }
-
-    /**
-     * Sets the mapper to use when processing values
-     *
-     * @param pValueMapper the mapper to use
-     */
-    public void setValueMapper(final CustomMapper pValueMapper) {
-        valueMapper = pValueMapper;
-    }
-
-    /**
-     * @return true if Morphia should ignore transient fields
-     * @deprecated this is actually the default and proper behavior.  this setting is redundant
-     */
-    @Deprecated
-    public boolean isActLikeSerializer() {
-        return actLikeSerializer;
-    }
-
-    /**
-     * Instructs Morphia to follow JDK serialization semantics and ignore values marked up with the transient keyword
-     *
-     * @param actLikeSerializer true if Morphia should ignore transient fields
-     * @deprecated this is actually the default and proper behavior.  this setting is redundant
-     */
-    @Deprecated
-    public void setActLikeSerializer(final boolean actLikeSerializer) {
-        this.actLikeSerializer = actLikeSerializer;
-    }
-
-    /**
      * @return true if Morphia should cache name -> Class lookups
      */
     public boolean isCacheClassLookups() {
@@ -215,22 +88,6 @@ public class MapperOptions {
      */
     public void setCacheClassLookups(final boolean cacheClassLookups) {
         this.cacheClassLookups = cacheClassLookups;
-    }
-
-    /**
-     * @return true if Morphia should ignore final fields
-     */
-    public boolean isIgnoreFinals() {
-        return ignoreFinals;
-    }
-
-    /**
-     * Controls if final fields are stored.
-     *
-     * @param ignoreFinals true if Morphia should ignore final fields
-     */
-    public void setIgnoreFinals(final boolean ignoreFinals) {
-        this.ignoreFinals = ignoreFinals;
     }
 
     /**

@@ -1,26 +1,32 @@
 package org.mongodb.morphia;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.CommandResult;
-import com.mongodb.DBCollection;
 import com.mongodb.DBDecoderFactory;
-import com.mongodb.DBObject;
 import com.mongodb.DBRef;
-import com.mongodb.DefaultDBDecoder;
 import com.mongodb.MapReduceCommand.OutputType;
 import com.mongodb.MongoClient;
 import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
-import com.mongodb.WriteResult;
+import com.mongodb.client.MapReduceIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.CreateCollectionOptions;
-import com.mongodb.client.model.DBCollectionUpdateOptions;
+import com.mongodb.client.model.DeleteOptions;
 import com.mongodb.client.model.FindOneAndDeleteOptions;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.FindOptions;
+import com.mongodb.client.model.InsertManyOptions;
+import com.mongodb.client.model.InsertOneOptions;
+import com.mongodb.client.model.ReturnDocument;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.ValidationOptions;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
+import org.bson.BsonDocument;
+import org.bson.BsonDocumentWriter;
+import org.bson.BsonValue;
 import org.bson.Document;
+import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -28,7 +34,6 @@ import org.mongodb.morphia.aggregation.AggregationPipeline;
 import org.mongodb.morphia.aggregation.AggregationPipelineImpl;
 import org.mongodb.morphia.annotations.CappedAt;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.NotSaved;
 import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.Validation;
 import org.mongodb.morphia.annotations.Version;
@@ -38,7 +43,6 @@ import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.MappingException;
-import org.mongodb.morphia.mapping.cache.EntityCache;
 import org.mongodb.morphia.mapping.lazy.proxy.ProxyHelper;
 import org.mongodb.morphia.query.DefaultQueryFactory;
 import org.mongodb.morphia.query.Query;
@@ -47,7 +51,6 @@ import org.mongodb.morphia.query.QueryFactory;
 import org.mongodb.morphia.query.UpdateException;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateOpsImpl;
-import org.mongodb.morphia.query.UpdateResults;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -55,16 +58,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 import static com.mongodb.BasicDBObject.parse;
-import static com.mongodb.BasicDBObjectBuilder.start;
 import static com.mongodb.DBCollection.ID_FIELD_NAME;
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -86,7 +88,6 @@ public class DatastoreImpl implements AdvancedDatastore {
     private MongoDatabase db;
     private Mapper mapper;
     private WriteConcern defConcern;
-    private DBDecoderFactory decoderFactory;
 
     private volatile QueryFactory queryFactory = new DefaultQueryFactory();
     private CodecRegistry codecRegistry;
@@ -150,7 +151,7 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     /**
      * @param source the initial type/collection to aggregate against
-     * @return a new query bound to the kind (a specific {@link DBCollection})
+     * @return a new query bound to the kind (a specific {@link MongoCollection})
      */
     @Override
     public AggregationPipeline createAggregation(final Class source) {
@@ -164,36 +165,35 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     @Override
     public <T> UpdateOperations<T> createUpdateOperations(final Class<T> clazz) {
-        return new UpdateOpsImpl<T>(clazz, getMapper());
+        return new UpdateOpsImpl<>(this, clazz, getMapper());
     }
 
     @Override
-    public <T, V> WriteResult delete(final Class<T> clazz, final V id) {
-        return delete(clazz, id, new DeleteOptions().writeConcern(getWriteConcern(clazz)));
+    public <T, V> DeleteResult delete(final Class<T> clazz, final V id) {
+        return delete(clazz, id, new DeleteOptions());
     }
 
     @Override
-    public <T, V> WriteResult delete(final Class<T> clazz, final V id, final DeleteOptions options) {
+    public <T, V> DeleteResult delete(final Class<T> clazz, final V id, final DeleteOptions options) {
         return delete(createQuery(clazz).filter(Mapper.ID_KEY, id), options);
     }
 
     @Override
-    public <T, V> WriteResult delete(final Class<T> clazz, final Iterable<V> ids) {
+    public <T, V> DeleteResult delete(final Class<T> clazz, final List<V> ids) {
         return delete(find(clazz).filter(Mapper.ID_KEY + " in", ids));
     }
 
     @Override
-    public <T, V> WriteResult delete(final Class<T> clazz, final Iterable<V> ids, final DeleteOptions options) {
+    public <T, V> DeleteResult delete(final Class<T> clazz, final List<V> ids, final DeleteOptions options) {
         return delete(find(clazz).filter(Mapper.ID_KEY + " in", ids), options);
     }
 
     @Override
-    public <T> WriteResult delete(final Query<T> query) {
-        return delete(query, new DeleteOptions().writeConcern(getWriteConcern(query.getEntityClass())));
+    public <T> DeleteResult delete(final Query<T> query) {
+        return delete(query, new DeleteOptions());
     }
 
-    @Override
-    public <T> WriteResult delete(final Query<T> query, final DeleteOptions options) {
+    public <T> DeleteResult delete(final Query<T> query, final DeleteOptions options) {
 
         MongoCollection<T> collection = query.getCollection();
         // TODO remove this after testing.
@@ -201,16 +201,13 @@ public class DatastoreImpl implements AdvancedDatastore {
             collection = getCollection(query.getEntityClass());
         }
 
-        if (query.getSortDocument() != null || query.getOffset() != 0 || query.getLimit() > 0) {
-            throw new QueryException("Delete does not allow sort/offset/limit query options.");
-        }
-
-        return collection.remove(query.getQueryDocument(), enforceWriteConcern(options, query.getEntityClass()).getOptions());
+        return collection.withWriteConcern(enforceWriteConcern(query.getEntityClass()))
+                         .deleteMany(query.getQueryDocument(), options);
     }
 
     @Override
-    public <T> WriteResult delete(final T entity) {
-        return delete(entity, new DeleteOptions().writeConcern(getWriteConcern(entity)));
+    public <T> DeleteResult delete(final T entity) {
+        return delete(entity, new DeleteOptions());
     }
 
     /**
@@ -221,7 +218,7 @@ public class DatastoreImpl implements AdvancedDatastore {
      * @return results of the delete
      */
     @Override
-    public <T> WriteResult delete(final T entity, final DeleteOptions options) {
+    public <T> DeleteResult delete(final T entity, final DeleteOptions options) {
         final T wrapped = ProxyHelper.unwrap(entity);
         if (wrapped instanceof Class<?>) {
             throw new MappingException("Did you mean to delete all documents? -- delete(ds.createQuery(???.class))");
@@ -234,6 +231,16 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
+    public <T, V> DeleteResult delete(final String kind, final Class<T> clazz, final V id) {
+        return delete(find(kind, clazz).filter(Mapper.ID_KEY, id));
+    }
+
+    @Override
+    public <T, V> DeleteResult delete(final String kind, final Class<T> clazz, final V id, final DeleteOptions options) {
+        return delete(find(kind, clazz).filter(Mapper.ID_KEY, id), options);
+    }
+
+    @Override
     public void ensureCaps() {
 
         for (final ClassModel mc : getClassModels()) {
@@ -241,38 +248,28 @@ public class DatastoreImpl implements AdvancedDatastore {
             if (annotation != null && annotation.cap().value() > 0) {
                 final CappedAt cap = annotation.cap();
                 final String collName = mapper.getCollectionName(mc);
-                final BasicDBObjectBuilder dbCapOpts = start("capped", true);
-                if (cap.value() > 0) {
-                    dbCapOpts.add("size", cap.value());
-                }
-                if (cap.count() > 0) {
-                    dbCapOpts.add("max", cap.count());
-                }
                 final MongoDatabase database = getDatabase();
-                if (database.getCollectionNames().contains(collName)) {
-                    final DBObject dbResult = database.command(start("collstats", collName).get());
-                    if (dbResult.containsField("capped")) {
-                        LOG.debug("DBCollection already exists and is capped already; doing nothing. " + dbResult);
+                if (database.listCollectionNames().into(new ArrayList<>()).contains(collName)) {
+                    final Document dbResult = database.runCommand(new Document("collstats", collName));
+                    if (dbResult.containsValue("capped")) {
+                        LOG.debug("Collection already exists and is capped already; doing nothing. " + dbResult);
                     } else {
-                        LOG.warning("DBCollection already exists with same name(" + collName
-                                    + ") and is not capped; not creating capped version!");
+                        LOG.warning(format("Collection already exists with same name(%s) and is not capped; not creating capped version!",
+                            collName));
                     }
                 } else {
-                    getDatabase().createCollection(collName, dbCapOpts.get());
-                    LOG.debug("Created capped DBCollection (" + collName + ") with opts " + dbCapOpts);
+                    final CreateCollectionOptions options = new CreateCollectionOptions();
+                    options.capped(true);
+                    if (cap.value() > 0) {
+                        options.sizeInBytes(cap.value());
+                    }
+                    if (cap.count() > 0) {
+                        options.maxDocuments(cap.count());
+                    }
+                    getDatabase().createCollection(collName, options);
+                    LOG.debug(format("Created capped Collection (%s) with opts %s", collName, options));
                 }
             }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private Collection<ClassModel<?>> getClassModels() {
-        try {
-            final Field field = pojoCodecProvider.getClass().getDeclaredField("classModels");
-            final Map<Class<?>, ClassModel<?>> map = (Map<Class<?>, ClassModel<?>>) field.get(pojoCodecProvider);
-            return map.values();
-        } catch (Exception e) {
-            return Collections.emptyList();
         }
     }
 
@@ -286,30 +283,25 @@ public class DatastoreImpl implements AdvancedDatastore {
     void process(final MappedClass mc, final Validation validation) {
         if (validation != null) {
             String collectionName = mc.getCollectionName();
-            CommandResult result = getDatabase()
-                                       .command(new BasicDBObject("collMod", collectionName)
-                                                    .append("validator", parse(validation.value()))
-                                                    .append("validationLevel", validation.level().getValue())
-                                                    .append("validationAction", validation.action().getValue())
-                                               );
+            Document result = getDatabase().runCommand(new Document("collMod", collectionName)
+                                                           .append("validator", parse(validation.value()))
+                                                           .append("validationLevel", validation.level().getValue())
+                                                           .append("validationAction", validation.action().getValue())
+                                                      );
 
-            if (!result.ok()) {
-                if (result.getInt("code") == 26) {
+            if (!result.getBoolean("ok")) {
+                if (result.getInteger("code") == 26) {
                     ValidationOptions options = new ValidationOptions()
                                                     .validator(parse(validation.value()))
                                                     .validationLevel(validation.level())
                                                     .validationAction(validation.action());
                     getDatabase().createCollection(collectionName, new CreateCollectionOptions().validationOptions(options));
                 } else {
-                    result.throwOnError();
+                    //                    result.throwOnError();
+                    throw new UnsupportedOperationException("need to be updated to extract error: " + result);
                 }
             }
         }
-    }
-
-    @Override
-    public void ensureIndexes() {
-        ensureIndexes(false);
     }
 
     private <T> MongoCollection<T> getMongoCollection(final Class<T> clazz) {
@@ -318,6 +310,11 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     private <T> MongoCollection<T> getMongoCollection(final String name, final Class<T> clazz) {
         return database.getCollection(name, clazz);
+    }
+
+    @Override
+    public void ensureIndexes() {
+        ensureIndexes(false);
     }
 
     @Override
@@ -338,6 +335,16 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
+    public <T> void ensureIndexes(final String collection, final Class<T> clazz) {
+        ensureIndexes(collection, clazz, false);
+    }
+
+    @Override
+    public <T> void ensureIndexes(final String collection, final Class<T> clazz, final boolean background) {
+        indexHelper.createIndex(getMongoCollection(collection, clazz), mapper.getMappedClass(clazz), background);
+    }
+
+    @Override
     public Key<?> exists(final Object entityOrKey) {
         final Query<?> query = buildExistsQuery(entityOrKey);
         return query.getKey();
@@ -346,6 +353,28 @@ public class DatastoreImpl implements AdvancedDatastore {
     @Override
     public <T> Query<T> find(final Class<T> clazz) {
         return createQuery(clazz);
+    }
+
+    /**
+     * Find all instances by type in a different collection than what is mapped on the class given skipping some documents and returning a
+     * fixed number of the remaining.
+     *
+     * @param collection The collection use when querying
+     * @param clazz      the class to use for mapping the results
+     * @param property   the document property to query against
+     * @param value      the value to check for
+     * @param validate   if true, validate the query
+     * @param <T>        the type to query
+     * @param <V>        the type to filter value
+     * @return the query
+     */
+    public <T, V> Query<T> find(final String collection, final Class<T> clazz, final String property, final V value,
+                                final boolean validate) {
+        final Query<T> query = find(collection, clazz);
+        if (!validate) {
+            query.disableValidation();
+        }
+        return query.filter(property, value).enableValidation();
     }
 
     @Override
@@ -364,7 +393,7 @@ public class DatastoreImpl implements AdvancedDatastore {
             LOG.trace("Executing findAndModify(" + collection.getNamespace().getCollectionName() + ") with delete ...");
         }
 
-        return collection.findOneAndDelete(query.getQueryDocument(), options)
+        return collection.findOneAndDelete(query.getQueryDocument(), options);
     }
 
     @Override
@@ -380,19 +409,17 @@ public class DatastoreImpl implements AdvancedDatastore {
         }
 
         updateForVersioning(query, operations);
-        DBObject res = collection.findOneAndUpdate(query.getQueryDocument(),((UpdateOpsImpl<T>) operations).getOperations(),
-            options
-                .sort(query.getSortDocument())
-                                                                              .projection(query.getFields()));
 
-        return res == null ? null : mapper.fromDBObject(this, query.getEntityClass(), res, createCache());
-
+        return collection.findOneAndUpdate(query.getQueryDocument(),
+            ((UpdateOpsImpl<T>) operations).getOperations(), options
+                                                                 .sort(query.getSortDocument())
+                                                                 .projection(query.getFields()));
     }
 
     @Override
     public <T> T findAndModify(final Query<T> query, final UpdateOperations<T> operations) {
-        return findAndModify(query, operations, new FindAndModifyOptions()
-                                                    .returnNew(true));
+        return findAndModify(query, operations, new FindOneAndUpdateOptions()
+                                                    .returnDocument(ReturnDocument.AFTER));
     }
 
     private <T> void updateForVersioning(final Query<T> query, final UpdateOperations<T> operations) {
@@ -406,18 +433,14 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     }
 
-    private EntityCache createCache() {
-        return mapper.createEntityCache();
-    }
-
     @Override
-    public <T, V> Query<T> get(final Class<T> clazz, final Iterable<V> ids) {
+    public <T, V> Query<T> get(final Class<T> clazz, final List<V> ids) {
         return find(clazz).disableValidation().filter(Mapper.ID_KEY + " in", ids).enableValidation();
     }
 
     @Override
     public <T, V> T get(final Class<T> clazz, final V id) {
-        return find(getCollection(clazz).getNamespace().getCollectionName(), clazz, Mapper.ID_KEY, id, 0, 1, true).get();
+        return find(getCollection(clazz).getNamespace().getCollectionName(), clazz, Mapper.ID_KEY, id, true).get();
     }
 
     @Override
@@ -434,28 +457,25 @@ public class DatastoreImpl implements AdvancedDatastore {
     @Override
     public <T> T getByKey(final Class<T> clazz, final Key<T> key) {
         final String collectionName = mapper.getCollectionName(clazz);
-        final String keyCollection = mapper.updateCollection(key);
-        if (!collectionName.equals(keyCollection)) {
-            throw new RuntimeException("collection names don't match for key and class: " + collectionName + " != " + keyCollection);
-        }
+        final String keyCollection = key.getCollection();
 
         Object id = key.getId();
-        if (id instanceof DBObject) {
-            ((DBObject) id).removeField(Mapper.CLASS_NAME_FIELDNAME);
+        if (id instanceof Document) {
+            ((Document) id).remove(Mapper.CLASS_NAME_FIELDNAME);
         }
-        return get(clazz, id);
+        return get(keyCollection != null ? keyCollection : collectionName, clazz, id);
     }
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public <T> List<T> getByKeys(final Class<T> clazz, final Iterable<Key<T>> keys) {
+    public <T> List<T> getByKeys(final Class<T> clazz, final List<Key<T>> keys) {
 
-        final Map<String, List<Key>> kindMap = new HashMap<String, List<Key>>();
-        final List<T> entities = new ArrayList<T>();
+        final Map<String, List<Key>> kindMap = new HashMap<>();
+        final List<T> entities = new ArrayList<>();
         // String clazzKind = (clazz==null) ? null :
         // getMapper().getCollectionName(clazz);
         for (final Key<?> key : keys) {
-            mapper.updateCollection(key);
+            mapper.coerceCollection(key);
 
             // if (clazzKind != null && !key.getKind().equals(clazzKind))
             // throw new IllegalArgumentException("Types are not equal (" +
@@ -465,13 +485,13 @@ public class DatastoreImpl implements AdvancedDatastore {
             if (kindMap.containsKey(key.getCollection())) {
                 kindMap.get(key.getCollection()).add(key);
             } else {
-                kindMap.put(key.getCollection(), new ArrayList<Key>(singletonList((Key) key)));
+                kindMap.put(key.getCollection(), new ArrayList<>(singletonList((Key) key)));
             }
         }
         for (final Map.Entry<String, List<Key>> entry : kindMap.entrySet()) {
             final List<Key> kindKeys = entry.getValue();
 
-            final List<Object> objIds = new ArrayList<Object>();
+            final List<Object> objIds = new ArrayList<>();
             for (final Key key : kindKeys) {
                 objIds.add(key.getId());
             }
@@ -484,7 +504,7 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
-    public <T> List<T> getByKeys(final Iterable<Key<T>> keys) {
+    public <T> List<T> getByKeys(final List<Key<T>> keys) {
         return getByKeys(null, keys);
     }
 
@@ -515,11 +535,6 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
-    public MongoDatabase getDB() {
-        return db;
-    }
-
-    @Override
     public MongoDatabase getDatabase() {
         return db;
     }
@@ -542,11 +557,6 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
-    public MongoClient getMongo() {
-        return mongoClient;
-    }
-
-    @Override
     public QueryFactory getQueryFactory() {
         return queryFactory;
     }
@@ -557,69 +567,50 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
-    public <T> MapreduceResults<T> mapReduce(final MapReduceOptions<T> options) {
+    public <T> MapReduceIterable<T> mapReduce(final MapReduceOptions<T> options) {
         MongoCollection<T> collection = options.getQuery().getCollection();
 
-        final EntityCache cache = createCache();
-        MapreduceResults<T> results = new MapreduceResults<T>(collection.mapReduce(options.toCommand(getMapper())));
+        final MapReduceIterable<T> iterable = options.apply(collection.mapReduce(options.getMap(), options.getReduce()));
 
-        results.setOutputType(options.getOutputType());
-
-        if (OutputType.INLINE.equals(options.getOutputType())) {
-            results.setInlineRequiredOptions(this, options.getResultType(), getMapper(), cache);
-        } else {
-            results.setQuery(newQuery(options.getResultType(),
-                getDatabase().getCollection(results.getOutputCollectionName(), options.getResultType())));
+        if (!OutputType.INLINE.equals(options.getOutputType())) {
+            iterable.toCollection();
         }
 
-        return results;
+        return iterable;
 
     }
 
     @Override
-    public <T> Key<T> merge(final T entity) {
-        return merge(entity, getWriteConcern(entity));
+    public <T> void merge(final T entity) {
+        merge(entity, getWriteConcern(entity));
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> Key<T> merge(final T entity, final WriteConcern wc) {
-        T unwrapped = entity;
-        final LinkedHashMap<Object, DBObject> involvedObjects = new LinkedHashMap<Object, DBObject>();
-        final DBObject dbObj = mapper.toDBObject(unwrapped, involvedObjects);
-        final Key<T> key = mapper.getKey(unwrapped);
-        unwrapped = ProxyHelper.unwrap(unwrapped);
-        final Object id = mapper.getId(unwrapped);
-        if (id == null) {
-            throw new MappingException("Could not get id for " + unwrapped.getClass().getName());
+    public <T> void merge(final T entity, final WriteConcern wc) {
+        if (mapper.getKey(entity) == null) {
+            throw new MappingException("Could not get ID for " + entity.getClass().getName());
+        }
+        Document document = toDocument(entity);
+
+        final Object idValue = document.remove(Mapper.ID_KEY);
+
+        final MongoCollection<T> collection = getCollection((Class<T>) entity.getClass())
+                                                  .withWriteConcern(wc);
+
+        UpdateResult result = tryVersionedUpdate(collection, entity, new InsertOneOptions());
+
+        if (result == null) {
+            final Query<T> query = (Query<T>) createQuery(entity.getClass()).filter(Mapper.ID_KEY, idValue);
+            result = update(query, new Document("$set", document), new UpdateOptions()
+                                                                       .upsert(false));
         }
 
-        // remove (immutable) _id field for update.
-        final Object idValue = dbObj.get(Mapper.ID_KEY);
-        dbObj.removeField(Mapper.ID_KEY);
-
-        WriteResult wr;
-
-        final MappedClass mc = mapper.getMappedClass(unwrapped);
-        final MongoCollection<T> collection = getCollection((Class<T>) unwrapped.getClass());
-
-        // try to do an update if there is a @Version field
-        wr = tryVersionedUpdate(collection, unwrapped, dbObj, idValue, new InsertOptions().writeConcern(wc), mc);
-
-        if (wr == null) {
-            final Query<T> query = (Query<T>) createQuery(unwrapped.getClass()).filter(Mapper.ID_KEY, id);
-            wr = update(query, new BasicDBObject("$set", dbObj), false, false, wc).getWriteResult();
-        }
-
-        final UpdateResults res = new UpdateResults(wr);
-
-        if (res.getUpdatedCount() == 0) {
+        if (result.getModifiedCount() == 0) {
             throw new UpdateException("Nothing updated");
         }
 
-        dbObj.put(Mapper.ID_KEY, idValue);
-        postSaveOperations(Collections.<T>singletonList(entity), involvedObjects, collection, false);
-        return key;
+        document.put(Mapper.ID_KEY, idValue);
+        postSaveOperations(Collections.singletonList(entity), false);
     }
 
     @Override
@@ -627,126 +618,143 @@ public class DatastoreImpl implements AdvancedDatastore {
         return queryByExample((MongoCollection<T>) getCollection(ex.getClass()), ex);
     }
 
-    @Override
-    public <T> Iterable<Key<T>> save(final Iterable<T> entities) {
-        Iterator<T> iterator = entities.iterator();
-        return !iterator.hasNext()
-               ? Collections.<Key<T>>emptyList()
-               : save(entities, new InsertOptions().writeConcern(getWriteConcern(iterator.next())));
-    }
-
-    @Override
-    public <T> Iterable<Key<T>> save(final Iterable<T> entities, final InsertOptions options) {
-        final List<Key<T>> savedKeys = new ArrayList<Key<T>>();
-        for (final T ent : entities) {
-            savedKeys.add(save(ent, options));
-        }
-        return savedKeys;
-
-    }
-
-    @Override
-    public <T> Key<T> save(final T entity) {
-        return save(entity, new InsertOptions());
-    }
-
-    @Override
-    public <T> Key<T> save(final T entity, final InsertOptions options) {
-        if (entity == null) {
-            throw new UpdateException("Can not persist a null entity");
-        }
-
-        final T unwrapped = ProxyHelper.unwrap(entity);
-        return save((MongoCollection<T>) getCollection(unwrapped.getClass()), unwrapped, enforceWriteConcern(options, entity.getClass()));
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> UpdateResults update(final T entity, final UpdateOperations<T> operations) {
-        if (entity instanceof Query) {
-            return update((Query<T>) entity, operations);
-        }
-
-        final MappedClass mc = mapper.getMappedClass(entity);
-        Query<?> query = createQuery(mapper.getMappedClass(entity).getClazz())
-                             .disableValidation()
-                             .filter(Mapper.ID_KEY, mapper.getId(entity));
-        if (!mc.getFieldsAnnotatedWith(Version.class).isEmpty()) {
-            final MappedField field = mc.getFieldsAnnotatedWith(Version.class).get(0);
-            query.field(field.getNameToStore()).equal(field.getFieldValue(entity));
-        }
-
-        return update((Query<T>) query, operations);
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    public <T> UpdateResults update(final Key<T> key, final UpdateOperations<T> operations) {
-        Class<T> clazz = (Class<T>) key.getType();
-        if (clazz == null) {
-            clazz = (Class<T>) mapper.getClassFromCollection(key.getCollection());
-        }
-        return update(createQuery(clazz).disableValidation().filter(Mapper.ID_KEY, key.getId()), operations, new UpdateOptions());
-    }
-
-    @Override
-    public <T> UpdateResults update(final Query<T> query, final UpdateOperations<T> operations) {
-        return update(query, operations, new UpdateOptions()
-                                             .upsert(false)
-                                             .multi(true)
-                                             .writeConcern(getWriteConcern(query.getEntityClass())));
-    }
-
-    @Override
-    public <T> UpdateResults update(final Query<T> query, final UpdateOperations<T> operations, final UpdateOptions options) {
-        MongoCollection<T> collection = query.getCollection();
-        // TODO remove this after testing.
-        if (collection == null) {
-            collection = getCollection(query.getEntityClass());
-        }
-
-        final MappedClass mc = getMapper().getMappedClass(query.getEntityClass());
-        final List<MappedField> fields = mc.getFieldsAnnotatedWith(Version.class);
-
-        DBObject queryObject = query.getQueryDocument();
-        if (operations.isIsolated()) {
-            queryObject.put("$isolated", true);
-        }
-
-        if (!fields.isEmpty()) {
-            operations.inc(fields.get(0).getNameToStore(), 1);
-        }
-
-        final BasicDBObject update = (BasicDBObject) ((UpdateOpsImpl) operations).getOperations();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace(format("Executing update(%s) for query: %s, ops: %s, multi: %s, upsert: %s",
-                collection.getNamespace().getCollectionName(), queryObject, update, options.isMulti(), options.isUpsert()));
-        }
-
-        return new UpdateResults(collection.update(queryObject, update,
-            enforceWriteConcern(options, query.getEntityClass())
-                .getOptions()));
-    }
-
     @SuppressWarnings("unchecked")
     private <T> Query<T> queryByExample(final MongoCollection<T> coll, final T example) {
         // TODO: think about remove className from baseQuery param below.
         final Class<T> type = (Class<T>) example.getClass();
-        final DBObject query = entityToDBObj(example, new HashMap<Object, DBObject>());
+        final Document query = toDocument(example);
         return newQuery(type, coll, query);
     }
 
-    private DBObject entityToDBObj(final Object entity, final Map<Object, DBObject> involvedObjects) {
-        return mapper.toDBObject(ProxyHelper.unwrap(entity), involvedObjects);
+    private <T> Document toDocument(final T entity) {
+        final BsonDocument bsonDocument = new BsonDocument();
+        final Class<T> aClass = (Class<T>) entity.getClass();
+        codecRegistry.get(aClass).encode(new BsonDocumentWriter(bsonDocument), entity,
+            EncoderContext.builder()
+                          .isEncodingCollectibleDocument(true)
+                          .build());
+
+        return new Document(new LinkedHashMap<>(bsonDocument));
     }
 
     /**
      * Creates and returns a {@link Query} using the underlying {@link QueryFactory}.
      *
-     * @see QueryFactory#createQuery(Datastore, MongoCollection, Class, DBObject)
+     * @see QueryFactory#createQuery(Datastore, MongoCollection, Class, Document)
      */
-    private <T> Query<T> newQuery(final Class<T> type, final MongoCollection<T> collection, final DBObject query) {
+    private <T> Query<T> newQuery(final Class<T> type, final MongoCollection<T> collection, final Document query) {
         return getQueryFactory().createQuery(this, collection, type, query);
+    }
+
+    private <T> UpdateResult tryVersionedUpdate(final MongoCollection<T> origCollection, final T entity,
+                                                final InsertOneOptions options) {
+        UpdateResult result;
+        final MappedClass mc = mapper.getMappedClass(entity);
+        if (mc.getFieldsAnnotatedWith(Version.class).isEmpty()) {
+            return null;
+        }
+
+        // involvedObjects is used not only as a cache but also as a list of what needs to be called for life-cycle methods at the end.
+        final Document document = toDocument(entity);
+
+        // try to do an update if there is a @Version field
+        final MongoCollection<Document> collection = getDatabase()
+                                                         .getCollection(origCollection.getNamespace().getCollectionName())
+                                                         .withWriteConcern(WriteConcern.ACKNOWLEDGED);
+
+        final MappedField mfVersion = mc.getMappedVersionField();
+        final String versionKeyName = mfVersion.getNameToStore();
+
+        Long oldVersion = (Long) mfVersion.getFieldValue(entity);
+        long newVersion = oldVersion == null ? 1 : oldVersion + 1;
+
+        document.put(versionKeyName, newVersion);
+        final Object idValue = document.remove(Mapper.ID_KEY);
+
+        if (idValue != null && newVersion != 1) {
+            final Query<?> query = newQuery(Document.class, collection)
+                                       .disableValidation()
+                                       .filter(Mapper.ID_KEY, idValue)
+                                       .enableValidation()
+                                       .filter(versionKeyName, oldVersion);
+            result = update(query, document, new UpdateOptions()
+                                                 .bypassDocumentValidation(options.getBypassDocumentValidation()));
+
+
+            if (result.getModifiedCount() != 1) {
+                throw new ConcurrentModificationException(format("Entity of class %s (id='%s',version='%d') was concurrently updated.",
+                    entity.getClass().getName(), idValue, oldVersion));
+            }
+        } else {
+            result = saveDocument(collection, document, options);
+        }
+
+        return result;
+    }
+
+    private UpdateResult saveDocument(final MongoCollection<Document> collection, final Document document,
+                                      final InsertOneOptions options) {
+        if (document.get(ID_FIELD_NAME) == null) {
+            collection.insertOne(document, options);
+            return new InsertResult(collection.getWriteConcern().isAcknowledged());
+        } else {
+            return collection.updateOne(new Document(ID_FIELD_NAME, document.get(ID_FIELD_NAME)), document,
+                new UpdateOptions()
+                    .bypassDocumentValidation(options.getBypassDocumentValidation())
+                    .upsert(true));
+        }
+    }
+
+    private <T> List<Key<T>> postSaveOperations(final List<T> entities/*, final Map<Object, Document> involvedObjects*/) {
+        return postSaveOperations(entities, /*involvedObjects, */true);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T> List<Key<T>> postSaveOperations(final List<T> entities, /*final Map<Object, Document> involvedObjects, */
+                                                final boolean fetchKeys) {
+        List<Key<T>> keys = new ArrayList<>();
+        for (final T entity : entities) {
+
+            if (fetchKeys) {
+                final Key<T> key = getMapper().getKey(entity);
+                if (key == null) {
+                    throw new MappingException(format("Missing _id after save on %s", entity.getClass().getName()));
+                }
+                keys.add(key);
+            }
+            mapper.getMappedClass(entity).callLifecycleMethods(PostPersist.class, entity, null, mapper);
+        }
+
+/*
+        for (Entry<Object, Document> entry : involvedObjects.entrySet()) {
+            final Object key = entry.getKey();
+            mapper.getMappedClass(key).callLifecycleMethods(PostPersist.class, key, entry.getValue(), mapper);
+
+        }
+*/
+        return keys;
+    }
+
+    private <T> WriteConcern enforceWriteConcern(final Class<T> klass) {
+        final WriteConcern klassConcern = getWriteConcern(klass);
+        return klassConcern != null ? klassConcern : getDefaultWriteConcern();
+    }
+
+    /**
+     * Gets the write concern for entity or returns the default write concern for this datastore
+     *
+     * @param clazzOrEntity the class or entity to use when looking up the WriteConcern
+     */
+    private WriteConcern getWriteConcern(final Object clazzOrEntity) {
+        WriteConcern wc = defConcern;
+        if (clazzOrEntity != null) {
+            final Entity entityAnn = getMapper().getMappedClass(clazzOrEntity).getEntityAnnotation();
+            if (entityAnn != null && entityAnn.concern().length() != 0) {
+                wc = WriteConcern.valueOf(entityAnn.concern());
+            }
+        }
+
+        return wc;
     }
 
     /**
@@ -763,32 +771,6 @@ public class DatastoreImpl implements AdvancedDatastore {
      */
     public void setMapper(final Mapper mapper) {
         this.mapper = mapper;
-    }
-
-    /**
-     * Find all instances by type in a different collection than what is mapped on the class given skipping some documents and returning a
-     * fixed number of the remaining.
-     *
-     * @param collection The collection use when querying
-     * @param clazz      the class to use for mapping the results
-     * @param property   the document property to query against
-     * @param value      the value to check for
-     * @param offset     the number of results to skip
-     * @param size       the maximum number of results to return
-     * @param validate   if true, validate the query
-     * @param <T>        the type to query
-     * @param <V>        the type to filter value
-     * @return the query
-     */
-    public <T, V> Query<T> find(final String collection, final Class<T> clazz, final String property, final V value, final int offset,
-                                final int size, final boolean validate) {
-        final Query<T> query = find(collection, clazz);
-        if (!validate) {
-            query.disableValidation();
-        }
-        query.offset(offset);
-        query.limit(size);
-        return query.filter(property, value).enableValidation();
     }
 
     private Query<?> buildExistsQuery(final Object entityOrKey) {
@@ -811,40 +793,15 @@ public class DatastoreImpl implements AdvancedDatastore {
         return getQueryFactory().createQuery(this, collection, type);
     }
 
-    <T> FindAndModifyOptions enforceWriteConcern(final FindAndModifyOptions options, final Class<T> klass) {
-        if (options.getWriteConcern() == null) {
-            return options
-                       .copy()
-                       .writeConcern(getWriteConcern(klass));
+    @SuppressWarnings("unchecked")
+    private Collection<ClassModel<?>> getClassModels() {
+        try {
+            final Field field = pojoCodecProvider.getClass().getDeclaredField("classModels");
+            final Map<Class<?>, ClassModel<?>> map = (Map<Class<?>, ClassModel<?>>) field.get(pojoCodecProvider);
+            return map.values();
+        } catch (Exception e) {
+            return emptyList();
         }
-        return options;
-    }
-
-    /**
-     * Gets the write concern for entity or returns the default write concern for this datastore
-     *
-     * @param clazzOrEntity the class or entity to use when looking up the WriteConcern
-     */
-    private WriteConcern getWriteConcern(final Object clazzOrEntity) {
-        WriteConcern wc = defConcern;
-        if (clazzOrEntity != null) {
-            final Entity entityAnn = getMapper().getMappedClass(clazzOrEntity).getEntityAnnotation();
-            if (entityAnn != null && entityAnn.concern().length() != 0) {
-                wc = WriteConcern.valueOf(entityAnn.concern());
-            }
-        }
-
-        return wc;
-    }
-
-    @Override
-    public DBDecoderFactory getDecoderFact() {
-        return decoderFactory != null ? decoderFactory : DefaultDBDecoder.FACTORY;
-    }
-
-    @Override
-    public void setDecoderFact(final DBDecoderFactory fact) {
-        decoderFactory = fact;
     }
 
     @Override
@@ -859,31 +816,13 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
-    public <T> Query<T> createQuery(final Class<T> clazz, final DBObject q) {
+    public <T> Query<T> createQuery(final Class<T> clazz, final Document q) {
         return newQuery(clazz, getCollection(clazz), q);
     }
 
     @Override
-    public <T> Query<T> createQuery(final String collection, final Class<T> type, final DBObject q) {
+    public <T> Query<T> createQuery(final String collection, final Class<T> type, final Document q) {
         return newQuery(type, getCollection(collection, type), q);
-    }
-
-    @Override
-    public <T, V> DBRef createRef(final Class<T> clazz, final V id) {
-        if (id == null) {
-            throw new MappingException("Could not get id for " + clazz.getName());
-        }
-        return new DBRef(getCollection(clazz).getNamespace().getCollectionName(), id);
-    }
-
-    @Override
-    public <T> DBRef createRef(final T entity) {
-        final T wrapped = ProxyHelper.unwrap(entity);
-        final Object id = mapper.getId(wrapped);
-        if (id == null) {
-            throw new MappingException("Could not get id for " + wrapped.getClass().getName());
-        }
-        return createRef(wrapped.getClass(), id);
     }
 
     @Override
@@ -894,32 +833,12 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
-    public <T, V> WriteResult delete(final String kind, final Class<T> clazz, final V id) {
-        return delete(find(kind, clazz).filter(Mapper.ID_KEY, id));
-    }
-
-    @Override
-    public <T, V> WriteResult delete(final String kind, final Class<T> clazz, final V id, final DeleteOptions options) {
-        return delete(find(kind, clazz).filter(Mapper.ID_KEY, id), options);
-    }
-
-    @Override
-    public <T> void ensureIndexes(final String collection, final Class<T> clazz) {
-        ensureIndexes(collection, clazz, false);
-    }
-
-    @Override
-    public <T> void ensureIndexes(final String collection, final Class<T> clazz, final boolean background) {
-        indexHelper.createIndex(getMongoCollection(collection, clazz), mapper.getMappedClass(clazz), background);
-    }
-
-    @Override
     public Key<?> exists(final Object entityOrKey, final ReadPreference readPreference) {
-        final Query<?> query = buildExistsQuery(entityOrKey);
+        Query<?> query = buildExistsQuery(entityOrKey);
         if (readPreference != null) {
-            query.useReadPreference(readPreference);
+            query = query.cloneQuery().setReadPreference(readPreference);
         }
-        return query.getKey();
+        return query.getKey(new FindOptions());
     }
 
     @Override
@@ -930,7 +849,7 @@ public class DatastoreImpl implements AdvancedDatastore {
     @Override
     public <T, V> Query<T> find(final String collection, final Class<T> clazz, final String property, final V value, final int offset,
                                 final int size) {
-        return find(collection, clazz, property, value, offset, size, true);
+        return find(collection, clazz, property, value, true);
     }
 
     @Override
@@ -954,25 +873,26 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     @Override
     public <T> Key<T> insert(final T entity) {
-        return insert(entity, getWriteConcern(entity));
+        return insert(entity, new InsertOneOptions());
     }
 
     @Override
-    public <T> Key<T> insert(final T entity, final InsertOptions options) {
-        final T unwrapped = ProxyHelper.unwrap(entity);
-        return insert(getCollection((Class<T>) unwrapped.getClass()), unwrapped, options);
+    public <T> Key<T> insert(final T entity, final InsertOneOptions options) {
+        final Class<T> aClass = (Class<T>) entity.getClass();
+        final MongoCollection<T> collection = getCollection(aClass);
+        return insert(collection, entity, options, enforceWriteConcern(aClass));
     }
 
     @Override
     public <T> Key<T> insert(final String collection, final T entity) {
-        final T unwrapped = ProxyHelper.unwrap(entity);
-        return insert(getCollection(collection, (Class<T>) entity.getClass()), unwrapped,
-            new InsertOptions().writeConcern(getWriteConcern(unwrapped)));
+        return insert(getCollection(collection, (Class<T>) entity.getClass()), entity,
+            new InsertOneOptions(), enforceWriteConcern(entity.getClass()));
     }
 
     @Override
-    public <T> Key<T> insert(final String collection, final T entity, final InsertOptions options) {
-        return insert(this.getCollection(collection, (Class<T>) entity.getClass()), ProxyHelper.unwrap(entity), options);
+    public <T> Key<T> insert(final String collection, final T entity, final InsertOneOptions options) {
+        return insert(this.getCollection(collection, (Class<T>) entity.getClass()), entity, options,
+            enforceWriteConcern(entity.getClass()));
     }
 
     /**
@@ -983,163 +903,52 @@ public class DatastoreImpl implements AdvancedDatastore {
      * @return the keys of entities
      */
     @Override
-    public <T> Iterable<Key<T>> insert(final Iterable<T> entities) {
-        return insert(entities, new InsertOptions()
-                                    .writeConcern(defConcern));
+    public <T> List<Key<T>> insert(final List<T> entities) {
+        return insert(entities, new InsertManyOptions());
     }
 
     @Override
-    public <T> Iterable<Key<T>> insert(final Iterable<T> entities, final InsertOptions options) {
-        Iterator<T> iterator = entities.iterator();
-        return !iterator.hasNext()
-               ? Collections.<Key<T>>emptyList()
-               : insert(getCollection((Class<T>) iterator.next().getClass()), entities, options);
+    public <T> List<Key<T>> insert(final List<T> entities, final InsertManyOptions options) {
+        if (entities.isEmpty()) {
+            return emptyList();
+        }
+        final Class<T> first = (Class<T>) entities.get(0).getClass();
+        return insert(getCollection(first), entities, options, enforceWriteConcern(first));
     }
 
     @Override
-    public <T> Iterable<Key<T>> insert(final String collection, final Iterable<T> entities) {
-        return insert(collection, entities, new InsertOptions());
+    public <T> List<Key<T>> insert(final String collection, final List<T> entities) {
+        return insert(collection, entities, new InsertManyOptions());
     }
 
     @Override
-    public <T> Iterable<Key<T>> insert(final String collection, final Iterable<T> entities, final InsertOptions options) {
-        Iterator<T> iterator = entities.iterator();
-        return !iterator.hasNext()
-               ? Collections.<Key<T>>emptyList()
-               : insert(getDatabase().getCollection(collection, (Class<T>) iterator.next().getClass()), entities, options);
+    public <T> List<Key<T>> insert(final String collection, final List<T> entities, final InsertManyOptions options) {
+        if (entities.isEmpty()) {
+            return emptyList();
+        }
+        final Class<?> entityClass = entities.get(0).getClass();
+        return insert(getDatabase().getCollection(collection, (Class<T>) entityClass), entities, options,
+            enforceWriteConcern(entityClass));
     }
-
-    @Override
-    public <T> Query<T> queryByExample(final String collection, final T ex) {
-        return queryByExample(getDatabase().getCollection(collection, (Class<T>) ex.getClass()), ex);
-    }
-
-    @Override
-    public <T> Key<T> save(final String collection, final T entity) {
-        final T unwrapped = ProxyHelper.unwrap(entity);
-        return save(collection, entity, new InsertOptions().writeConcern(getWriteConcern(unwrapped)));
-    }
-
-    @Override
-    public <T> Key<T> save(final String collection, final T entity, final InsertOptions options) {
-        return save(getCollection(collection, (Class<T>) entity.getClass()), ProxyHelper.unwrap(entity), options);
-    }
-
-    private <T> Iterable<Key<T>> insert(final MongoCollection<T> collection, final Iterable<T> entities, final InsertOptions options) {
-        if (!entities.iterator().hasNext()) {
-            return Collections.emptyList();
+    private <T> List<Key<T>> insert(final MongoCollection<T> collection, final List<T> entities, final InsertManyOptions options,
+                                    WriteConcern wc) {
+        if (entities.isEmpty()) {
+            return emptyList();
         }
 
-        final Map<Object, DBObject> involvedObjects = new LinkedHashMap<Object, DBObject>();
-        final List<DBObject> list = new ArrayList<DBObject>();
-        com.mongodb.InsertOptions insertOptions = options.getOptions();
-        for (final T entity : entities) {
-            if (options.getWriteConcern() == null) {
-                insertOptions = enforceWriteConcern(options, entity.getClass()).getOptions();
-            }
-            list.add(toDbObject(entity, involvedObjects));
-        }
-        collection.insert(list, insertOptions);
+        collection
+            .withWriteConcern(wc)
+            .insertMany(entities, options);
 
-        return postSaveOperations(entities, involvedObjects, collection);
+        return postSaveOperations(entities);
     }
 
-    private <T> DBObject toDbObject(final T ent, final Map<Object, DBObject> involvedObjects) {
-        final MappedClass mc = mapper.getMappedClass(ent);
-        if (mc.getAnnotation(NotSaved.class) != null) {
-            throw new MappingException(format("Entity type: %s is marked as NotSaved which means you should not try to save it!",
-                mc.getClazz().getName()));
-        }
-        DBObject dbObject = entityToDBObj(ent, involvedObjects);
-        List<MappedField> versionFields = mc.getFieldsAnnotatedWith(Version.class);
-        for (MappedField mappedField : versionFields) {
-            String name = mappedField.getNameToStore();
-            if (dbObject.get(name) == null) {
-                dbObject.put(name, 1);
-                mappedField.setFieldValue(ent, 1L);
-            }
-        }
-        return dbObject;
-    }
+    protected <T> Key<T> insert(final MongoCollection<T> collection, final T entity, final InsertOneOptions options, WriteConcern wc) {
+        collection
+            .withWriteConcern(wc)
+            .insertOne(entity, options);
 
-    protected <T> Key<T> insert(final MongoCollection<T> collection, final T entity, final InsertOptions options) {
-        final LinkedHashMap<Object, DBObject> involvedObjects = new LinkedHashMap<Object, DBObject>();
-        collection.insert(singletonList(entityToDBObj(entity, involvedObjects)), enforceWriteConcern(options, entity.getClass())
-                                                                                     .getOptions());
-
-        return postSaveOperations(singletonList(entity), involvedObjects, collection).get(0);
-    }
-
-    <T> InsertOptions enforceWriteConcern(final InsertOptions options, final Class<T> klass) {
-        if (options.getWriteConcern() == null) {
-            return options
-                       .copy()
-                       .writeConcern(getWriteConcern(klass));
-        }
-        return options;
-    }
-
-    private <T> List<Key<T>> postSaveOperations(final Iterable<T> entities, final Map<Object, DBObject> involvedObjects,
-                                                final MongoCollection<T> collection) {
-        return postSaveOperations(entities, involvedObjects, collection, true);
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> List<Key<T>> postSaveOperations(final Iterable<T> entities, final Map<Object, DBObject> involvedObjects,
-                                                final MongoCollection<T> collection, final boolean fetchKeys) {
-        List<Key<T>> keys = new ArrayList<Key<T>>();
-        for (final T entity : entities) {
-            final DBObject dbObj = involvedObjects.remove(entity);
-
-            if (fetchKeys) {
-                if (dbObj.get(Mapper.ID_KEY) == null) {
-                    throw new MappingException(format("Missing _id after save on %s", entity.getClass().getName()));
-                }
-                mapper.updateKeyAndVersionInfo(this, dbObj, createCache(), entity);
-                keys.add(new Key<T>((Class<? extends T>) entity.getClass(), collection.getNamespace().getCollectionName(),
-                    mapper.getId(entity)));
-            }
-            mapper.getMappedClass(entity).callLifecycleMethods(PostPersist.class, entity, dbObj, mapper);
-        }
-
-        for (Entry<Object, DBObject> entry : involvedObjects.entrySet()) {
-            final Object key = entry.getKey();
-            mapper.getMappedClass(key).callLifecycleMethods(PostPersist.class, key, entry.getValue(), mapper);
-
-        }
-        return keys;
-    }
-
-    <T> DeleteOptions enforceWriteConcern(final DeleteOptions options, final Class<T> klass) {
-        if (options.getWriteConcern() == null) {
-            return options
-                       .copy()
-                       .writeConcern(getWriteConcern(klass));
-        }
-        return options;
-    }
-
-    protected <T> MongoCollection<T> getCollection(final String kind, final Class<T> aClass) {
-        if (kind == null) {
-            return null;
-        }
-        return getDatabase().getCollection(kind, aClass);
-    }
-
-    /**
-     * Deletes entities based on the query, with the WriteConcern
-     *
-     * @param clazz the clazz to query against when finding documents to delete
-     * @param id    the ID to look for
-     * @param wc    the WriteConcern to use when deleting
-     * @param <T>   the type to delete
-     * @param <V>   the type of the key
-     * @return results of the delete
-     * @deprecated use {@link #delete(Class, Object, DeleteOptions)}
-     */
-    @Deprecated
-    public <T, V> WriteResult delete(final Class<T> clazz, final V id, final WriteConcern wc) {
-        return delete(createQuery(clazz).filter(Mapper.ID_KEY, id), new DeleteOptions().writeConcern(wc));
+        return postSaveOperations(singletonList(entity)).get(0);
     }
 
     /**
@@ -1152,8 +961,97 @@ public class DatastoreImpl implements AdvancedDatastore {
      * @return the key of entity
      */
     public <T> Key<T> insert(final String collection, final T entity, final WriteConcern wc) {
-        return insert(getCollection(collection, (Class<T>) entity.getClass()), ProxyHelper.unwrap(entity),
-            new InsertOptions().writeConcern(wc));
+        return insert(getCollection(collection, (Class<T>) entity.getClass()), entity,
+            new InsertOneOptions(), wc);
+    }
+
+    @Override
+    public <T> Query<T> queryByExample(final String collection, final T ex) {
+        return queryByExample(getDatabase().getCollection(collection, (Class<T>) ex.getClass()), ex);
+    }
+
+    @Override
+    public <T> Key<T> save(final String collection, final T entity) {
+        return save(collection, entity, new InsertOneOptions());
+    }
+
+    @Override
+    public <T> Key<T> save(final String collection, final T entity, final InsertOneOptions options) {
+        return save(getCollection(collection, (Class<T>) entity.getClass()), entity, options, enforceWriteConcern(entity.getClass()));
+    }
+
+    @Override
+    public <T> List<Key<T>> save(final List<T> entities) {
+        return save(entities, new InsertManyOptions());
+    }
+
+    @Override
+    public <T> List<Key<T>> save(final List<T> entities, final InsertManyOptions options) {
+        if (entities.isEmpty()) {
+            return emptyList();
+        }
+        final Class<T> first = (Class<T>) entities.get(0).getClass();
+
+        getCollection(first)
+            .withWriteConcern(enforceWriteConcern(first))
+            .insertMany(entities, options);
+
+        return entities.stream().map(mapper::getKey)
+                       .collect(Collectors.toList());
+    }
+
+    @Override
+    public <T> Key<T> save(final T entity) {
+        return save(entity, new InsertOneOptions(), enforceWriteConcern(entity.getClass()));
+    }
+
+    @Override
+    public <T> Key<T> save(final T entity, final WriteConcern writeConcern) {
+        return save(entity, new InsertOneOptions(), writeConcern);
+    }
+
+    @Override
+    public <T> Key<T> save(final T entity, final InsertOneOptions options) {
+        if (entity == null) {
+            throw new UpdateException("Can not persist a null entity");
+        }
+
+        final Class<?> aClass = entity.getClass();
+        final MongoCollection<T> collection = (MongoCollection<T>) getCollection(aClass)
+                                                                       .withWriteConcern(enforceWriteConcern(aClass));
+        return save(collection, entity, options, enforceWriteConcern(aClass));
+    }
+
+    @Override
+    public <T> Key<T> save(final T entity, final InsertOneOptions options, final WriteConcern writeConcern) {
+        if (entity == null) {
+            throw new UpdateException("Can not persist a null entity");
+        }
+
+        final MongoCollection<T> collection = (MongoCollection<T>) getCollection(entity.getClass());
+        return save(collection, entity, options, writeConcern);
+    }
+
+    private <T> Key<T> save(final MongoCollection<T> collection, final T entity, final InsertOneOptions options,
+                            WriteConcern writeConcern) {
+        if (entity == null) {
+            throw new UpdateException("Can not persist a null entity");
+        }
+
+        if (tryVersionedUpdate(collection, entity, options) == null) {
+            collection
+                .withWriteConcern(writeConcern)
+                .insertOne(entity, options);
+        }
+
+        return postSaveOperations(singletonList(entity)).get(0);
+    }
+
+    protected <T> MongoCollection<T> getCollection(final String kind, final Class<T> aClass) {
+        if (kind == null) {
+            return null;
+        }
+        return getDatabase().getCollection(kind, aClass);
     }
 
     @Deprecated
@@ -1161,107 +1059,82 @@ public class DatastoreImpl implements AdvancedDatastore {
         return mapper.getId(entity);
     }
 
-    <T> UpdateOptions enforceWriteConcern(final UpdateOptions options, final Class<T> klass) {
-        if (options.getWriteConcern() == null) {
-            return options
-                       .copy()
-                       .writeConcern(getWriteConcern(klass));
-        }
-        return options;
+    @SuppressWarnings("unchecked")
+    private <T> UpdateResult update(final Query<T> query, final Document update) {
+        return update(query, update, new UpdateOptions()
+                                         .upsert(false));
     }
 
-    protected <T> Key<T> save(final MongoCollection<T> collection, final T entity, final InsertOptions options) {
-        if (entity == null) {
-            throw new UpdateException("Can not persist a null entity");
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> UpdateResult update(final T entity, final UpdateOperations<T> operations) {
+        if (entity instanceof Query) {
+            return update((Query<T>) entity, operations);
         }
 
         final MappedClass mc = mapper.getMappedClass(entity);
-        if (mc.getAnnotation(NotSaved.class) != null) {
-            throw new MappingException(format("Entity type: %s is marked as NotSaved which means you should not try to save it!",
-                mc.getClazz().getName()));
+        Query<?> query = createQuery(mapper.getMappedClass(entity).getClazz())
+                             .disableValidation()
+                             .filter(Mapper.ID_KEY, mapper.getId(entity));
+        if (!mc.getFieldsAnnotatedWith(Version.class).isEmpty()) {
+            final MappedField field = mc.getFieldsAnnotatedWith(Version.class).get(0);
+            query.field(field.getNameToStore()).equal(field.getFieldValue(entity));
         }
 
-        // involvedObjects is used not only as a cache but also as a list of what needs to be called for life-cycle methods at the end.
-        final LinkedHashMap<Object, DBObject> involvedObjects = new LinkedHashMap<Object, DBObject>();
-        final DBObject document = entityToDBObj(entity, involvedObjects);
-
-        // try to do an update if there is a @Version field
-        final Object idValue = document.get(Mapper.ID_KEY);
-        WriteResult wr = tryVersionedUpdate(collection, entity, document, idValue, enforceWriteConcern(options, entity.getClass()), mc);
-
-        if (wr == null) {
-            saveDocument(collection, document, options);
-        }
-
-        return postSaveOperations(singletonList(entity), involvedObjects, collection).get(0);
+        return update((Query<T>) query, operations);
     }
 
-    private <T> WriteResult saveDocument(final MongoCollection<T> collection, final DBObject document, final InsertOptions options) {
-        if (document.get(ID_FIELD_NAME) == null) {
-            return collection.insert(singletonList(document), options.getOptions());
-        } else {
-            return collection.update(new BasicDBObject(ID_FIELD_NAME, document.get(ID_FIELD_NAME)), document,
-                new DBCollectionUpdateOptions()
-                    .bypassDocumentValidation(options.getBypassDocumentValidation())
-                    .writeConcern(options.getWriteConcern())
-                    .upsert(true));
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> UpdateResult update(final Key<T> key, final UpdateOperations<T> operations) {
+        Class<T> clazz = (Class<T>) key.getType();
+        if (clazz == null) {
+            clazz = (Class<T>) mapper.getClassFromCollection(key.getCollection());
         }
+        return update(createQuery(clazz).disableValidation().filter(Mapper.ID_KEY, key.getId()), operations, new UpdateOptions());
     }
 
-    private <T> WriteResult tryVersionedUpdate(final MongoCollection<T> collection, final T entity, final DBObject dbObj,
-                                               final Object idValue, final InsertOptions options, final MappedClass mc) {
-        WriteResult wr;
-        if (mc.getFieldsAnnotatedWith(Version.class).isEmpty()) {
-            return null;
-        }
-
-        final MappedField mfVersion = mc.getMappedVersionField();
-        final String versionKeyName = mfVersion.getNameToStore();
-
-        Long oldVersion = (Long) mfVersion.getFieldValue(entity);
-        long newVersion = nextValue(oldVersion);
-
-        dbObj.put(versionKeyName, newVersion);
-        //        mfVersion.setFieldValue(entity, newVersion);
-
-        if (idValue != null && newVersion != 1) {
-            final Query<?> query = find(collection.getNamespace().getCollectionName(), entity.getClass())
-                                       .disableValidation()
-                                       .filter(Mapper.ID_KEY, idValue)
-                                       .enableValidation()
-                                       .filter(versionKeyName, oldVersion);
-            final UpdateResults res = update(query, dbObj, new UpdateOptions()
-                                                               .bypassDocumentValidation(options.getBypassDocumentValidation())
-                                                               .writeConcern(options.getWriteConcern()));
-
-            wr = res.getWriteResult();
-
-            if (res.getUpdatedCount() != 1) {
-                throw new ConcurrentModificationException(format("Entity of class %s (id='%s',version='%d') was concurrently updated.",
-                    entity.getClass().getName(), idValue, oldVersion));
-            }
-        } else {
-            wr = saveDocument(collection, dbObj, options);
-        }
-
-        return wr;
+    @Override
+    public <T> UpdateResult update(final Query<T> query, final UpdateOperations<T> operations) {
+        return update(query, operations, new UpdateOptions()
+                                             .upsert(false)
+            //                                             .multi(true)
+                     );
     }
 
-    private long nextValue(final Long oldVersion) {
-        return oldVersion == null ? 1 : oldVersion + 1;
+    @Override
+    public <T> UpdateResult update(final Query<T> query, final UpdateOperations<T> operations, final UpdateOptions options) {
+        MongoCollection<T> collection = query.getCollection();
+        // TODO remove this after testing.
+        if (collection == null) {
+            collection = getCollection(query.getEntityClass());
+        }
+
+        final MappedClass mc = getMapper().getMappedClass(query.getEntityClass());
+        final List<MappedField> fields = mc.getFieldsAnnotatedWith(Version.class);
+
+        Document queryObject = query.getQueryDocument();
+        if (operations.isIsolated()) {
+            queryObject.put("$isolated", true);
+        }
+
+        if (!fields.isEmpty()) {
+            operations.inc(fields.get(0).getNameToStore(), 1);
+        }
+
+        final Document update = ((UpdateOpsImpl) operations).getOperations();
+        if (LOG.isTraceEnabled()) {
+            LOG.trace(format("Executing update(%s) for query: %s, ops: %s,upsert: %s",
+                collection.getNamespace().getCollectionName(), queryObject, update, /*options.isMulti(), */options.isUpsert()));
+        }
+
+        return collection.updateMany(queryObject, update, options);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> UpdateResults update(final Query<T> query, final DBObject update, final boolean createIfMissing, final boolean multi,
-                                     final WriteConcern wc) {
-        return update(query, update, new UpdateOptions()
-                                         .upsert(createIfMissing)
-                                         .multi(multi)
-                                         .writeConcern(wc));
-    }
-
-    @SuppressWarnings("unchecked")
-    private <T> UpdateResults update(final Query<T> query, final DBObject update, final UpdateOptions options) {
+    private <T> UpdateResult update(final Query<T> query,
+                                    final Document update,
+                                    final UpdateOptions options) {
 
         MongoCollection<T> collection = query.getCollection();
         // TODO remove this after testing.
@@ -1269,25 +1142,19 @@ public class DatastoreImpl implements AdvancedDatastore {
             collection = getCollection(query.getEntityClass());
         }
 
-        if (query.getSortDocument() != null && query.getSortDocument().keySet() != null && !query.getSortDocument().keySet().isEmpty()) {
+        if (query.getSortDocument() != null && !query.getSortDocument().keySet().isEmpty()) {
             throw new QueryException("sorting is not allowed for updates.");
         }
-        if (query.getOffset() > 0) {
-            throw new QueryException("a query offset is not allowed for updates.");
-        }
-        if (query.getLimit() > 0) {
-            throw new QueryException("a query limit is not allowed for updates.");
-        }
 
-        DBObject queryObject = query.getQueryDocument();
+        Document queryObject = query.getQueryDocument();
 
         final MappedClass mc = getMapper().getMappedClass(query.getEntityClass());
         final List<MappedField> fields = mc.getFieldsAnnotatedWith(Version.class);
         if (!fields.isEmpty()) {
             final MappedField versionMF = fields.get(0);
             if (update.get(versionMF.getNameToStore()) == null) {
-                if (!update.containsField("$inc")) {
-                    update.put("$inc", new BasicDBObject(versionMF.getNameToStore(), 1));
+                if (!update.containsKey("$inc")) {
+                    update.put("$inc", new Document(versionMF.getNameToStore(), 1));
                 } else {
                     ((Map<String, Object>) (update.get("$inc"))).put(versionMF.getNameToStore(), 1);
                 }
@@ -1295,12 +1162,43 @@ public class DatastoreImpl implements AdvancedDatastore {
         }
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace(format("Executing update(%s) for query: %s, ops: %s, multi: %s, upsert: %s",
-                collection.getNamespace().getCollectionName(), queryObject, update, options.isMulti(), options.isUpsert()));
+            LOG.trace(format("Executing update(%s) for query: %s, ops: %s, upsert: %s",
+                collection.getNamespace().getCollectionName(), queryObject, update, options.isUpsert()));
         }
 
-        return new UpdateResults(collection.update(queryObject, update,
-            enforceWriteConcern(options, query.getEntityClass())
-                .getOptions()));
+        return collection.updateOne(queryObject, update);
+    }
+
+    private static class InsertResult extends UpdateResult {
+        private boolean acknowledged;
+
+        public InsertResult(final boolean acknowledged) {
+            this.acknowledged = acknowledged;
+        }
+
+        @Override
+        public boolean wasAcknowledged() {
+            return acknowledged;
+        }
+
+        @Override
+        public long getMatchedCount() {
+            return 0;
+        }
+
+        @Override
+        public boolean isModifiedCountAvailable() {
+            return true;
+        }
+
+        @Override
+        public long getModifiedCount() {
+            return 1;
+        }
+
+        @Override
+        public BsonValue getUpsertedId() {
+            return null;
+        }
     }
 }

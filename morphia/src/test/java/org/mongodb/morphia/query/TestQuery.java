@@ -18,12 +18,13 @@ package org.mongodb.morphia.query;
 import com.jayway.awaitility.Awaitility;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
-import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
 import com.mongodb.MongoException;
 import com.mongodb.MongoInternalException;
-import com.mongodb.ReadPreference;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.CollationStrength;
+import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.FindOptions;
 import org.bson.Document;
 import org.bson.types.CodeWScope;
@@ -85,26 +86,6 @@ import static org.mongodb.morphia.query.Sort.naturalDescending;
 public class TestQuery extends TestBase {
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void batchSize() {
-        QueryImpl<Photo> query = (QueryImpl<Photo>) getDatastore().find(Photo.class)
-                                                                  .batchSize(42);
-        Assert.assertEquals(42, query.getBatchSize());
-        Assert.assertEquals(42, query.getOptions().getBatchSize());
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void cursorTimeOut() {
-        QueryImpl<Photo> query = (QueryImpl<Photo>) getDatastore().find(Photo.class)
-                                                                  .enableCursorTimeout();
-        Assert.assertFalse(query.getOptions().isNoCursorTimeout());
-
-        query.disableCursorTimeout();
-        Assert.assertTrue(query.getOptions().isNoCursorTimeout());
-    }
-
-    @Test
     public void genericMultiKeyValueQueries() {
         getMorphia().map(GenericKeyValue.class);
         getDatastore().ensureIndexes(GenericKeyValue.class);
@@ -116,31 +97,6 @@ public class TestQuery extends TestBase {
         final Query<GenericKeyValue> query = getDatastore().find(GenericKeyValue.class).field("key").hasAnyOf(keys);
         Assert.assertTrue(query.toString().replaceAll("\\s", "").contains("{\"$in\":[\"key1\",\"key2\"]"));
         assertEquals(query.get().id, value.id);
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void maxScan() {
-        getDatastore().save(asList(new Pic("pic1"), new Pic("pic2"), new Pic("pic3"), new Pic("pic4")));
-
-        assertEquals(2, getDatastore().find(Pic.class)
-                                      .maxScan(2)
-                                      .asList()
-                                      .size());
-        assertEquals(2, getDatastore().find(Pic.class)
-                                      .asList(new FindOptions()
-                                           .modifier("$maxScan", 2))
-                                      .size());
-        assertEquals(4, getDatastore().find(Pic.class).asList().size());
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void maxTime() {
-        Query<ContainsRenamedFields> query = getDatastore().find(ContainsRenamedFields.class)
-                                                           .maxTime(15, TimeUnit.MINUTES);
-
-        assertEquals(900, ((QueryImpl) query).getMaxTime(TimeUnit.SECONDS));
     }
 
     @Test
@@ -158,16 +114,6 @@ public class TestQuery extends TestBase {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void oldReadPreference() {
-        QueryImpl<Photo> query = (QueryImpl<Photo>) getDatastore().find(Photo.class)
-                                                                  .queryNonPrimary();
-        Assert.assertEquals(ReadPreference.secondaryPreferred(), query.getOptions().getReadPreference());
-        query.queryPrimaryOnly();
-        Assert.assertEquals(ReadPreference.primary(), query.getOptions().getReadPreference());
-    }
-
-    @Test
     public void referenceKeys() {
         final ReferenceKey key1 = new ReferenceKey("key1");
 
@@ -180,25 +126,6 @@ public class TestQuery extends TestBase {
 
         final ReferenceKeyValue byKey = getDatastore().getByKey(ReferenceKeyValue.class, key);
         assertEquals(value.id, byKey.id);
-    }
-
-    @Test
-    public void snapshot() {
-        getDatastore().find(Photo.class)
-                      .get(new FindOptions()
-                        .modifier("$snapshot", true));
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void snapshotOld() {
-        QueryImpl<Photo> query = (QueryImpl<Photo>) getDatastore().find(Photo.class)
-                                                                  .enableSnapshotMode();
-        Assert.assertTrue(query.getOptions().getModifiers().containsField("$snapshot"));
-        query.get();
-
-        query.disableSnapshotMode();
-        Assert.assertFalse(query.getOptions().getModifiers().containsField("$snapshot"));
     }
 
     @Override
@@ -223,20 +150,6 @@ public class TestQuery extends TestBase {
                            .order("-w")
                            .get(new FindOptions()
                              .limit(1));
-        assertNotNull(r1);
-        assertEquals(10, r1.getWidth(), 0);
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testAliasedFieldSortOld() {
-        getDatastore().save(asList(new Rectangle(1, 10), new Rectangle(3, 8), new Rectangle(6, 10), new Rectangle(10, 10), new Rectangle(10, 1)));
-
-        Rectangle r1 = getDatastore().find(Rectangle.class).limit(1).order("w").get();
-        assertNotNull(r1);
-        assertEquals(1, r1.getWidth(), 0);
-
-        r1 = getDatastore().find(Rectangle.class).limit(1).order("-w").get();
         assertNotNull(r1);
         assertEquals(10, r1.getWidth(), 0);
     }
@@ -328,36 +241,18 @@ public class TestQuery extends TestBase {
     public void testCommentsShowUpInLogs() {
         getDatastore().save(asList(new Pic("pic1"), new Pic("pic2"), new Pic("pic3"), new Pic("pic4")));
 
-        getDb().command(new BasicDBObject("profile", 2));
+        getDatabase().runCommand(new Document("profile", 2));
         String expectedComment = "test comment";
 
         getDatastore().find(Pic.class)
                       .asList(new FindOptions()
-                           .modifier("$comment", expectedComment));
+                           .comment(expectedComment));
 
-        DBCollection profileCollection = getDb().getCollection("system.profile");
+        MongoCollection<Document> profileCollection = getDatabase().getCollection("system.profile");
         assertNotEquals(0, profileCollection.count());
-        DBObject profileRecord = profileCollection.findOne(new BasicDBObject("op", "query")
-                                                               .append("ns", getDatastore().getCollection(Pic.class).getFullName()));
-        assertEquals(profileRecord.toString(), expectedComment, getCommentFromProfileRecord(profileRecord));
-
-        turnOffProfilingAndDropProfileCollection();
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testCommentsShowUpInLogsOld() {
-        getDatastore().save(asList(new Pic("pic1"), new Pic("pic2"), new Pic("pic3"), new Pic("pic4")));
-
-        getDb().command(new BasicDBObject("profile", 2));
-        String expectedComment = "test comment";
-
-        getDatastore().find(Pic.class).comment(expectedComment).asList();
-
-        DBCollection profileCollection = getDb().getCollection("system.profile");
-        assertNotEquals(0, profileCollection.count());
-        DBObject profileRecord = profileCollection.findOne(new BasicDBObject("op", "query")
-                                                               .append("ns", getDatastore().getCollection(Pic.class).getFullName()));
+        Document profileRecord = profileCollection.find(new Document("op", "query")
+                                                            .append("ns", getDatastore().getCollection(Pic.class).getNamespace()))
+                                                  .first();
         assertEquals(profileRecord.toString(), expectedComment, getCommentFromProfileRecord(profileRecord));
 
         turnOffProfilingAndDropProfileCollection();
@@ -476,17 +371,17 @@ public class TestQuery extends TestBase {
             .find(PhotoWithKeywords.class)
             .field("keywords").not().sizeEq(3);
 
-        assertEquals(new BasicDBObject("keywords", new BasicDBObject("$not", new BasicDBObject("$size", 3))), query.getQueryDocument());
+        assertEquals(new Document("keywords", new Document("$not", new Document("$size", 3))), query.getQueryDocument());
     }
 
     @Test
     public void testDBObjectOrQuery() {
         getDatastore().save(new PhotoWithKeywords("scott", "hernandez"));
 
-        final List<DBObject> orList = new ArrayList<DBObject>();
-        orList.add(new BasicDBObject("keywords.keyword", "scott"));
-        orList.add(new BasicDBObject("keywords.keyword", "ralph"));
-        final BasicDBObject orQuery = new BasicDBObject("$or", orList);
+        final List<Document> orList = new ArrayList<Document>();
+        orList.add(new Document("keywords.keyword", "scott"));
+        orList.add(new Document("keywords.keyword", "ralph"));
+        final Document orQuery = new Document("$or", orList);
 
         Query<PhotoWithKeywords> q = getAds().createQuery(PhotoWithKeywords.class, orQuery);
         assertEquals(1, q.count());
@@ -629,7 +524,7 @@ public class TestQuery extends TestBase {
         PhotoWithKeywords pwk3 = new PhotoWithKeywords("MongoDB", "World");
         getDatastore().save(asList(pwk1, pwk2, pwk3));
 
-        MorphiaIterator<PhotoWithKeywords> keys = getDatastore().find(PhotoWithKeywords.class).fetchEmptyEntities();
+        MongoCursor<PhotoWithKeywords> keys = getDatastore().find(PhotoWithKeywords.class).fetchEmptyEntities();
         assertTrue(keys.hasNext());
         assertEquals(pwk1.id, keys.next().id);
         assertEquals(pwk2.id, keys.next().id);
@@ -661,7 +556,7 @@ public class TestQuery extends TestBase {
             q.or(q.criteria("keywords.keyword").equal("hernandez")));
 
         assertEquals(1, q.count());
-        assertTrue(q.getQueryDocument().containsField("$and"));
+        assertTrue(q.getQueryDocument().containsKey("$and"));
     }
 
     @Test
@@ -674,7 +569,7 @@ public class TestQuery extends TestBase {
               q.criteria("keywords.keyword").hasAnyOf(asList("scott", "hernandez")));
 
         assertEquals(1, q.count());
-        assertTrue(q.getQueryDocument().containsField("$and"));
+        assertTrue(q.getQueryDocument().containsKey("$and"));
 
     }
 
@@ -969,8 +864,7 @@ public class TestQuery extends TestBase {
                             new PhotoWithKeywords("3", "4"),
                             new PhotoWithKeywords("5", "6")));
         assertEquals(2, getDatastore().find(PhotoWithKeywords.class)
-                                      .batchSize(-2)
-                                      .asList()
+                                      .asList(new FindOptions().batchSize(-2))
                                       .size());
     }
 
@@ -1003,9 +897,8 @@ public class TestQuery extends TestBase {
                             new PhotoWithKeywords("scott", "hernandez")));
         final Iterator<PhotoWithKeywords> it = getDatastore().find(PhotoWithKeywords.class)
                                                              .fetch(new FindOptions()
-                                                                 .modifier("$snapshot", true)
-                                                                 .batchSize(2)
-                                                            );
+                                                                 .snapshot(true)
+                                                                 .batchSize(2));
         getDatastore().save(asList(new PhotoWithKeywords("1", "2"),
                             new PhotoWithKeywords("3", "4"),
                             new PhotoWithKeywords("5", "6")));
@@ -1034,7 +927,7 @@ public class TestQuery extends TestBase {
     public void testNotGeneratesCorrectQueryForGreaterThan() {
         final Query<Keyword> query = getDatastore().find(Keyword.class);
         query.criteria("score").not().greaterThan(7);
-        assertEquals(new BasicDBObject("score", new BasicDBObject("$not", new BasicDBObject("$gt", 7))), query.getQueryDocument());
+        assertEquals(new Document("score", new Document("$not", new Document("$gt", 7))), query.getQueryDocument());
     }
 
     @Test
@@ -1042,9 +935,9 @@ public class TestQuery extends TestBase {
     public void testNotGeneratesCorrectQueryForRegex() {
         final Query<PhotoWithKeywords> query = getAds().find(PhotoWithKeywords.class);
         query.criteria("keywords.keyword").not().startsWith("ralph");
-        DBObject queryObject = query.getQueryDocument();
-        BasicDBObject expected = new BasicDBObject("keywords.keyword",
-                                                   new BasicDBObject("$not", new BasicDBObject("$regex", "^ralph")));
+        Document queryObject = query.getQueryDocument();
+        Document expected = new Document("keywords.keyword",
+                                                   new Document("$not", new Document("$regex", "^ralph")));
         assertEquals(expected.toString(), queryObject.toString());
     }
 
@@ -1235,9 +1128,10 @@ public class TestQuery extends TestBase {
         getDatastore().ensureIndexes();
 
         Pic foundItem = getDatastore().find(Pic.class)
-                                      .returnKey()
                                       .field("name").equal("pic2")
-                                      .get();
+                                      .fetchEmptyEntities(new FindOptions()
+                                                              .limit(1))
+                                      .tryNext();
         assertNotNull(foundItem);
         assertThat("Name should be populated", foundItem.getName(), is("pic2"));
         assertNull("ID should not be populated", foundItem.getId());
@@ -1263,7 +1157,7 @@ public class TestQuery extends TestBase {
     @Test
     @SuppressWarnings("deprecation")
     public void testSizeEqQuery() {
-        assertEquals(new BasicDBObject("keywords", new BasicDBObject("$size", 3)), getDatastore().find(PhotoWithKeywords.class)
+        assertEquals(new Document("keywords", new Document("$size", 3)), getDatastore().find(PhotoWithKeywords.class)
                                                                                                  .field("keywords")
                                                                                                  .sizeEq(3).getQueryDocument());
     }
@@ -1376,7 +1270,7 @@ public class TestQuery extends TestBase {
     public void testWhereCodeWScopeQuery() {
         getDatastore().save(new PhotoWithKeywords(new Keyword("california"), new Keyword("nevada"), new Keyword("arizona")));
         //        CodeWScope hasKeyword = new CodeWScope("for (kw in this.keywords) { if(kw.keyword == kwd) return true; } return false;
-        // ", new BasicDBObject("kwd","california"));
+        // ", new Document("kwd","california"));
         final CodeWScope hasKeyword = new CodeWScope("this.keywords != null", new BasicDBObject());
         assertNotNull(getDatastore().find(PhotoWithKeywords.class).where(hasKeyword).get());
     }
@@ -1412,7 +1306,7 @@ public class TestQuery extends TestBase {
                       .insertOne(new Document()
                                      .append("@class", Class1.class.getName())
                                      .append("value1", "foo")
-                                     .append("someMap", new BasicDBObject("someKey", "value")));
+                                     .append("someMap", new Document("someKey", "value")));
 
         Query<Class1> query = getDatastore().createQuery(Class1.class);
         query.disableValidation().criteria("someMap.someKey").equal("value");
@@ -1435,9 +1329,8 @@ public class TestQuery extends TestBase {
     }
 
     private void turnOffProfilingAndDropProfileCollection() {
-        getDb().command(new BasicDBObject("profile", 0));
-        DBCollection profileCollection = getDb().getCollection("system.profile");
-        profileCollection.drop();
+        getDatabase().runCommand(new Document("profile", 0));
+        getDatabase().getCollection("system.profile").drop();
     }
 
     @Entity
@@ -1824,18 +1717,18 @@ public class TestQuery extends TestBase {
         assertEquals(query2.asList(), list);
     }
 
-    private String getCommentFromProfileRecord(final DBObject profileRecord) {
-        if (profileRecord.containsField("command")) {
-            DBObject commandDocument = ((DBObject) profileRecord.get("command"));
-            if (commandDocument.containsField("comment")) {
+    private String getCommentFromProfileRecord(final Document profileRecord) {
+        if (profileRecord.containsKey("command")) {
+            Document commandDocument = ((Document) profileRecord.get("command"));
+            if (commandDocument.containsKey("comment")) {
                 return (String) commandDocument.get("comment");
             }
         }
-        if (profileRecord.containsField("query")) {
-            DBObject queryDocument = ((DBObject) profileRecord.get("query"));
-            if (queryDocument.containsField("comment")) {
+        if (profileRecord.containsKey("query")) {
+            Document queryDocument = ((Document) profileRecord.get("query"));
+            if (queryDocument.containsKey("comment")) {
                 return (String) queryDocument.get("comment");
-            } else if (queryDocument.containsField("$comment")) {
+            } else if (queryDocument.containsKey("$comment")) {
                 return (String) queryDocument.get("$comment");
             }
         }

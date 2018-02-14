@@ -2,13 +2,19 @@ package org.mongodb.morphia;
 
 
 import com.mongodb.DBCollection;
-import com.mongodb.MongoClient;
 import com.mongodb.WriteConcern;
-import com.mongodb.WriteResult;
+import com.mongodb.client.MapReduceIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.CountOptions;
+import com.mongodb.client.model.DeleteOptions;
 import com.mongodb.client.model.FindOneAndDeleteOptions;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.InsertManyOptions;
+import com.mongodb.client.model.InsertOneOptions;
+import com.mongodb.client.model.UpdateOptions;
+import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 import org.mongodb.morphia.aggregation.AggregationPipeline;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
@@ -17,8 +23,8 @@ import org.mongodb.morphia.annotations.Validation;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryFactory;
 import org.mongodb.morphia.query.UpdateOperations;
-import org.mongodb.morphia.query.UpdateResults;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -63,7 +69,7 @@ public interface Datastore {
      * @param <V>   the type of the id
      * @return results of the delete
      */
-    <T, V> WriteResult delete(Class<T> clazz, V id);
+    <T, V> DeleteResult delete(Class<T> clazz, V id);
 
     /**
      * Deletes the given entity (by id)
@@ -76,7 +82,7 @@ public interface Datastore {
      * @return results of the delete
      * @since 1.3
      */
-    <T, V> WriteResult delete(Class<T> clazz, V id, DeleteOptions options);
+    <T, V> DeleteResult delete(Class<T> clazz, V id, DeleteOptions options);
 
     /**
      * Deletes the given entities (by id)
@@ -87,7 +93,7 @@ public interface Datastore {
      * @param <V>   the type of the id
      * @return results of the delete
      */
-    <T, V> WriteResult delete(Class<T> clazz, Iterable<V> ids);
+    <T, V> DeleteResult delete(Class<T> clazz, List<V> ids);
 
     /**
      * Deletes the given entities (by id)
@@ -100,7 +106,7 @@ public interface Datastore {
      * @return results of the delete
      * @since 1.3
      */
-    <T, V> WriteResult delete(Class<T> clazz, Iterable<V> ids, DeleteOptions options);
+    <T, V> DeleteResult delete(Class<T> clazz, List<V> ids, DeleteOptions options);
 
     /**
      * Deletes entities based on the query
@@ -109,7 +115,7 @@ public interface Datastore {
      * @param <T>   the type to delete
      * @return results of the delete
      */
-    <T> WriteResult delete(Query<T> query);
+    <T> DeleteResult delete(Query<T> query);
 
     /**
      * Deletes entities based on the query
@@ -120,7 +126,7 @@ public interface Datastore {
      * @return results of the delete
      * @since 1.3
      */
-    <T> WriteResult delete(Query<T> query, DeleteOptions options);
+    <T> DeleteResult delete(Query<T> query, DeleteOptions options);
 
     /**
      * Deletes the given entity (by @Id)
@@ -129,7 +135,7 @@ public interface Datastore {
      * @param <T>    the type to delete
      * @return results of the delete
      */
-    <T> WriteResult delete(T entity);
+    <T> DeleteResult delete(T entity);
 
     /**
      * Deletes the given entity (by @Id), with the WriteConcern
@@ -140,7 +146,7 @@ public interface Datastore {
      * @return results of the delete
      * @since 1.3
      */
-    <T> WriteResult delete(T entity, DeleteOptions options);
+    <T> DeleteResult delete(T entity, DeleteOptions options);
 
     /**
      * ensure capped collections for {@code Entity}(s)
@@ -228,6 +234,7 @@ public interface Datastore {
      * @return the deleted Entity
      */
     <T> T findAndDelete(Query<T> query);
+
     /**
      * Deletes the given entities based on the query (first item only).
      *
@@ -270,7 +277,7 @@ public interface Datastore {
      * @param <V>   the type of the ID
      * @return the query to find the entities
      */
-    <T, V> Query<T> get(Class<T> clazz, Iterable<V> ids);
+    <T, V> Query<T> get(Class<T> clazz, List<V> ids);
 
     /**
      * Find the given entity (by id); shorthand for {@code find("_id ", id)}
@@ -310,7 +317,7 @@ public interface Datastore {
      * @param <T>   the type to fetch
      * @return the matched entities.  may be null.
      */
-    <T> List<T> getByKeys(Class<T> clazz, Iterable<Key<T>> keys);
+    <T> List<T> getByKeys(Class<T> clazz, List<Key<T>> keys);
 
     /**
      * Find the given entities (by id); shorthand for {@code find("_id in", ids)}
@@ -319,7 +326,7 @@ public interface Datastore {
      * @param <T>  the type to fetch
      * @return the matched entities.  may be null.
      */
-    <T> List<T> getByKeys(Iterable<Key<T>> keys);
+    <T> List<T> getByKeys(List<Key<T>> keys);
 
     /**
      * @param clazz the class to use for mapping
@@ -367,13 +374,6 @@ public interface Datastore {
 
     /**
      * @return the database this Datastore uses
-     * @deprecated use {@link #getDatabase()} instead
-     */
-    @Deprecated
-    MongoDatabase getDB();
-
-    /**
-     * @return the database this Datastore uses
      */
     MongoDatabase getDatabase();
 
@@ -399,13 +399,6 @@ public interface Datastore {
     <T> Key<T> getKey(T entity);
 
     /**
-     * Get the underlying MongoClient that allows connection to the MongoDB instance being used.
-     *
-     * @return the MongoClient being used by this datastore.
-     */
-    MongoClient getMongo();
-
-    /**
      * @return the current {@link QueryFactory}.
      * @see QueryFactory
      */
@@ -427,26 +420,24 @@ public interface Datastore {
      * @return the results
      * @since 1.3
      */
-    <T> MapreduceResults<T> mapReduce(MapReduceOptions<T> options);
+    <T> MapReduceIterable<T> mapReduce(MapReduceOptions<T> options);
 
     /**
      * Work as if you did an update with each field in the entity doing a $set; Only at the top level of the entity.
      *
-     * @param entity the entity to merge back in to the database
      * @param <T>    the type of the entity
-     * @return the key of the entity
+     * @param entity the entity to merge back in to the database
      */
-    <T> Key<T> merge(T entity);
+    <T> void merge(T entity);
 
     /**
      * Work as if you did an update with each field in the entity doing a $set; Only at the top level of the entity.
      *
-     * @param entity the entity to merge back in to the database
      * @param <T>    the type of the entity
+     * @param entity the entity to merge back in to the database
      * @param wc     the WriteConcern to use
-     * @return the key of the entity
      */
-    <T> Key<T> merge(T entity, WriteConcern wc);
+    <T> void merge(T entity, WriteConcern wc);
 
     /**
      * Returns a new query based on the example object
@@ -464,7 +455,20 @@ public interface Datastore {
      * @param <T>      the type of the entity
      * @return the keys of the entities
      */
-    <T> Iterable<Key<T>> save(Iterable<T> entities);
+    default <T> Iterable<Key<T>> save(Iterable<T> entities) {
+        List<T> list = new ArrayList<>();
+        entities.forEach(list::add);
+        return save(list);
+    }
+
+    /**
+     * Saves the entities (Objects) and updates the @Id field
+     *
+     * @param entities the entities to save
+     * @param <T>      the type of the entity
+     * @return the keys of the entities
+     */
+    <T> List<Key<T>> save(List<T> entities);
 
     /**
      * Saves the entities (Objects) and updates the @Id field, with the WriteConcern
@@ -474,7 +478,7 @@ public interface Datastore {
      * @param options  the options to apply to the save operation
      * @return the keys of the entities
      */
-    <T> Iterable<Key<T>> save(Iterable<T> entities, InsertOptions options);
+    <T> List<Key<T>> save(List<T> entities, InsertManyOptions options);
 
     /**
      * Saves an entity (Object) and updates the @Id field
@@ -493,7 +497,28 @@ public interface Datastore {
      * @param <T>     the type of the entity
      * @return the keys of the entity
      */
-    <T> Key<T> save(T entity, InsertOptions options);
+    <T> Key<T> save(T entity, InsertOneOptions options);
+
+    /**
+     * Saves an entity (Object) and updates the @Id field
+     *
+     * @param entity       the entity to save
+     * @param <T>          the type of the entity
+     * @param writeConcern the WriteConcern to use for this operation
+     * @return the keys of the entity
+     */
+    <T> Key<T> save(T entity, WriteConcern writeConcern);
+
+    /**
+     * Saves an entity (Object) and updates the @Id field
+     *
+     * @param entity       the entity to save
+     * @param <T>          the type of the entity
+     * @param options the options to apply to the save operation
+     * @param writeConcern the WriteConcern to use for this operation
+     * @return the keys of the entity
+     */
+    <T> Key<T> save(T entity, InsertOneOptions options, WriteConcern writeConcern);
 
     /**
      * Updates an entity with the operations; this is an atomic operation
@@ -502,9 +527,9 @@ public interface Datastore {
      * @param operations the update operations to perform
      * @param <T>        the type of the entity
      * @return the update results
-     * @see UpdateResults
+     * @see UpdateResult
      */
-    <T> UpdateResults update(T entity, UpdateOperations<T> operations);
+    <T> UpdateResult update(T entity, UpdateOperations<T> operations);
 
     /**
      * Updates an entity with the operations; this is an atomic operation
@@ -513,9 +538,9 @@ public interface Datastore {
      * @param operations the update operations to perform
      * @param <T>        the type of the entity
      * @return the update results
-     * @see UpdateResults
+     * @see UpdateResult
      */
-    <T> UpdateResults update(Key<T> key, UpdateOperations<T> operations);
+    <T> UpdateResult update(Key<T> key, UpdateOperations<T> operations);
 
     /**
      * Updates all entities found with the operations; this is an atomic operation per entity
@@ -525,7 +550,7 @@ public interface Datastore {
      * @param <T>        the type of the entity
      * @return the results of the updates
      */
-    <T> UpdateResults update(Query<T> query, UpdateOperations<T> operations);
+    <T> UpdateResult update(Query<T> query, UpdateOperations<T> operations);
 
     /**
      * Updates all entities found with the operations; this is an atomic operation per entity
@@ -537,5 +562,5 @@ public interface Datastore {
      * @return the results of the updates
      * @since 1.3
      */
-    <T> UpdateResults update(Query<T> query, UpdateOperations<T> operations, UpdateOptions options);
+    <T> UpdateResult update(Query<T> query, UpdateOperations<T> operations, UpdateOptions options);
 }

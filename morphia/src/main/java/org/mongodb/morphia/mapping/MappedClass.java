@@ -17,7 +17,7 @@
 package org.mongodb.morphia.mapping;
 
 
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.mongodb.morphia.EntityInterceptor;
 import org.mongodb.morphia.annotations.Converters;
 import org.mongodb.morphia.annotations.Embedded;
@@ -72,7 +72,7 @@ public class MappedClass {
      *
      * @see #addInterestingAnnotation
      */
-    private static final List<Class<? extends Annotation>> INTERESTING_ANNOTATIONS = new ArrayList<Class<? extends Annotation>>();
+    private static final List<Class<? extends Annotation>> INTERESTING_ANNOTATIONS = new ArrayList<>();
     /**
      * Annotations interesting for life-cycle events
      */
@@ -99,16 +99,16 @@ public class MappedClass {
      * Annotations we were interested in, and found.
      */
     private final Map<Class<? extends Annotation>, List<Annotation>> foundAnnotations =
-        new HashMap<Class<? extends Annotation>, List<Annotation>>();
+        new HashMap<>();
     /**
      * Methods which are life-cycle events
      */
     private final Map<Class<? extends Annotation>, List<ClassMethodPair>> lifecycleMethods =
-        new HashMap<Class<? extends Annotation>, List<ClassMethodPair>>();
+        new HashMap<>();
     /**
      * a list of the fields to map
      */
-    private final List<MappedField> persistenceFields = new ArrayList<MappedField>();
+    private final List<MappedField> persistenceFields = new ArrayList<>();
     /**
      * the type we are mapping to/from
      */
@@ -124,7 +124,7 @@ public class MappedClass {
     private Embedded embeddedAn;
     private MapperOptions mapperOptions;
     private MappedClass superClass;
-    private List<MappedClass> interfaces = new ArrayList<MappedClass>();
+    private List<MappedClass> interfaces = new ArrayList<>();
 
     /**
      * Creates a MappedClass instance
@@ -140,7 +140,10 @@ public class MappedClass {
             LOG.trace("Creating MappedClass for " + clazz);
         }
 
-        basicValidate();
+        final boolean isStatic = Modifier.isStatic(this.clazz.getModifiers());
+        if (!isStatic && this.clazz.isMemberClass()) {
+            throw new MappingException("Cannot use non-static inner class: " + this.clazz + ". Please make static.");
+        }
         discover(mapper);
 
         if (LOG.isDebugEnabled()) {
@@ -183,7 +186,7 @@ public class MappedClass {
      * @param clazz the type to check
      * @return true if the type is supported
      */
-    public static boolean isSupportedType(final Class<?> clazz) {
+    private static boolean isSupportedType(final Class<?> clazz) {
         if (ReflectionUtils.isPropertyType(clazz)) {
             return true;
         }
@@ -227,7 +230,7 @@ public class MappedClass {
         }
 
         if (!foundAnnotations.containsKey(clazz)) {
-            foundAnnotations.put(clazz, new ArrayList<Annotation>());
+            foundAnnotations.put(clazz, new ArrayList<>());
         }
 
         foundAnnotations.get(clazz).add(ann);
@@ -238,19 +241,19 @@ public class MappedClass {
      *
      * @param event  the lifecycle annotation
      * @param entity the entity to process
-     * @param dbObj  the dbObject to use
+     * @param document  the dbObject to use
      * @param mapper  the Mapper to use
      * @return dbObj
      */
     @SuppressWarnings({"WMI", "unchecked"})
-    public DBObject callLifecycleMethods(final Class<? extends Annotation> event, final Object entity, final DBObject dbObj,
+    public Document callLifecycleMethods(final Class<? extends Annotation> event, final Object entity, final Document document,
                                          final Mapper mapper) {
         final List<ClassMethodPair> methodPairs = getLifecycleMethods((Class<Annotation>) event);
-        DBObject retDbObj = dbObj;
+        Document retDbObj = document;
         try {
             Object tempObj;
             if (methodPairs != null) {
-                final HashMap<Class<?>, Object> toCall = new HashMap<Class<?>, Object>((int) (methodPairs.size() * 1.3));
+                final HashMap<Class<?>, Object> toCall = new HashMap<>((int) (methodPairs.size() * 1.3));
                 for (final ClassMethodPair cm : methodPairs) {
                     toCall.put(cm.clazz, null);
                 }
@@ -284,12 +287,12 @@ public class MappedClass {
                     }
 
                     if (tempObj != null) {
-                        retDbObj = (DBObject) tempObj;
+                        retDbObj = (Document) tempObj;
                     }
                 }
             }
 
-            callGlobalInterceptors(event, entity, dbObj, mapper);
+            callGlobalInterceptors(event, entity, document, mapper);
         } catch (IllegalAccessException e) {
             throw new RuntimeException(e);
         } catch (InvocationTargetException e) {
@@ -370,7 +373,7 @@ public class MappedClass {
      * @return the list of fields
      */
     public List<MappedField> getFieldsAnnotatedWith(final Class<? extends Annotation> clazz) {
-        final List<MappedField> results = new ArrayList<MappedField>();
+        final List<MappedField> results = new ArrayList<>();
         for (final MappedField mf : persistenceFields) {
             if (mf.getAnnotations().containsKey(clazz)) {
                 results.add(mf);
@@ -523,13 +526,6 @@ public class MappedClass {
         new MappingValidator(mapper.getOptions().getObjectFactory()).validate(mapper, this);
     }
 
-    protected void basicValidate() {
-        final boolean isStatic = Modifier.isStatic(clazz.getModifiers());
-        if (!isStatic && clazz.isMemberClass()) {
-            throw new MappingException("Cannot use non-static inner class: " + clazz + ". Please make static.");
-        }
-    }
-
     /**
      * Discovers interesting (that we care about) things about the class.
      */
@@ -546,7 +542,7 @@ public class MappedClass {
             interfaces.add(mapper.getMappedClass(aClass));
         }
 
-        final List<Class<?>> lifecycleClasses = new ArrayList<Class<?>>();
+        final List<Class<?>> lifecycleClasses = new ArrayList<>();
         lifecycleClasses.add(clazz);
 
         final EntityListeners entityLisAnn = (EntityListeners) getAnnotation(EntityListeners.class);
@@ -571,7 +567,7 @@ public class MappedClass {
             final int fieldMods = field.getModifiers();
             if (!isIgnorable(field, fieldMods, mapper)) {
                 if (field.isAnnotationPresent(Id.class)) {
-                    persistenceFields.add(new MappedField(field, clazz, mapper));
+                    persistenceFields.add(new MappedField(field));
                     update();
                 } else if (field.isAnnotationPresent(Property.class)
                            || field.isAnnotationPresent(Reference.class)
@@ -579,10 +575,10 @@ public class MappedClass {
                            || field.isAnnotationPresent(Serialized.class)
                            || isSupportedType(field.getType())
                            || ReflectionUtils.implementsInterface(field.getType(), Serializable.class)) {
-                    persistenceFields.add(new MappedField(field, clazz, mapper));
+                    persistenceFields.add(new MappedField(field));
                 } else {
                     if (mapper.getOptions().getDefaultMapper() != null) {
-                        persistenceFields.add(new MappedField(field, clazz, mapper));
+                        persistenceFields.add(new MappedField(field));
                     } else if (LOG.isWarningEnabled()) {
                         LOG.warning(format("Ignoring (will not persist) field: %s.%s [type:%s]", clazz.getName(), field.getName(),
                                            field.getType().getName()));
@@ -607,13 +603,13 @@ public class MappedClass {
         if (lifecycleMethods.containsKey(lceClazz)) {
             lifecycleMethods.get(lceClazz).add(cm);
         } else {
-            final List<ClassMethodPair> methods = new ArrayList<ClassMethodPair>();
+            final List<ClassMethodPair> methods = new ArrayList<>();
             methods.add(cm);
             lifecycleMethods.put(lceClazz, methods);
         }
     }
 
-    private void callGlobalInterceptors(final Class<? extends Annotation> event, final Object entity, final DBObject dbObj,
+    private void callGlobalInterceptors(final Class<? extends Annotation> event, final Object entity, final Document document,
                                         final Mapper mapper) {
         for (final EntityInterceptor ei : mapper.getInterceptors()) {
             if (LOG.isDebugEnabled()) {
@@ -621,15 +617,15 @@ public class MappedClass {
             }
 
             if (event.equals(PreLoad.class)) {
-                ei.preLoad(entity, dbObj, mapper);
+                ei.preLoad(entity, document, mapper);
             } else if (event.equals(PostLoad.class)) {
-                ei.postLoad(entity, dbObj, mapper);
+                ei.postLoad(entity, document, mapper);
             } else if (event.equals(PrePersist.class)) {
-                ei.prePersist(entity, dbObj, mapper);
+                ei.prePersist(entity, document, mapper);
             } else if (event.equals(PreSave.class)) {
-                ei.preSave(entity, dbObj, mapper);
+                ei.preSave(entity, document, mapper);
             } else if (event.equals(PostPersist.class)) {
-                ei.postPersist(entity, dbObj, mapper);
+                ei.postPersist(entity, document, mapper);
             }
         }
     }

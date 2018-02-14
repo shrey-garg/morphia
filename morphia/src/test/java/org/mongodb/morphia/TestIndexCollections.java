@@ -27,7 +27,7 @@ public class TestIndexCollections extends TestBase {
     @Test
     public void testEmbedded() {
         AdvancedDatastore ads = getAds();
-        DB db = getDb();
+        DB db = getDatabase();
         getMorphia().map(HasEmbeddedIndex.class);
         ads.ensureIndexes();
 
@@ -45,7 +45,7 @@ public class TestIndexCollections extends TestBase {
     @Test
     public void testOldStyleIndexing() {
         getMorphia().map(OldStyleIndexing.class);
-        getDb().dropDatabase();
+        getDatabase().dropDatabase();
         getAds().ensureIndexes();
         testIndex(getAds().getCollection(OldStyleIndexing.class).getIndexInfo(),
                   new BasicDBObject("field", 1),
@@ -57,7 +57,7 @@ public class TestIndexCollections extends TestBase {
     @SuppressWarnings("deprecation")
     public void testSingleFieldIndex() {
         AdvancedDatastore ads = getAds();
-        DB db = getDb();
+        DB db = getDatabase();
 
         ads.ensureIndexes("a_1", SingleFieldIndex.class);
         testIndex(db.getCollection("a_1").getIndexInfo(),

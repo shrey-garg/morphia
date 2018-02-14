@@ -71,10 +71,10 @@ public class ZipCodeDataSetTest extends TestBase {
                 download(new URL("http://media.mongodb.org/zips.json"), file);
             }
         }
-        DBCollection zips = getDb().getCollection("zips");
+        DBCollection zips = getDatabase().getCollection("zips");
         if (zips.count() == 0) {
             new ProcessExecutor().command(MONGO_IMPORT,
-                                          "--db", getDb().getName(),
+                                          "--db", getDatabase().getName(),
                                           "--collection", "zipcodes",
                                           "--file", file.getAbsolutePath())
                                  .redirectError(System.err)

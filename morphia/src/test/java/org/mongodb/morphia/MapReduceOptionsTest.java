@@ -47,7 +47,6 @@ public class MapReduceOptionsTest extends TestBase {
             .outputDB("output db")
             .outputType(OutputType.INLINE)
             .query(query)
-            .readPreference(ReadPreference.primaryPreferred())
             .reduce("i'm a reduce function")
             .scope(new Document("key", "value").append("key2", "value2"))
             .verbose(true);

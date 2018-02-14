@@ -1,23 +1,20 @@
 package org.mongodb.morphia;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.CommandResult;
-import com.mongodb.DB;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
 
 import java.util.Iterator;
 
-@SuppressWarnings({"deprecation", "WeakerAccess"})
 public abstract class TestBase {
     protected static final String TEST_DB_NAME = "morphia_test";
     private final MongoClient mongoClient;
     private final Morphia morphia = new Morphia();
-    private final DB db;
     private final MongoDatabase database;
     private final Datastore ds;
 
@@ -27,21 +24,16 @@ public abstract class TestBase {
 
     protected TestBase(final MongoClient mongoClient) {
         this.mongoClient = mongoClient;
-        this.db = getMongoClient().getDB(TEST_DB_NAME);
         this.database = getMongoClient().getDatabase(TEST_DB_NAME);
-        this.ds = getMorphia().createDatastore(getMongoClient(), getDb().getName());
+        this.ds = getMorphia().createDatastore(getMongoClient(), getDatabase().getName());
     }
 
-    protected static String getMongoURI() {
+    static String getMongoURI() {
         return System.getProperty("MONGO_URI", "mongodb://localhost:27017");
     }
 
     public AdvancedDatastore getAds() {
         return (AdvancedDatastore) getDatastore();
-    }
-
-    public DB getDb() {
-        return db;
     }
 
     public MongoDatabase getDatabase() {
@@ -52,7 +44,7 @@ public abstract class TestBase {
         return ds;
     }
 
-    public MongoClient getMongoClient() {
+    protected MongoClient getMongoClient() {
         return mongoClient;
     }
 
@@ -60,7 +52,7 @@ public abstract class TestBase {
         return morphia;
     }
 
-    public boolean isReplicaSet() {
+    boolean isReplicaSet() {
         return runIsMaster().get("setName") != null;
     }
 
@@ -80,9 +72,9 @@ public abstract class TestBase {
     }
 
     protected void cleanup() {
-        DB db = getDb();
+        MongoDatabase db = getDatabase();
         if (db != null) {
-            db.dropDatabase();
+            db.drop();
         }
     }
 
@@ -100,8 +92,7 @@ public abstract class TestBase {
      * @return true if server is at least specified version
      */
     protected boolean serverIsAtLeastVersion(final double version) {
-        String serverVersion = (String) getMongoClient().getDB("admin").command("serverStatus").get("version");
-        return Double.parseDouble(serverVersion.substring(0, 3)) >= version;
+        return Double.parseDouble(getServerVersion().substring(0, 3)) >= version;
     }
 
     /**
@@ -109,13 +100,18 @@ public abstract class TestBase {
      * @return true if server is at least specified version
      */
     protected boolean serverIsAtMostVersion(final double version) {
-        String serverVersion = (String) getMongoClient().getDB("admin").command("serverStatus").get("version");
-        return Double.parseDouble(serverVersion.substring(0, 3)) <= version;
+        return Double.parseDouble(getServerVersion().substring(0, 3)) <= version;
     }
 
-    private CommandResult runIsMaster() {
+    private String getServerVersion() {
+        return (String) getMongoClient().getDatabase("admin")
+                                        .runCommand(new Document("serverStatus", 1))
+                                        .get("version");
+    }
+
+    private Document runIsMaster() {
         // Check to see if this is a replica set... if not, get out of here.
-        return mongoClient.getDB("admin").command(new BasicDBObject("ismaster", 1));
+        return mongoClient.getDatabase("admin").runCommand(new Document("ismaster", 1));
     }
 
     public BasicDBObject obj(final String key, final Object value) {

@@ -347,7 +347,7 @@ public class AggregationTest extends TestBase {
                       .group("author", grouping("books", push("title")))
                       .out("different", Author.class);
 
-        Assert.assertEquals(2, getDb().getCollection("different").count());
+        Assert.assertEquals(2, getDatabase().getCollection("different").count());
     }
 
     @Test
@@ -364,7 +364,7 @@ public class AggregationTest extends TestBase {
                                            .field("author").equal("Homer"))
                       .group("author", grouping("copies", sum("copies")))
                       .out("testAverage", Author.class);
-        DBCursor testAverage = getDb().getCollection("testAverage").find();
+        DBCursor testAverage = getDatabase().getCollection("testAverage").find();
         Assert.assertNotNull(testAverage);
         try {
             Assert.assertEquals(20, testAverage.next().get("copies"));

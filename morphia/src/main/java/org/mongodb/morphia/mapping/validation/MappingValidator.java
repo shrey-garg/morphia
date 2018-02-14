@@ -7,6 +7,7 @@ import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
+import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.validation.ConstraintViolation.Level;
 import org.mongodb.morphia.mapping.validation.classrules.DuplicatedAttributeNames;
@@ -22,12 +23,10 @@ import org.mongodb.morphia.mapping.validation.fieldrules.LazyReferenceMissingDep
 import org.mongodb.morphia.mapping.validation.fieldrules.LazyReferenceOnArray;
 import org.mongodb.morphia.mapping.validation.fieldrules.MapKeyDifferentFromString;
 import org.mongodb.morphia.mapping.validation.fieldrules.MapNotSerializable;
-import org.mongodb.morphia.mapping.validation.fieldrules.MisplacedProperty;
 import org.mongodb.morphia.mapping.validation.fieldrules.ReferenceToUnidentifiable;
 import org.mongodb.morphia.mapping.validation.fieldrules.VersionMisuse;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -35,6 +34,7 @@ import java.util.TreeSet;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.sort;
+import static java.util.Comparator.comparingInt;
 
 
 /**
@@ -72,13 +72,7 @@ public class MappingValidator {
      * @param mapper the Mapper to use for validation
      */
     public void validate(final Mapper mapper, final List<MappedClass> classes) {
-        final Set<ConstraintViolation> ve = new TreeSet<ConstraintViolation>(new Comparator<ConstraintViolation>() {
-
-            @Override
-            public int compare(final ConstraintViolation o1, final ConstraintViolation o2) {
-                return o1.getLevel().ordinal() > o2.getLevel().ordinal() ? -1 : 1;
-            }
-        });
+        final Set<ConstraintViolation> ve = new TreeSet<>(comparingInt(o -> o.getLevel().ordinal()));
 
         final List<ClassConstraint> rules = getConstraints();
         for (final MappedClass c : classes) {
@@ -95,7 +89,7 @@ public class MappingValidator {
             }
 
             // sort by class to make it more readable
-            final List<LogLine> l = new ArrayList<LogLine>();
+            final List<LogLine> l = new ArrayList<>();
             for (final ConstraintViolation v : ve) {
                 l.add(new LogLine(v));
             }
@@ -108,7 +102,7 @@ public class MappingValidator {
     }
 
     private List<ClassConstraint> getConstraints() {
-        final List<ClassConstraint> constraints = new ArrayList<ClassConstraint>(32);
+        final List<ClassConstraint> constraints = new ArrayList<>(32);
 
         // normally, i do this with scanning the classpath, but that´d bring
         // another dependency ;)
@@ -124,7 +118,6 @@ public class MappingValidator {
         constraints.add(new DuplicatedAttributeNames());
         // constraints.add(new ContainsEmbeddedWithId());
         // field-level
-        constraints.add(new MisplacedProperty());
         constraints.add(new ReferenceToUnidentifiable());
         constraints.add(new LazyReferenceMissingDependencies());
         constraints.add(new LazyReferenceOnArray());

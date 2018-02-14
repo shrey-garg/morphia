@@ -16,17 +16,15 @@
 
 package org.mongodb.morphia;
 
-import com.mongodb.DBCollection;
-import com.mongodb.MapReduceCommand;
 import com.mongodb.MapReduceCommand.OutputType;
 import com.mongodb.ReadPreference;
+import com.mongodb.client.MapReduceIterable;
 import com.mongodb.client.model.Collation;
-import org.mongodb.morphia.mapping.Mapper;
+import com.mongodb.client.model.MapReduceAction;
+import org.bson.Document;
 import org.mongodb.morphia.query.Query;
-import org.mongodb.morphia.query.QueryException;
 import org.mongodb.morphia.utils.Assert;
 
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -38,16 +36,14 @@ import java.util.concurrent.TimeUnit;
 public class MapReduceOptions<T> {
     private String outputDB;
     private String outputCollection;
-    private String inputCollection;
     private String map;
     private String reduce;
     private OutputType outputType;
     private Query<T> query;
     private String finalize;
-    private ReadPreference readPreference;
     private int limit;
     private long maxTimeMS;
-    private Map<String, Object> scope;
+    private Document scope;
     private boolean jsMode;
     private boolean verbose;
     private boolean bypassDocumentValidation;
@@ -137,17 +133,6 @@ public class MapReduceOptions<T> {
     }
 
     /**
-     * Sets the input collection for the job should that collection differ from the mapped collection used in the query
-     *
-     * @param name the collection name
-     * @return this
-     */
-    public MapReduceOptions<T> inputCollection(final String name) {
-        this.inputCollection = name;
-        return this;
-    }
-
-    /**
      * Sets the output collection for the job
      *
      * @param name the collection name
@@ -186,20 +171,9 @@ public class MapReduceOptions<T> {
      * @param query the query to use
      * @return this
      */
-    public MapReduceOptions<T> query(final Query query) {
+    public MapReduceOptions<T> query(final Query<T> query) {
         Assert.parametersNotNull("query", query);
         this.query = query;
-        return this;
-    }
-
-    /**
-     * Sets the read preference for this command. See the documentation for {@link ReadPreference} for more information.
-     *
-     * @param preference Read Preference to use
-     * @return this
-     */
-    public MapReduceOptions<T> readPreference(final ReadPreference preference) {
-        this.readPreference = preference;
         return this;
     }
 
@@ -233,7 +207,7 @@ public class MapReduceOptions<T> {
      * @param scope The JavaScript scope
      * @return this
      */
-    public MapReduceOptions<T> scope(final Map<String, Object> scope) {
+    public MapReduceOptions<T> scope(final Document scope) {
         this.scope = scope;
         return this;
     }
@@ -261,29 +235,62 @@ public class MapReduceOptions<T> {
         return resultType;
     }
 
+    public String getMap() {
+        return map;
+    }
+
+    public String getReduce() {
+        return reduce;
+    }
+
     @SuppressWarnings("deprecation")
-    MapReduceCommand toCommand(final Mapper mapper) {
-        if (query.getOffset() != 0 || query.getFields() != null) {
-            throw new QueryException("mapReduce does not allow the offset/retrievedFields query ");
+    MapReduceIterable<T> apply(final MapReduceIterable<T> iterable) {
+
+        if (outputCollection != null) {
+            iterable.collectionName(outputCollection);
         }
 
-        final DBCollection dbColl = inputCollection != null ? getQuery().getCollection().getDB().getCollection(inputCollection)
-                                                            : query.getCollection();
-        final String target = outputCollection != null ? outputCollection : mapper.getMappedClass(resultType).getCollectionName();
+        switch (outputType) {
+            case REPLACE:
+                iterable.action(MapReduceAction.REPLACE);
+            case MERGE:
+                iterable.action(MapReduceAction.MERGE);
+            case REDUCE:
+                iterable.action(MapReduceAction.REDUCE);
+        }
+        iterable.bypassDocumentValidation(bypassDocumentValidation);
+        iterable.collation(collation);
+        iterable.filter(query.getQueryDocument());
+        iterable.finalizeFunction(finalize);
+        iterable.jsMode(jsMode);
+        iterable.limit(limit);
+        iterable.maxTime(maxTimeMS, TimeUnit.MILLISECONDS);
+        iterable.databaseName(outputDB);
+        iterable.scope(scope);
+        iterable.sort(query.getSortDocument());
+        iterable.verbose(verbose);
 
-        final MapReduceCommand command = new MapReduceCommand(dbColl, map, reduce, target, outputType, query.getQueryDocument());
-        command.setBypassDocumentValidation(bypassDocumentValidation);
-        command.setCollation(collation);
-        command.setFinalize(finalize);
-        command.setJsMode(jsMode);
-        command.setLimit(limit);
-        command.setMaxTime(maxTimeMS, TimeUnit.MILLISECONDS);
-        command.setOutputDB(outputDB);
-        command.setReadPreference(readPreference);
-        command.setScope(scope);
-        command.setSort(query.getSortDocument());
-        command.setVerbose(verbose);
-
-        return command;
+        return iterable;
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

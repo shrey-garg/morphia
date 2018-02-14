@@ -347,7 +347,7 @@ public class IndexHelperTest extends TestBase {
 
         indexHelper.createIndex(indexes, mappedClass, index, false);
 
-        List<DBObject> wildcard = getDb().getCollection("indexes").getIndexInfo();
+        List<DBObject> wildcard = getDatabase().getCollection("indexes").getIndexInfo();
         boolean found = false;
         for (DBObject dbObject : wildcard) {
             found |= dbObject.get("name").equals("$**_text");

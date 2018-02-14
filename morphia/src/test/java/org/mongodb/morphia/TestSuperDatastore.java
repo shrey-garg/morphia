@@ -26,7 +26,7 @@ public class TestSuperDatastore extends TestBase {
     public void testDeleteDoesNotDeleteAnythingWhenGivenAnIncorrectId() throws Exception {
         // given
         final String ns = "someCollectionName";
-        getDb().getCollection(ns).remove(new BasicDBObject());
+        getDatabase().getCollection(ns).remove(new BasicDBObject());
 
         final Rectangle rect = new Rectangle(10, 10);
         ObjectId id = new ObjectId();
@@ -46,7 +46,7 @@ public class TestSuperDatastore extends TestBase {
     public void testDeleteWillRemoveAnyDocumentWithAMatchingId() throws Exception {
         // given
         final String ns = "someCollectionName";
-        getDb().getCollection(ns).remove(new BasicDBObject());
+        getDatabase().getCollection(ns).remove(new BasicDBObject());
 
         final Rectangle rect = new Rectangle(10, 10);
         ObjectId rectangleId = new ObjectId();
@@ -70,7 +70,7 @@ public class TestSuperDatastore extends TestBase {
     public void testDeleteWithAnEntityTypeAndId() throws Exception {
         // given
         final String ns = "someCollectionName";
-        getDb().getCollection(ns).remove(new BasicDBObject());
+        getDatabase().getCollection(ns).remove(new BasicDBObject());
 
         final Rectangle rect = new Rectangle(10, 10);
         ObjectId id = new ObjectId();
@@ -93,7 +93,7 @@ public class TestSuperDatastore extends TestBase {
         ObjectId id = new ObjectId();
         rect.setId(id);
 
-        getDb().getCollection(ns).remove(new BasicDBObject());
+        getDatabase().getCollection(ns).remove(new BasicDBObject());
 
         getAds().save(ns, rect);
         assertEquals(1, getAds().getCount(ns));
@@ -125,7 +125,7 @@ public class TestSuperDatastore extends TestBase {
         final String ns = "hotels";
         final Rectangle rect = new Rectangle(10, 10);
 
-        getDb().getCollection(ns).remove(new BasicDBObject());
+        getDatabase().getCollection(ns).remove(new BasicDBObject());
 
         getAds().save(ns, rect);
         assertEquals(1, getAds().getCount(ns));

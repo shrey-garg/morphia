@@ -32,21 +32,14 @@ import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.annotations.Text;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.annotations.Version;
-import org.mongodb.morphia.logging.Logger;
-import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.utils.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
-import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -65,7 +58,6 @@ import static java.util.Arrays.asList;
  */
 @SuppressWarnings("unchecked")
 public class MappedField {
-    private static final Logger LOG = MorphiaLoggerFactory.get(MappedField.class);
     // The Annotations to look for when reflecting on the field (stored in the mappingAnnotations)
     private static final List<Class<? extends Annotation>> INTERESTING = new ArrayList<Class<? extends Annotation>>();
 
@@ -86,7 +78,6 @@ public class MappedField {
     // Annotations that have been found relevant to mapping
     private final Map<Class<? extends Annotation>, Annotation> foundAnnotations = new HashMap<Class<? extends Annotation>, Annotation>();
     private final List<MappedField> typeParameters = new ArrayList<MappedField>();
-    private Class persistedClass;
     private Field field; // the field :)
     private Class realType; // the real type
     private Constructor constructor; // the constructor for the type
@@ -102,13 +93,12 @@ public class MappedField {
     private boolean isCollection; // indicated if the collection is a list)
     private Type genericType;
 
-    MappedField(final Field f, final Class<?> clazz, final Mapper mapper) {
+    MappedField(final Field f) {
         f.setAccessible(true);
         field = f;
-        persistedClass = clazz;
         realType = field.getType();
         genericType = field.getGenericType();
-        discover(mapper);
+        discover();
     }
 
     /**
@@ -124,15 +114,6 @@ public class MappedField {
     }
 
     /**
-     * Adds an annotation for Morphia to retain when mapping.
-     *
-     * @param annotation the type to retain
-     */
-    public static void addInterestingAnnotation(final Class<? extends Annotation> annotation) {
-        INTERESTING.add(annotation);
-    }
-
-    /**
      * Adds the annotation, if it exists on the field.
      *
      * @param clazz the annotation to add
@@ -141,16 +122,6 @@ public class MappedField {
         if (field.isAnnotationPresent(clazz)) {
             foundAnnotations.put(clazz, field.getAnnotation(clazz));
         }
-    }
-
-    /**
-     * Adds the annotation, if it exists on the field.
-     *
-     * @param clazz type of the annotation
-     * @param ann   the annotation
-     */
-    public void addAnnotation(final Class<? extends Annotation> clazz, final Annotation ann) {
-        foundAnnotations.put(clazz, ann);
     }
 
     /**
@@ -242,7 +213,7 @@ public class MappedField {
      * @return the value of this field mapped from the DBObject
      * @see AlsoLoad
      */
-    public String getFirstFieldName(final DBObject dbObj) {
+    private String getFirstFieldName(final DBObject dbObj) {
         String fieldName = getNameToStore();
         boolean foundField = false;
         for (final String n : getLoadNames()) {
@@ -256,13 +227,6 @@ public class MappedField {
             }
         }
         return fieldName;
-    }
-
-    /**
-     * @return the full name of the class plus java field name
-     */
-    public String getFullName() {
-        return field.getDeclaringClass().getName() + "." + field.getName();
     }
 
     /**
@@ -280,7 +244,7 @@ public class MappedField {
         names.add(getMappedFieldName());
 
         final AlsoLoad al = (AlsoLoad) foundAnnotations.get(AlsoLoad.class);
-        if (al != null && al.value() != null && al.value().length > 0) {
+        if (al != null && al.value().length > 0) {
             names.addAll(asList(al.value()));
         }
 
@@ -478,13 +442,10 @@ public class MappedField {
     /**
      * Discovers interesting (that we care about) things about the field.
      */
-    protected void discover(final Mapper mapper) {
+    protected void discover() {
         for (final Class<? extends Annotation> clazz : INTERESTING) {
             addAnnotation(clazz);
         }
-
-        //type must be discovered before the constructor.
-        discoverType(mapper);
 
         // check the main type
         isMongoType = ReflectionUtils.isPropertyType(realType);
@@ -496,10 +457,6 @@ public class MappedField {
         }
 
         if (!isMongoType && !isSingleValue && (subType == null || subType == Object.class)) {
-            if (LOG.isWarningEnabled() && !mapper.getConverters().hasDbObjectConverter(this)) {
-                LOG.warning(format("The multi-valued field '%s' is a possible heterogeneous collection. It cannot be verified. "
-                                   + "Please declare a valid type to get rid of this warning. %s", getFullName(), subType));
-            }
             isMongoType = true;
         }
     }

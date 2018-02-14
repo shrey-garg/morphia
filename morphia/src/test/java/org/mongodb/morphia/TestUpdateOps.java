@@ -31,7 +31,6 @@ import org.mongodb.morphia.query.TestQuery.ContainsPic;
 import org.mongodb.morphia.query.TestQuery.Pic;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateOpsImpl;
-import org.mongodb.morphia.query.UpdateResults;
 import org.mongodb.morphia.query.ValidationException;
 import org.mongodb.morphia.testmodel.Article;
 import org.mongodb.morphia.testmodel.Circle;

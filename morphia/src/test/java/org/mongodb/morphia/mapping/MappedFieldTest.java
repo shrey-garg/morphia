@@ -23,7 +23,7 @@ import static java.util.Arrays.asList;
 public class MappedFieldTest extends TestBase {
     @Test
     public void arrayFieldMapping() {
-        final MappedField field = new MappedField(getField(TestEntity.class, "arrayOfInt"), TestEntity.class, getMorphia().getMapper());
+        final MappedField field = new MappedField(getField(TestEntity.class, "arrayOfInt"));
 
         Assert.assertFalse(field.isSingleValue());
         Assert.assertTrue(field.isMultipleValues());
@@ -35,7 +35,7 @@ public class MappedFieldTest extends TestBase {
 
     @Test
     public void basicFieldMapping() {
-        final MappedField field = new MappedField(getField(TestEntity.class, "name"), TestEntity.class, getMorphia().getMapper());
+        final MappedField field = new MappedField(getField(TestEntity.class, "name"));
 
         Assert.assertTrue(field.isSingleValue());
         Assert.assertTrue(String.class == field.getType());
@@ -45,7 +45,7 @@ public class MappedFieldTest extends TestBase {
 
     @Test
     public void collectionFieldMapping() {
-        final MappedField field = new MappedField(getField(TestEntity.class, "listOfString"), TestEntity.class, getMorphia().getMapper());
+        final MappedField field = new MappedField(getField(TestEntity.class, "listOfString"));
 
         Assert.assertFalse(field.isSingleValue());
         Assert.assertTrue(field.isMultipleValues());
@@ -58,7 +58,7 @@ public class MappedFieldTest extends TestBase {
 
     @Test
     public void idFieldMapping() {
-        final MappedField field = new MappedField(getField(TestEntity.class, "id"), TestEntity.class, getMorphia().getMapper());
+        final MappedField field = new MappedField(getField(TestEntity.class, "id"));
 
         Assert.assertTrue(field.isSingleValue());
         Assert.assertTrue(ObjectId.class == field.getType());
@@ -68,9 +68,8 @@ public class MappedFieldTest extends TestBase {
 
     @Test
     public void nestedCollectionsMapping() {
-        final MappedField field = new MappedField(getField(TestEntity.class, "listOfListOfString"),
-                                                  TestEntity.class,
-                                                  getMorphia().getMapper());
+        final MappedField field = new MappedField(getField(TestEntity.class, "listOfListOfString")
+        );
 
         Assert.assertFalse(field.isSingleValue());
         Assert.assertTrue(field.isMultipleValues());

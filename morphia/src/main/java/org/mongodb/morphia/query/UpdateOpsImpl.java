@@ -3,6 +3,7 @@ package org.mongodb.morphia.query;
 
 import com.mongodb.BasicDBObject;
 import org.bson.Document;
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.internal.PathTarget;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
@@ -18,6 +19,7 @@ import static java.util.Collections.singletonList;
  * @author Scott Hernandez
  */
 public class UpdateOpsImpl<T> implements UpdateOperations<T> {
+    private Datastore datastore;
     private final Mapper mapper;
     private final Class<T> clazz;
     private Document operations = new Document();
@@ -30,7 +32,8 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
      * @param type   the type to update
      * @param mapper the Mapper to use
      */
-    public UpdateOpsImpl(final Class<T> type, final Mapper mapper) {
+    public UpdateOpsImpl(final Datastore datastore, final Class<T> type, final Mapper mapper) {
+        this.datastore = datastore;
         this.mapper = mapper;
         clazz = type;
     }
@@ -275,7 +278,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
     }
 
     private List<Object> toDBObjList(final MappedField mf, final List<?> values) {
-        final List<Object> list = new ArrayList<Object>(values.size());
+        final List<Object> list = new ArrayList<>(values.size());
         for (final Object obj : values) {
             list.add(mapper.toMongoObject(mf, null, obj));
         }

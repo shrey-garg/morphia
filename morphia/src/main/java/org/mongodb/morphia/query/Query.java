@@ -2,6 +2,8 @@ package org.mongodb.morphia.query;
 
 
 import com.mongodb.DBCollection;
+import com.mongodb.ReadConcern;
+import com.mongodb.ReadPreference;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.FindOptions;
 import org.bson.Document;
@@ -21,6 +23,10 @@ public interface Query<T> extends QueryResults<T>, Cloneable {
      * @return the container
      */
     CriteriaContainer and(Criteria... criteria);
+
+    Query<T> setReadConcern(ReadConcern readConcern);
+
+    Query<T> setReadPreference(ReadPreference readPreference);
 
     /**
      * Creates and returns a copy of this {@link Query}.
