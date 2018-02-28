@@ -1,11 +1,11 @@
 package org.mongodb.morphia.query;
 
 
-import org.mongodb.morphia.geo.CoordinateReferenceSystem;
-import org.mongodb.morphia.geo.Geometry;
-import org.mongodb.morphia.geo.MultiPolygon;
-import org.mongodb.morphia.geo.Point;
-import org.mongodb.morphia.geo.Polygon;
+import com.mongodb.client.model.geojson.Geometry;
+import com.mongodb.client.model.geojson.MultiPolygon;
+import com.mongodb.client.model.geojson.Point;
+import com.mongodb.client.model.geojson.Polygon;
+import com.mongodb.client.model.geojson.CoordinateReferenceSystem;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.utils.Assert;
@@ -158,13 +158,13 @@ public class FieldEndImpl<T extends CriteriaContainerImpl> implements FieldEnd<T
 
     @Override
     public T intersects(final Geometry geometry) {
-        target.add(new StandardGeoFieldCriteria(query, field, INTERSECTS, geometry, null));
+        target.add(new GeoIntersectsFieldCriteria(query, field, geometry, null, INTERSECTS));
         return target;
     }
 
     @Override
     public T intersects(final Geometry geometry, final CoordinateReferenceSystem crs) {
-        target.add(new StandardGeoFieldCriteria(query, field, INTERSECTS, geometry, null, crs));
+        target.add(new GeoIntersectsFieldCriteria(query, field, geometry, crs, INTERSECTS));
         return target;
     }
 
@@ -209,13 +209,13 @@ public class FieldEndImpl<T extends CriteriaContainerImpl> implements FieldEnd<T
 
     @Override
     public T near(final Point point, final int maxDistance) {
-        target.add(new StandardGeoFieldCriteria(query, field, FilterOperator.NEAR, point, maxDistance));
+        target.add(new GeoNearFieldCriteria(query, field, point, maxDistance));
         return target;
     }
 
     @Override
     public T near(final Point point) {
-        target.add(new StandardGeoFieldCriteria(query, field, FilterOperator.NEAR, point, null));
+        target.add(new GeoNearFieldCriteria(query, field, point));
         return target;
     }
 
@@ -265,25 +265,25 @@ public class FieldEndImpl<T extends CriteriaContainerImpl> implements FieldEnd<T
 
     @Override
     public T within(final Polygon boundary) {
-        target.add(new StandardGeoFieldCriteria(query, field, GEO_WITHIN, boundary, null));
+        target.add(new GeoIntersectsFieldCriteria(query, field, boundary, GEO_WITHIN));
         return target;
     }
 
     @Override
     public T within(final MultiPolygon boundaries) {
-        target.add(new StandardGeoFieldCriteria(query, field, GEO_WITHIN, boundaries, null));
+        target.add(new GeoIntersectsFieldCriteria(query, field, boundaries, GEO_WITHIN));
         return target;
     }
 
     @Override
     public T within(final Polygon boundary, final CoordinateReferenceSystem crs) {
-        target.add(new StandardGeoFieldCriteria(query, field, GEO_WITHIN, boundary, null, crs));
+        target.add(new GeoIntersectsFieldCriteria(query, field, boundary, crs, GEO_WITHIN));
         return target;
     }
 
     @Override
     public T within(final MultiPolygon boundaries, final CoordinateReferenceSystem crs) {
-        target.add(new StandardGeoFieldCriteria(query, field, GEO_WITHIN, boundaries, null, crs));
+        target.add(new GeoIntersectsFieldCriteria(query, field, boundaries, crs, GEO_WITHIN));
         return target;
     }
 

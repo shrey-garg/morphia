@@ -130,8 +130,19 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
+    public <T, V> DeleteResult delete(final String collectionName, final Class<T> clazz, final V id) {
+        return delete(collectionName, clazz, id, new DeleteOptions(), enforceWriteConcern(clazz));
+    }
+
+    @Override
     public <T, V> DeleteResult delete(final Class<T> clazz, final V id, final DeleteOptions options, WriteConcern writeConcern) {
         return delete(createQuery(clazz).filter(Mapper.ID_KEY, id), options, writeConcern);
+    }
+
+    @Override
+    public <T, V> DeleteResult delete(final String collectionName, final Class<T> clazz, final V id, final DeleteOptions options,
+                                      final WriteConcern writeConcern) {
+        return delete(createQuery(collectionName, clazz).filter(Mapper.ID_KEY, id), options, writeConcern);
     }
 
     @Override
@@ -140,8 +151,22 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
+    public <T, V> DeleteResult delete(final String collectionName, final Class<T> clazz, final List<V> ids) {
+        return delete(find(collectionName, clazz).filter(Mapper.ID_KEY + " in", ids));
+    }
+
+    @Override
     public <T, V> DeleteResult delete(final Class<T> clazz, final List<V> ids, final DeleteOptions options, WriteConcern writeConcern) {
         return delete(find(clazz).filter(Mapper.ID_KEY + " in", ids), options, writeConcern);
+    }
+
+    @Override
+    public <T, V> DeleteResult delete(final String collectionName,
+                                      final Class<T> clazz,
+                                      final List<V> ids,
+                                      final DeleteOptions options,
+                                      final WriteConcern writeConcern) {
+        return delete(find(collectionName, clazz).filter(Mapper.ID_KEY + " in", ids), options, writeConcern);
     }
 
     @Override
@@ -504,10 +529,10 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
-    public <T> MapReduceIterable<T> mapReduce(final MapReduceOptions<T> options) {
-        MongoCollection<T> collection = options.getQuery().getCollection();
+    public <T> MapReduceIterable<?> mapReduce(final MapReduceOptions<T> options) {
+        MongoCollection<?> collection = options.getQuery().getCollection();
 
-        final MapReduceIterable<T> iterable = options.apply(collection.mapReduce(options.getMap(), options.getReduce()));
+        final MapReduceIterable<?> iterable = options.apply(collection.mapReduce(options.getMap(), options.getReduce()));
 
         if (!OutputType.INLINE.equals(options.getOutputType())) {
             iterable.toCollection();

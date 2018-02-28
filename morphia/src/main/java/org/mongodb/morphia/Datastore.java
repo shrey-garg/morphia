@@ -27,7 +27,6 @@ import org.mongodb.morphia.query.QueryFactory;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 
@@ -421,7 +420,7 @@ public interface Datastore {
      * @return the results
      * @since 1.3
      */
-    <T> MapReduceIterable<T> mapReduce(MapReduceOptions<T> options);
+    <T> MapReduceIterable<?> mapReduce(MapReduceOptions<T> options);
 
     /**
      * Runs a map/reduce job at the server; this should be used with a server version 1.7.4 or higher
@@ -436,7 +435,7 @@ public interface Datastore {
      */
     @Deprecated
     default <T> MapReduceIterable mapReduce(MapreduceType type, Query q, Class<T> outputType, MapReduceCommand baseCommand) {
-        return mapReduce(new MapReduceOptions<>()
+        return mapReduce(new MapReduceOptions<T>()
                              .outputType(type.toOutputType())
                              .query(q)
                              .map(baseCommand.getMap())

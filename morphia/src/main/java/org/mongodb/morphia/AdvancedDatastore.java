@@ -64,6 +64,14 @@ public interface AdvancedDatastore extends Datastore {
      */
     <T> UpdateOperations<T> createUpdateOperations(Class<T> type, Document operations);
 
+    <T, V> DeleteResult delete(String collectionName, Class<T> clazz, V id);
+
+    <T, V> DeleteResult delete(String collectionName, Class<T> clazz, V id, DeleteOptions options, WriteConcern writeConcern);
+
+    <T, V> DeleteResult delete(String collectionName, Class<T> clazz, List<V> ids);
+
+    <T, V> DeleteResult delete(String collectionName, Class<T> clazz, List<V> ids, DeleteOptions options, WriteConcern writeConcern);
+
     /**
      * Ensures (creating if necessary) the indexes found during class mapping (using {@code @Indexed, @Indexes)} on the given collection
      * name, possibly in the background

@@ -1,12 +1,15 @@
 package org.mongodb.morphia.geo;
 
+import com.mongodb.client.model.geojson.Point;
+import com.mongodb.client.model.geojson.Position;
+
 /**
  * Creates Point instances representing a <a href="http://docs.mongodb.org/manual/apps/geospatial-indexes/#geojson-objects">GeoJSON</a>
  * point type. The advantage of using the builder is to reduce confusion of the order of the latitude and longitude double values.
  * <p/>
  * Supported by server versions 2.4 and above.
  *
- * @see org.mongodb.morphia.geo.Point
+ * @see com.mongodb.client.model.geojson.Point
  */
 public class PointBuilder {
     private double longitude;
@@ -27,7 +30,7 @@ public class PointBuilder {
      * @return the Point with the specifications from this builder.
      */
     public Point build() {
-        return new Point(latitude, longitude);
+        return new Point(new Position(latitude, longitude));
     }
 
     /**

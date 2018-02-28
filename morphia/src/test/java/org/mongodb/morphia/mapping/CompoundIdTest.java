@@ -11,7 +11,6 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.annotations.Version;
-import org.mongodb.morphia.dao.BasicDAO;
 
 import java.io.Serializable;
 
@@ -19,7 +18,7 @@ import java.io.Serializable;
 public class CompoundIdTest extends TestBase {
 
     @Test
-    public void testDelete() throws Exception {
+    public void testDelete() {
         final CompoundIdEntity entity = new CompoundIdEntity();
         entity.id = new CompoundId("test");
 
@@ -30,14 +29,13 @@ public class CompoundIdTest extends TestBase {
     @Test
     public void testFetchKey() {
         getDatastore().save(new ConfigEntry(new ConfigKey("env", "key", "subenv")));
-        BasicDAO<ConfigEntry, ConfigKey> innerDAO = new BasicDAO<ConfigEntry, ConfigKey>(ConfigEntry.class, getDatastore());
-        ConfigEntry entry = innerDAO.find().get();
+        ConfigEntry entry = getDatastore().find(ConfigEntry.class).get();
         entry.setValue("something");
-        innerDAO.save(entry);
+        getDatastore().save(entry);
     }
 
     @Test
-    public void testMapping() throws Exception {
+    public void testMapping() {
         CompoundIdEntity entity = new CompoundIdEntity();
         entity.id = new CompoundId("test");
 
@@ -48,12 +46,13 @@ public class CompoundIdTest extends TestBase {
     }
 
     @Test
-    public void testOtherDelete() throws Exception {
+    public void testOtherDelete() {
         final CompoundIdEntity entity = new CompoundIdEntity();
         entity.id = new CompoundId("test");
 
         getDatastore().save(entity);
-        ((AdvancedDatastore) getDatastore()).delete(getDatastore().getCollection(CompoundIdEntity.class).getName(), CompoundIdEntity.class, entity.id);
+        final String collectionName = getDatastore().getCollection(CompoundIdEntity.class).getNamespace().getCollectionName();
+        ((AdvancedDatastore) getDatastore()).delete(collectionName, CompoundIdEntity.class, entity.id);
     }
 
     @Test

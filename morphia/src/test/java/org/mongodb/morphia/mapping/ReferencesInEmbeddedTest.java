@@ -60,7 +60,7 @@ public class ReferencesInEmbeddedTest extends TestBase {
         @Reference
         private ReferencedEntity ref;
 
-        @Reference(lazy = true)
+        @Reference
         private ReferencedEntity lazyRef;
     }
 

@@ -1,11 +1,11 @@
 package org.mongodb.morphia.query;
 
 
-import org.mongodb.morphia.geo.CoordinateReferenceSystem;
-import org.mongodb.morphia.geo.Geometry;
-import org.mongodb.morphia.geo.MultiPolygon;
-import org.mongodb.morphia.geo.Point;
-import org.mongodb.morphia.geo.Polygon;
+import com.mongodb.client.model.geojson.CoordinateReferenceSystem;
+import com.mongodb.client.model.geojson.Geometry;
+import com.mongodb.client.model.geojson.MultiPolygon;
+import com.mongodb.client.model.geojson.Point;
+import com.mongodb.client.model.geojson.Polygon;
 import org.mongodb.morphia.mapping.MapperOptions;
 
 /**
@@ -159,8 +159,8 @@ public interface FieldEnd<T> {
      * @param val the value to check against
      * @return T
      * @mongodb.driver.manual reference/operator/query/elemMatch/ $elemMatch
-     * @deprecated use {@link #elemMatch(Query)} instead
      * @see MapperOptions
+     * @deprecated use {@link #elemMatch(Query)} instead
      */
     @Deprecated
     T doesNotHaveThisElement(Object val);
@@ -415,7 +415,7 @@ public interface FieldEnd<T> {
      * These queries are only compatible with MongoDB 2.6 or greater.
      *
      * @param boundaries a multi-polygon describing the areas to search within.
-     * @param crs      the coordinate reference system to use
+     * @param crs        the coordinate reference system to use
      * @return T
      * @mongodb.driver.manual reference/operator/query/geoWithin/ $geoWithin
      * @mongodb.server.release 2.6
