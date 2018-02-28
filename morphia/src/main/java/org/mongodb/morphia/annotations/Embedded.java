@@ -25,10 +25,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
-/**
- * @author Olafur Gauti Gudmundsson
- * @author Scott Hernandez
- */
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)

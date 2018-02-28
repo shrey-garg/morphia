@@ -20,10 +20,6 @@ import org.mongodb.morphia.annotations.Property;
 
 import java.io.Serializable;
 
-
-/**
- * @author Olafur Gauti Gudmundsson
- */
 @Embedded
 public class PhoneNumber implements Serializable {
 

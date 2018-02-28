@@ -17,8 +17,6 @@ import java.util.List;
 /**
  * This interface exposes advanced {@link Datastore} features, like interacting with Document and low-level options. It implements matching
  * methods from the {@code Datastore} interface but with a specified kind (collection name), or raw types (Document).
- *
- * @author ScottHernandez
  */
 public interface AdvancedDatastore extends Datastore {
 
@@ -67,50 +65,6 @@ public interface AdvancedDatastore extends Datastore {
     <T> UpdateOperations<T> createUpdateOperations(Class<T> type, Document operations);
 
     /**
-     * Deletes an entity of the given type T, with the given {@code id}, from the collection with the name in the {@code kind} param.
-     * Validates the {@code id}, checking it's the correct type for an ID for entities of type {@code T}. The entity type {@code clazz} is
-     * used only for validation, not for filtering, therefore if you have entities of different types in the same collection ({@code
-     * kind}),
-     * this method will delete any entity with the given {@code id}, regardless of its type.
-     *
-     * @param kind  the collection name
-     * @param clazz the Class of the entity to delete
-     * @param id    the value of the ID
-     * @param <T>   the entity type
-     * @param <V>   is the type of the ID, for example ObjectId
-     * @return the result of this delete operation.
-     */
-    <T, V> DeleteResult delete(String kind, Class<T> clazz, V id);
-
-    /**
-     * Deletes an entity of the given type T, with the given {@code id}, from the collection with the name in the {@code kind} param.
-     * Validates the {@code id}, checking it's the correct type for an ID for entities of type {@code T}. The entity type {@code clazz} is
-     * used only for validation, not for filtering, therefore if you have entities of different types in the same collection ({@code
-     * kind}),
-     * this method will delete any entity with the given {@code id}, regardless of its type.
-     *
-     * @param kind    the collection name
-     * @param clazz   the Class of the entity to delete
-     * @param id      the value of the ID
-     * @param options the options to use when deleting
-     * @param <T>     the entity type
-     * @param <V>     is the type of the ID, for example ObjectId
-     * @return the result of this delete operation.
-     * @since 1.3
-     */
-    <T, V> DeleteResult delete(String kind, Class<T> clazz, V id, DeleteOptions options);
-
-    /**
-     * Ensures (creating if necessary) the indexes found during class mapping (using {@code @Indexed, @Indexes)} on the given collection
-     * name.
-     *
-     * @param collection the collection to update
-     * @param clazz      the class from which to get the index definitions
-     * @param <T>        the type to index
-     */
-    <T> void ensureIndexes(String collection, Class<T> clazz);
-
-    /**
      * Ensures (creating if necessary) the indexes found during class mapping (using {@code @Indexed, @Indexes)} on the given collection
      * name, possibly in the background
      *
@@ -141,32 +95,6 @@ public interface AdvancedDatastore extends Datastore {
      * @return the query
      */
     <T> Query<T> find(String collection, Class<T> clazz);
-
-    /**
-     * Find all instances by type in a different collection than what is mapped on the class given skipping some documents and returning a
-     * fixed number of the remaining.
-     *
-     * @param collection the collection to query against
-     * @param clazz      the class to use for mapping the results
-     * @param property   the document property to query against
-     * @param value      the value to check for
-     * @param offset     the number of results to skip
-     * @param size       the maximum number of results to return
-     * @param <T>        the type to query
-     * @param <V>        the type to filter value
-     * @return the query
-     */
-    <T, V> Query<T> find(String collection, Class<T> clazz, String property, V value, int offset, int size);
-
-    /**
-     * Find the given entity (by collectionName/id);
-     *
-     * @param clazz the class to use for mapping
-     * @param ref   the DBRef to use when querying
-     * @param <T>   the type to fetch
-     * @return the entity referenced in the DBRef.  May be null.
-     */
-    <T> T get(Class<T> clazz, DBRef ref);
 
     /**
      * Finds an entity in the named collection whose id matches the value given.
@@ -206,7 +134,7 @@ public interface AdvancedDatastore extends Datastore {
      * @return the new key of the inserted entity
      * @since 1.3
      */
-    <T> Key<T> insert(T entity, InsertOneOptions options);
+    <T> Key<T> insert(T entity, InsertOneOptions options, WriteConcern writeConcern);
 
     /**
      * Inserts an entity in to the named collection.
@@ -228,7 +156,7 @@ public interface AdvancedDatastore extends Datastore {
      * @return the new key of the inserted entity
      * @since 1.3
      */
-    <T> Key<T> insert(String collection, T entity, InsertOneOptions options);
+    <T> Key<T> insert(String collection, T entity, InsertOneOptions options, WriteConcern writeConcern);
 
     /**
      * Inserts entities in to the mapped collection.
@@ -248,7 +176,7 @@ public interface AdvancedDatastore extends Datastore {
      * @return the new keys of the inserted entities
      * @since 1.3
      */
-    <T> List<Key<T>> insert(List<T> entities, InsertManyOptions options);
+    <T> List<Key<T>> insert(List<T> entities, InsertManyOptions options, WriteConcern writeConcern);
 
     /**
      * Inserts an entity in to the named collection.
@@ -271,7 +199,7 @@ public interface AdvancedDatastore extends Datastore {
      * @return the new keys of the inserted entities
      * @since 1.3
      */
-    <T> List<Key<T>> insert(String collection, List<T> entities, InsertManyOptions options);
+    <T> List<Key<T>> insert(String collection, List<T> entities, InsertManyOptions options, WriteConcern writeConcern);
 
     /**
      * Returns a new query based on the example object
@@ -302,6 +230,6 @@ public interface AdvancedDatastore extends Datastore {
      * @param <T>        the type of the entity
      * @return the new key of the inserted entity
      */
-    <T> Key<T> save(String collection, T entity, InsertOneOptions options);
+    <T> Key<T> save(String collection, T entity, InsertOneOptions options, WriteConcern writeConcern);
 
 }

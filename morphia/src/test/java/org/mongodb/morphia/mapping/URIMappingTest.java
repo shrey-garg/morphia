@@ -11,10 +11,6 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
-
-/**
- * @author ScottHernandez
- */
 public class URIMappingTest extends TestBase {
 
     @Test

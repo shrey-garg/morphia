@@ -14,10 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
-/**
- * @author us@thomas-daily.de
- */
 public class GuiceObjectFactory implements ObjectFactory {
 
     // rather messy, i'd like ObjectFactory to be tackled to have a clean

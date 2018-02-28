@@ -6,9 +6,6 @@ import org.mongodb.morphia.TestBase;
 import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertThat;
 
-/**
- * @author us@thomas-daily.de
- */
 public class MorphiaLoggerFactoryTest extends TestBase {
 
     @Override

@@ -17,7 +17,6 @@
 package org.mongodb.morphia;
 
 import com.mongodb.MapReduceCommand.OutputType;
-import com.mongodb.ReadPreference;
 import com.mongodb.client.MapReduceIterable;
 import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.MapReduceAction;
@@ -39,7 +38,7 @@ public class MapReduceOptions<T> {
     private String map;
     private String reduce;
     private OutputType outputType;
-    private Query<T> query;
+    private Query<?> query;
     private String finalize;
     private int limit;
     private long maxTimeMS;
@@ -171,7 +170,7 @@ public class MapReduceOptions<T> {
      * @param query the query to use
      * @return this
      */
-    public MapReduceOptions<T> query(final Query<T> query) {
+    public MapReduceOptions<T> query(final Query<?> query) {
         Assert.parametersNotNull("query", query);
         this.query = query;
         return this;
@@ -227,7 +226,7 @@ public class MapReduceOptions<T> {
         return outputType;
     }
 
-    Query<T> getQuery() {
+    Query<?> getQuery() {
         return query;
     }
 

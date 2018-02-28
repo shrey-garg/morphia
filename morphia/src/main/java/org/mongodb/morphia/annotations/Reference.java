@@ -25,10 +25,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
-/**
- * @author Olafur Gauti Gudmundsson
- * @author Scott Hernandez
- */
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
@@ -50,11 +46,6 @@ public @interface Reference {
      * @return if true, Ignore any reference that don't resolve (aren't in mongodb)
      */
     boolean ignoreMissing() default false;
-
-    /**
-     * @return if true, Create a proxy around the reference which will be resolved on the first method call.
-     */
-    boolean lazy() default false;
 
     /**
      * @return The name of the Mongo value to store the field. Defaults to the name of the field being annotated.

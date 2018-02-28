@@ -15,15 +15,10 @@ import java.util.Map;
 
 import static org.junit.Assert.assertTrue;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- * @author scott hernandez
- */
 public class MapImplTest extends TestBase {
 
     @Test
-    public void testEmbeddedMap() throws Exception {
+    public void testEmbeddedMap() {
         getMorphia().map(ContainsMapOfEmbeddedGoos.class).map(ContainsMapOfEmbeddedInterfaces.class);
         final Goo g1 = new Goo("Scott");
         final ContainsMapOfEmbeddedGoos cmoeg = new ContainsMapOfEmbeddedGoos();
@@ -40,7 +35,7 @@ public class MapImplTest extends TestBase {
     }
 
     @Test //@Ignore("waiting on issue 184")
-    public void testEmbeddedMapUpdateOperations() throws Exception {
+    public void testEmbeddedMapUpdateOperations() {
         getMorphia().map(ContainsMapOfEmbeddedGoos.class).map(ContainsMapOfEmbeddedInterfaces.class);
         final Goo g1 = new Goo("Scott");
         final Goo g2 = new Goo("Ralph");
@@ -60,7 +55,7 @@ public class MapImplTest extends TestBase {
     }
 
     @Test
-    public void testEmbeddedMapUpdateOperationsOnInterfaceValue() throws Exception {
+    public void testEmbeddedMapUpdateOperationsOnInterfaceValue() {
         getMorphia().map(ContainsMapOfEmbeddedGoos.class).map(ContainsMapOfEmbeddedInterfaces.class);
         final Goo g1 = new Goo("Scott");
         final Goo g2 = new Goo("Ralph");
@@ -79,7 +74,7 @@ public class MapImplTest extends TestBase {
     }
 
     @Test
-    public void testEmbeddedMapWithValueInterface() throws Exception {
+    public void testEmbeddedMapWithValueInterface() {
         getMorphia().map(ContainsMapOfEmbeddedGoos.class).map(ContainsMapOfEmbeddedInterfaces.class);
         final Goo g1 = new Goo("Scott");
 
@@ -96,7 +91,7 @@ public class MapImplTest extends TestBase {
     }
 
     @Test
-    public void testMapping() throws Exception {
+    public void testMapping() {
         E e = new E();
         e.mymap.put("1", "a");
         e.mymap.put("2", "b");

@@ -29,8 +29,6 @@ import java.lang.annotation.Target;
 
 /**
  * Defines an index
- *
- * @author Scott Hernandez
  */
 @Documented
 @Inherited

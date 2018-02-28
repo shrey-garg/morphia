@@ -18,9 +18,9 @@ package org.mongodb.morphia.aggregation;
 
 import com.mongodb.AggregationOptions;
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
 import com.mongodb.MongoCommandException;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.CollationStrength;
@@ -31,7 +31,6 @@ import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
-import org.mongodb.morphia.annotations.AlsoLoad;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -43,7 +42,6 @@ import org.mongodb.morphia.query.Query;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -51,6 +49,8 @@ import java.util.List;
 import static com.mongodb.AggregationOptions.builder;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static org.bson.Document.parse;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mongodb.morphia.aggregation.Accumulator.accumulator;
 import static org.mongodb.morphia.aggregation.Group.addToSet;
@@ -75,9 +75,9 @@ public class AggregationTest extends TestBase {
         AggregationPipeline pipeline = getDatastore()
             .createAggregation(User.class)
             .match(query);
-        Assert.assertEquals(1, count(pipeline.aggregate(User.class)));
+        assertEquals(1, count(pipeline.aggregate(User.class)));
 
-        Assert.assertEquals(2, count(pipeline.aggregate(User.class,
+        assertEquals(2, count(pipeline.aggregate(User.class,
                                                         builder()
                                                             .collation(Collation.builder()
                                                                                 .locale("en")
@@ -95,7 +95,7 @@ public class AggregationTest extends TestBase {
         database.getCollection("out_users").drop();
         database.createCollection("out_users", new CreateCollectionOptions()
             .validationOptions(new ValidationOptions()
-                                   .validator(Document.parse("{ age : { gte : 13 } }"))));
+                                   .validator(parse("{ age : { gte : 13 } }"))));
 
         try {
             getDatastore()
@@ -114,7 +114,7 @@ public class AggregationTest extends TestBase {
                 .bypassDocumentValidation(true)
                 .build());
 
-        Assert.assertEquals(1, getAds().find("out_users", User.class).count());
+        assertEquals(1, getAds().find("out_users", User.class).count());
     }
 
     @Test
@@ -124,10 +124,10 @@ public class AggregationTest extends TestBase {
             .group(id(grouping("month", accumulator("$month", "date")),
                          grouping("year", accumulator("$year", "date"))),
                 grouping("count", accumulator("$sum", 1)));
-        final DBObject group = ((AggregationPipelineImpl) pipeline).getStages().get(0);
-        final DBObject id = getDBObject(group, "$group", "_id");
-        Assert.assertEquals(new BasicDBObject("$month", "$date"), id.get("month"));
-        Assert.assertEquals(new BasicDBObject("$year", "$date"), id.get("year"));
+        final Document group = ((AggregationPipelineImpl) pipeline).getStages().get(0);
+        final Document id = getDocument(group, "$group", "_id");
+        assertEquals(new BasicDBObject("$month", "$date"), id.get("month"));
+        assertEquals(new BasicDBObject("$year", "$date"), id.get("year"));
 
         pipeline.aggregate(User.class);
     }
@@ -138,7 +138,7 @@ public class AggregationTest extends TestBase {
             .createAggregation(User.class)
             .group(grouping("count", accumulator("$sum", 1)));
 
-        final DBObject group = ((AggregationPipelineImpl) pipeline).getStages().get(0);
+        final Document group = ((AggregationPipelineImpl) pipeline).getStages().get(0);
         Assert.assertNull(group.get("_id"));
 
         pipeline.aggregate(User.class);
@@ -160,7 +160,7 @@ public class AggregationTest extends TestBase {
             .build());
         while (aggregate.hasNext()) {
             StringDates next = aggregate.next();
-            Assert.assertEquals("2016-05-01", next.string);
+            assertEquals("2016-05-01", next.string);
         }
     }
 
@@ -180,10 +180,10 @@ public class AggregationTest extends TestBase {
         CountResult result1 = aggregation.next();
         CountResult result2 = aggregation.next();
         Assert.assertFalse("Expecting two results", aggregation.hasNext());
-        Assert.assertEquals("Dante", result1.getAuthor());
-        Assert.assertEquals(3, result1.getCount());
-        Assert.assertEquals("Homer", result2.getAuthor());
-        Assert.assertEquals(2, result2.getCount());
+        assertEquals("Dante", result1.getAuthor());
+        assertEquals(3, result1.getCount());
+        assertEquals("Homer", result2.getAuthor());
+        assertEquals(2, result2.getCount());
     }
 
     @Test
@@ -209,9 +209,9 @@ public class AggregationTest extends TestBase {
 
         // then
         Assert.assertTrue(citiesOrderedByDistanceFromLondon.hasNext());
-        Assert.assertEquals(london, citiesOrderedByDistanceFromLondon.next());
-        Assert.assertEquals(manchester, citiesOrderedByDistanceFromLondon.next());
-        Assert.assertEquals(sevilla, citiesOrderedByDistanceFromLondon.next());
+        assertEquals(london, citiesOrderedByDistanceFromLondon.next());
+        assertEquals(manchester, citiesOrderedByDistanceFromLondon.next());
+        assertEquals(sevilla, citiesOrderedByDistanceFromLondon.next());
         Assert.assertFalse(citiesOrderedByDistanceFromLondon.hasNext());
     }
 
@@ -240,9 +240,9 @@ public class AggregationTest extends TestBase {
 
         // then
         Assert.assertTrue(citiesOrderedByDistanceFromLondon.hasNext());
-        Assert.assertEquals(london, citiesOrderedByDistanceFromLondon.next());
-        Assert.assertEquals(manchester, citiesOrderedByDistanceFromLondon.next());
-        Assert.assertEquals(sevilla, citiesOrderedByDistanceFromLondon.next());
+        assertEquals(london, citiesOrderedByDistanceFromLondon.next());
+        assertEquals(manchester, citiesOrderedByDistanceFromLondon.next());
+        assertEquals(sevilla, citiesOrderedByDistanceFromLondon.next());
         Assert.assertFalse(citiesOrderedByDistanceFromLondon.hasNext());
     }
 
@@ -270,9 +270,9 @@ public class AggregationTest extends TestBase {
 
         // then
         Assert.assertTrue(citiesOrderedByDistanceFromLondon.hasNext());
-        Assert.assertEquals(london, citiesOrderedByDistanceFromLondon.next());
-        Assert.assertEquals(manchester, citiesOrderedByDistanceFromLondon.next());
-        Assert.assertEquals(sevilla, citiesOrderedByDistanceFromLondon.next());
+        assertEquals(london, citiesOrderedByDistanceFromLondon.next());
+        assertEquals(manchester, citiesOrderedByDistanceFromLondon.next());
+        assertEquals(sevilla, citiesOrderedByDistanceFromLondon.next());
         Assert.assertFalse(citiesOrderedByDistanceFromLondon.hasNext());
     }
 
@@ -292,7 +292,7 @@ public class AggregationTest extends TestBase {
             aggregate.next();
             count++;
         }
-        Assert.assertEquals(2, count);
+        assertEquals(2, count);
     }
 
     /**
@@ -318,10 +318,10 @@ public class AggregationTest extends TestBase {
         List<Order> lookups = getAds().createQuery("lookups", Order.class)
                                       .order("_id")
                                       .asList();
-        Assert.assertEquals(inventories.get(0), lookups.get(0).inventoryDocs.get(0));
-        Assert.assertEquals(inventories.get(3), lookups.get(1).inventoryDocs.get(0));
-        Assert.assertEquals(inventories.get(4), lookups.get(2).inventoryDocs.get(0));
-        Assert.assertEquals(inventories.get(5), lookups.get(2).inventoryDocs.get(1));
+        assertEquals(inventories.get(0), lookups.get(0).inventoryDocs.get(0));
+        assertEquals(inventories.get(3), lookups.get(1).inventoryDocs.get(0));
+        assertEquals(inventories.get(4), lookups.get(2).inventoryDocs.get(0));
+        assertEquals(inventories.get(5), lookups.get(2).inventoryDocs.get(1));
     }
 
     @Test
@@ -338,16 +338,16 @@ public class AggregationTest extends TestBase {
         Iterator<Author> aggregate = getDatastore().createAggregation(Book.class)
                                                    .group("author", grouping("books", push("title")))
                                                    .out(Author.class, options);
-        Assert.assertEquals(2, getDatastore().getCollection(Author.class).count());
+        assertEquals(2, getDatastore().getCollection(Author.class).count());
         Author author = aggregate.next();
-        Assert.assertEquals("Homer", author.name);
-        Assert.assertEquals(asList("The Odyssey", "Iliad"), author.books);
+        assertEquals("Homer", author.name);
+        assertEquals(asList("The Odyssey", "Iliad"), author.books);
 
         getDatastore().createAggregation(Book.class)
                       .group("author", grouping("books", push("title")))
                       .out("different", Author.class);
 
-        Assert.assertEquals(2, getDatabase().getCollection("different").count());
+        assertEquals(2, getDatabase().getCollection("different").count());
     }
 
     @Test
@@ -364,10 +364,10 @@ public class AggregationTest extends TestBase {
                                            .field("author").equal("Homer"))
                       .group("author", grouping("copies", sum("copies")))
                       .out("testAverage", Author.class);
-        DBCursor testAverage = getDatabase().getCollection("testAverage").find();
+        MongoCursor<Document> testAverage = getDatabase().getCollection("testAverage").find().iterator();
         Assert.assertNotNull(testAverage);
         try {
-            Assert.assertEquals(20, testAverage.next().get("copies"));
+            assertEquals(20, testAverage.next().get("copies"));
         } finally {
             testAverage.close();
         }
@@ -389,14 +389,12 @@ public class AggregationTest extends TestBase {
                                                            .sort(ascending("author"));
         Iterator<Book> aggregate = pipeline.aggregate(Book.class);
         Book book = aggregate.next();
-        Assert.assertEquals("Dante", book.author);
-        Assert.assertEquals(1, book.copies.intValue());
+        assertEquals("Dante", book.author);
+        assertEquals(1, book.copies.intValue());
 
-        final List<DBObject> stages = ((AggregationPipelineImpl) pipeline).getStages();
-        Assert.assertEquals(stages.get(0), obj("$group", obj("_id", "$author").append("copies", obj("$sum", "$copies"))));
-        Assert.assertEquals(stages.get(1), obj("$project", obj("_id", 0)
-            .append("author", "$_id")
-            .append("copies", obj("$divide", Arrays.<Object>asList("$copies", 5)))));
+        final List<Document> stages = ((AggregationPipelineImpl) pipeline).getStages();
+        assertEquals(stages.get(0), parse("{ \"$group\": {_id: \"$author\", copies: { \"$sum\": \"$copies\"}}"));
+        assertEquals(stages.get(1), parse(("{ \"$project\": {_id: 0, author: \"$_id\", copies: { \"$divide\", [ \"$copies\", 5\" ] }}}")));
 
     }
 
@@ -411,9 +409,9 @@ public class AggregationTest extends TestBase {
         Book book = getDatastore().createAggregation(Book.class)
                                   .skip(2)
                                   .aggregate(Book.class).next();
-        Assert.assertEquals("Eclogues", book.title);
-        Assert.assertEquals("Dante", book.author);
-        Assert.assertEquals(2, book.copies.intValue());
+        assertEquals("Eclogues", book.title);
+        assertEquals("Dante", book.author);
+        assertEquals(2, book.copies.intValue());
     }
 
     @Test
@@ -432,24 +430,24 @@ public class AggregationTest extends TestBase {
             User user = aggregate.next();
             switch (count) {
                 case 0:
-                    Assert.assertEquals("jane", user.name);
-                    Assert.assertEquals("golf", user.likes.get(0));
+                    assertEquals("jane", user.name);
+                    assertEquals("golf", user.likes.get(0));
                     break;
                 case 1:
-                    Assert.assertEquals("jane", user.name);
-                    Assert.assertEquals("racquetball", user.likes.get(0));
+                    assertEquals("jane", user.name);
+                    assertEquals("racquetball", user.likes.get(0));
                     break;
                 case 2:
-                    Assert.assertEquals("joe", user.name);
-                    Assert.assertEquals("tennis", user.likes.get(0));
+                    assertEquals("joe", user.name);
+                    assertEquals("tennis", user.likes.get(0));
                     break;
                 case 3:
-                    Assert.assertEquals("joe", user.name);
-                    Assert.assertEquals("golf", user.likes.get(0));
+                    assertEquals("joe", user.name);
+                    assertEquals("golf", user.likes.get(0));
                     break;
                 case 4:
-                    Assert.assertEquals("joe", user.name);
-                    Assert.assertEquals("swimming", user.likes.get(0));
+                    assertEquals("joe", user.name);
+                    assertEquals("swimming", user.likes.get(0));
                     break;
                 default:
                     fail("Should only find 5 elements");
@@ -465,14 +463,15 @@ public class AggregationTest extends TestBase {
                                                            .match(getDatastore().find(Book.class)
                                                                                 .disableValidation()
                                                                                 .field("total_pop").greaterThanOrEq(10000000));
-        DBObject group = obj("$group", obj("_id", "$state")
-            .append("total_pop", obj("$sum", "$pop")));
 
-        DBObject match = obj("$match", obj("total_pop", obj("$gte", 10000000)));
 
-        final List<DBObject> stages = ((AggregationPipelineImpl) pipeline).getStages();
-        Assert.assertEquals(stages.get(0), group);
-        Assert.assertEquals(stages.get(1), match);
+        Document group = parse("{ \"$group\": {_id: \"$state\", total_pop: {\"$sum\": \"$pop\"}}}");
+
+        Document match = parse("{ \"$match\": {total_pop: {\"$gte\": 10000000}}}");
+
+        final List<Document> stages = ((AggregationPipelineImpl) pipeline).getStages();
+        assertEquals(stages.get(0), group);
+        assertEquals(stages.get(1), match);
     }
 
     @Test
@@ -487,12 +486,12 @@ public class AggregationTest extends TestBase {
                            grouping("messageCount", accumulator("$sum", 1)))
                           .limit(10)
                           .skip(0);
-        List<DBObject> stages = ((AggregationPipelineImpl) pipeline).getStages();
-        DBObject group = stages.get(0);
-        DBObject addToSet = getDBObject(group, "$group", "messageDataSet", "$addToSet");
+        List<Document> stages = ((AggregationPipelineImpl) pipeline).getStages();
+        Document group = stages.get(0);
+        Document addToSet = getDocument(group, "$group", "messageDataSet", "$addToSet");
         Assert.assertNotNull(addToSet);
-        Assert.assertEquals(addToSet.get("sentDate"), "$sentDate");
-        Assert.assertEquals(addToSet.get("messageId"), "$_id");
+        assertEquals(addToSet.get("sentDate"), "$sentDate");
+        assertEquals(addToSet.get("messageId"), "$_id");
     }
 
     @Test
@@ -508,16 +507,16 @@ public class AggregationTest extends TestBase {
         DBObject sum = (DBObject) summation.get("$sum");
         List<?> add = (List<?>) sum.get("$add");
         Assert.assertTrue(add.get(0) instanceof String);
-        Assert.assertEquals("$amountFromTBInDouble", add.get(0));
+        assertEquals("$amountFromTBInDouble", add.get(0));
         pipeline.aggregate(User.class);
     }
 
-    private DBObject getDBObject(final DBObject dbObject, final String... path) {
-        DBObject current = dbObject;
+    private Document getDocument(final Document dbObject, final String... path) {
+        Document current = dbObject;
         for (String step : path) {
             Object next = current.get(step);
             Assert.assertNotNull(format("Could not find %s in \n%s", step, current), next);
-            current = (DBObject) next;
+            current = (Document) next;
         }
         return current;
     }
@@ -590,7 +589,6 @@ public class AggregationTest extends TestBase {
 
         @Id
         private String author;
-        @AlsoLoad("value")
         private int count;
 
         public String getAuthor() {

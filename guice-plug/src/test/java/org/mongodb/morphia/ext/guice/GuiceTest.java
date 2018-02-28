@@ -17,10 +17,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
-/**
- * @author us@thomas-daily.de
- */
 public class GuiceTest extends TestBase {
     private Injector i;
 

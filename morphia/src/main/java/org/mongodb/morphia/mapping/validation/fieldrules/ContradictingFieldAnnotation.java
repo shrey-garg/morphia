@@ -1,6 +1,8 @@
 package org.mongodb.morphia.mapping.validation.fieldrules;
 
 
+import org.mongodb.morphia.mapping.MappedClass;
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.validation.ConstraintViolation;
 import org.mongodb.morphia.mapping.validation.ConstraintViolation.Level;
@@ -8,10 +10,6 @@ import org.mongodb.morphia.mapping.validation.ConstraintViolation.Level;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class ContradictingFieldAnnotation extends FieldConstraint {
 
     private final Class<? extends Annotation> a1;

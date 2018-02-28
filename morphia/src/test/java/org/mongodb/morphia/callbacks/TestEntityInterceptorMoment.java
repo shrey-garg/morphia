@@ -11,10 +11,6 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.PrePersist;
 import org.mongodb.morphia.mapping.Mapper;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class TestEntityInterceptorMoment extends TestBase {
 
     @Test

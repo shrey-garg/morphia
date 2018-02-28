@@ -11,10 +11,6 @@ import org.mongodb.morphia.annotations.Id;
 
 import java.io.Serializable;
 
-
-/**
- * @author scott hernandez
- */
 public class MapWithDotInKeyTest extends TestBase {
 
     @Test

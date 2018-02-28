@@ -10,6 +10,7 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.PrePersist;
 import org.mongodb.morphia.callbacks.TestSimpleValidationViaInterceptor.NonNullValidation.NonNullValidationException;
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.lang.annotation.ElementType;
@@ -19,15 +20,7 @@ import java.lang.annotation.Target;
 import java.util.Date;
 import java.util.List;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class TestSimpleValidationViaInterceptor extends TestBase {
-
-    static {
-        MappedField.addInterestingAnnotation(NonNull.class);
-    }
 
     @Test
     public void testGlobalEntityInterceptorWorksAfterEntityCallback() {

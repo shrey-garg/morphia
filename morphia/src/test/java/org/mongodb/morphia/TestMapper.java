@@ -12,8 +12,8 @@ import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.mapping.EmbeddedMappingTest.AnotherNested;
 import org.mongodb.morphia.mapping.EmbeddedMappingTest.Nested;
 import org.mongodb.morphia.mapping.EmbeddedMappingTest.NestedImpl;
+import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
-import org.mongodb.morphia.mapping.lazy.LazyFeatureDependencies;
 
 import java.io.Serializable;
 import java.util.List;
@@ -23,12 +23,10 @@ import static java.util.Arrays.asList;
 
 /**
  * Tests mapper functions; this is tied to some of the internals.
- *
- * @author scotthernandez
  */
 public class TestMapper extends TestBase {
     @Test
-    public void serializableId() throws Exception {
+    public void serializableId() {
         final CustomId cId = new CustomId();
         cId.id = new ObjectId();
         cId.type = "banker";
@@ -40,7 +38,7 @@ public class TestMapper extends TestBase {
     }
 
     @Test
-    public void singleLookup() throws Exception {
+    public void singleLookup() {
         A.loadCount = 0;
         final A a = new A();
         HoldsMultipleA holder = new HoldsMultipleA();
@@ -50,33 +48,6 @@ public class TestMapper extends TestBase {
         holder = getDatastore().get(HoldsMultipleA.class, holder.id);
         Assert.assertEquals(1, A.loadCount);
         Assert.assertTrue(holder.a1 == holder.a2);
-    }
-
-    @Test
-    public void singleProxy() throws Exception {
-        // TODO us: exclusion does not work properly with maven + junit4
-        if (!LazyFeatureDependencies.testDependencyFullFilled()) {
-            return;
-        }
-
-        A.loadCount = 0;
-        final A a = new A();
-        HoldsMultipleALazily holder = new HoldsMultipleALazily();
-        holder.a1 = a;
-        holder.a2 = a;
-        holder.a3 = a;
-        getDatastore().save(asList(a, holder));
-        Assert.assertEquals(0, A.loadCount);
-        holder = getDatastore().get(HoldsMultipleALazily.class, holder.id);
-        Assert.assertNotNull(holder.a2);
-        Assert.assertEquals(1, A.loadCount);
-        Assert.assertFalse(holder.a1 == holder.a2);
-        // FIXME currently not guaranteed:
-        // Assert.assertTrue(holder.a1 == holder.a3);
-
-        // A.loadCount=0;
-        // Assert.assertEquals(holder.a1.getId(), holder.a2.getId());
-
     }
 
     @Test
@@ -116,18 +87,6 @@ public class TestMapper extends TestBase {
         private A a1;
         @Reference
         private A a2;
-    }
-
-    @Entity("holders")
-    public static class HoldsMultipleALazily {
-        @Id
-        private ObjectId id;
-        @Reference(lazy = true)
-        private A a1;
-        @Reference
-        private A a2;
-        @Reference(lazy = true)
-        private A a3;
     }
 
     public static class CustomId implements Serializable {

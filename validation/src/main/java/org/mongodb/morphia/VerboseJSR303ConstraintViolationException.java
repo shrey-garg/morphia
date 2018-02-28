@@ -7,10 +7,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.Set;
 
-
-/**
- * @author us@thomas-daily.de
- */
 public class VerboseJSR303ConstraintViolationException extends ConstraintViolationException {
     /**
      * Creates a VerboseJSR303ConstraintViolationException

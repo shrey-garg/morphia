@@ -29,9 +29,6 @@ import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
-import org.mongodb.morphia.annotations.NotSaved;
-import org.mongodb.morphia.annotations.Reference;
-import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.annotations.Text;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
@@ -127,7 +124,7 @@ final class IndexHelper {
 
     @SuppressWarnings("deprecation")
     private List<Index> collectFieldIndexes(final MappedClass mc) {
-        List<Index> list = new ArrayList<Index>();
+        List<Index> list = new ArrayList<>();
         for (final MappedField mf : mc.getPersistenceFields()) {
             if (mf.hasAnnotation(Indexed.class)) {
                 final Indexed indexed = mf.getAnnotation(Indexed.class);
@@ -147,27 +144,28 @@ final class IndexHelper {
 
         List<Index> indexes = collectTopLevelIndexes(mc);
         indexes.addAll(collectFieldIndexes(mc));
-        indexes.addAll(collectNestedIndexes(mc, parentMCs));
+//        indexes.addAll(collectNestedIndexes(mc, parentMCs));
 
         return indexes;
     }
 
+/*
     private List<Index> collectNestedIndexes(final MappedClass mc, final List<MappedClass> parentMCs) {
-        List<Index> list = new ArrayList<Index>();
+        List<Index> list = new ArrayList<>();
         for (final MappedField mf : mc.getPersistenceFields()) {
             if (!mf.isTypeMongoCompatible() && !mf.hasAnnotation(Reference.class) && !mf.hasAnnotation(Serialized.class)
                 && !mf.hasAnnotation(NotSaved.class) && !mf.isTransient()) {
 
-                final List<MappedClass> parents = new ArrayList<MappedClass>(parentMCs);
+                final List<MappedClass> parents = new ArrayList<>(parentMCs);
                 parents.add(mc);
 
-                List<MappedClass> classes = new ArrayList<MappedClass>();
+                List<MappedClass> classes = new ArrayList<>();
                 MappedClass mappedClass = mapper.getMappedClass(mf.isSingleValue() ? mf.getType() : mf.getSubClass());
                 classes.add(mappedClass);
                 classes.addAll(mapper.getSubTypes(mappedClass));
                 for (MappedClass aClass : classes) {
                     for (Index index : collectIndexes(aClass, parents)) {
-                        List<Field> fields = new ArrayList<Field>();
+                        List<Field> fields = new ArrayList<>();
                         for (Field field : index.fields()) {
                             fields.add(new FieldBuilder()
                                            .value(field.value().equals("$**")
@@ -185,9 +183,10 @@ final class IndexHelper {
 
         return list;
     }
+*/
 
     private List<Index> collectTopLevelIndexes(final MappedClass mc) {
-        List<Index> list = new ArrayList<Index>();
+        List<Index> list = new ArrayList<>();
         if (mc != null) {
             final List<Indexes> annotations = mc.getAnnotations(Indexes.class);
             if (annotations != null) {
@@ -200,7 +199,7 @@ final class IndexHelper {
                             updated = new IndexBuilder()
                                 .migrate(index);
                         }
-                        List<Field> fields = new ArrayList<Field>();
+                        List<Field> fields = new ArrayList<>();
                         for (Field field : updated.fields()) {
                             fields.add(new FieldBuilder()
                                            .value(findField(mc, index.options(), asList(field.value().split("\\."))))
@@ -255,7 +254,7 @@ final class IndexHelper {
         for (Field field : index.fields()) {
             String path;
             try {
-                path = findField(mc, index.options(), new ArrayList<String>(asList(field.value().split("\\."))));
+                path = findField(mc, index.options(), new ArrayList<>(asList(field.value().split("\\."))));
             } catch (Exception e) {
                 path = field.value();
                 String message = format("The path '%s' can not be validated against '%s' and may represent an invalid index",
@@ -329,7 +328,7 @@ final class IndexHelper {
         if (mf == null && mc.isInterface()) {
             for (final MappedClass mappedClass : mapper.getSubTypes(mc)) {
                 try {
-                    return findField(mappedClass, options, new ArrayList<String>(path));
+                    return findField(mappedClass, options, new ArrayList<>(path));
                 } catch (MappingException e) {
                     // try the next one
                 }
@@ -347,7 +346,7 @@ final class IndexHelper {
         }
         if (path.size() > 1) {
             try {
-                Class concreteType = !mf.isSingleValue() ? mf.getSubClass() : mf.getConcreteType();
+                Class concreteType = !mf.isSingleValue() ? mf.getSpecializedType() : mf.getConcreteType();
                 namePath += "." + findField(mapper.getMappedClass(concreteType), options, path.subList(1, path.size()));
             } catch (MappingException e) {
                 if (!options.disableValidation()) {

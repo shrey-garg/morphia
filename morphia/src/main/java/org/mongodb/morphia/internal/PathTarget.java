@@ -147,7 +147,7 @@ public class PathTarget {
         }
 
         if (mf != null) {
-            context = mapper.getMappedClass(mf.getSubClass() != null ? mf.getSubClass() : mf.getConcreteType());
+            context = mapper.getMappedClass(mf.getSpecializedType() != null ? mf.getSpecializedType() : mf.getConcreteType());
         }
         return mf;
     }

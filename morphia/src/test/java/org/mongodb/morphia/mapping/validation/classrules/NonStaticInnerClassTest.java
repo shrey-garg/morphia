@@ -7,10 +7,6 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.mapping.MappingException;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class NonStaticInnerClassTest extends TestBase {
 
     @Test(expected = MappingException.class)

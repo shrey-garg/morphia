@@ -1,11 +1,10 @@
 package org.mongodb.morphia;
 
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.MapReduceCommand.OutputType;
 import com.mongodb.MongoCommandException;
 import com.mongodb.MongoException;
+import com.mongodb.client.MapReduceIterable;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.CollationStrength;
@@ -21,7 +20,6 @@ import org.mongodb.morphia.aggregation.AggregationTest.CountResult;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.testmodel.Circle;
 import org.mongodb.morphia.testmodel.Rectangle;
@@ -37,7 +35,7 @@ import static org.junit.Assert.fail;
 public class TestMapreduce extends TestBase {
 
     @Test(expected = MongoException.class)
-    public void testBadMR() throws Exception {
+    public void testBadMR() {
         final String map = "function () { if(this['radius']) { doEmit('circle', {count:1}); return; } emit('rect', {count:1}); }";
         final String reduce = "function (key, values) { var total = 0; for ( var i=0; i<values.length; i++ ) {total += values[i].count;} "
                               + "return { count : total }; }";
@@ -52,7 +50,7 @@ public class TestMapreduce extends TestBase {
 
     @Test
     @SuppressWarnings("deprecation")
-    public void testOldMapReduce() throws Exception {
+    public void testOldMapReduce() {
         final Random rnd = new Random();
 
         //create 100 circles and rectangles
@@ -64,21 +62,34 @@ public class TestMapreduce extends TestBase {
         final String reduce = "function (key, values) { var total = 0; for ( var i=0; i<values.length; i++ ) {total += values[i].count;} "
                               + "return { count : total }; }";
 
-        final MapreduceResults<ResultEntity> mrRes =
-            getDatastore().mapReduce(MapreduceType.REPLACE, getAds().find(Shape.class), map, reduce, null, null, ResultEntity.class);
-        Assert.assertEquals(2, mrRes.createQuery().countAll());
-        Assert.assertEquals(100, mrRes.createQuery().get().getValue().count, 0);
+        final MapReduceIterable<ResultEntity> mrRes =
+            getDatastore().mapReduce(new MapReduceOptions<ResultEntity>()
+                                         .outputType(MapreduceType.REPLACE.toOutputType())
+                                         .query(getDatastore().find(Shape.class))
+                                         .map(map)
+                                         .reduce(reduce)
+                                         .resultType(ResultEntity.class));
+        mrRes.toCollection();
+
+        final Query<ResultEntity> query = getDatastore().find(ResultEntity.class);
+        Assert.assertEquals(2, query.countAll());
+        Assert.assertEquals(100, query.get().getValue().count, 0);
 
 
-        final MapreduceResults<ResultEntity> inline =
-            getDatastore().mapReduce(MapreduceType.INLINE, getAds().find(Shape.class), map, reduce, null, null, ResultEntity.class);
+        final MapReduceIterable<ResultEntity> inline =
+            getDatastore().mapReduce(new MapReduceOptions<ResultEntity>()
+                                         .outputType(MapreduceType.INLINE.toOutputType())
+                                         .query(getAds().find(Shape.class))
+                                         .map(map)
+                                         .reduce(reduce)
+                                         .resultType(ResultEntity.class));
         final Iterator<ResultEntity> iterator = inline.iterator();
         Assert.assertEquals(2, count(iterator));
         Assert.assertEquals(100, inline.iterator().next().getValue().count, 0);
     }
 
     @Test
-    public void testMapReduce() throws Exception {
+    public void testMapReduce() {
         final Random rnd = new Random();
 
         //create 100 circles and rectangles
@@ -90,18 +101,21 @@ public class TestMapreduce extends TestBase {
         final String reduce = "function (key, values) { var total = 0; for ( var i=0; i<values.length; i++ ) {total += values[i].count;} "
                               + "return { count : total }; }";
 
-        final MapreduceResults<ResultEntity> mrRes =
+        final MapReduceIterable<ResultEntity> mrRes =
             getDatastore().mapReduce(new MapReduceOptions<ResultEntity>()
                                   .outputType(OutputType.REPLACE)
                                   .query(getAds().find(Shape.class))
                                   .map(map)
                                   .reduce(reduce)
                                   .resultType(ResultEntity.class));
-        Assert.assertEquals(2, mrRes.createQuery().count());
-        Assert.assertEquals(100, mrRes.createQuery().get().getValue().count, 0);
+        mrRes.toCollection();
+
+        final Query<ResultEntity> query = getDatastore().find(ResultEntity.class);
+        Assert.assertEquals(2, query.count());
+        Assert.assertEquals(100, query.get().getValue().count, 0);
 
 
-        final MapreduceResults<ResultEntity> inline =
+        final MapReduceIterable<ResultEntity> inline =
             getDatastore().mapReduce(new MapReduceOptions<ResultEntity>()
                                   .outputType(OutputType.INLINE)
                                   .query(getAds().find(Shape.class)).map(map).reduce(reduce)
@@ -131,7 +145,7 @@ public class TestMapreduce extends TestBase {
             .query(query)
             .map(map)
             .reduce(reduce);
-        Iterator<CountResult> iterator = getDatastore().mapReduce(options).getInlineResults();
+        Iterator<CountResult> iterator = getDatastore().mapReduce(options).iterator();
 
         Assert.assertEquals(0, count(iterator));
 
@@ -140,7 +154,7 @@ public class TestMapreduce extends TestBase {
                          .locale("en")
                          .collationStrength(CollationStrength.SECONDARY)
                          .build());
-        iterator = getDatastore().mapReduce(options).getInlineResults();
+        iterator = getDatastore().mapReduce(options).iterator();
         CountResult result = iterator.next();
         Assert.assertEquals("Dante", result.getAuthor());
         Assert.assertEquals(3D, result.getCount(), 0);
@@ -215,18 +229,4 @@ public class TestMapreduce extends TestBase {
     private static class HasCount {
         private double count;
     }
-
-    @Entity("mr-results")
-    private static class ResultEntity2 {
-        @Id
-        private String type;
-        private double count;
-
-        @PreLoad
-        void preLoad(final BasicDBObject dbObj) {
-            //pull all the fields from value field into the parent.
-            dbObj.putAll((DBObject) dbObj.get("value"));
-        }
-    }
-
 }

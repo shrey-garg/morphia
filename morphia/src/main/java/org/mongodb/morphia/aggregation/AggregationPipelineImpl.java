@@ -1,15 +1,11 @@
 package org.mongodb.morphia.aggregation;
 
 import com.mongodb.AggregationOptions;
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.ReadPreference;
-import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.mongodb.morphia.Datastore;
-import org.mongodb.morphia.geo.GeometryShapeConverter;
+import org.mongodb.morphia.DatastoreImpl;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.query.Query;
@@ -27,7 +23,7 @@ public class AggregationPipelineImpl implements AggregationPipeline {
     private static final Logger LOG = MorphiaLoggerFactory.get(AggregationPipelineImpl.class);
 
     private final MongoCollection<?> collection;
-    private final List<Document> stages = new ArrayList<Document>();
+    private final List<Document> stages = new ArrayList<>();
     private final Datastore datastore;
 
     /**
@@ -71,18 +67,15 @@ public class AggregationPipelineImpl implements AggregationPipeline {
                                      final ReadPreference readPreference) {
         LOG.debug("stages = " + stages);
 
-        AggregateIterable<U> cursor = collection.aggregate(stages, target);
-        return new MorphiaIterator<U>(cursor);
+        return collection.aggregate(stages, target).iterator();
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public AggregationPipeline geoNear(final GeoNear geoNear) {
-        DBObject geo = new BasicDBObject();
-        GeometryShapeConverter.PointConverter pointConverter = new GeometryShapeConverter.PointConverter();
-        pointConverter.setMapper(mapper);
+        Document geo = new Document();
 
-        putIfNull(geo, "near", geoNear.getNearAsDBObject(pointConverter));
+        putIfNull(geo, "near", geoNear);
         putIfNull(geo, "distanceField", geoNear.getDistanceField());
         putIfNull(geo, "limit", geoNear.getLimit());
         putIfNull(geo, "num", geoNear.getMaxDocuments());
@@ -93,8 +86,7 @@ public class AggregationPipelineImpl implements AggregationPipeline {
         putIfNull(geo, "spherical", geoNear.getSpherical());
         putIfNull(geo, "distanceMultiplier", geoNear.getDistanceMultiplier());
         putIfNull(geo, "includeLocs", geoNear.getIncludeLocations());
-        putIfNull(geo, "uniqueDocs", geoNear.getUniqueDocuments());
-        stages.add(new BasicDBObject("$geoNear", geo));
+        stages.add(new Document("$geoNear", geo));
 
         return this;
     }
@@ -106,43 +98,43 @@ public class AggregationPipelineImpl implements AggregationPipeline {
 
     @Override
     public AggregationPipeline group(final String id, final Group... groupings) {
-        DBObject group = new BasicDBObject();
+        Document group = new Document();
         group.put("_id", id != null ? "$" + id : null);
         for (Group grouping : groupings) {
-            group.putAll(toDBObject(grouping));
+            group.putAll(toDocument(grouping));
         }
 
-        stages.add(new BasicDBObject("$group", group));
+        stages.add(new Document("$group", group));
         return this;
     }
 
     @Override
     public AggregationPipeline group(final List<Group> id, final Group... groupings) {
-        DBObject idGroup = null;
+        Document idGroup = null;
         if (id != null) {
-            idGroup = new BasicDBObject();
+            idGroup = new Document();
             for (Group group : id) {
-                idGroup.putAll(toDBObject(group));
+                idGroup.putAll(toDocument(group));
             }
         }
-        DBObject group = new BasicDBObject("_id", idGroup);
+        Document group = new Document("_id", idGroup);
         for (Group grouping : groupings) {
-            group.putAll(toDBObject(grouping));
+            group.putAll(toDocument(grouping));
         }
 
-        stages.add(new BasicDBObject("$group", group));
+        stages.add(new Document("$group", group));
         return this;
     }
 
     @Override
     public AggregationPipeline limit(final int count) {
-        stages.add(new BasicDBObject("$limit", count));
+        stages.add(new Document("$limit", count));
         return this;
     }
 
     @Override
     public AggregationPipeline lookup(final String from, final String localField, final String foreignField, final String as) {
-        stages.add(new BasicDBObject("$lookup", new BasicDBObject("from", from)
+        stages.add(new Document("$lookup", new Document("from", from)
             .append("localField", localField)
             .append("foreignField", foreignField)
             .append("as", as)));
@@ -151,18 +143,18 @@ public class AggregationPipelineImpl implements AggregationPipeline {
 
     @Override
     public AggregationPipeline match(final Query query) {
-        stages.add(new BasicDBObject("$match", query.getQueryDocument()));
+        stages.add(new Document("$match", query.getQueryDocument()));
         return this;
     }
 
     @Override
     public <U> Iterator<U> out(final Class<U> target) {
-        return out(datastore.getCollection(target).getName(), target);
+        return out(datastore.getCollection(target).getNamespace().getCollectionName(), target);
     }
 
     @Override
     public <U> Iterator<U> out(final Class<U> target, final AggregationOptions options) {
-        return out(datastore.getCollection(target).getName(), target, options);
+        return out(datastore.getCollection(target).getNamespace().getCollectionName(), target, options);
     }
 
     @Override
@@ -172,106 +164,106 @@ public class AggregationPipelineImpl implements AggregationPipeline {
 
     @Override
     public <U> Iterator<U> out(final String collectionName, final Class<U> target, final AggregationOptions options) {
-        stages.add(new BasicDBObject("$out", collectionName));
+        stages.add(new Document("$out", collectionName));
         return aggregate(target, options);
     }
 
     @Override
     public AggregationPipeline project(final Projection... projections) {
-        firstStage = stages.isEmpty();
-        DBObject dbObject = new BasicDBObject();
+        Document Document = new Document();
         for (Projection projection : projections) {
-            dbObject.putAll(toDBObject(projection));
+            Document.putAll(toDocument(projection));
         }
-        stages.add(new BasicDBObject("$project", dbObject));
+        stages.add(new Document("$project", Document));
         return this;
     }
 
     @Override
     public AggregationPipeline skip(final int count) {
-        stages.add(new BasicDBObject("$skip", count));
+        stages.add(new Document("$skip", count));
         return this;
     }
 
     @Override
     public AggregationPipeline sort(final Sort... sorts) {
-        DBObject sortList = new BasicDBObject();
+        Document sortList = new Document();
         for (Sort sort : sorts) {
             sortList.put(sort.getField(), sort.getOrder());
         }
 
-        stages.add(new BasicDBObject("$sort", sortList));
+        stages.add(new Document("$sort", sortList));
         return this;
     }
 
     @Override
     public AggregationPipeline unwind(final String field) {
-        stages.add(new BasicDBObject("$unwind", "$" + field));
+        stages.add(new Document("$unwind", "$" + field));
         return this;
     }
 
     /**
-     * Converts a Projection to a DBObject for use by the Java driver.
+     * Converts a Projection to a Document for use by the Java driver.
      *
      * @param projection the project to apply
-     * @return the DBObject
+     * @return the Document
      */
     @SuppressWarnings("unchecked")
-    private DBObject toDBObject(final Projection projection) {
+    private Document toDocument(final Projection projection) {
         String target = projection.getTarget();
         if (projection.getProjections() != null) {
             List<Projection> list = projection.getProjections();
-            DBObject projections = new BasicDBObject();
+            Document projections = new Document();
             for (Projection subProjection : list) {
-                projections.putAll(toDBObject(subProjection));
+                projections.putAll(toDocument(subProjection));
             }
-            return new BasicDBObject(target, projections);
+            return new Document(target, projections);
         } else if (projection.getSource() != null) {
-            return new BasicDBObject(target, projection.getSource());
+            return new Document(target, projection.getSource());
         } else if (projection.getArguments() != null) {
             if (target == null) {
-                return toExpressionArgs(projection.getArguments());
+                throw new UnsupportedOperationException("This case is not yet supported.");
+//                return toExpressionArgs(projection.getArguments());
             } else {
-                return new BasicDBObject(target, toExpressionArgs(projection.getArguments()));
+                return new Document(target, toExpressionArgs(projection.getArguments()));
             }
         } else {
-            return new BasicDBObject(target, projection.isSuppressed() ? 0 : 1);
+            return new Document(target, projection.isSuppressed() ? 0 : 1);
         }
     }
 
-    private DBObject toDBObject(final Group group) {
-        BasicDBObject dbObject = new BasicDBObject();
+    private Document toDocument(final Group group) {
+        Document Document = new Document();
 
         if (group.getAccumulator() != null) {
-            dbObject.put(group.getName(), group.getAccumulator().toDBObject());
+            Document.put(group.getName(), group.getAccumulator().toDocument());
         } else if (group.getProjections() != null) {
-            final BasicDBObject projection = new BasicDBObject();
+            final Document projection = new Document();
             for (Projection p : group.getProjections()) {
-                projection.putAll(toDBObject(p));
+                projection.putAll(toDocument(p));
             }
-            dbObject.put(group.getName(), projection);
+            Document.put(group.getName(), projection);
         } else if (group.getNested() != null) {
-            dbObject.put(group.getName(), toDBObject(group.getNested()));
+            Document.put(group.getName(), toDocument(group.getNested()));
         } else {
-            dbObject.put(group.getName(), group.getSourceField());
+            Document.put(group.getName(), group.getSourceField());
         }
 
-        return dbObject;
+        return Document;
     }
 
-    private void putIfNull(final DBObject dbObject, final String name, final Object value) {
+    private void putIfNull(final Document Document, final String name, final Object value) {
         if (value != null) {
-            dbObject.put(name, value);
+            Document.put(name, value);
         }
     }
 
-    private DBObject toExpressionArgs(final List<Object> args) {
-        BasicDBList result = new BasicDBList();
+    private Object toExpressionArgs(final List<Object> args) {
+        List<Object> result = new ArrayList<>();
         for (Object arg : args) {
             if (arg instanceof Projection) {
                 Projection projection = (Projection) arg;
                 if (projection.getArguments() != null || projection.getProjections() != null || projection.getSource() != null) {
-                    result.add(toDBObject(projection));
+                    result.add(toDocument(projection).toBsonDocument(Document.class, ((DatastoreImpl) datastore).getCodecRegistry()));
                 } else {
                     result.add("$" + projection.getTarget());
                 }
@@ -279,7 +271,7 @@ public class AggregationPipelineImpl implements AggregationPipeline {
                 result.add(arg);
             }
         }
-        return result.size() == 1 ? (DBObject) result.get(0) : result;
+        return result.size() == 1 ? (Document) result.get(0) : result;
     }
 
     @Override

@@ -10,10 +10,6 @@ import org.mongodb.morphia.testutil.TestEntity;
 import java.util.HashMap;
 import java.util.Map;
 
-
-/**
- * @author Olafur Gauti Gudmundsson
- */
 @Entity("articles")
 @SuppressWarnings("unchecked")
 public class Article extends TestEntity {

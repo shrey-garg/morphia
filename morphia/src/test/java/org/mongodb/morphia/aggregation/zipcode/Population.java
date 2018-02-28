@@ -16,7 +16,6 @@
 
 package org.mongodb.morphia.aggregation.zipcode;
 
-import org.mongodb.morphia.annotations.AlsoLoad;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Property;
@@ -26,7 +25,6 @@ public class Population {
     @Id
     private String state;
     @Property("totalPop")
-    @AlsoLoad("avgCityPop")
     private Long population;
 
     public String getState() {

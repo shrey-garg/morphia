@@ -23,15 +23,13 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.mapping.MappedClass;
 
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-/**
- * @author Scott Hernandez
- */
 public class TestEmbeddedArrayIndexes extends TestBase {
     @Test
     public void testParamEntity() throws Exception {

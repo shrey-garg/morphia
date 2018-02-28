@@ -26,10 +26,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-
-/**
- * @author Olafur Gauti Gudmundsson
- */
 @Entity("hotels")
 public class Hotel extends TestEntity {
     private String name;

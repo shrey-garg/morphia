@@ -7,10 +7,6 @@ import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.testutil.TestEntity;
 
-
-/**
- * @author josephpachod
- */
 public class EnumBehindAnInterfaceTest extends TestBase {
     @Test
     @Ignore("does not work since the EnumConverter stores as a single string value -- no type info")

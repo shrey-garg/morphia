@@ -17,7 +17,7 @@ public class EntityTypeAndIdValueValidatorTest {
         // given
         ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
         // when
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("_id");
 
         boolean validationApplied = EntityTypeAndIdValueValidator.getInstance().apply(mappedClass, mappedField, new ObjectId(),
@@ -32,7 +32,7 @@ public class EntityTypeAndIdValueValidatorTest {
         // given
         ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
         // when
-        MappedClass mappedClass = new MappedClass(EntityWithNoId.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithNoId.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("_id");
         boolean validationApplied = EntityTypeAndIdValueValidator.getInstance().apply(mappedClass, mappedField, "some non-null value",
                                                                                       validationFailures);
@@ -46,7 +46,7 @@ public class EntityTypeAndIdValueValidatorTest {
         // given
         ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
         // when
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("_id");
         boolean validationApplied = EntityTypeAndIdValueValidator.getInstance().apply(mappedClass, mappedField, "some non-ObjectId value",
                                                                                       validationFailures);

@@ -19,11 +19,7 @@ import org.mongodb.morphia.mapping.validation.classrules.MultipleId;
 import org.mongodb.morphia.mapping.validation.classrules.MultipleVersions;
 import org.mongodb.morphia.mapping.validation.classrules.NoId;
 import org.mongodb.morphia.mapping.validation.fieldrules.ContradictingFieldAnnotation;
-import org.mongodb.morphia.mapping.validation.fieldrules.LazyReferenceMissingDependencies;
-import org.mongodb.morphia.mapping.validation.fieldrules.LazyReferenceOnArray;
-import org.mongodb.morphia.mapping.validation.fieldrules.MapKeyDifferentFromString;
 import org.mongodb.morphia.mapping.validation.fieldrules.MapNotSerializable;
-import org.mongodb.morphia.mapping.validation.fieldrules.ReferenceToUnidentifiable;
 import org.mongodb.morphia.mapping.validation.fieldrules.VersionMisuse;
 
 import java.util.ArrayList;
@@ -37,9 +33,6 @@ import static java.util.Collections.sort;
 import static java.util.Comparator.comparingInt;
 
 
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class MappingValidator {
 
     private static final Logger LOG = MorphiaLoggerFactory.get(MappingValidator.class);
@@ -118,10 +111,6 @@ public class MappingValidator {
         constraints.add(new DuplicatedAttributeNames());
         // constraints.add(new ContainsEmbeddedWithId());
         // field-level
-        constraints.add(new ReferenceToUnidentifiable());
-        constraints.add(new LazyReferenceMissingDependencies());
-        constraints.add(new LazyReferenceOnArray());
-        constraints.add(new MapKeyDifferentFromString());
         constraints.add(new MapNotSerializable());
         constraints.add(new VersionMisuse(creator));
         //

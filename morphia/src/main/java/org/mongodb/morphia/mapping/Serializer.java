@@ -13,10 +13,6 @@ import java.io.OutputStream;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public final class Serializer {
     private Serializer() {
     }

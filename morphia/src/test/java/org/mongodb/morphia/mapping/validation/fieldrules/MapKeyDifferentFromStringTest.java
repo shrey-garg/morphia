@@ -13,10 +13,6 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class MapKeyDifferentFromStringTest extends TestBase {
 
     @Test

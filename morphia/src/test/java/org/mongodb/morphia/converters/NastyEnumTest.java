@@ -6,10 +6,6 @@ import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.testutil.TestEntity;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class NastyEnumTest extends TestBase {
     @Test
     public void testNastyEnumPersistence() throws Exception {

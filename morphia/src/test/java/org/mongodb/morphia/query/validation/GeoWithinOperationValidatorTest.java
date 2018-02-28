@@ -19,7 +19,7 @@ public class GeoWithinOperationValidatorTest {
     public void shouldAllowGeoWithinOperatorForGeoEntityWithListOfIntegers() {
         // given
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
-        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("list");
         assertThat(GeoWithinOperationValidator.getInstance().apply(mappedField, GEO_WITHIN, new BasicDBObject("$box", 1),
                                                                    validationFailures), is(true));
@@ -29,7 +29,7 @@ public class GeoWithinOperationValidatorTest {
     public void shouldAllowGeoWithinOperatorWithAllAppropriateTrimmings() {
         // given
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
-        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("array");
 
         // when
@@ -54,7 +54,7 @@ public class GeoWithinOperationValidatorTest {
     public void shouldRejectGeoWithinOperatorWhenMappedFieldIsArrayThatDoesNotContainNumbers() {
         // given
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
-        MappedClass mappedClass = new MappedClass(InvalidGeoEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(InvalidGeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("arrayOfStrings");
 
         // when
@@ -71,7 +71,7 @@ public class GeoWithinOperationValidatorTest {
     public void shouldRejectGeoWithinOperatorWhenMappedFieldIsListThatDoesNotContainNumbers() {
         // given
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
-        MappedClass mappedClass = new MappedClass(InvalidGeoEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(InvalidGeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("listOfStrings");
 
         // when
@@ -90,7 +90,7 @@ public class GeoWithinOperationValidatorTest {
     public void shouldRejectGeoWithinWhenValueDoesNotContainKeyword() {
         // given
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
-        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("array");
 
         // when
@@ -110,7 +110,7 @@ public class GeoWithinOperationValidatorTest {
     public void shouldRejectGeoWithinWhenValueIsNotADBObject() {
         // given
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
-        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("array");
 
         // when

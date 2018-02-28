@@ -37,7 +37,6 @@ public class MorphiaKeyIterator<T> implements MongoCursor<Key<T>> {
 
     @Override
     public Key<T> next() {
-
         return mapper.getKey(cursor.next());
     }
 

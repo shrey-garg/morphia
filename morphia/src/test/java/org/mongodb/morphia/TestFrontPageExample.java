@@ -15,6 +15,7 @@
 package org.mongodb.morphia;
 
 
+import com.mongodb.client.result.UpdateResult;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
@@ -30,14 +31,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-
-/**
- * @author Scott Hernandez
- */
 public class TestFrontPageExample extends TestBase {
 
     @Test
-    public void testIt() throws Exception {
+    public void testIt() {
         getMorphia().map(Employee.class);
 
         getDatastore().save(new Employee("Mister", "GOD", null, 0));
@@ -47,11 +44,11 @@ public class TestFrontPageExample extends TestBase {
         final Key<Employee> key = getDatastore().save(new Employee("Scott", "Hernandez", getDatastore().getKey(boss), 150 * 1000));
         Assert.assertNotNull(key);
 
-        final UpdateResults res = getDatastore().update(boss, getDatastore().createUpdateOperations(Employee.class)
-                                                                            .addToSet("underlings", key)); //add Scott as an employee of his manager
+        final UpdateResult res = getDatastore().update(boss, getDatastore().createUpdateOperations(Employee.class)
+                                                                           .addToSet("underlings", key)); //add Scott as an employee of his manager
         Assert.assertNotNull(res);
-        Assert.assertTrue("Should update existing document", res.getUpdatedExisting());
-        Assert.assertEquals("Should update one document", 1, res.getUpdatedCount());
+        Assert.assertTrue("Should update existing document", res.getModifiedCount() > 0);
+        Assert.assertEquals("Should update one document", 1, res.getModifiedCount());
 
         final Employee scottsBoss = getDatastore().find(Employee.class).filter("underlings", key).get(); // get Scott's boss
         Assert.assertNotNull(scottsBoss);

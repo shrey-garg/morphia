@@ -23,10 +23,6 @@ import org.mongodb.morphia.testutil.TestEntity;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/**
- * @author Olafur Gauti Gudmundsson
- */
 @Entity("agencies")
 public class TravelAgency extends TestEntity {
     @Property

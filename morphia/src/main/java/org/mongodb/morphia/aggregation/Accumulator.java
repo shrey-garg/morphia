@@ -16,8 +16,7 @@
 
 package org.mongodb.morphia.aggregation;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,7 @@ public class Accumulator implements AggregationElement {
      * @param operation the accumulator operation
      * @param field     the field to use
      */
-    public Accumulator(final String operation, final String field) {
+    Accumulator(final String operation, final String field) {
         this(operation, (Object) ("$" + field));
     }
 
@@ -45,7 +44,7 @@ public class Accumulator implements AggregationElement {
      * @param operation the accumulator operation
      * @param field     the field to use
      */
-    public Accumulator(final String operation, final Object field) {
+    private Accumulator(final String operation, final Object field) {
         this.operation = operation;
         this.value = field;
     }
@@ -57,7 +56,7 @@ public class Accumulator implements AggregationElement {
      * @param field     the field to use
      * @return an Accumulator
      */
-    public static Accumulator accumulator(final String operation, final String field) {
+    static Accumulator accumulator(final String operation, final String field) {
         return new Accumulator(operation, field);
     }
 
@@ -68,17 +67,8 @@ public class Accumulator implements AggregationElement {
      * @param field     the field to use
      * @return an Accumulator
      */
-    public static Accumulator accumulator(final String operation, final Object field) {
+    static Accumulator accumulator(final String operation, final Object field) {
         return new Accumulator(operation, field);
-    }
-
-    /**
-     * @return the value for this accumulator
-     * @deprecated use {@link #getValue()}
-     */
-    @Deprecated
-    public Object getField() {
-        return getValue();
     }
 
     /**
@@ -96,24 +86,24 @@ public class Accumulator implements AggregationElement {
     }
 
     @Override
-    public DBObject toDBObject() {
-        BasicDBObject dbObject = new BasicDBObject();
+    public Document toDocument() {
+        Document document = new Document();
         if (value instanceof List) {
-            List<Object> dbValue = new ArrayList<Object>();
+            List<Object> dbValue = new ArrayList<>();
             for (Object o : (List) value) {
                 if (o instanceof AggregationElement) {
-                    dbValue.add(((AggregationElement) o).toDBObject());
+                    dbValue.add(((AggregationElement) o).toDocument());
                 } else {
                     dbValue.add(o);
                 }
             }
-            dbObject.put(operation, dbValue);
+            document.put(operation, dbValue);
         } else if (value instanceof AggregationElement) {
-            dbObject.put(operation, ((AggregationElement) value).toDBObject());
+            document.put(operation, ((AggregationElement) value).toDocument());
         } else {
-            dbObject.put(operation, value);
+            document.put(operation, value);
         }
 
-        return dbObject;
+        return document;
     }
 }

@@ -11,10 +11,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 @SuppressWarnings("unchecked")
 public class SerializedMapTest extends TestBase {
 

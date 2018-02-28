@@ -23,10 +23,6 @@ import org.mongodb.morphia.testutil.TestEntity;
 import java.util.HashSet;
 import java.util.Set;
 
-
-/**
- * @author Olafur Gauti Gudmundsson
- */
 @Entity("shapeshifters")
 public class ShapeShifter extends TestEntity {
     @Embedded

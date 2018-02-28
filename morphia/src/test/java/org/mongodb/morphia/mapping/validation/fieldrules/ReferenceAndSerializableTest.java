@@ -8,10 +8,6 @@ import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.mapping.validation.ConstraintViolationException;
 import org.mongodb.morphia.testutil.TestEntity;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class ReferenceAndSerializableTest extends TestBase {
     @Test(expected = ConstraintViolationException.class)
     public void testCheck() {

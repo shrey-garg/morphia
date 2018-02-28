@@ -33,10 +33,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-
-/**
- * @author Scott Hernandez
- */
 public class TestInheritanceMappings extends TestBase {
 
 
@@ -48,7 +44,7 @@ public class TestInheritanceMappings extends TestBase {
     }
 
     @Test(expected = ConstraintViolationException.class)
-    public void testMapEntity() throws Exception {
+    public void testMapEntity() {
         getMorphia().map(MapLike.class);
         MapLike m = new MapLike();
         m.put("Name", "Scott");
@@ -64,7 +60,7 @@ public class TestInheritanceMappings extends TestBase {
     }
 
     @Test
-    public void testParamEntity() throws Exception {
+    public void testParamEntity() {
         getMorphia().map(ParameterizedEntity.class);
         ParameterizedEntity c = new ParameterizedEntity();
         c.setId("foo");
@@ -83,7 +79,7 @@ public class TestInheritanceMappings extends TestBase {
     }
 
     @Test
-    public void testParamIdEntity() throws Exception {
+    public void testParamIdEntity() {
         getMorphia().map(ParameterizedIdEntity.class);
         ParameterizedIdEntity c = new ParameterizedIdEntity();
         c.setId("foo");
@@ -96,7 +92,7 @@ public class TestInheritanceMappings extends TestBase {
     }
 
     @Test
-    public void testParamIdEntity2() throws Exception {
+    public void testParamIdEntity2() {
         getMorphia().map(ParameterizedIdEntity2.class);
         ParameterizedIdEntity2 c = new ParameterizedIdEntity2();
         c.setId("foo");
@@ -109,7 +105,7 @@ public class TestInheritanceMappings extends TestBase {
     }
 
     @Test
-    public void testSuperclassEntity() throws Exception {
+    public void testSuperclassEntity() {
         final Car c = new Car();
         getDatastore().save(c);
         assertNotNull(c.getId());

@@ -33,10 +33,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-
-/**
- * @author Scott Hernandez
- */
 public class TestIdField extends TestBase {
 
     @Test

@@ -13,13 +13,13 @@
 
 package org.mongodb.morphia;
 
-import com.mongodb.Document;
-import com.mongodb.DBObject;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.model.Collation;
-import com.mongodb.client.model.CollationStrength;
+import com.mongodb.client.model.DeleteOptions;
+import com.mongodb.client.model.FindOneAndDeleteOptions;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.InsertOneOptions;
-import com.mongodb.client.model.UpdateManyModel;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -47,22 +47,24 @@ import org.mongodb.morphia.testmodel.Rectangle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import static com.mongodb.ReadPreference.secondaryPreferred;
 import static com.mongodb.WriteConcern.ACKNOWLEDGED;
-import static com.mongodb.WriteConcern.MAJORITY;
+import static com.mongodb.WriteConcern.UNACKNOWLEDGED;
 import static com.mongodb.WriteConcern.W2;
+import static com.mongodb.client.model.CollationStrength.SECONDARY;
+import static com.mongodb.client.model.ReturnDocument.AFTER;
+import static com.mongodb.client.model.ReturnDocument.BEFORE;
+import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings("unused")
 public class TestDatastore extends TestBase {
 
     @Test(expected = UpdateException.class)
@@ -73,10 +75,10 @@ public class TestDatastore extends TestBase {
     @Test
     @SuppressWarnings("deprecation")
     public void saveVarargs() {
-        Iterable<Key<FacebookUser>> keys = getDatastore().save(new FacebookUser(1, "user 1"),
+        Iterable<Key<FacebookUser>> keys = getDatastore().save(asList(new FacebookUser(1, "user 1"),
                                                         new FacebookUser(2, "user 2"),
                                                         new FacebookUser(3, "user 3"),
-                                                        new FacebookUser(4, "user 4"));
+                                                        new FacebookUser(4, "user 4")));
         long id = 1;
         for (final Key<FacebookUser> key : keys) {
             assertEquals(id++, key.getId());
@@ -107,7 +109,7 @@ public class TestDatastore extends TestBase {
     @Test
     public void testDoesNotExistAfterDelete() {
         // given
-        long id = System.currentTimeMillis();
+        long id = currentTimeMillis();
         final Key<FacebookUser> key = getDatastore().save(new FacebookUser(id, "user 1"));
 
         // when
@@ -144,7 +146,7 @@ public class TestDatastore extends TestBase {
     @Test
     public void testExistsWhenItemSaved() {
         // given
-        long id = System.currentTimeMillis();
+        long id = currentTimeMillis();
         final Key<FacebookUser> key = getDatastore().save(new FacebookUser(id, "user 1"));
 
         // expect
@@ -156,7 +158,8 @@ public class TestDatastore extends TestBase {
     @SuppressWarnings("deprecation")
     public void testExistsWhenSecondaryPreferredOld() {
         if (isReplicaSet()) {
-            final Key<FacebookUser> key = getDatastore().save(new FacebookUser(System.currentTimeMillis(), "user 1"), W2);
+            final Key<FacebookUser> key = getDatastore().save(new FacebookUser(currentTimeMillis(), "user 1"),
+                new InsertOneOptions(), W2);
             assertNotNull("Should exist when using secondaryPreferred", getAds().exists(key, secondaryPreferred()));
         }
     }
@@ -168,8 +171,8 @@ public class TestDatastore extends TestBase {
             final WriteConcern defaultWriteConcern = datastore.getDefaultWriteConcern();
             try {
                 datastore.setDefaultWriteConcern(W2);
-                final Key<FacebookUser> key = datastore.save(new FacebookUser(System.currentTimeMillis(), "user 1"),
-                    new InsertOneOptions());
+                final Key<FacebookUser> key = datastore.save(new FacebookUser(currentTimeMillis(), "user 1"),
+                    new InsertOneOptions(), getDatastore().getDefaultWriteConcern());
                 assertNotNull("Should exist when using secondaryPreferred", getAds().exists(key, secondaryPreferred()));
             } finally {
                 datastore.setDefaultWriteConcern(defaultWriteConcern);
@@ -193,7 +196,7 @@ public class TestDatastore extends TestBase {
     @Test
     public void testGet() {
         getMorphia().map(FacebookUser.class);
-        List<FacebookUser> fbUsers = new ArrayList<FacebookUser>();
+        List<FacebookUser> fbUsers = new ArrayList<>();
         fbUsers.add(new FacebookUser(1, "user 1"));
         fbUsers.add(new FacebookUser(2, "user 2"));
         fbUsers.add(new FacebookUser(3, "user 3"));
@@ -205,7 +208,7 @@ public class TestDatastore extends TestBase {
         List<FacebookUser> res = getDatastore().get(FacebookUser.class, asList(1L, 2L)).asList();
         assertEquals(2, res.size());
         assertNotNull(res.get(0));
-        assertNotNull(res.get(0).id);
+        assertNotEquals(0, res.get(0).id);
         assertNotNull(res.get(1));
         assertNotNull(res.get(1).username);
 
@@ -216,7 +219,7 @@ public class TestDatastore extends TestBase {
         res = getDatastore().get(FacebookUser.class, asList(1L, 2L)).asList();
         assertEquals(2, res.size());
         assertNotNull(res.get(0));
-        assertNotNull(res.get(0).id);
+        assertNotEquals(0, res.get(0).id);
         assertNotNull(res.get(1));
         assertNotNull(res.get(1).username);
     }
@@ -364,61 +367,19 @@ public class TestDatastore extends TestBase {
                                                   .field("username").equal("john doe");
         UpdateOperations<FacebookUser> updateOperations = getDatastore().createUpdateOperations(FacebookUser.class)
                                                                         .inc("loginCount");
-        UpdateResult results = getDatastore().update(query, updateOperations);
+        UpdateResult results = getDatastore().updateMany(query, updateOperations);
         assertEquals(1, results.getModifiedCount());
         assertEquals(0, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
         assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
 
-        results = getDatastore().update(query, updateOperations, new UpdateManyModel<>()
-            .multi(true)
+        results = getDatastore().updateMany(query, updateOperations, new UpdateOptions()
             .collation(Collation.builder()
                                 .locale("en")
-                                .collationStrength(CollationStrength.SECONDARY)
-                                .build()));
+                                .collationStrength(SECONDARY)
+                                .build()), getDatastore().getDefaultWriteConcern());
         assertEquals(2, results.getModifiedCount());
         assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
         assertEquals(2, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testFindAndModifyOld() {
-        getDatastore().getCollection(FacebookUser.class).drop();
-        getDatastore().save(asList(new FacebookUser(1, "John Doe"),
-                            new FacebookUser(2, "john doe")));
-
-        Query<FacebookUser> query = getDatastore().find(FacebookUser.class)
-                                                  .field("username").equal("john doe");
-        UpdateOperations<FacebookUser> updateOperations = getDatastore().createUpdateOperations(FacebookUser.class)
-                                                                        .inc("loginCount");
-        FacebookUser results = getDatastore().findAndModify(query, updateOperations);
-        assertEquals(0, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
-        assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
-        assertEquals(1, results.loginCount);
-
-        results = getDatastore().findAndModify(query, updateOperations, true);
-        assertEquals(0, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
-        assertEquals(2, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
-        assertEquals(1, results.loginCount);
-
-        results = getDatastore().findAndModify(getDatastore().find(FacebookUser.class)
-                                                             .field("id").equal(3L)
-                                                             .field("username").equal("Jon Snow"), updateOperations, true, true);
-        assertNull(results);
-        FacebookUser user = getDatastore().find(FacebookUser.class).filter("id", 3).get();
-        assertEquals(1, user.loginCount);
-        assertEquals("Jon Snow", user.username);
-
-
-        results = getDatastore().findAndModify(getDatastore().find(FacebookUser.class)
-                                                             .field("id").equal(4L)
-                                                             .field("username").equal("Ron Swanson"), updateOperations, false, true);
-        assertNotNull(results);
-        user = getDatastore().find(FacebookUser.class).filter("id", 4).get();
-        assertEquals(1, results.loginCount);
-        assertEquals("Ron Swanson", results.username);
-        assertEquals(1, user.loginCount);
-        assertEquals("Ron Swanson", user.username);
     }
 
     @Test
@@ -436,17 +397,18 @@ public class TestDatastore extends TestBase {
         assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
         assertEquals(1, results.loginCount);
 
-        results = getDatastore().findAndModify(query, updateOperations, new FindAndModifyOptions()
-            .returnNew(false));
+        results = getDatastore().findAndModify(query, updateOperations, new FindOneAndUpdateOptions()
+            .returnDocument(AFTER), getDatastore().getDefaultWriteConcern());
         assertEquals(0, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
         assertEquals(2, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
         assertEquals(1, results.loginCount);
 
         results = getDatastore().findAndModify(getDatastore().find(FacebookUser.class)
                                                              .field("id").equal(3L)
-                                                             .field("username").equal("Jon Snow"), updateOperations, new FindAndModifyOptions()
-                                            .returnNew(false)
-                                            .upsert(true));
+                                                             .field("username").equal("Jon Snow"), updateOperations,
+            new FindOneAndUpdateOptions()
+                .returnDocument(AFTER)
+                .upsert(true), getDatastore().getDefaultWriteConcern());
         assertNull(results);
         FacebookUser user = getDatastore().find(FacebookUser.class).filter("id", 3).get();
         assertEquals(1, user.loginCount);
@@ -455,9 +417,10 @@ public class TestDatastore extends TestBase {
 
         results = getDatastore().findAndModify(getDatastore().find(FacebookUser.class)
                                                              .field("id").equal(4L)
-                                                             .field("username").equal("Ron Swanson"), updateOperations, new FindAndModifyOptions()
-                                                                                           .returnNew(true)
-                                                                                           .upsert(true));
+                                                             .field("username").equal("Ron Swanson"), updateOperations,
+            new FindOneAndUpdateOptions()
+                .returnDocument(AFTER)
+                .upsert(true), getDatastore().getDefaultWriteConcern());
         assertNotNull(results);
         user = getDatastore().find(FacebookUser.class).filter("id", 4).get();
         assertEquals(1, results.loginCount);
@@ -471,23 +434,26 @@ public class TestDatastore extends TestBase {
         checkMinServerVersion(3.4);
         getDatastore().getCollection(FacebookUser.class).drop();
         getDatastore().save(asList(new FacebookUser(1, "John Doe"),
-                            new FacebookUser(2, "john doe")));
+            new FacebookUser(2, "john doe")));
 
         Query<FacebookUser> query = getDatastore().find(FacebookUser.class)
                                                   .field("username").equal("john doe");
         UpdateOperations<FacebookUser> updateOperations = getDatastore().createUpdateOperations(FacebookUser.class)
                                                                         .inc("loginCount");
-        FacebookUser results = getDatastore().findAndModify(query, updateOperations, new FindAndModifyOptions());
+        FacebookUser results = getDatastore().findAndModify(query, updateOperations, new FindOneAndUpdateOptions(),
+            getDatastore().getDefaultWriteConcern());
         assertEquals(0, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
         assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
         assertEquals(1, results.loginCount);
 
-        results = getDatastore().findAndModify(query, updateOperations, new FindAndModifyOptions()
-            .returnNew(false)
-            .collation(Collation.builder()
-                                .locale("en")
-                                .collationStrength(CollationStrength.SECONDARY)
-                                .build()));
+        results = getDatastore().findAndModify(query, updateOperations,
+            new FindOneAndUpdateOptions()
+                .returnDocument(BEFORE)
+                .collation(Collation.builder()
+                                    .locale("en")
+                                    .collationStrength(SECONDARY)
+                                    .build()),
+            getDatastore().getDefaultWriteConcern());
         assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
         assertEquals(0, results.loginCount);
         assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
@@ -495,9 +461,9 @@ public class TestDatastore extends TestBase {
         results = getDatastore().findAndModify(getDatastore().find(FacebookUser.class)
                                                              .field("id").equal(3L)
                                                              .field("username").equal("Jon Snow"),
-                                        updateOperations, new FindAndModifyOptions()
-                                            .returnNew(false)
-                                            .upsert(true));
+            updateOperations, new FindOneAndUpdateOptions()
+                                  .returnDocument(BEFORE)
+                                  .upsert(true), getDatastore().getDefaultWriteConcern());
         assertNull(results);
         FacebookUser user = getDatastore().find(FacebookUser.class).filter("id", 3).get();
         assertEquals(1, user.loginCount);
@@ -507,8 +473,8 @@ public class TestDatastore extends TestBase {
         results = getDatastore().findAndModify(getDatastore().find(FacebookUser.class)
                                                              .field("id").equal(4L)
                                                              .field("username").equal("Ron Swanson"),
-                                        updateOperations, new FindAndModifyOptions()
-                                            .upsert(true));
+            updateOperations, new FindOneAndUpdateOptions()
+                                  .upsert(true), getDatastore().getDefaultWriteConcern());
         assertNotNull(results);
         user = getDatastore().find(FacebookUser.class).filter("id", 4).get();
         assertEquals(1, results.loginCount);
@@ -522,77 +488,28 @@ public class TestDatastore extends TestBase {
         checkMinServerVersion(3.4);
         getDatastore().getCollection(FacebookUser.class).drop();
         getDatastore().save(asList(new FacebookUser(1, "John Doe"),
-                            new FacebookUser(2, "john doe")));
+            new FacebookUser(2, "john doe")));
 
         Query<FacebookUser> query = getDatastore().find(FacebookUser.class)
                                                   .field("username").equal("john doe");
-        assertEquals(1, getDatastore().delete(query).getN());
+        assertEquals(1, getDatastore().delete(query).getDeletedCount());
 
-        assertEquals(1, getDatastore().delete(query, new DeleteOptions()
-            .collation(Collation.builder()
-                                .locale("en")
-                                .collationStrength(CollationStrength.SECONDARY)
-                                .build()))
-                                      .getN());
+        assertEquals(1, getDatastore().delete(query,
+            new DeleteOptions()
+                .collation(Collation.builder()
+                                    .locale("en")
+                                    .collationStrength(SECONDARY)
+                                    .build()), getDatastore().getDefaultWriteConcern())
+                                      .getDeletedCount());
     }
 
     @Test
     @SuppressWarnings("deprecation")
     public void testEnforceWriteConcern() {
         DatastoreImpl ds = (DatastoreImpl) getDatastore();
-        Query<FacebookUser> query = ds.find(FacebookUser.class);
-        FacebookUser user = new FacebookUser();
 
-        FindAndModifyOptions findAndModifyOptions = new FindAndModifyOptions();
-        assertNull(findAndModifyOptions.getWriteConcern());
-
-        assertEquals(ACKNOWLEDGED, ds.enforceWriteConcern(findAndModifyOptions, FacebookUser.class)
-                                     .getWriteConcern());
-        assertEquals(MAJORITY, ds.enforceWriteConcern(findAndModifyOptions.writeConcern(MAJORITY), FacebookUser.class)
-                                 .getWriteConcern());
-
-        InsertOptions insertOptions = new InsertOptions();
-        assertNull(insertOptions.getWriteConcern());
-
-        assertEquals(ACKNOWLEDGED, ds.enforceWriteConcern(insertOptions, FacebookUser.class)
-                                     .getWriteConcern());
-        assertEquals(MAJORITY, ds.enforceWriteConcern(insertOptions.writeConcern(MAJORITY), FacebookUser.class)
-                                 .getWriteConcern());
-
-        UpdateOptions updateOptions = new UpdateOptions();
-        assertNull(updateOptions.getWriteConcern());
-
-        assertEquals(ACKNOWLEDGED, ds.enforceWriteConcern(updateOptions, FacebookUser.class)
-                                     .getWriteConcern());
-        assertEquals(MAJORITY, ds.enforceWriteConcern(updateOptions.writeConcern(MAJORITY), FacebookUser.class)
-                                 .getWriteConcern());
-
-        DeleteOptions deleteOptions = new DeleteOptions();
-        assertNull(deleteOptions.getWriteConcern());
-
-        assertEquals(ACKNOWLEDGED, ds.enforceWriteConcern(deleteOptions, FacebookUser.class)
-                                     .getWriteConcern());
-        assertEquals(MAJORITY, ds.enforceWriteConcern(deleteOptions.writeConcern(MAJORITY), FacebookUser.class)
-                                 .getWriteConcern());
-    }
-
-    @Test
-    public void entityWriteConcern() {
-        ensureEntityWriteConcern();
-
-        getDatastore().setDefaultWriteConcern(WriteConcern.UNACKNOWLEDGED);
-        ensureEntityWriteConcern();
-    }
-
-    @SuppressWarnings("deprecation")
-    private void ensureEntityWriteConcern() {
-        DatastoreImpl datastore = (DatastoreImpl) getAds();
-        assertEquals(ACKNOWLEDGED, datastore.enforceWriteConcern(new InsertOptions(), Simple.class)
-                                            .getWriteConcern());
-        assertEquals(ACKNOWLEDGED, datastore.enforceWriteConcern(new UpdateOptions(), Simple.class)
-                                            .getWriteConcern());
-        assertEquals(ACKNOWLEDGED, datastore.enforceWriteConcern(new FindAndModifyOptions(), Simple.class)
-                                            .getWriteConcern());
+        assertEquals(ACKNOWLEDGED, ds.enforceWriteConcern(FacebookUser.class));
+        assertEquals(UNACKNOWLEDGED, ds.enforceWriteConcern(Simple.class));
     }
 
     @Test
@@ -607,14 +524,12 @@ public class TestDatastore extends TestBase {
         assertNotNull(getDatastore().findAndDelete(query));
         assertNull(getDatastore().findAndDelete(query));
 
-        FindAndModifyOptions options = new FindAndModifyOptions()
+        FindOneAndDeleteOptions options = new FindOneAndDeleteOptions()
             .collation(Collation.builder()
                                 .locale("en")
-                                .collationStrength(CollationStrength.SECONDARY)
+                                .collationStrength(SECONDARY)
                                 .build());
-        assertNotNull(getDatastore().findAndDelete(query, options));
-        assertTrue("Options should not be modified by the datastore", options.isReturnNew());
-        assertFalse("Options should not be modified by the datastore", options.isRemove());
+        assertNotNull(getDatastore().findAndDelete(query, options, getDatastore().getDefaultWriteConcern()));
     }
 
     @Test
@@ -661,7 +576,7 @@ public class TestDatastore extends TestBase {
         private String username;
         private int loginCount;
         @Reference
-        private List<FacebookUser> friends = new ArrayList<FacebookUser>();
+        private List<FacebookUser> friends = new ArrayList<>();
 
         public FacebookUser(final long id, final String name) {
             this();
@@ -727,7 +642,7 @@ public class TestDatastore extends TestBase {
         private boolean preLoadWithParam;
 
         @PrePersist
-        public DBObject prePersistWithParamAndReturn(final DBObject dbObj) {
+        public Document prePersistWithParamAndReturn(final Document dbObj) {
             if (prePersistWithParamAndReturn) {
                 throw new RuntimeException("already called");
             }
@@ -736,7 +651,7 @@ public class TestDatastore extends TestBase {
         }
 
         @PrePersist
-        protected void prePersistWithParam(final DBObject dbObj) {
+        protected void prePersistWithParam(final Document dbObj) {
             if (prePersistWithParam) {
                 throw new RuntimeException("already called");
             }
@@ -762,9 +677,9 @@ public class TestDatastore extends TestBase {
         }
 
         @PostPersist
-        void postPersistWithParam(final DBObject dbObj) {
+        void postPersistWithParam(final Document dbObj) {
             postPersistWithParam = true;
-            if (!dbObj.containsField(Mapper.ID_KEY)) {
+            if (!dbObj.containsValue(Mapper.ID_KEY)) {
                 throw new RuntimeException("missing " + Mapper.ID_KEY);
             }
         }
@@ -779,12 +694,12 @@ public class TestDatastore extends TestBase {
         }
 
         @PreLoad
-        void preLoadWithParam(final DBObject dbObj) {
+        void preLoadWithParam(final Document dbObj) {
             dbObj.put("preLoadWithParam", true);
         }
 
         @PreLoad
-        DBObject preLoadWithParamAndReturn(final DBObject dbObj) {
+        Document preLoadWithParamAndReturn(final Document dbObj) {
             final Document retObj = new Document();
             retObj.putAll(dbObj);
             retObj.put("preLoadWithParamAndReturn", true);
@@ -801,7 +716,7 @@ public class TestDatastore extends TestBase {
         }
 
         @PostLoad
-        void postLoadWithParam(final DBObject dbObj) {
+        void postLoadWithParam(final Document dbObj) {
             if (postLoadWithParam) {
                 throw new RuntimeException("already called");
             }
@@ -837,7 +752,7 @@ public class TestDatastore extends TestBase {
         }
     }
 
-    @Entity(concern = "ACKNOWLEDGED")
+    @Entity(concern = "UNACKNOWLEDGED")
     static class Simple {
         @Id
         private String id;

@@ -22,10 +22,6 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.ConstructorArgs;
 import org.mongodb.morphia.annotations.Id;
 
-
-/**
- * @author Scott Hernandez
- */
 public class TestConstructorArgs extends TestBase {
 
     @Test

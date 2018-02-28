@@ -9,10 +9,6 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.testutil.TestEntity;
 
-
-/**
- * @author josephpachod
- */
 public class ReferencesInEmbeddedTest extends TestBase {
     @Test
     public void testLazyReferencesInEmbedded() throws Exception {

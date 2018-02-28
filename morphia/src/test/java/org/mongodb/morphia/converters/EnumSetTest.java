@@ -9,10 +9,6 @@ import org.mongodb.morphia.testutil.TestEntity;
 
 import java.util.EnumSet;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class EnumSetTest extends TestBase {
     @Test
     public void testNastyEnumPersistence() throws Exception {

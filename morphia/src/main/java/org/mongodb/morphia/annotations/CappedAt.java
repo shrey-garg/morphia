@@ -25,8 +25,6 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Properties for capped collections; used in {@link Entity}
- *
- * @author Scott Hernandez
  */
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CappedAt {

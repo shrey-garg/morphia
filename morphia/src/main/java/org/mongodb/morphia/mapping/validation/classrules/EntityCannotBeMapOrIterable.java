@@ -1,6 +1,7 @@
 package org.mongodb.morphia.mapping.validation.classrules;
 
 
+import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.validation.ClassConstraint;
 import org.mongodb.morphia.mapping.validation.ConstraintViolation;
@@ -9,10 +10,6 @@ import org.mongodb.morphia.mapping.validation.ConstraintViolation.Level;
 import java.util.Map;
 import java.util.Set;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class EntityCannotBeMapOrIterable implements ClassConstraint {
 
     @Override

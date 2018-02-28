@@ -1,5 +1,6 @@
 package org.mongodb.morphia.query.validation;
 
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.query.FilterOperator;
 
 import java.util.List;

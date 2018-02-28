@@ -91,13 +91,11 @@ final class QueryValidator {
                                                              + " validating - %s", part, mc.getClazz().getName(), prop));
                     }
 
-                    if (mf == null && (mc.isInterface() || !validateNames)) {
+                    if (mf == null) {
                         break;
-                    } else if (mf == null) {
-                        throw new ValidationException(format("The field '%s' could not be found in '%s'", prop, mc.getClazz().getName()));
                     }
                     //get the next MappedClass for the next field validation
-                    mc = mapper.getMappedClass((mf.isSingleValue()) ? mf.getType() : mf.getSubClass());
+                    mc = mapper.getMappedClass((mf.isSingleValue()) ? mf.getType() : mf.getSpecializedType());
                 }
             }
 
@@ -115,7 +113,7 @@ final class QueryValidator {
                 List<ValidationFailure> typeValidationFailures = new ArrayList<ValidationFailure>();
                 boolean compatibleForType = isCompatibleForOperator(mc, mf, mf.getType(), op, val, typeValidationFailures);
                 List<ValidationFailure> subclassValidationFailures = new ArrayList<ValidationFailure>();
-                boolean compatibleForSubclass = isCompatibleForOperator(mc, mf, mf.getSubClass(), op, val, subclassValidationFailures);
+                boolean compatibleForSubclass = isCompatibleForOperator(mc, mf, mf.getSpecializedType(), op, val, subclassValidationFailures);
 
                 if ((mf.isSingleValue() && !compatibleForType)
                     || mf.isMultipleValues() && !(compatibleForSubclass || compatibleForType)) {

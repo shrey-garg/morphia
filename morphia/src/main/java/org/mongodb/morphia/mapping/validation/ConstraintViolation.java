@@ -1,9 +1,9 @@
 package org.mongodb.morphia.mapping.validation;
 
 
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
+import org.mongodb.morphia.mapping.MappedClass;
+import org.mongodb.morphia.mapping.MappedField;
+
 public class ConstraintViolation {
     private final MappedClass clazz;
     private final Class<? extends ClassConstraint> validator;

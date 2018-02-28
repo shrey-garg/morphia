@@ -26,8 +26,6 @@ import java.lang.annotation.Target;
 
 /**
  * Marker for fields that should be (java) serialized
- *
- * @author Scott Hernandez
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)

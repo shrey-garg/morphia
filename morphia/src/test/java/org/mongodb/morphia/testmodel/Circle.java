@@ -18,10 +18,6 @@ package org.mongodb.morphia.testmodel;
 import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.testutil.TestEntity;
 
-
-/**
- * @author Olafur Gauti Gudmundsson
- */
 public class Circle extends TestEntity implements Shape {
     @Property
     private double radius;

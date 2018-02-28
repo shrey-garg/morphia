@@ -1,8 +1,7 @@
 package org.mongodb.morphia.query;
 
 
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DBObject;
+import org.bson.Document;
 
 import java.util.Map;
 
@@ -20,35 +19,34 @@ class GeoFieldCriteria extends FieldCriteria {
     }
 
     @Override
-    public void addTo(final DBObject obj) {
-        final BasicDBObjectBuilder query;
+    public void addTo(final Document obj) {
+        final Document query;
         switch (getOperator()) {
             case NEAR:
-                query = BasicDBObjectBuilder.start(FilterOperator.NEAR.val(), getValue());
+                query = new Document(FilterOperator.NEAR.val(), getValue());
                 break;
             case NEAR_SPHERE:
-                query = BasicDBObjectBuilder.start(FilterOperator.NEAR_SPHERE.val(), getValue());
+                query = new Document(FilterOperator.NEAR_SPHERE.val(), getValue());
                 break;
             case WITHIN_BOX:
-                query = BasicDBObjectBuilder.start().push(FilterOperator.GEO_WITHIN.val()).add(getOperator().val(), getValue());
+                query = new Document(FilterOperator.GEO_WITHIN.val(), new Document(getOperator().val(), getValue()));
                 break;
             case WITHIN_CIRCLE:
-                query = BasicDBObjectBuilder.start().push(FilterOperator.GEO_WITHIN.val()).add(getOperator().val(), getValue());
+                query = new Document(FilterOperator.GEO_WITHIN.val(), new Document(getOperator().val(), getValue()));
                 break;
             case WITHIN_CIRCLE_SPHERE:
-                query = BasicDBObjectBuilder.start().push(FilterOperator.GEO_WITHIN.val()).add(getOperator().val(), getValue());
+                query = new Document(FilterOperator.GEO_WITHIN.val(), new Document(getOperator().val(), getValue()));
                 break;
             default:
                 throw new UnsupportedOperationException(getOperator() + " not supported for geo-query");
         }
 
-        //add options...
         if (opts != null) {
             for (final Map.Entry<String, Object> e : opts.entrySet()) {
                 query.append(e.getKey(), e.getValue());
             }
         }
 
-        obj.put(getField(), query.get());
+        obj.put(getField(), query);
     }
 }

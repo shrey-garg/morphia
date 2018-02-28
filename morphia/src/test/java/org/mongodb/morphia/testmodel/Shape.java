@@ -17,10 +17,6 @@ package org.mongodb.morphia.testmodel;
 
 import org.mongodb.morphia.annotations.Entity;
 
-
-/**
- * @author Olafur Gauti Gudmundsson
- */
 @Entity("shapes")
 public interface Shape {
     double getArea();

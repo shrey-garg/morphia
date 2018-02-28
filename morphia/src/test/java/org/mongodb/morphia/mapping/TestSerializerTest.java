@@ -10,10 +10,6 @@ import org.mongodb.morphia.annotations.Serialized;
 
 import java.io.IOException;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class TestSerializerTest extends TestBase {
 
     private static final String TEST_TEXT

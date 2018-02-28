@@ -25,9 +25,6 @@ import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-/**
- * @author us@thomas-daily.de
- */
 public class SLF4JLoggerTest extends TestBase {
 
     private ByteArrayOutputStream baos;

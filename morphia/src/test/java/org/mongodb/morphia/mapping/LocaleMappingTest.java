@@ -13,14 +13,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class LocaleMappingTest extends TestBase {
 
     @Test
-    public void testLocaleMapping() throws Exception {
+    public void testLocaleMapping() {
         E e = new E();
         e.l1 = Locale.CANADA_FRENCH;
         e.l2 = Arrays.asList(Locale.GERMANY, Locale.TRADITIONAL_CHINESE);

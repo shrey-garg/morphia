@@ -30,10 +30,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-
-/**
- * @author Olafur Gauti Gudmundsson
- */
 public class TestInterfaces extends TestBase {
 
     @Test

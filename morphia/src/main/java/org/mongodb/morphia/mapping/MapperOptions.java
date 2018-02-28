@@ -2,7 +2,6 @@ package org.mongodb.morphia.mapping;
 
 
 import org.mongodb.morphia.ObjectFactory;
-import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.mapping.cache.DefaultEntityCacheFactory;
@@ -13,12 +12,12 @@ import org.mongodb.morphia.mapping.cache.EntityCacheFactory;
  */
 public class MapperOptions {
     private static final Logger LOG = MorphiaLoggerFactory.get(MapperOptions.class);
+    private boolean ignoreFinals; //ignore final fields.
     private boolean storeNulls;
     private boolean storeEmpties;
     private boolean useLowerCaseCollectionNames;
-    private boolean cacheClassLookups = false;
     private boolean mapSubPackages = false;
-    private ObjectFactory objectFactory = new DefaultCreator(this);
+    private ObjectFactory objectFactory = new DefaultCreator();
     private EntityCacheFactory cacheFactory = new DefaultEntityCacheFactory();
 
     /**
@@ -33,10 +32,10 @@ public class MapperOptions {
      * @param options the MapperOptions to copy
      */
     public MapperOptions(final MapperOptions options) {
+        setIgnoreFinals(options.isIgnoreFinals());
         setStoreNulls(options.isStoreNulls());
         setStoreEmpties(options.isStoreEmpties());
         setUseLowerCaseCollectionNames(options.isUseLowerCaseCollectionNames());
-        setCacheClassLookups(options.isCacheClassLookups());
         setObjectFactory(options.getObjectFactory());
         setCacheFactory(options.getCacheFactory());
     }
@@ -78,16 +77,23 @@ public class MapperOptions {
      * @return true if Morphia should cache name -> Class lookups
      */
     public boolean isCacheClassLookups() {
-        return cacheClassLookups;
+        return false;
     }
 
     /**
-     * Sets whether Morphia should cache name -> Class lookups
-     *
-     * @param cacheClassLookups true if the lookup results should be cached
+     * @return true if Morphia should ignore final fields
      */
-    public void setCacheClassLookups(final boolean cacheClassLookups) {
-        this.cacheClassLookups = cacheClassLookups;
+    public boolean isIgnoreFinals() {
+        return ignoreFinals;
+    }
+
+    /**
+     * Controls if final fields are stored.
+     *
+     * @param ignoreFinals true if Morphia should ignore final fields
+     */
+    public void setIgnoreFinals(final boolean ignoreFinals) {
+        this.ignoreFinals = ignoreFinals;
     }
 
     /**

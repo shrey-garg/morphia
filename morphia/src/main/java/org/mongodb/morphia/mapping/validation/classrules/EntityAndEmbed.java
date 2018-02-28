@@ -3,6 +3,7 @@ package org.mongodb.morphia.mapping.validation.classrules;
 
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.validation.ClassConstraint;
 import org.mongodb.morphia.mapping.validation.ConstraintViolation;
@@ -12,10 +13,6 @@ import java.util.Set;
 
 import static java.lang.String.format;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class EntityAndEmbed implements ClassConstraint {
 
     @Override

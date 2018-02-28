@@ -9,10 +9,6 @@ import javax.validation.Validation;
 import javax.validation.ValidatorFactory;
 import java.util.Set;
 
-
-/**
- * @author us@thomas-daily.de
- */
 public class ValidationExtension extends AbstractEntityInterceptor {
     private ValidatorFactory validationFactory;
 

@@ -7,10 +7,6 @@ import org.mongodb.morphia.TestBase;
 
 import static org.junit.Assert.assertEquals;
 
-
-/**
- * @author ScottHernandez
- */
 public class LongIdEntityTest extends TestBase {
     @Test
     public void testMonoIncreasingId() throws Exception {

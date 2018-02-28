@@ -22,10 +22,6 @@ import java.util.Set;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
-
-/**
- * @author scotthernandez
- */
 public class QueryInTest extends TestBase {
     private static final Logger LOG = getLogger(QueryInTest.class);
 

@@ -29,9 +29,6 @@ import java.lang.annotation.Target;
 
 /**
  * Allows marking and naming the collectionName
- *
- * @author Olafur Gauti Gudmundsson
- * @author Scott Hernandez
  */
 @Documented
 @Inherited

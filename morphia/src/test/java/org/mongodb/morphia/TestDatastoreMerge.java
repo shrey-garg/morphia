@@ -21,10 +21,6 @@ import org.mongodb.morphia.annotations.Id;
 
 import static org.junit.Assert.assertEquals;
 
-
-/**
- * @author Scott Hernandez
- */
 public class TestDatastoreMerge extends TestBase {
 
     @Test

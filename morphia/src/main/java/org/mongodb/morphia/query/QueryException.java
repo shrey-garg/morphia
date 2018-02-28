@@ -17,8 +17,6 @@ package org.mongodb.morphia.query;
 
 /**
  * Error during query.
- *
- * @author ScottHernandez
  */
 public class QueryException extends RuntimeException {
     private static final long serialVersionUID = 1L;

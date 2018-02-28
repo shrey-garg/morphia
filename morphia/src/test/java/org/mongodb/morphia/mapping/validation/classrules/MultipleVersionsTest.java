@@ -7,10 +7,6 @@ import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.mapping.validation.ConstraintViolationException;
 import org.mongodb.morphia.testutil.TestEntity;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class MultipleVersionsTest extends TestBase {
 
     @Test(expected = ConstraintViolationException.class)

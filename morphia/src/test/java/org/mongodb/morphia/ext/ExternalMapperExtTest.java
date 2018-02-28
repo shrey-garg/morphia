@@ -20,6 +20,8 @@ import org.mongodb.morphia.Key;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.mapping.MappedClass;
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.lang.annotation.Annotation;
@@ -30,10 +32,6 @@ import java.util.Map.Entry;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-
-/**
- * @author Scott Hernandez
- */
 public class ExternalMapperExtTest extends TestBase {
 
     @Test
@@ -58,8 +56,6 @@ public class ExternalMapperExtTest extends TestBase {
 
     /**
      * The skeleton to apply from.
-     *
-     * @author skot
      */
     @Entity("special")
     private static class Skeleton {

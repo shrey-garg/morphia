@@ -1,5 +1,6 @@
 package org.mongodb.morphia.query.validation;
 
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.query.FilterOperator;
 
 import java.util.List;
@@ -37,9 +38,7 @@ public final class InOperationValidator extends OperationValidator {
             validationFailures.add(new ValidationFailure(format("For an $in operation, value cannot be null.")));
         } else if (!typeIsIterableOrArrayOrMap(value.getClass())) {
             validationFailures.add(new ValidationFailure(format("For a $in operation, value '%s' should be a List or array or Map. "
-                                                                + "Instead it was a: %s",
-                                                                value, value.getClass()
-                                                               )));
+                                                                + "Instead it was a: %s", value, value.getClass())));
         }
     }
 }

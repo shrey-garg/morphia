@@ -1,6 +1,5 @@
 package org.mongodb.morphia;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
@@ -8,13 +7,14 @@ import org.bson.Document;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
+import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
 
 import java.util.Iterator;
 
 public abstract class TestBase {
     protected static final String TEST_DB_NAME = "morphia_test";
     private final MongoClient mongoClient;
-    private final Morphia morphia = new Morphia();
+    private final Morphia morphia;
     private final MongoDatabase database;
     private final Datastore ds;
 
@@ -22,10 +22,11 @@ public abstract class TestBase {
         this(new MongoClient(new MongoClientURI(getMongoURI())));
     }
 
-    protected TestBase(final MongoClient mongoClient) {
-        this.mongoClient = mongoClient;
-        this.database = getMongoClient().getDatabase(TEST_DB_NAME);
-        this.ds = getMorphia().createDatastore(getMongoClient(), getDatabase().getName());
+    protected TestBase(final MongoClient client) {
+        mongoClient = client;
+        morphia = new Morphia(getMongoClient());
+        database = getMongoClient().getDatabase(TEST_DB_NAME);
+        ds = getMorphia().createDatastore(getDatabase().getName());
     }
 
     static String getMongoURI() {
@@ -114,7 +115,14 @@ public abstract class TestBase {
         return mongoClient.getDatabase("admin").runCommand(new Document("ismaster", 1));
     }
 
-    public BasicDBObject obj(final String key, final Object value) {
-        return new BasicDBObject(key, value);
+    protected Document toDocument(Object entity) {
+        return new Document();
+    }
+
+    protected <T> T fromDocument(final Datastore datastore,
+                                 final Class<T> clazz,
+                                 final Document document,
+                                 final DefaultEntityCache defaultEntityCache) {
+        return null;
     }
 }

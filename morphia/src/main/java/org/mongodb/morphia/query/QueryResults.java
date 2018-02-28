@@ -98,6 +98,7 @@ public interface QueryResults<T> extends Iterable<T> {
      * @return an Iterator of the empty entities
      */
     MongoCursor<T> fetchEmptyEntities();
+
     /**
      * Execute the query and get only the ids of the results.  This is more efficient than fetching the actual results (transfers less
      * data).

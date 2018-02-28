@@ -2,8 +2,6 @@ package org.mongodb.morphia.query;
 
 /**
  * Defines BSON types for use in querying against field types.
- *
- * @author suresh chaudhari
  */
 public enum Type {
 

@@ -10,10 +10,6 @@ import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.testutil.TestEntity;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class SerializedNameTest extends TestBase {
     @Test
     public void testCheck() {

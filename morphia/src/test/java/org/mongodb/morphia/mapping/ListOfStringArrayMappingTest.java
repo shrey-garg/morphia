@@ -10,13 +10,9 @@ import org.mongodb.morphia.annotations.Id;
 import java.util.ArrayList;
 import java.util.List;
 
-
-/**
- * @author scotthernandez
- */
 public class ListOfStringArrayMappingTest extends TestBase {
     @Test
-    public void testMapping() throws Exception {
+    public void testMapping() {
         getMorphia().map(ContainsListStringArray.class);
         final ContainsListStringArray ent = new ContainsListStringArray();
         ent.listOfStrings.add(new String[]{"a", "b"});

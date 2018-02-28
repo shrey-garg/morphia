@@ -30,10 +30,7 @@ public abstract class LongIdEntity {
 
     /**
      * Used to store counters for other entities.
-     *
-     * @author skot
      */
-
     @Entity(value = "ids", noClassnameStored = true)
     public static class StoredId {
         @Id

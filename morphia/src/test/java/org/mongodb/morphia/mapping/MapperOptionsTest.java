@@ -16,11 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Collection;
 
-
-/**
- * @author scott hernandez
- * @author RainoBoy97
- */
 public class MapperOptionsTest extends TestBase {
 
     @Test

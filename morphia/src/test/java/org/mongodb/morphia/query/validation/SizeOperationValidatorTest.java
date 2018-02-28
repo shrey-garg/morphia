@@ -18,7 +18,8 @@ public class SizeOperationValidatorTest {
     @Test
     public void shouldAllowSizeOperatorForArrayListTypesAndIntegerValues() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("arrayListOfIntegers");
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
 
@@ -33,7 +34,8 @@ public class SizeOperationValidatorTest {
     @Test
     public void shouldAllowSizeOperatorForArrayTypeAndIntValues() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("arrayOfInts");
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
 
@@ -48,7 +50,8 @@ public class SizeOperationValidatorTest {
     @Test
     public void shouldAllowSizeOperatorForArrayTypeAndLongValues() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("arrayOfInts");
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
 
@@ -63,7 +66,8 @@ public class SizeOperationValidatorTest {
     @Test
     public void shouldAllowSizeOperatorForIterableTypesAndIntegerValues() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("setOfIntegers");
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
 
@@ -78,7 +82,8 @@ public class SizeOperationValidatorTest {
     @Test
     public void shouldAllowSizeOperatorForListTypesAndIntValues() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("listOfIntegers");
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
 
@@ -93,7 +98,8 @@ public class SizeOperationValidatorTest {
     @Test
     public void shouldAllowSizeOperatorForListTypesAndLongValues() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("listOfIntegers");
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
 
@@ -108,7 +114,8 @@ public class SizeOperationValidatorTest {
     @Test
     public void shouldContainValidationFailuresForBothErrorsWhenTypeIsWrongAndValueIsWrong() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("notAnArrayOrList");
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
 
@@ -123,7 +130,8 @@ public class SizeOperationValidatorTest {
     @Test
     public void shouldNotApplyValidationToOperatorThatIsNotSize() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("list");
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
 
@@ -138,7 +146,8 @@ public class SizeOperationValidatorTest {
     @Test
     public void shouldRejectSizeOperatorForNonIntegerValues() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("listOfStrings");
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
 
@@ -154,7 +163,8 @@ public class SizeOperationValidatorTest {
     @Test
     public void shouldRejectSizeOperatorForNonListTypes() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("notAnArrayOrList");
         List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
 

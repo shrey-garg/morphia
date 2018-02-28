@@ -2,8 +2,7 @@ package org.mongodb.morphia.query;
 
 
 import org.bson.Document;
-import org.mongodb.morphia.logging.Logger;
-import org.mongodb.morphia.logging.MorphiaLoggerFactory;
+import org.mongodb.morphia.DatastoreImpl;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.Map;
@@ -14,8 +13,6 @@ import static org.mongodb.morphia.query.QueryValidator.validateQuery;
  * Defines a Criteria against a field
  */
 class FieldCriteria extends AbstractCriteria {
-    private static final Logger LOG = MorphiaLoggerFactory.get(FieldCriteria.class);
-
     private final String field;
     private final FilterOperator operator;
     private final Object value;
@@ -29,7 +26,7 @@ class FieldCriteria extends AbstractCriteria {
     FieldCriteria(final QueryImpl<?> query, final String fieldName, final FilterOperator op, final Object value, final boolean not) {
         //validate might modify prop string to translate java field name to db field name
         final StringBuilder sb = new StringBuilder(fieldName);
-        final Mapper mapper = query.getDatastore().getMapper();
+        final Mapper mapper = ((DatastoreImpl) query.getDatastore()).getMapper();
 
         validateQuery(query.getEntityClass(), mapper, sb, op, value, query.isValidatingNames(), query.isValidatingTypes());
 

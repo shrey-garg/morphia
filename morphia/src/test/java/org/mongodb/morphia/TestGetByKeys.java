@@ -10,10 +10,6 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class TestGetByKeys extends TestBase {
     @Test
     public final void testGetByKeys() {

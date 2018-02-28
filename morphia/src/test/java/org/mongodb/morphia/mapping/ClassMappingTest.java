@@ -12,10 +12,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class ClassMappingTest extends TestBase {
 
     @Test

@@ -2,8 +2,6 @@ package org.mongodb.morphia.mapping.cache;
 
 
 import org.mongodb.morphia.Key;
-import org.mongodb.morphia.mapping.lazy.LazyFeatureDependencies;
-import org.mongodb.morphia.mapping.lazy.proxy.ProxyHelper;
 import relocated.morphia.org.apache.commons.collections.ReferenceMap;
 
 import java.util.HashMap;
@@ -48,21 +46,7 @@ public class DefaultEntityCache implements EntityCache {
 
     @Override
     public <T> T getEntity(final Key<T> k) {
-        final Object o = entityMap.get(k);
-        if (o == null) {
-            if (LazyFeatureDependencies.testDependencyFullFilled()) {
-                final Object proxy = proxyMap.get(k);
-                if (proxy != null) {
-                    stats.incHits();
-                    return (T) ProxyHelper.unwrap(proxy);
-                }
-            }
-            // System.out.println("miss entity " + k + ":" + this);
-            stats.incMisses();
-        } else {
-            stats.incHits();
-        }
-        return (T) o;
+        return (T) entityMap.get(k);
     }
 
     @Override

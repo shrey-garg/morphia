@@ -19,10 +19,6 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.testutil.TestEntity;
 
-
-/**
- * @author Olafur Gauti Gudmundsson
- */
 @Entity("stuff")
 public class RecursiveParent extends TestEntity {
     @Reference

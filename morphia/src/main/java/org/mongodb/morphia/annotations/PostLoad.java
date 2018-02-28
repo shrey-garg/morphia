@@ -11,8 +11,6 @@ import java.lang.annotation.Target;
 
 /**
  * Called after the data has been loaded into the java object.
- *
- * @author Scott Hernandez
  */
 @Documented
 @Inherited

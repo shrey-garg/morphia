@@ -1,11 +1,8 @@
 package org.mongodb.morphia.query;
 
-import com.mongodb.DBObject;
 import org.bson.Document;
 import org.mongodb.morphia.geo.CoordinateReferenceSystem;
 import org.mongodb.morphia.geo.Geometry;
-import org.mongodb.morphia.geo.GeometryQueryConverter;
-import org.mongodb.morphia.geo.NamedCoordinateReferenceSystemConverter;
 
 import static org.mongodb.morphia.query.FilterOperator.NEAR;
 
@@ -15,7 +12,7 @@ import static org.mongodb.morphia.query.FilterOperator.NEAR;
  */
 class StandardGeoFieldCriteria extends FieldCriteria {
     private final Integer maxDistanceMeters;
-    private final DBObject geometryAsDBObject;
+    private final Geometry geometry;
     private CoordinateReferenceSystem crs;
 
     StandardGeoFieldCriteria(final QueryImpl<?> query, final String field, final FilterOperator operator, final Geometry value,
@@ -29,8 +26,7 @@ class StandardGeoFieldCriteria extends FieldCriteria {
                              final Integer maxDistanceMeters) {
         super(query, field, operator, value);
         this.maxDistanceMeters = maxDistanceMeters;
-        GeometryQueryConverter geometryQueryConverter = new GeometryQueryConverter(query.getDatastore().getMapper());
-        geometryAsDBObject = (DBObject) geometryQueryConverter.encode(value, null);
+        geometry = value;
     }
 
     @Override
@@ -41,15 +37,15 @@ class StandardGeoFieldCriteria extends FieldCriteria {
         switch (operator) {
             case NEAR:
                 if (maxDistanceMeters != null) {
-                    geometryAsDBObject.put("$maxDistance", maxDistanceMeters);
+                    geometry.put("$maxDistance", maxDistanceMeters);
                 }
-                query = new Document(NEAR.val(), geometryAsDBObject);
+                query = new Document(NEAR.val(), geometry);
                 break;
             case GEO_WITHIN:
             case INTERSECTS:
-                query = new Document(operator.val(), geometryAsDBObject);
+                query = new Document(operator.val(), geometry);
                 if (crs != null) {
-                    ((DBObject) geometryAsDBObject.get("$geometry")).put("crs", new NamedCoordinateReferenceSystemConverter().encode(crs));
+                    ((Document) geometry.get("$geometry")).put("crs", crs);
                 }
                 break;
             default:

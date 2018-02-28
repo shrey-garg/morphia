@@ -63,7 +63,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldAllowGeoWithinOperatorWithAllAppropriateTrimmings() {
         // expect
-        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("array");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, GEO_WITHIN, new BasicDBObject("$box", 1),
                                                           new ArrayList<ValidationFailure>()), is(true));
@@ -112,7 +112,8 @@ public class QueryValidatorTest {
     //this used to fail
     public void shouldAllowSizeOperatorForArrayListTypesAndIntegerValues() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("arrayListOfIntegers");
 
         // expect
@@ -128,7 +129,8 @@ public class QueryValidatorTest {
     @Test
     public void shouldAllowSizeOperatorForArraysAndIntegerValues() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("arrayOfInts");
 
         // expect
@@ -144,7 +146,8 @@ public class QueryValidatorTest {
     @Test
     public void shouldAllowSizeOperatorForListTypesAndIntegerValues() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("listOfIntegers");
 
         // expect
@@ -160,7 +163,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldAllowTypeThatMatchesKeyTypeValue() {
         // expect
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("integer");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, Integer.class, EQUAL,
                                                           new Key<Number>(Integer.class, "Integer", new ObjectId()),
@@ -211,7 +214,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldAllowValuesOfList() {
         // expect
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, EQUAL, new ArrayList<String>(),
                                                           new ArrayList<ValidationFailure>()), is(true));
@@ -244,7 +247,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowGeoOperatorIfValueDoesNotContainCorrectField() {
         // expect
-        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("array");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, GEO_WITHIN,
                                                           new BasicDBObject("name", "value"), new ArrayList<ValidationFailure>()),
@@ -254,7 +257,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowGeoOperatorIfValueIsNotDBObject() {
         // expect
-        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("array");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, GEO_WITHIN, "value",
                                                           new ArrayList<ValidationFailure>()), is(false));
@@ -263,7 +266,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowGeoWithinWhenValueDoesNotContainKeyword() {
         // expect
-        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("array");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, GEO_WITHIN,
                                                           new BasicDBObject("notValidKey", 1), new ArrayList<ValidationFailure>()),
@@ -287,7 +290,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowNonBooleanValuesForExistsOperator() {
         // given
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, SimpleEntity.class, EXISTS, "value",
                                                           new ArrayList<ValidationFailure>()), is(false));
@@ -296,7 +299,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowNonIntegerTypeIfValueIsInt() {
         // expect
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, SimpleEntity.class, EQUAL, 1,
                                                           new ArrayList<ValidationFailure>()), is(false));
@@ -312,7 +315,8 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowNonKeyTypeWithKeyValue() {
         // expect
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("listOfIntegers");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, SimpleEntity.class, EQUAL,
                                                           new Key<String>(String.class, "kind", new ObjectId()),
@@ -331,7 +335,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowOtherValuesForAllOperator() {
         // given
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("name");
 
         // expect
@@ -342,7 +346,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowOtherValuesForInOperator() {
         // expect
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass,
                                                           mappedField,
@@ -356,7 +360,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowOtherValuesForNotInOperator() {
         // expect
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, SimpleEntity.class, NOT_IN, "value",
                                                           new ArrayList<ValidationFailure>()), is(false));
@@ -365,7 +369,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowSizeOperatorForNonIntegerValues() {
         // expect
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass,
                                                           mappedField,
@@ -379,7 +383,8 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowSizeOperatorForNonListTypes() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("notAnArrayOrList");
 
         // expect
@@ -395,7 +400,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowStringValueWithTypeThatIsNotString() {
         // expect
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, Integer.class, EQUAL, "value",
                                                           new ArrayList<ValidationFailure>()), is(false));
@@ -404,7 +409,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowTypeThatDoesNotMatchKeyTypeValue() {
         // expect
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, String.class, EQUAL,
                                                           new Key<Number>(Integer.class, "Integer", new ObjectId()),
@@ -414,7 +419,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldNotAllowValueWithoutEntityAnnotationAndTypeOfKey() {
         // expect
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass,
                                                           mappedField,
@@ -446,7 +451,7 @@ public class QueryValidatorTest {
         // this unit test is to drive fixing a null pointer in the logging code.  It's a bit stupid but it's an edge case that wasn't
         // caught.
         // when this is called, don't error
-        validateQuery(SimpleEntity.class, new Mapper(), new StringBuilder("name"), EQUAL, null, true, true);
+        validateQuery(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()), new StringBuilder("name"), EQUAL, null, true, true);
     }
 
     @Test
@@ -459,7 +464,7 @@ public class QueryValidatorTest {
     @Test
     public void shouldRejectTypesAndValuesThatDoNotMatch() {
         // expect
-        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, String.class, EQUAL, 1,
                                                           new ArrayList<ValidationFailure>()), is(false));
@@ -469,14 +474,14 @@ public class QueryValidatorTest {
     public void shouldReferToMappedClassInExceptionWhenFieldNotFound() {
         thrown.expect(ValidationException.class);
         thrown.expectMessage("The field 'notAField' could not be found in 'org.bson.types.ObjectId'");
-        validateQuery(SimpleEntity.class, new Mapper(), new StringBuilder("id.notAField"), FilterOperator.EQUAL, 1, true, true);
+        validateQuery(SimpleEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()), new StringBuilder("id.notAField"), FilterOperator.EQUAL, 1, true, true);
     }
 
     @Test
     public void shouldReferToMappedClassInExceptionWhenQueryingPastReferenceField() {
         thrown.expect(ValidationException.class);
         thrown.expectMessage("Cannot use dot-notation past 'reference' in 'org.mongodb.morphia.query.QueryValidatorTest$WithReference'");
-        validateQuery(WithReference.class, new Mapper(), new StringBuilder("reference.name"), FilterOperator.EQUAL, "", true, true);
+        validateQuery(WithReference.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()), new StringBuilder("reference.name"), FilterOperator.EQUAL, "", true, true);
     }
 
     @Test
@@ -484,7 +489,7 @@ public class QueryValidatorTest {
         thrown.expect(ValidationException.class);
         thrown.expectMessage("Cannot use dot-notation past 'serialized' in "
                              + "'org.mongodb.morphia.query.QueryValidatorTest$WithSerializedField'");
-        validateQuery(WithSerializedField.class, new Mapper(), new StringBuilder("serialized.name"), FilterOperator.EQUAL, "", true, true);
+        validateQuery(WithSerializedField.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()), new StringBuilder("serialized.name"), FilterOperator.EQUAL, "", true, true);
     }
 
     private static class GeoEntity {

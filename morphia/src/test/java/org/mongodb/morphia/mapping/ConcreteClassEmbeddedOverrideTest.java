@@ -8,10 +8,6 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Id;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class ConcreteClassEmbeddedOverrideTest extends TestBase {
 
     @Test

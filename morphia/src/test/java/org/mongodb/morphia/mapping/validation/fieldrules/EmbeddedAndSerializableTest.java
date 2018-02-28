@@ -17,10 +17,6 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class EmbeddedAndSerializableTest extends TestBase {
     @Test
     public void embedded() {

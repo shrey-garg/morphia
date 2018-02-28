@@ -14,12 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class EnumMappingTest extends TestBase {
     @Test
-    public void getMapOfEnum() throws Exception {
+    public void getMapOfEnum() {
         Class1 entity = new Class1();
         entity.getMap().put("key", Foo.BAR);
         getDatastore().save(entity);
@@ -91,7 +88,7 @@ public class EnumMappingTest extends TestBase {
     }
 
     @Test
-    public void testEnumMapping() throws Exception {
+    public void testEnumMapping() {
         getDatastore().getDatabase().dropDatabase();
 
         getMorphia().map(ContainsEnum.class);

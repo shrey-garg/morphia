@@ -4,7 +4,6 @@ package org.mongodb.morphia;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mongodb.morphia.annotations.AlsoLoad;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -63,7 +62,6 @@ public class TestSingleToMultipleConversion extends TestBase {
     private static class HasEmbeddedStringyArray {
         @Id
         private ObjectId id;
-        @AlsoLoad("hs")
         private HasString[] hss;
     }
 
@@ -71,7 +69,6 @@ public class TestSingleToMultipleConversion extends TestBase {
     private static class HasEmbeddedStringySet {
         @Id
         private ObjectId id;
-        @AlsoLoad("hs")
         private Set<HasString> hss;
     }
 
@@ -86,7 +83,6 @@ public class TestSingleToMultipleConversion extends TestBase {
     private static class HasManyStringsArray {
         @Id
         private ObjectId id;
-        @AlsoLoad("s")
         private String[] strings;
     }
 
@@ -94,7 +90,6 @@ public class TestSingleToMultipleConversion extends TestBase {
     private static class HasManyStringsList {
         @Id
         private ObjectId id;
-        @AlsoLoad("s")
         private List<String> strings;
     }
 }

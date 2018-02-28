@@ -18,10 +18,6 @@ import java.util.ConcurrentModificationException;
 
 import static org.junit.Assert.assertEquals;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class VersionTest extends TestBase {
 
 

@@ -23,10 +23,7 @@ import java.io.Serializable;
 
 /**
  * Example for a base class to all entities.
- *
- * @author Olafur Gauti Gudmundsson
  */
-
 public class TestEntity implements Serializable {
     @Id
     private ObjectId id = new ObjectId();

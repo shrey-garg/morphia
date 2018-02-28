@@ -19,10 +19,6 @@ import java.util.Map;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
 
-
-/**
- * @author scotthernandez
- */
 public class NestedMapsAndListsTest extends TestBase {
 
     @Test

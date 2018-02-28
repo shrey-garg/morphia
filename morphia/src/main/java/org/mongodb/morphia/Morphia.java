@@ -15,253 +15,77 @@
 package org.mongodb.morphia;
 
 
-import com.mongodb.DBObject;
 import com.mongodb.MongoClient;
-import org.bson.codecs.pojo.PojoCodecProvider;
-import org.bson.codecs.pojo.PojoCodecProvider.Builder;
-import org.mongodb.morphia.logging.Logger;
-import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.mapping.Mapper;
-import org.mongodb.morphia.mapping.MappingException;
-import org.mongodb.morphia.mapping.cache.EntityCache;
 
-import java.util.Collections;
 import java.util.Set;
 
 
-/**
- * @author Olafur Gauti Gudmundsson
- * @author Scott Hernandez
- */
 public class Morphia {
-    private static final Logger LOG = MorphiaLoggerFactory.get(Morphia.class);
     private final Mapper mapper;
-    private final Builder providerBuilder = PojoCodecProvider.builder();
+    private MongoClient mongoClient;
 
     /**
      * Creates a Morphia instance with a default Mapper and an empty class set.
+     *
+     * @param mongoClient the representations of the connection to a MongoDB instance
      */
-    public Morphia() {
-        this(new Mapper(), Collections.<Class>emptySet());
+    public Morphia(final MongoClient mongoClient) {
+        this.mongoClient = mongoClient;
+        mapper = new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry());
+    }
+
+    /**
+     * Maps a set of classes
+     *
+     * @param classes the classes to map
+     */
+    public void map(final Class... classes) {
+        mapper.map(classes);
     }
 
     /**
      * Creates a Morphia instance with the given Mapper and class set.
      *
-     * @param mapper       the Mapper to use
      * @param classesToMap the classes to map
      */
-    public Morphia(final Mapper mapper, final Set<Class> classesToMap) {
-        this.mapper = mapper;
-        for (final Class c : classesToMap) {
-            map(c);
-        }
-    }
-
-    /**
-     * Creates a Morphia instance with the given Mapper
-     *
-     * @param mapper the Mapper to use
-     */
-    public Morphia(final Mapper mapper) {
-        this(mapper, Collections.<Class>emptySet());
-    }
-
-    /**
-     * Creates a Morphia instance with the given classes
-     *
-     * @param classesToMap the classes to map
-     */
-    public Morphia(final Set<Class> classesToMap) {
-        this(new Mapper(), classesToMap);
-    }
-
-    Builder getProviderBuilder() {
-        return providerBuilder;
-    }
-
-    /**
-     * It is best to use a Mongo singleton instance here.
-     *
-     * @param mongoClient the representations of the connection to a MongoDB instance
-     * @param dbName      the name of the database
-     * @return a Datastore that you can use to interact with MongoDB
-     */
-    @SuppressWarnings("deprecation")
-    public Datastore createDatastore(final MongoClient mongoClient, final String dbName) {
-        return new DatastoreImpl(this, mongoClient, dbName);
-    }
-
-    /**
-     * Creates a new Datastore for interacting with MongoDB using POJOs
-     *
-     * @param mongoClient the representations of the connection to a MongoDB instance
-     * @param mapper      a pre-configured Mapper for your POJOs
-     * @param dbName      the name of the database
-     * @return a Datastore that you can use to interact with MongoDB
-     * @deprecated use {@link #createDatastore(MongoClient, String)} instead
-     */
-    @SuppressWarnings("deprecation")
-    @Deprecated
-    public Datastore createDatastore(final MongoClient mongoClient, final Mapper mapper, final String dbName) {
-        return new DatastoreImpl(this, mapper, mongoClient, dbName);
-    }
-
-    /**
-     * Creates an entity and populates its state based on the dbObject given.  This method is primarily an internal method.  Reliance on
-     * this method may break your application in future releases.
-     *
-     * @param <T>         type of the entity
-     * @param datastore   the Datastore to use when fetching this reference
-     * @param entityClass type to create
-     * @param dbObject    the object state to use
-     * @return the newly created and populated entity
-     */
-    public <T> T fromDBObject(final Datastore datastore, final Class<T> entityClass, final DBObject dbObject) {
-        return fromDBObject(datastore, entityClass, dbObject, mapper.createEntityCache());
-    }
-
-    /**
-     * Creates an entity and populates its state based on the dbObject given.  This method is primarily an internal method.  Reliance on
-     * this method may break your application in future releases.
-     *
-     * @param <T>         type of the entity
-     * @param datastore   the Datastore to use when fetching this reference
-     * @param entityClass type to create
-     * @param dbObject    the object state to use
-     * @param cache       the EntityCache to use to prevent multiple loads of the same entities over and over
-     * @return the newly created and populated entity
-     */
-    public <T> T fromDBObject(final Datastore datastore, final Class<T> entityClass, final DBObject dbObject, final EntityCache cache) {
-        if (!entityClass.isInterface() && !mapper.isMapped(entityClass)) {
-            throw new MappingException("Trying to map to an unmapped class: " + entityClass.getName());
-        }
-        try {
-            return mapper.fromDBObject(datastore, entityClass, dbObject, cache);
-        } catch (Exception e) {
-            throw new MappingException("Could not map entity from DBObject", e);
-        }
-    }
-
-    /**
-     * @return the mapper used by this instance of Morphia
-     */
-    public Mapper getMapper() {
-        return mapper;
-    }
-
-    /**
-     * @return false.  Setting this value has no value functionally or performance-wise.
-     * @deprecated
-     * @see <a href="https://github.com/mongodb/morphia/issues/1052">Issue #1052</a>
-     */
-    @Deprecated
-    public boolean getUseBulkWriteOperations() {
-        return false;
-    }
-
-    /**
-     * Check whether a specific class is mapped by this instance.
-     *
-     * @param entityClass the class we want to check
-     * @return true if the class is mapped, else false
-     */
-    public boolean isMapped(final Class entityClass) {
-        return mapper.isMapped(entityClass);
-    }
-
-    /**
-     * @return false.  Setting this value has no value functionally or performance-wise.
-     * @deprecated
-     * @see <a href="https://github.com/mongodb/morphia/issues/1052">Issue #1052</a>
-     */
-    @Deprecated
-    public boolean isUseBulkWriteOperations() {
-        return false;
-    }
-
-    /**
-     * Configures Morphia to use bulk writes.  Only useful with MongoDB 2.6+.
-     *
-     * @param useBulkWriteOperations true if Morphia should use bulk writes
-     * @see <a href="https://github.com/mongodb/morphia/issues/1052">Issue #1052</a>
-     * @deprecated Setting this value has no value functionally or performance-wise.
-     */
-    @Deprecated
-    public void setUseBulkWriteOperations(final boolean useBulkWriteOperations) {
-    }
-
-    /**
-     * Maps a set of classes
-     *
-     * @param entityClasses the classes to map
-     * @return this
-     */
-    public synchronized Morphia map(final Class... entityClasses) {
-        providerBuilder.register(entityClasses);
-        return this;
-    }
-
-    /**
-     * Maps a set of classes
-     *
-     * @param entityClasses the classes to map
-     * @return this
-     */
-    public synchronized Morphia map(final Set<Class> entityClasses) {
-        if (entityClasses != null && !entityClasses.isEmpty()) {
-            for (final Class entityClass : entityClasses) {
-                providerBuilder.register(entityClass);
-            }
-        }
-        return this;
+    public void map(final Set<Class> classesToMap) {
+        mapper.map(classesToMap);
     }
 
     /**
      * Tries to map all classes in the package specified. Fails if one of the classes is not valid for mapping.
      *
      * @param packageName the name of the package to process
-     * @return the Morphia instance
      */
-    public synchronized Morphia mapPackage(final String packageName) {
-        return mapPackage(packageName, false);
-    }
-
-    /**
-     * Tries to map all classes in the package specified.
-     *
-     * @param packageName          the name of the package to process
-     * @param ignoreInvalidClasses specifies whether to ignore classes in the package that cannot be mapped
-     * @return the Morphia instance
-     */
-    public synchronized Morphia mapPackage(final String packageName, final boolean ignoreInvalidClasses) {
-        providerBuilder.register(packageName);
-        return this;
+    public void mapPackage(final String packageName) {
+        mapper.mapPackage(packageName);
     }
 
     /**
      * Maps all the classes found in the package to which the given class belongs.
      *
      * @param clazz the class to use when trying to find others to map
-     * @return this
      */
-    public Morphia mapPackageFromClass(final Class clazz) {
-        return mapPackage(clazz.getPackage().getName(), false);
+    public void mapPackageFromClass(final Class clazz) {
+        mapper.mapPackageFromClass(clazz);
     }
 
     /**
-     * Converts an entity to a DBObject.  This method is primarily an internal method. Reliance on this method may break your application
-     * in
-     * future releases.
+     * It is best to use a Mongo singleton instance here.
      *
-     * @param entity the entity to convert
-     * @return the DBObject
+     * @param dbName the name of the database
+     * @return a Datastore that you can use to interact with MongoDB
      */
-    public DBObject toDBObject(final Object entity) {
-        try {
-            return mapper.toDBObject(entity);
-        } catch (Exception e) {
-            throw new MappingException("Could not map entity to DBObject", e);
-        }
+    public Datastore createDatastore(final String dbName) {
+        return new DatastoreImpl(mongoClient, mapper, dbName);
     }
+
+    /**
+     * @return the mapper used by this instance of Morphia
+     */
+    public synchronized Mapper getMapper() {
+        return mapper;
+    }
+
 }

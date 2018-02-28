@@ -8,10 +8,6 @@ import org.mongodb.morphia.annotations.Id;
 
 import javax.validation.ValidationException;
 
-
-/**
- * @author doc
- */
 public class TestMorphiaValidation extends TestBase {
 
     public static class E {

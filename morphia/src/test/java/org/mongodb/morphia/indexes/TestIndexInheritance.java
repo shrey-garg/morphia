@@ -14,7 +14,7 @@
 
 package org.mongodb.morphia.indexes;
 
-import com.mongodb.DBCollection;
+import com.mongodb.client.MongoCollection;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
@@ -23,19 +23,16 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.mapping.MappedClass;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-/**
- * @author Scott Hernandez
- */
 public class TestIndexInheritance extends TestBase {
 
     @Test
-    public void testClassIndexInherit() throws Exception {
-        getMorphia().map(Circle.class)
-                    .map(Shape.class);
+    public void testClassIndexInherit() {
+        getMorphia().map(Circle.class, Shape.class);
         final MappedClass mc = getMorphia().getMapper()
                                            .getMappedClass(Circle.class);
         assertNotNull(mc);
@@ -44,24 +41,21 @@ public class TestIndexInheritance extends TestBase {
                           .size());
 
         getDatastore().ensureIndexes();
-        final DBCollection coll = getDatastore().getCollection(Circle.class);
+        final MongoCollection<Circle> coll = getDatastore().getCollection(Circle.class);
 
-        assertEquals(4, coll.getIndexInfo()
-                            .size());
+        assertEquals(4, count(coll.listIndexes().iterator()));
     }
 
     @Test
-    public void testInheritedFieldIndex() throws Exception {
-        getMorphia().map(Circle.class)
-                    .map(Shape.class);
+    public void testInheritedFieldIndex() {
+        getMorphia().map(Circle.class, Shape.class);
         getMorphia().getMapper()
                     .getMappedClass(Circle.class);
 
         getDatastore().ensureIndexes();
-        final DBCollection coll = getDatastore().getCollection(Circle.class);
+        final MongoCollection<Circle> coll = getDatastore().getCollection(Circle.class);
 
-        assertEquals(4, coll.getIndexInfo()
-                            .size());
+        assertEquals(4, count(coll.listIndexes().iterator()));
     }
 
     @Indexes(@Index(fields = @Field("description")))

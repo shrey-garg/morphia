@@ -27,9 +27,6 @@ import java.lang.annotation.Target;
 
 /**
  * Optional annotation for specifying persistence behavior
- *
- * @author Olafur Gauti Gudmundsson
- * @author Scott Hernandez
  */
 @Documented
 @Inherited

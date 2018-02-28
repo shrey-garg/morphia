@@ -25,10 +25,6 @@ import org.mongodb.morphia.annotations.Property;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-
-/**
- * @author Scott Hernandez
- */
 public class GenericsMappingTest extends TestBase {
 
     @Test

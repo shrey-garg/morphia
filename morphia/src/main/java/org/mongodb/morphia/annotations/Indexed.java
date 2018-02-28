@@ -13,8 +13,6 @@ import java.lang.annotation.Target;
 
 /**
  * Specified on fields that should be Indexed.
- *
- * @author Scott Hernandez
  */
 @SuppressWarnings("deprecation")
 @Documented

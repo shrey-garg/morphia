@@ -11,10 +11,6 @@ import org.mongodb.morphia.annotations.Reference;
 
 import java.util.List;
 
-
-/**
- * @author scotthernandez
- */
 public class ReferencesWIgnoreMissingTest extends TestBase {
     @Test
     public void testMissingReference() throws Exception {

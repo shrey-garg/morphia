@@ -5,9 +5,6 @@ import java.util.List;
 
 import static java.lang.String.format;
 
-/**
- * @author Scott Hernandez
- */
 public enum FilterOperator {
 
     WITHIN_CIRCLE("$center"),

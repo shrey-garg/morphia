@@ -235,7 +235,7 @@ public final class Group {
      * @return the projections for the group
      */
     public List<Projection> getProjections() {
-        return projections != null ? new ArrayList<Projection>(projections) : null;
+        return projections != null ? new ArrayList<>(projections) : null;
     }
 
     /**

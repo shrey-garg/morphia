@@ -1,7 +1,7 @@
 package org.mongodb.morphia.query;
 
 
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.bson.types.CodeWScope;
 
 /**
@@ -30,7 +30,7 @@ public class WhereCriteria extends AbstractCriteria {
     }
 
     @Override
-    public void addTo(final DBObject obj) {
+    public void addTo(final Document obj) {
         obj.put(FilterOperator.WHERE.val(), js);
     }
 

@@ -14,10 +14,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class CharacterMappingTest extends TestBase {
     @Test
     public void emptyStringToPrimitive() {

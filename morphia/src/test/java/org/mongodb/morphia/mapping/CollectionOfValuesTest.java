@@ -18,10 +18,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class CollectionOfValuesTest extends TestBase {
 
     @Test

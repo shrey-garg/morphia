@@ -6,10 +6,6 @@ import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.mapping.MapperOptions;
 import org.mongodb.morphia.utils.Assert;
 
-
-/**
- * @author us@thomas-daily.de
- */
 public class GuiceExtension {
 
     /**

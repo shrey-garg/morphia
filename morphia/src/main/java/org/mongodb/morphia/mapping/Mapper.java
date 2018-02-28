@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) 2010 Olafur Gauti Gudmundsson Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
  * except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless
  * required
@@ -11,15 +11,16 @@
 package org.mongodb.morphia.mapping;
 
 
+import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
+import org.bson.codecs.pojo.PojoCodec;
+import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.codecs.pojo.PojoCodecProvider.Builder;
 import org.mongodb.morphia.EntityInterceptor;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
-import org.mongodb.morphia.mapping.cache.EntityCache;
-import org.mongodb.morphia.mapping.lazy.proxy.ProxiedEntityReference;
-import org.mongodb.morphia.mapping.lazy.proxy.ProxyHelper;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -36,9 +37,6 @@ import static java.lang.String.format;
 /**
  * <p>This is the heart of Morphia and takes care of mapping from/to POJOs/Documents<p> <p>This class is thread-safe and keeps various
  * "cached" data which should speed up processing.</p>
- *
- * @author Olafur Gauti Gudmundsson
- * @author Scott Hernandez
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class Mapper {
@@ -67,9 +65,13 @@ public class Mapper {
 
     //A general cache of instances of classes; used by MappedClass for EntityListener(s)
     private final Map<Class, Object> instanceCache = new ConcurrentHashMap();
-    private MapperOptions opts = new MapperOptions();
+    private CodecRegistry codecRegistry;
+    private MapperOptions opts;
 
-    public Mapper() {
+    private final Builder providerBuilder = PojoCodecProvider.builder();
+
+    public Mapper(final CodecRegistry codecRegistry) {
+        this(codecRegistry,  new MapperOptions());
     }
 
     /**
@@ -77,23 +79,13 @@ public class Mapper {
      *
      * @param opts the options to use
      */
-    public Mapper(final MapperOptions opts) {
-        this();
+    public Mapper(final CodecRegistry codecRegistry, final MapperOptions opts) {
+        this.codecRegistry = codecRegistry;
         this.opts = opts;
     }
 
-    /**
-     * Creates a new Mapper with the given options and a Mapper to copy.  This is effectively a copy constructor that allows a developer
-     * to override the options.
-     *
-     * @param options the options to use
-     * @param mapper  the collection of MappedClasses to add
-     */
-    public Mapper(final MapperOptions options, final Mapper mapper) {
-        this(options);
-        for (final MappedClass mappedClass : mapper.getMappedClasses()) {
-            addMappedClass(mappedClass, false);
-        }
+    public PojoCodecProvider getPojoCodecProvider() {
+        return providerBuilder.build();
     }
 
     /**
@@ -112,22 +104,13 @@ public class Mapper {
      * @return the MappedClass for the given Class
      */
     public MappedClass addMappedClass(final Class c) {
-
         MappedClass mappedClass = mappedClasses.get(c.getName());
         if (mappedClass == null) {
-            mappedClass = new MappedClass(c, this);
+            final PojoCodec codec = (PojoCodec) getPojoCodecProvider().get(c, codecRegistry);
+            mappedClass = new MappedClass(codec.getClassModel(), this);
             return addMappedClass(mappedClass, true);
         }
         return mappedClass;
-    }
-
-    /**
-     * Creates a cache for tracking entities seen during processing
-     *
-     * @return the cache
-     */
-    public EntityCache createEntityCache() {
-        return getOptions().getCacheFactory().createCache();
     }
 
     /**
@@ -155,7 +138,7 @@ public class Mapper {
      * @param collection the collection name
      * @return the Class mapped to this collection name
      */
-    public Class<?> getClassFromCollection(final String collection) {
+    public <T> Class<T> getClassFromCollection(final String collection) {
         final Set<MappedClass> mcs = mappedClassesByCollection.get(collection);
         if (mcs == null || mcs.isEmpty()) {
             throw new MappingException(format("The collection '%s' is not mapped to a java class.", collection));
@@ -165,7 +148,7 @@ public class Mapper {
                 LOG.info(format("Found more than one class mapped to collection '%s'%s", collection, mcs));
             }
         }
-        return mcs.iterator().next().getClazz();
+        return (Class<T>) mcs.iterator().next().getClazz();
     }
 
     /**
@@ -199,13 +182,13 @@ public class Mapper {
      * @return the ID value
      */
     public Object getId(final Object entity) {
-        Object unwrapped = entity;
-        if (unwrapped == null) {
+        if (entity == null) {
             return null;
         }
-        unwrapped = ProxyHelper.unwrap(unwrapped);
         try {
-            return getMappedClass(unwrapped.getClass()).getIdField().get(unwrapped);
+            final MappedClass mappedClass = getMappedClass(entity.getClass());
+            final MappedField idField = mappedClass.getIdField();
+            return idField.getFieldValue(entity);
         } catch (Exception e) {
             return null;
         }
@@ -235,19 +218,12 @@ public class Mapper {
      * @return the Key
      */
     public <T> Key<T> getKey(final T entity) {
-        T unwrapped = entity;
-        if (unwrapped instanceof ProxiedEntityReference) {
-            final ProxiedEntityReference proxy = (ProxiedEntityReference) unwrapped;
-            return (Key<T>) proxy.__getKey();
+        if (entity instanceof Key) {
+            return (Key<T>) entity;
         }
 
-        unwrapped = ProxyHelper.unwrap(unwrapped);
-        if (unwrapped instanceof Key) {
-            return (Key<T>) unwrapped;
-        }
-
-        final Object id = getId(unwrapped);
-        final Class<T> aClass = (Class<T>) unwrapped.getClass();
+        final Object id = getId(entity);
+        final Class<T> aClass = (Class<T>) entity.getClass();
         return id == null ? null : new Key<>(aClass, getCollectionName(aClass), id);
     }
 
@@ -260,19 +236,12 @@ public class Mapper {
      * @return the Key
      */
     public <T> Key<T> getKey(final T entity, final String collection) {
-        T unwrapped = entity;
-        if (unwrapped instanceof ProxiedEntityReference) {
-            final ProxiedEntityReference proxy = (ProxiedEntityReference) unwrapped;
-            return (Key<T>) proxy.__getKey();
+        if (entity instanceof Key) {
+            return (Key<T>) entity;
         }
 
-        unwrapped = ProxyHelper.unwrap(unwrapped);
-        if (unwrapped instanceof Key) {
-            return (Key<T>) unwrapped;
-        }
-
-        final Object id = getId(unwrapped);
-        final Class<T> aClass = (Class<T>) unwrapped.getClass();
+        final Object id = getId(entity);
+        final Class<T> aClass = (Class<T>) entity.getClass();
         return id == null ? null : new Key<>(aClass, collection, id);
     }
 
@@ -288,13 +257,10 @@ public class Mapper {
         }
 
         Class type = (obj instanceof Class) ? (Class) obj : obj.getClass();
-        if (ProxyHelper.isProxy(obj)) {
-            type = ProxyHelper.getReferentClass(obj);
-        }
 
         MappedClass mc = mappedClasses.get(type.getName());
         if (mc == null) {
-            mc = new MappedClass(type, this);
+            mc = new MappedClass(mc.getClassModel(), this);
             // no validation
             addMappedClass(mc, false);
         }
@@ -325,29 +291,17 @@ public class Mapper {
     }
 
     /**
-     * Checks to see if a Class has been mapped.
-     *
-     * @param c the Class to check
-     * @return true if the Class has been mapped
-     */
-    public boolean isMapped(final Class c) {
-        return mappedClasses.containsKey(c.getName());
-    }
-
-    /**
      * Updates the collection value on a Key with the mapped value on the Key's type Class
      *
      * @param key the Key to update
-     * @return the collection name on the Key
      */
-    public String coerceCollection(final Key key) {
+    public void coerceCollection(final Key key) {
         if (key.getCollection() == null && key.getType() == null) {
             throw new IllegalStateException("Key is invalid! " + toString());
         } else if (key.getCollection() == null) {
             key.setCollection(getMappedClass(key.getType()).getCollectionName());
         }
 
-        return key.getCollection();
     }
 
     /**
@@ -373,4 +327,40 @@ public class Mapper {
 
         return mc;
     }
+
+    /**
+     * Maps a set of classes
+     *
+     * @param entityClasses the classes to map
+     */
+    public void map(final Class... entityClasses) {
+        providerBuilder.register(entityClasses);
+    }
+
+    public void map(final Set<Class> entityClasses) {
+        if (entityClasses != null && !entityClasses.isEmpty()) {
+            for (final Class entityClass : entityClasses) {
+                providerBuilder.register(entityClass);
+            }
+        }
+    }
+
+    /**
+     * Tries to map all classes in the package specified. Fails if one of the classes is not valid for mapping.
+     *
+     * @param packageName the name of the package to process
+     */
+    public void mapPackage(final String packageName) {
+        providerBuilder.register(packageName);
+    }
+
+    /**
+     * Maps all the classes found in the package to which the given class belongs.
+     *
+     * @param clazz the class to use when trying to find others to map
+     */
+    public void mapPackageFromClass(final Class clazz) {
+        mapPackage(clazz.getPackage().getName());
+    }
+
 }

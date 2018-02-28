@@ -32,9 +32,7 @@ import static org.mongodb.morphia.query.QueryValidator.validateQuery;
  * Implementation of Query
  *
  * @param <T> The type we will be querying for, and returning.
- * @author Scott Hernandez
  */
-@SuppressWarnings("deprecation")
 public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     private static final Logger LOG = MorphiaLoggerFactory.get(QueryImpl.class);
     private final DatastoreImpl ds;
@@ -61,7 +59,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
         setQuery(this);
         this.clazz = clazz;
-        this.ds = ((DatastoreImpl) ds);
+        this.ds = (DatastoreImpl) ds;
         this.collection = collection;
         readPreference = getDatastore().getDatabase().getReadPreference();
         readConcern = getDatastore().getDatabase().getReadConcern();
@@ -117,14 +115,11 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public List<Key<T>> asKeyList(final FindOptions options) {
-        final List<Key<T>> results = new ArrayList<Key<T>>();
-        MorphiaKeyIterator<T> keys = fetchKeys(options);
-        try {
+        final List<Key<T>> results = new ArrayList<>();
+        try (MorphiaKeyIterator<T> keys = fetchKeys(options)) {
             while (keys.hasNext()) {
                 results.add(keys.next());
             }
-        } finally {
-            keys.close();
         }
         return results;
     }
@@ -136,14 +131,11 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public List<T> asList(final FindOptions options) {
-        final List<T> results = new ArrayList<T>();
-        final MongoCursor<T> entities = fetch(options);
-        try {
+        final List<T> results = new ArrayList<>();
+        try (MongoCursor<T> entities = fetch(options)) {
             while (entities.hasNext()) {
                 results.add(entities.next());
             }
-        } finally {
-            entities.close();
         }
 
         return results;
@@ -205,10 +197,10 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     @Override
     public MorphiaKeyIterator<T> fetchKeys(final FindOptions options) {
 
-        return new MorphiaKeyIterator<T>(
-            prepareCursor(new FindOptions(options)
-                              .projection(new Document(Mapper.ID_KEY, 1)))
-                .iterator(), ds.getMapper());
+        final FindOptions projection = new FindOptions(options)
+                                           .projection(new Document(Mapper.ID_KEY, 1));
+        return new MorphiaKeyIterator<>(
+            prepareCursor(projection).iterator(), ds.getMapper());
     }
 
     @Override
@@ -218,12 +210,9 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public T get(final FindOptions options) {
-        final MongoCursor<T> it = fetch(new FindOptions(options)
-                                                   .limit(1));
-        try {
+        try (MongoCursor<T> it = fetch(new FindOptions(options)
+                                           .limit(1))) {
             return (it.hasNext()) ? it.next() : null;
-        } finally {
-            it.close();
         }
     }
 
@@ -243,7 +232,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public QueryImpl<T> cloneQuery() {
-        final QueryImpl<T> n = new QueryImpl<T>(clazz, collection, ds);
+        final QueryImpl<T> n = new QueryImpl<>(clazz, collection, ds);
         n.includeFields = includeFields;
         n.setQuery(n); // feels weird, correct?
         n.validateName = validateName;
@@ -252,7 +241,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
         // fields from superclass
         n.setAttachedTo(getAttachedTo());
-        n.setChildren(getChildren() == null ? null : new ArrayList<Criteria>(getChildren()));
+        n.setChildren(getChildren() == null ? null : new ArrayList<>(getChildren()));
         return n;
     }
 
@@ -265,7 +254,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         final CriteriaContainerImpl container = new CriteriaContainerImpl(this, CriteriaJoin.AND);
         add(container);
 
-        return new FieldEndImpl<CriteriaContainerImpl>(this, field, container);
+        return new FieldEndImpl<>(this, field, container);
     }
 
     @Override
@@ -291,13 +280,13 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> explain(final FindOptions options) {
-        return new LinkedHashMap<String, Object>(getDatastore().getDatabase()
-                                                               .runCommand(getQueryDocument()));
+        return new LinkedHashMap<>(getDatastore().getDatabase()
+                                                 .runCommand(getQueryDocument()));
     }
 
     @Override
     public FieldEnd<? extends Query<T>> field(final String name) {
-        return new FieldEndImpl<QueryImpl<T>>(this, name, this);
+        return new FieldEndImpl<>(this, name, this);
     }
 
     @Override
@@ -494,7 +483,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     /**
      * @return the Datastore
      */
-    public DatastoreImpl getDatastore() {
+    public Datastore getDatastore() {
         return ds;
     }
 

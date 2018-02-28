@@ -11,7 +11,8 @@ public class MappedFieldTypeValidatorTest {
     @Test
     public void shouldAllowAListThatDoesNotContainNumbers() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("listOfIntegers");
 
         // expect
@@ -21,7 +22,8 @@ public class MappedFieldTypeValidatorTest {
     @Test
     public void shouldAllowArraysOfNumbers() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("arrayOfInts");
 
         // expect
@@ -31,7 +33,8 @@ public class MappedFieldTypeValidatorTest {
     @Test
     public void shouldRejectAListThatDoesNotContainNumbers() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("listOfStrings");
 
         // expect
@@ -41,7 +44,8 @@ public class MappedFieldTypeValidatorTest {
     @Test
     public void shouldRejectArraysOfStrings() {
         // given
-        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper());
+        MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
+            mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("arrayOfStrings");
 
         // expect

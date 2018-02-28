@@ -46,9 +46,6 @@ import static org.junit.Assert.assertThat;
 import static org.mongodb.morphia.testutil.IndexMatcher.doesNotHaveIndexNamed;
 import static org.mongodb.morphia.testutil.IndexMatcher.hasIndexNamed;
 
-/**
- * @author Scott Hernandez
- */
 public class TestIndexed extends TestBase {
     @Before
     @Override

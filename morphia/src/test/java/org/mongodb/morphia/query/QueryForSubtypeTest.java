@@ -8,6 +8,8 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Reference;
+import org.mongodb.morphia.mapping.MappedClass;
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.query.validation.ValidationFailure;
 
@@ -21,8 +23,6 @@ import static org.mongodb.morphia.query.QueryValidator.isCompatibleForOperator;
 
 /**
  * For issue #615.
- *
- * @author jbyler
  */
 public class QueryForSubtypeTest extends TestBase {
 
@@ -32,7 +32,7 @@ public class QueryForSubtypeTest extends TestBase {
     @Override
     public void setUp() {
         super.setUp();
-        jobMappedClass = new Mapper().getMappedClass(Job.class);
+        jobMappedClass = new Mapper(getMongoClient().getMongoClientOptions().getCodecRegistry()).getMappedClass(Job.class);
     }
 
     @Test
@@ -44,7 +44,7 @@ public class QueryForSubtypeTest extends TestBase {
                                                      User.class,
                                                      EQUAL,
                                                      new UserImpl(),
-                                                     new ArrayList<ValidationFailure>());
+            new ArrayList<>());
 
         assertThat(compatible, is(true));
     }
@@ -58,7 +58,7 @@ public class QueryForSubtypeTest extends TestBase {
                                                      ArrayList.class,
                                                      SIZE,
                                                      2,
-                                                     new ArrayList<ValidationFailure>());
+            new ArrayList<>());
 
         assertThat(compatible, is(true));
     }
@@ -74,7 +74,7 @@ public class QueryForSubtypeTest extends TestBase {
                                                      User.class,
                                                      EQUAL,
                                                      anonymousKeySubclass,
-                                                     new ArrayList<ValidationFailure>());
+            new ArrayList<>());
 
         assertThat(compatible, is(true));
     }

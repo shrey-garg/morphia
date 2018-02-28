@@ -62,9 +62,6 @@ import static org.junit.Assert.fail;
 import static org.mongodb.morphia.logging.MorphiaLoggerFactory.get;
 import static org.mongodb.morphia.query.PushOptions.options;
 
-/**
- * @author Scott Hernandez
- */
 @SuppressWarnings("UnusedDeclaration")
 public class TestUpdateOps extends TestBase {
     private static final Logger LOG = get(TestUpdateOps.class);

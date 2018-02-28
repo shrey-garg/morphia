@@ -5,10 +5,6 @@ import org.mongodb.morphia.annotations.Embedded;
 
 import java.io.Serializable;
 
-
-/**
- * @author Olafur Gauti Gudmundsson
- */
 @Embedded
 public class Translation implements Serializable {
     private String title;

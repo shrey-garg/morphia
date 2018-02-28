@@ -17,7 +17,6 @@
 package org.mongodb.morphia.aggregation;
 
 import org.mongodb.morphia.geo.Geometry;
-import org.mongodb.morphia.geo.GeometryShapeConverter;
 import org.mongodb.morphia.geo.Point;
 import org.mongodb.morphia.query.Query;
 
@@ -27,8 +26,6 @@ import org.mongodb.morphia.query.Query;
  * @mongodb.driver.manual reference/operator/aggregation/geoNear/ geoNear
  */
 public final class GeoNear {
-    private final double[] nearLegacy;
-    private final Geometry nearGeoJson;
     private final String distanceField;
     private final Long limit;
     private final Long maxDocuments;
@@ -40,8 +37,6 @@ public final class GeoNear {
     private final Boolean uniqueDocuments;
 
     private GeoNear(final GeoNearBuilder builder) {
-        nearLegacy = builder.nearLegacy;
-        nearGeoJson = builder.nearGeoJson;
         distanceField = builder.distanceField;
         limit = builder.limit;
         maxDocuments = builder.maxDocuments;
@@ -116,32 +111,6 @@ public final class GeoNear {
     }
 
     /**
-     * The point for which to find the closest documents.
-     * <p/>
-     * If using a 2dsphere index, you can specify the point as either a GeoJSON point or legacy coordinate pair.
-     * <p/>
-     * If using a 2d index, specify the point as a legacy coordinate pair.
-     *
-     * @return the point
-     */
-    public double[] getNear() {
-        double[] copy = new double[0];
-        if (nearLegacy != null) {
-            copy = new double[nearLegacy.length];
-            System.arraycopy(nearLegacy, 0, copy, 0, nearLegacy.length);
-        }
-        return copy;
-    }
-
-    Object getNearAsDBObject(final GeometryShapeConverter.PointConverter pointConverter) {
-        if (nearGeoJson != null) {
-            return pointConverter.encode(nearGeoJson);
-        } else {
-            return getNear();
-        }
-    }
-
-    /**
      * Limits the results to the documents that match the query.
      *
      * @return the query
@@ -167,19 +136,6 @@ public final class GeoNear {
     }
 
     /**
-     * If this value is true, the query returns a matching document once, even if more than one of the document's location fields match the
-     * query.
-     *
-     * @return true if returning only unique documents
-     * @deprecated since version MongoDB 2.6: Geospatial queries no longer return duplicate results. The $uniqueDocs operator has no impact
-     * on results.
-     */
-    @Deprecated
-    public Boolean getUniqueDocuments() {
-        return uniqueDocuments;
-    }
-
-    /**
      * Provides a builder for GeoNear instances.
      */
     public static class GeoNearBuilder {
@@ -192,8 +148,6 @@ public final class GeoNear {
         private Double distanceMultiplier;
         private String includeLocations;
         private Boolean uniqueDocuments;
-        private double[] nearLegacy;
-        private Geometry nearGeoJson;
 
         /**
          * @param distanceField The output field that contains the calculated distance. To specify a field within a subdocument, use dot
@@ -282,7 +236,6 @@ public final class GeoNear {
          * @return this
          */
         public GeoNearBuilder setNear(final double latitude, final double longitude) {
-            this.nearLegacy = new double[]{longitude, latitude};
             return this;
         }
 
@@ -293,7 +246,6 @@ public final class GeoNear {
          * @return this
          */
         public GeoNearBuilder setNear(final Point point) {
-            this.nearGeoJson = point;
             return this;
         }
 

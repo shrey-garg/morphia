@@ -23,10 +23,6 @@ import org.mongodb.morphia.annotations.Id;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-
-/**
- * @author Scott Hernandez
- */
 public class TestDatatypes extends TestBase {
 
     @Before

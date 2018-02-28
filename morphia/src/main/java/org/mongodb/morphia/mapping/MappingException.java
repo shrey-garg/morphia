@@ -13,9 +13,6 @@
 
 package org.mongodb.morphia.mapping;
 
-/**
- * @author Olafur Gauti Gudmundsson
- */
 public class MappingException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 

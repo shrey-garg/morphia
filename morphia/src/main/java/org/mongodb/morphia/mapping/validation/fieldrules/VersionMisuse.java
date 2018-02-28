@@ -3,6 +3,8 @@ package org.mongodb.morphia.mapping.validation.fieldrules;
 
 import org.mongodb.morphia.ObjectFactory;
 import org.mongodb.morphia.annotations.Version;
+import org.mongodb.morphia.mapping.MappedClass;
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.validation.ConstraintViolation;
 import org.mongodb.morphia.mapping.validation.ConstraintViolation.Level;
@@ -11,10 +13,6 @@ import java.util.Set;
 
 import static java.lang.String.format;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public class VersionMisuse extends FieldConstraint {
 
     private ObjectFactory creator;

@@ -1,14 +1,11 @@
 package org.mongodb.morphia.query;
 
 
-import com.mongodb.BasicDBObject;
+import com.mongodb.client.model.PushOptions;
 import org.bson.Document;
-import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.internal.PathTarget;
-import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.Collections.singletonList;
@@ -16,10 +13,8 @@ import static java.util.Collections.singletonList;
 
 /**
  * @param <T> the type to update
- * @author Scott Hernandez
  */
 public class UpdateOpsImpl<T> implements UpdateOperations<T> {
-    private Datastore datastore;
     private final Mapper mapper;
     private final Class<T> clazz;
     private Document operations = new Document();
@@ -32,8 +27,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
      * @param type   the type to update
      * @param mapper the Mapper to use
      */
-    public UpdateOpsImpl(final Datastore datastore, final Class<T> type, final Mapper mapper) {
-        this.datastore = datastore;
+    public UpdateOpsImpl(final Class<T> type, final Mapper mapper) {
         this.mapper = mapper;
         clazz = type;
     }
@@ -44,7 +38,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
             throw new QueryException("Value cannot be null.");
         }
 
-        add(UpdateOperator.ADD_TO_SET, field, value, true);
+        add(UpdateOperator.ADD_TO_SET, field, value);
         return this;
     }
 
@@ -54,7 +48,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
             throw new QueryException("Values cannot be null or empty.");
         }
 
-        add(UpdateOperator.ADD_TO_SET_EACH, field, values, true);
+        add(UpdateOperator.ADD_TO_SET_EACH, field, values);
         return this;
     }
 
@@ -84,9 +78,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
             pathTarget.disableValidation();
         }
 
-        BasicDBObject dbObject = new BasicDBObject(UpdateOperator.EACH.val(), mapper.toMongoObject(pathTarget.getTarget(), null, values));
-        options.update(dbObject);
-        addOperation(UpdateOperator.PUSH, pathTarget.translatedPath(), dbObject);
+        addOperation(UpdateOperator.PUSH, pathTarget.translatedPath(), new Document(UpdateOperator.EACH.val(), values));
 
         return this;
     }
@@ -130,7 +122,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
         if (value == null) {
             throw new QueryException("Value cannot be null.");
         }
-        add(UpdateOperator.INC, field, value, false);
+        add(UpdateOperator.INC, field, value);
         return this;
     }
 
@@ -142,13 +134,13 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
 
     @Override
     public UpdateOperations<T> max(final String field, final Number value) {
-        add(UpdateOperator.MAX, field, value, false);
+        add(UpdateOperator.MAX, field, value);
         return this;
     }
 
     @Override
     public UpdateOperations<T> min(final String field, final Number value) {
-        add(UpdateOperator.MIN, field, value, false);
+        add(UpdateOperator.MIN, field, value);
         return this;
     }
 
@@ -157,7 +149,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
         if (value == null) {
             throw new QueryException("Value cannot be null.");
         }
-        add(UpdateOperator.PULL, field, value, true);
+        add(UpdateOperator.PULL, field, value);
         return this;
     }
 
@@ -167,7 +159,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
             throw new QueryException("Value cannot be null or empty.");
         }
 
-        add(UpdateOperator.PULL_ALL, field, values, true);
+        add(UpdateOperator.PULL_ALL, field, values);
         return this;
     }
 
@@ -187,7 +179,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
             throw new QueryException("Value cannot be null.");
         }
 
-        add(UpdateOperator.SET, field, value, true);
+        add(UpdateOperator.SET, field, value);
         return this;
     }
 
@@ -197,13 +189,13 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
             throw new QueryException("Value cannot be null.");
         }
 
-        add(UpdateOperator.SET_ON_INSERT, field, value, true);
+        add(UpdateOperator.SET_ON_INSERT, field, value);
         return this;
     }
 
     @Override
     public UpdateOperations<T> unset(final String field) {
-        add(UpdateOperator.UNSET, field, 1, false);
+        add(UpdateOperator.UNSET, field, 1);
         return this;
     }
 
@@ -232,8 +224,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
         return isolated;
     }
 
-    //TODO Clean this up a little.
-    protected void add(final UpdateOperator op, final String f, final Object value, final boolean convert) {
+    protected void add(final UpdateOperator op, final String f, final Object value) {
         if (value == null) {
             throw new QueryException("Val cannot be null");
         }
@@ -243,19 +234,9 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
         if (!validateNames) {
             pathTarget.disableValidation();
         }
-        MappedField mf = pathTarget.getTarget();
-
-        if (convert) {
-            if (UpdateOperator.PULL_ALL.equals(op) && value instanceof List) {
-                val = toDBObjList(mf, (List<?>) value);
-            } else {
-                val = mapper.toMongoObject(mf, null, value);
-            }
-        }
-
 
         if (UpdateOperator.ADD_TO_SET_EACH.equals(op)) {
-            val = new BasicDBObject(UpdateOperator.EACH.val(), val);
+            val = new Document(UpdateOperator.EACH.val(), val);
         }
 
         addOperation(op, pathTarget.translatedPath(), val);
@@ -273,17 +254,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
     }
 
     protected UpdateOperations<T> remove(final String fieldExpr, final boolean firstNotLast) {
-        add(UpdateOperator.POP, fieldExpr, (firstNotLast) ? -1 : 1, false);
+        add(UpdateOperator.POP, fieldExpr, (firstNotLast) ? -1 : 1);
         return this;
     }
-
-    private List<Object> toDBObjList(final MappedField mf, final List<?> values) {
-        final List<Object> list = new ArrayList<>(values.size());
-        for (final Object obj : values) {
-            list.add(mapper.toMongoObject(mf, null, obj));
-        }
-
-        return list;
-    }
-
 }

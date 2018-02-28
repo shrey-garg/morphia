@@ -6,10 +6,6 @@ import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.Set;
 
-
-/**
- * @author Uwe Schaefer, (us@thomas-daily.de)
- */
 public interface ClassConstraint {
     /**
      * Check that a MappedClass meets the constraint
