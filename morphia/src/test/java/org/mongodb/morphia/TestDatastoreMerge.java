@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 public class TestDatastoreMerge extends TestBase {
 
     @Test
-    public void testMerge() throws Exception {
+    public void testMerge() {
         final Merger te = new Merger();
         te.name = "test1";
         te.foo = "bar";

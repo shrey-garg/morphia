@@ -32,7 +32,7 @@ public class TestMongoClientWriteConcern extends TestBase {
     }
 
     @Test
-    public void defaultWriteConcern() throws Exception {
+    public void defaultWriteConcern() {
         assertEquals(UNACKNOWLEDGED, getDatastore().getDefaultWriteConcern());
         getAds().insert(new SimpleEntity(1));
         getAds().insert(new SimpleEntity(1));

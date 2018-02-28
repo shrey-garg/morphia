@@ -13,7 +13,7 @@ import org.mongodb.morphia.query.Type;
 public class TestTypeCriteria extends TestBase {
 
     @Test
-    public void getStringTypeData() throws Exception {
+    public void getStringTypeData() {
         Class1 entity = new Class1();
         entity.firstName = "first_name";
         getDatastore().save(entity);

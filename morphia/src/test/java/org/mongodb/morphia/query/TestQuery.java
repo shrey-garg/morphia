@@ -90,7 +90,7 @@ public class TestQuery extends TestBase {
         getMorphia().map(GenericKeyValue.class);
         getDatastore().ensureIndexes(GenericKeyValue.class);
         final GenericKeyValue<String> value = new GenericKeyValue<String>();
-        final List<Object> keys = Arrays.<Object>asList("key1", "key2");
+        final List<Object> keys = Arrays.asList("key1", "key2");
         value.key = keys;
         getDatastore().save(value);
 
@@ -104,7 +104,7 @@ public class TestQuery extends TestBase {
         getMorphia().map(KeyValue.class);
         getDatastore().ensureIndexes(KeyValue.class);
         final KeyValue value = new KeyValue();
-        final List<Object> keys = Arrays.<Object>asList("key1", "key2");
+        final List<Object> keys = Arrays.asList("key1", "key2");
         value.key = keys;
         getDatastore().save(value);
 

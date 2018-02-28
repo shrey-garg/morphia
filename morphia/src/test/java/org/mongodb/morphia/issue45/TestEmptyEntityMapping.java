@@ -15,7 +15,7 @@ import java.util.Set;
 
 public class TestEmptyEntityMapping extends TestBase {
     @Test
-    public void testEmptyEmbeddedNotNullAfterReload() throws Exception {
+    public void testEmptyEmbeddedNotNullAfterReload() {
         A a = new A();
         a.b = new B();
 

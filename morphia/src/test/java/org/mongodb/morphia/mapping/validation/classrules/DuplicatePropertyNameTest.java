@@ -13,17 +13,17 @@ import java.util.Map;
 
 public class DuplicatePropertyNameTest extends TestBase {
     @Test(expected = ConstraintViolationException.class)
-    public void testDuplicatedPropertyNameDifferentType() throws Exception {
+    public void testDuplicatedPropertyNameDifferentType() {
         getMorphia().map(DuplicatedPropertyName2.class);
     }
 
     @Test(expected = ConstraintViolationException.class)
-    public void testDuplicatedPropertyNameSameType() throws Exception {
+    public void testDuplicatedPropertyNameSameType() {
         getMorphia().map(DuplicatedPropertyName.class);
     }
 
     @Test(expected = ConstraintViolationException.class)
-    public void testDuplicatedPropertyNameShadowedFields() throws Exception {
+    public void testDuplicatedPropertyNameShadowedFields() {
         getMorphia().map(Extends.class);
     }
 

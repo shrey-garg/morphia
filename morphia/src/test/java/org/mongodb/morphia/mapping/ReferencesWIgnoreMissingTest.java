@@ -13,7 +13,7 @@ import java.util.List;
 
 public class ReferencesWIgnoreMissingTest extends TestBase {
     @Test
-    public void testMissingReference() throws Exception {
+    public void testMissingReference() {
         final Container c = new Container();
         c.refs = new StringHolder[]{new StringHolder(), new StringHolder()};
         getDatastore().save(c);

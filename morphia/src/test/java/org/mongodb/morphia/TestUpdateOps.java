@@ -118,7 +118,7 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     @SuppressWarnings("deprecation")
-    public void testAdd() throws Exception {
+    public void testAdd() {
         checkMinServerVersion(2.6);
 
         ContainsIntArray cIntArray = new ContainsIntArray();
@@ -211,7 +211,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testAddToSet() throws Exception {
+    public void testAddToSet() {
         ContainsIntArray cIntArray = new ContainsIntArray();
         getDatastore().save(cIntArray);
 
@@ -244,7 +244,7 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     @SuppressWarnings("deprecation")
-    public void testUpdateFirst() throws Exception {
+    public void testUpdateFirst() {
         ContainsIntArray cIntArray = new ContainsIntArray();
         ContainsIntArray control = new ContainsIntArray();
         Datastore ds = getDatastore();
@@ -285,7 +285,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testExistingUpdates() throws Exception {
+    public void testExistingUpdates() {
         Circle c = new Circle(100D);
         getDatastore().save(c);
         c = new Circle(12D);
@@ -308,7 +308,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testIncDec() throws Exception {
+    public void testIncDec() {
         final Rectangle[] array = {new Rectangle(1, 10), new Rectangle(1, 10), new Rectangle(1, 10), new Rectangle(10, 10),
             new Rectangle(10, 10)};
 
@@ -369,7 +369,7 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     @SuppressWarnings("deprecation")
-    public void testInsertUpdate() throws Exception {
+    public void testInsertUpdate() {
         assertInserted(getDatastore().update(getDatastore().find(Circle.class).field("radius").equal(0),
                                       getDatastore().createUpdateOperations(Circle.class).inc("radius", 1D), true));
         assertInserted(getDatastore().update(getDatastore().find(Circle.class).field("radius").equal(0),
@@ -379,7 +379,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testInsertWithRef() throws Exception {
+    public void testInsertWithRef() {
         final Pic pic = new Pic();
         pic.setName("fist");
         final Key<Pic> picKey = getDatastore().save(pic);
@@ -407,7 +407,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testMaxKeepsCurrentDocumentValueWhenThisIsLargerThanSuppliedValue() throws Exception {
+    public void testMaxKeepsCurrentDocumentValueWhenThisIsLargerThanSuppliedValue() {
         checkMinServerVersion(2.6);
         final ObjectId id = new ObjectId();
         final double originalValue = 2D;
@@ -433,7 +433,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testMinKeepsCurrentDocumentValueWhenThisIsSmallerThanSuppliedValue() throws Exception {
+    public void testMinKeepsCurrentDocumentValueWhenThisIsSmallerThanSuppliedValue() {
         checkMinServerVersion(2.6);
         final ObjectId id = new ObjectId();
         final double originalValue = 3D;
@@ -452,7 +452,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testMinUsesSuppliedValueWhenThisIsSmallerThanCurrentDocumentValue() throws Exception {
+    public void testMinUsesSuppliedValueWhenThisIsSmallerThanCurrentDocumentValue() {
         checkMinServerVersion(2.6);
         final ObjectId id = new ObjectId();
         final double newLowerValue = 2D;
@@ -472,7 +472,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testPush() throws Exception {
+    public void testPush() {
         checkMinServerVersion(2.6);
         ContainsIntArray cIntArray = new ContainsIntArray();
         getDatastore().save(cIntArray);
@@ -614,7 +614,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testRemoveFirst() throws Exception {
+    public void testRemoveFirst() {
         final ContainsIntArray cIntArray = new ContainsIntArray();
         getDatastore().save(cIntArray);
         ContainsIntArray cIALoaded = getDatastore().get(cIntArray);
@@ -639,7 +639,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testSetOnInsertWhenInserting() throws Exception {
+    public void testSetOnInsertWhenInserting() {
         checkMinServerVersion(2.4);
         ObjectId id = new ObjectId();
 
@@ -655,7 +655,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testSetOnInsertWhenUpdating() throws Exception {
+    public void testSetOnInsertWhenUpdating() {
         checkMinServerVersion(2.4);
         ObjectId id = new ObjectId();
 
@@ -677,7 +677,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testSetUnset() throws Exception {
+    public void testSetUnset() {
         Datastore ds = getDatastore();
         final Key<Circle> key = ds.save(new Circle(1));
 
@@ -777,7 +777,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testUpdateKeyRef() throws Exception {
+    public void testUpdateKeyRef() {
         final ContainsPicKey cpk = new ContainsPicKey();
         cpk.name = "cpk one";
 
@@ -817,7 +817,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testUpdateKeyList() throws Exception {
+    public void testUpdateKeyList() {
         final ContainsPicKey cpk = new ContainsPicKey();
         cpk.name = "cpk one";
 
@@ -845,7 +845,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testUpdateRef() throws Exception {
+    public void testUpdateRef() {
         final ContainsPic cp = new ContainsPic();
         cp.setName("cp one");
 
@@ -888,7 +888,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    public void testUpdateWithDifferentType() throws Exception {
+    public void testUpdateWithDifferentType() {
         final ContainsInt cInt = new ContainsInt();
         cInt.val = 21;
         getDatastore().save(cInt);
@@ -902,7 +902,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test(expected = ValidationException.class)
-    public void testValidationBadFieldName() throws Exception {
+    public void testValidationBadFieldName() {
         getDatastore().update(getDatastore().find(Circle.class).field("radius").equal(0),
                        getDatastore().createUpdateOperations(Circle.class).inc("r", 1D));
     }

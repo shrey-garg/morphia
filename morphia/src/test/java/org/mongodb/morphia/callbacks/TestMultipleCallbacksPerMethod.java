@@ -13,7 +13,7 @@ import org.mongodb.morphia.annotations.Transient;
 
 public class TestMultipleCallbacksPerMethod extends TestBase {
     @Test
-    public void testMultipleCallbackAnnotation() throws Exception {
+    public void testMultipleCallbackAnnotation() {
         final SomeEntity entity = new SomeEntity();
         Assert.assertFalse(entity.isPersistent());
         getDatastore().save(entity);

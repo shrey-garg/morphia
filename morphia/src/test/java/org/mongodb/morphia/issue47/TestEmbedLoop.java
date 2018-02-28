@@ -14,7 +14,7 @@ public class TestEmbedLoop extends TestBase {
 
     @Test
     @Ignore
-    public void testCircularRefs() throws Exception {
+    public void testCircularRefs() {
 
         getMorphia().map(A.class);
 

@@ -34,6 +34,7 @@ import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.entities.IndexOnValue;
 import org.mongodb.morphia.entities.NamedIndexOnValue;
 import org.mongodb.morphia.entities.UniqueIndexOnValue;
+import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappingException;
 import org.mongodb.morphia.utils.IndexDirection;
 import org.mongodb.morphia.utils.IndexType;
@@ -145,7 +146,7 @@ public class TestIndexed extends TestBase {
     }
 
     @Test
-    public void testIndexedEntity() throws Exception {
+    public void testIndexedEntity() {
         getDatastore().ensureIndexes();
         assertThat(getDatastore().getCollection(IndexOnValue.class).getIndexInfo(), hasIndexNamed("value_1"));
 
@@ -155,7 +156,7 @@ public class TestIndexed extends TestBase {
     }
 
     @Test
-    public void testIndexedRecursiveEntity() throws Exception {
+    public void testIndexedRecursiveEntity() {
         final MappedClass mc = getMorphia().getMapper().getMappedClass(CircularEmbeddedEntity.class);
         getDatastore().ensureIndexes();
         assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("a_1"));
@@ -182,14 +183,14 @@ public class TestIndexed extends TestBase {
     }
 
     @Test
-    public void testNamedIndexEntity() throws Exception {
+    public void testNamedIndexEntity() {
         getDatastore().ensureIndexes();
 
         assertThat(getDatastore().getCollection(NamedIndexOnValue.class).getIndexInfo(), hasIndexNamed("value_ascending"));
     }
 
     @Test(expected = DuplicateKeyException.class)
-    public void testUniqueIndexedEntity() throws Exception {
+    public void testUniqueIndexedEntity() {
         getDatastore().ensureIndexes();
         assertThat(getDatastore().getCollection(UniqueIndexOnValue.class).getIndexInfo(), hasIndexNamed("l_ascending"));
         getDatastore().save(new UniqueIndexOnValue("a"));
@@ -198,7 +199,7 @@ public class TestIndexed extends TestBase {
         getDatastore().save(new UniqueIndexOnValue("v"));
     }
     @Test(expected = MappingException.class)
-    public void testMixedIndexDefinitions() throws Exception {
+    public void testMixedIndexDefinitions() {
         getMorphia().map(MixedIndexDefinitions.class);
         getDatastore().ensureIndexes(MixedIndexDefinitions.class);
     }

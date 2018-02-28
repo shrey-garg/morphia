@@ -77,7 +77,7 @@ public class NestedMapsAndListsTest extends TestBase {
     }
 
     @Test
-    public void testMapOfList() throws Exception {
+    public void testMapOfList() {
         HashMapOfList map = new HashMapOfList();
         map.mol.put("entry1", Collections.singletonList("val1"));
         map.mol.put("entry2", Collections.singletonList("val2"));
@@ -105,7 +105,7 @@ public class NestedMapsAndListsTest extends TestBase {
     }
 
     @Test
-    public void testMapOfListOfMapMap() throws Exception {
+    public void testMapOfListOfMapMap() {
         final HashMapOfMap mapOfMap = new HashMapOfMap();
         final Map<String, String> map = new HashMap<String, String>();
         mapOfMap.mom.put("root", map);
@@ -130,7 +130,7 @@ public class NestedMapsAndListsTest extends TestBase {
     }
 
     @Test
-    public void testMapOfMap() throws Exception {
+    public void testMapOfMap() {
         HashMapOfMap mapOfMap = new HashMapOfMap();
         final Map<String, String> map = new HashMap<String, String>();
         mapOfMap.mom.put("root", map);

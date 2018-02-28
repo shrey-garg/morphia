@@ -19,7 +19,7 @@ import java.util.Collection;
 public class MapperOptionsTest extends TestBase {
 
     @Test
-    public void emptyListStoredWithOptions() throws Exception {
+    public void emptyListStoredWithOptions() {
         final HasList hl = new HasList();
         hl.names = new ArrayList<String>();
 
@@ -50,7 +50,7 @@ public class MapperOptionsTest extends TestBase {
     }
 
     @Test
-    public void emptyMapStoredWithOptions() throws Exception {
+    public void emptyMapStoredWithOptions() {
         final HasMap hm = new HasMap();
         hm.properties = new HashMap<String, String>();
 
@@ -69,7 +69,7 @@ public class MapperOptionsTest extends TestBase {
     }
 
     @Test
-    public void emptyCollectionValuedMapStoredWithOptions() throws Exception {
+    public void emptyCollectionValuedMapStoredWithOptions() {
         final HasCollectionValuedMap hm = new HasCollectionValuedMap();
         hm.properties = new HashMap<String, Collection<String>>();
 
@@ -87,7 +87,7 @@ public class MapperOptionsTest extends TestBase {
     }
 
     @Test
-    public void emptyComplexObjectValuedMapStoredWithOptions() throws Exception {
+    public void emptyComplexObjectValuedMapStoredWithOptions() {
         final HasComplexObjectValuedMap hm = new HasComplexObjectValuedMap();
         hm.properties = new HashMap<String, ComplexObject>();
 
@@ -118,7 +118,7 @@ public class MapperOptionsTest extends TestBase {
     }
 
     @Test
-    public void nullListStoredWithOptions() throws Exception {
+    public void nullListStoredWithOptions() {
         final HasList hl = new HasList();
         hl.names = null;
 
@@ -136,7 +136,7 @@ public class MapperOptionsTest extends TestBase {
     }
 
     @Test
-    public void nullMapStoredWithOptions() throws Exception {
+    public void nullMapStoredWithOptions() {
         final HasMap hm = new HasMap();
         hm.properties = null;
 

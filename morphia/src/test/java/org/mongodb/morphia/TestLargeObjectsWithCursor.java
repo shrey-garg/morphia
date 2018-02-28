@@ -29,7 +29,7 @@ public class TestLargeObjectsWithCursor extends TestBase {
     }
 
     @Test
-    public void testWithManyElementsInCollection() throws Exception {
+    public void testWithManyElementsInCollection() {
         Query<E> query = getDatastore().find(E.class);
         final long countAll = query.count();
         query = getDatastore().find(E.class);

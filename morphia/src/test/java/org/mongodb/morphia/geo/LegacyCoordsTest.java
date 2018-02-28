@@ -91,7 +91,7 @@ public class LegacyCoordsTest extends TestBase {
     }
 
     @Test
-    public void shouldNotReturnAnyResultsIfNoLocationsWithinGivenRadius() throws Exception {
+    public void shouldNotReturnAnyResultsIfNoLocationsWithinGivenRadius() {
         // given
         final PlaceWithLegacyCoords nearbyPlace = new PlaceWithLegacyCoords(new double[]{1.1, 2.3}, "Nearby Place");
         getDatastore().save(nearbyPlace);
@@ -107,7 +107,7 @@ public class LegacyCoordsTest extends TestBase {
     }
 
     @Test
-    public void shouldReturnAllLocationsOrderedByDistanceFromQueryLocationWhenPerformingNearQuery() throws Exception {
+    public void shouldReturnAllLocationsOrderedByDistanceFromQueryLocationWhenPerformingNearQuery() {
         // given
         final PlaceWithLegacyCoords nearbyPlace = new PlaceWithLegacyCoords(new double[]{1.1, 2.3}, "Nearby Place");
         getDatastore().save(nearbyPlace);
@@ -129,7 +129,7 @@ public class LegacyCoordsTest extends TestBase {
     }
 
     @Test
-    public void shouldReturnOnlyThosePlacesWithinTheGivenRadius() throws Exception {
+    public void shouldReturnOnlyThosePlacesWithinTheGivenRadius() {
         // given
         final PlaceWithLegacyCoords nearbyPlace = new PlaceWithLegacyCoords(new double[]{1.1, 2.3}, "Nearby Place");
         getDatastore().save(nearbyPlace);
@@ -149,7 +149,7 @@ public class LegacyCoordsTest extends TestBase {
     }
 
     @Test(expected = MongoException.class)
-    public void shouldThrowAnExceptionIfQueryingWithoutA2dIndex() throws Exception {
+    public void shouldThrowAnExceptionIfQueryingWithoutA2dIndex() {
         // given
         final PlaceWithLegacyCoords nearbyPlace = new PlaceWithLegacyCoords(new double[]{1.1, 2.3}, "Nearby Place");
         getDatastore().save(nearbyPlace);

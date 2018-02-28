@@ -35,7 +35,7 @@ import static org.junit.Assert.assertNotNull;
 public class ExternalMapperExtTest extends TestBase {
 
     @Test
-    public void testExternalMapping() throws Exception {
+    public void testExternalMapping() {
         final Mapper mapper = getMorphia().getMapper();
         final CloneMapper helper = new CloneMapper(mapper);
         helper.map(Skeleton.class, EntityWithNoAnnotations.class);

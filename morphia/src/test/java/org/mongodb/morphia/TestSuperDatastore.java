@@ -23,7 +23,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TestSuperDatastore extends TestBase {
     @Test
-    public void testDeleteDoesNotDeleteAnythingWhenGivenAnIncorrectId() throws Exception {
+    public void testDeleteDoesNotDeleteAnythingWhenGivenAnIncorrectId() {
         // given
         final String ns = "someCollectionName";
         getDatabase().getCollection(ns).remove(new BasicDBObject());
@@ -43,7 +43,7 @@ public class TestSuperDatastore extends TestBase {
     }
 
     @Test
-    public void testDeleteWillRemoveAnyDocumentWithAMatchingId() throws Exception {
+    public void testDeleteWillRemoveAnyDocumentWithAMatchingId() {
         // given
         final String ns = "someCollectionName";
         getDatabase().getCollection(ns).remove(new BasicDBObject());
@@ -67,7 +67,7 @@ public class TestSuperDatastore extends TestBase {
     }
 
     @Test
-    public void testDeleteWithAnEntityTypeAndId() throws Exception {
+    public void testDeleteWithAnEntityTypeAndId() {
         // given
         final String ns = "someCollectionName";
         getDatabase().getCollection(ns).remove(new BasicDBObject());
@@ -87,7 +87,7 @@ public class TestSuperDatastore extends TestBase {
     }
 
     @Test
-    public void testFind() throws Exception {
+    public void testFind() {
         final String ns = "hotels";
         Rectangle rect = new Rectangle(10, 10);
         ObjectId id = new ObjectId();
@@ -121,7 +121,7 @@ public class TestSuperDatastore extends TestBase {
     }
 
     @Test
-    public void testGet() throws Exception {
+    public void testGet() {
         final String ns = "hotels";
         final Rectangle rect = new Rectangle(10, 10);
 

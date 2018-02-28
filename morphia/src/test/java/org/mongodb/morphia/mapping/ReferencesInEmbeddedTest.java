@@ -11,7 +11,7 @@ import org.mongodb.morphia.testutil.TestEntity;
 
 public class ReferencesInEmbeddedTest extends TestBase {
     @Test
-    public void testLazyReferencesInEmbedded() throws Exception {
+    public void testLazyReferencesInEmbedded() {
         final Container container = new Container();
         container.name = "lazy";
         getDatastore().save(container);
@@ -27,13 +27,13 @@ public class ReferencesInEmbeddedTest extends TestBase {
     }
 
     @Test
-    public void testMapping() throws Exception {
+    public void testMapping() {
         getMorphia().map(Container.class);
         getMorphia().map(ReferencedEntity.class);
     }
 
     @Test
-    public void testNonLazyReferencesInEmbedded() throws Exception {
+    public void testNonLazyReferencesInEmbedded() {
         final Container container = new Container();
         container.name = "nonLazy";
         getDatastore().save(container);

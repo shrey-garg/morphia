@@ -21,7 +21,7 @@ import java.util.List;
 
 public class TestCallbackEscalation extends TestBase {
     @Test
-    public void testPostLoadEscalation() throws Exception {
+    public void testPostLoadEscalation() {
         A a = new A();
         a.b = new B();
         a.bs.add(new B());
@@ -45,7 +45,7 @@ public class TestCallbackEscalation extends TestBase {
     }
 
     @Test
-    public void testPostPersistEscalation() throws Exception {
+    public void testPostPersistEscalation() {
         final A a = new A();
         a.b = new B();
         a.bs.add(new B());
@@ -65,7 +65,7 @@ public class TestCallbackEscalation extends TestBase {
     }
 
     @Test
-    public void testPreLoadEscalation() throws Exception {
+    public void testPreLoadEscalation() {
         A a = new A();
         a.b = new B();
         a.bs.add(new B());
@@ -89,7 +89,7 @@ public class TestCallbackEscalation extends TestBase {
     }
 
     @Test
-    public void testPrePersistEscalation() throws Exception {
+    public void testPrePersistEscalation() {
         final A a = new A();
         a.b = new B();
         a.bs.add(new B());

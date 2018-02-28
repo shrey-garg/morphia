@@ -53,7 +53,7 @@ public class TestIdField extends TestBase {
     }
 
     @Test
-    public void testIdFieldNameMapping() throws Exception {
+    public void testIdFieldNameMapping() {
         final Rectangle r = new Rectangle(1, 12);
         final BasicDBObject dbObj = (BasicDBObject) getMorphia().toDBObject(r);
         assertFalse(dbObj.containsField("id"));
@@ -62,7 +62,7 @@ public class TestIdField extends TestBase {
     }
 
     @Test
-    public void testKeyAsId() throws Exception {
+    public void testKeyAsId() {
         getMorphia().map(KeyAsId.class);
 
         final Rectangle r = new Rectangle(1, 1);
@@ -78,7 +78,7 @@ public class TestIdField extends TestBase {
     }
 
     @Test
-    public void testMapAsId() throws Exception {
+    public void testMapAsId() {
         getMorphia().map(MapAsId.class);
 
         final MapAsId mai = new MapAsId();

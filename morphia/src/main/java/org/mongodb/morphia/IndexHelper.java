@@ -92,7 +92,7 @@ final class IndexHelper {
     Index convert(final Text text, final String nameToStore) {
         return new IndexBuilder()
             .options(text.options())
-            .fields(Collections.<Field>singletonList(new FieldBuilder()
+            .fields(Collections.singletonList(new FieldBuilder()
                                                          .value(nameToStore)
                                                          .type(IndexType.TEXT)
                                                          .weight(text.value())));
@@ -109,7 +109,7 @@ final class IndexHelper {
                                            + "allowed.  Please migrate all settings to @IndexOptions");
         }
 
-        List<Field> fields = Collections.<Field>singletonList(new FieldBuilder()
+        List<Field> fields = Collections.singletonList(new FieldBuilder()
                                                                   .value(nameToStore)
                                                                   .type(fromValue(indexed.value().toIndexValue())));
         return newOptions.isEmpty()
@@ -361,7 +361,7 @@ final class IndexHelper {
 
     void createIndex(final MongoCollection collection, final MappedClass mc, final boolean background) {
         if (!mc.isInterface() && !mc.isAbstract()) {
-            for (Index index : collectIndexes(mc, Collections.<MappedClass>emptyList())) {
+            for (Index index : collectIndexes(mc, Collections.emptyList())) {
                 createIndex(collection, mc, index, background);
             }
         }

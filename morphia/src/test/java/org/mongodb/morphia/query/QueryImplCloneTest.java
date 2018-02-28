@@ -11,7 +11,7 @@ public class QueryImplCloneTest extends TestBase {
 
     @Test
     @SuppressWarnings("deprecation")
-    public void testQueryCloneOld() throws Exception {
+    public void testQueryCloneOld() {
         final Query q = getDatastore().find(E1.class)
                                       .field("i")
                                       .equal(5)
@@ -28,7 +28,7 @@ public class QueryImplCloneTest extends TestBase {
     }
 
     @Test
-    public void testQueryClone() throws Exception {
+    public void testQueryClone() {
         final Query q = getDatastore().find(E1.class)
                                       .field("i")
                                       .equal(5)

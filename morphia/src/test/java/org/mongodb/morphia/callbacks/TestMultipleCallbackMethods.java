@@ -16,7 +16,7 @@ public class TestMultipleCallbackMethods extends TestBase {
     private static int loading;
 
     @Test
-    public void testMultipleCallbackAnnotation() throws Exception {
+    public void testMultipleCallbackAnnotation() {
         final SomeEntity entity = new SomeEntity();
         getDatastore().save(entity);
 

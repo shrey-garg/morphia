@@ -33,7 +33,7 @@ public class GenericsMappingTest extends TestBase {
     }
 
     @Test
-    public void testIt() throws Exception {
+    public void testIt() {
         getMorphia().map(HoldsAnInteger.class, HoldsAString.class, ContainsThings.class);
         final ContainsThings ct = new ContainsThings();
         final HoldsAnInteger hai = new HoldsAnInteger();

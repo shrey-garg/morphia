@@ -25,7 +25,7 @@ import org.mongodb.morphia.annotations.NotSaved;
 public class TestNotSaved extends TestBase {
 
     @Test
-    public void testBasic() throws Exception {
+    public void testBasic() {
         getDatastore().save(new Normal("value"));
         Normal n = getDatastore().find(Normal.class).get();
         Assert.assertNotNull(n);

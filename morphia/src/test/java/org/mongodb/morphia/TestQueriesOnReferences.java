@@ -41,7 +41,7 @@ public class TestQueriesOnReferences extends TestBase {
     }
 
     @Test
-    public void testQueryOverLazyReference() throws Exception {
+    public void testQueryOverLazyReference() {
 
         final ContainsPic cpk = new ContainsPic();
         final Pic p = new Pic();
@@ -64,7 +64,7 @@ public class TestQueriesOnReferences extends TestBase {
     }
 
     @Test
-    public void testQueryOverReference() throws Exception {
+    public void testQueryOverReference() {
 
         final ContainsPic cpk = new ContainsPic();
         final Pic p = new Pic();

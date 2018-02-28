@@ -10,12 +10,12 @@ import org.mongodb.morphia.mapping.MappingException;
 public class NonStaticInnerClassTest extends TestBase {
 
     @Test(expected = MappingException.class)
-    public void testInValidInnerClass() throws Exception {
+    public void testInValidInnerClass() {
         getMorphia().map(InValid.class);
     }
 
     @Test
-    public void testValidInnerClass() throws Exception {
+    public void testValidInnerClass() {
         getMorphia().map(Valid.class);
     }
 

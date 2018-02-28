@@ -62,7 +62,7 @@ public class QueryInTest extends TestBase {
     }
 
     @Test
-    public void testInIdList() throws Exception {
+    public void testInIdList() {
         final Doc doc = new Doc();
         doc.id = 1;
         getDatastore().save(doc);
@@ -78,7 +78,7 @@ public class QueryInTest extends TestBase {
     }
 
     @Test
-    public void testInQuery() throws Exception {
+    public void testInQuery() {
         checkMinServerVersion(2.5);
         final HasRefs hr = new HasRefs();
         for (int x = 0; x < 10; x++) {
@@ -94,7 +94,7 @@ public class QueryInTest extends TestBase {
     }
 
     @Test
-    public void testInQueryByKey() throws Exception {
+    public void testInQueryByKey() {
         checkMinServerVersion(2.5);
         final HasRef hr = new HasRef();
         List<Key<ReferencedEntity>> refs = new ArrayList<Key<ReferencedEntity>>();
@@ -119,7 +119,7 @@ public class QueryInTest extends TestBase {
     }
 
     @Test
-    public void testMapping() throws Exception {
+    public void testMapping() {
         getMorphia().map(HasRefs.class);
         getMorphia().map(ReferencedEntity.class);
     }

@@ -15,7 +15,7 @@ public class MorphiaLoggerFactoryTest extends TestBase {
     }
 
     @Test
-    public void testOverrideLoggerWithCustomOne() throws Exception {
+    public void testOverrideLoggerWithCustomOne() {
         // given
         MorphiaLoggerFactory.reset();
         MorphiaLoggerFactory.registerLogger(TestLoggerFactory.class);

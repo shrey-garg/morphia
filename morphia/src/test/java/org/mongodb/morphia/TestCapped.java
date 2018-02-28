@@ -11,7 +11,7 @@ import static org.junit.Assert.assertTrue;
 
 public class TestCapped extends TestBase {
     @Test
-    public void testCappedEntity() throws Exception {
+    public void testCappedEntity() {
         // given
         getMorphia().map(CurrentStatus.class);
         getDatastore().ensureCaps();

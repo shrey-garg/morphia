@@ -9,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 
 public class LongIdEntityTest extends TestBase {
     @Test
-    public void testMonoIncreasingId() throws Exception {
+    public void testMonoIncreasingId() {
         MyEntity ent = new MyEntity(getDatastore());
         getDatastore().save(ent);
         assertEquals(1L, ent.getMyLongId(), 0);

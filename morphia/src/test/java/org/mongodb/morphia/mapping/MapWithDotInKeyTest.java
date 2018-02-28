@@ -14,7 +14,7 @@ import java.io.Serializable;
 public class MapWithDotInKeyTest extends TestBase {
 
     @Test
-    public void testMapping() throws Exception {
+    public void testMapping() {
         E e = new E();
         e.mymap.put("a.b", "a");
         e.mymap.put("c.e.g", "b");

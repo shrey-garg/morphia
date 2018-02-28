@@ -29,7 +29,7 @@ public class KeyMappingTest extends TestBase {
     }
 
     @Test
-    public void testKeyComparisons() throws Exception {
+    public void testKeyComparisons() {
         final User user = new User("Luke Skywalker");
         getDatastore().save(user);
         final Key<User> k1 = new Key<User>(User.class, "User", user.id);

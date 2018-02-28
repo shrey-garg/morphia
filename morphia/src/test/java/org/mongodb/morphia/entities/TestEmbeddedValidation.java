@@ -40,7 +40,7 @@ public class TestEmbeddedValidation extends TestBase {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void testCreateEntityWithBasicDBList() throws Exception {
+    public void testCreateEntityWithBasicDBList() {
         getMorphia().map(TestEntity.class);
         BasicDAO<TestEntity, ObjectId> dao = new BasicDAO<TestEntity, ObjectId>(TestEntity.class, getDatastore());
         TestEntity entity = new TestEntity();

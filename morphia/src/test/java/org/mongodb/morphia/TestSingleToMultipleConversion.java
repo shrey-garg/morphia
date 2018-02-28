@@ -14,7 +14,7 @@ import java.util.Set;
 
 public class TestSingleToMultipleConversion extends TestBase {
     @Test
-    public void testBasicType() throws Exception {
+    public void testBasicType() {
         getDatastore().delete(getDatastore().find(HasSingleString.class));
         getDatastore().save(new HasSingleString());
         Assert.assertNotNull(getDatastore().find(HasSingleString.class).get());
@@ -31,7 +31,7 @@ public class TestSingleToMultipleConversion extends TestBase {
     }
 
     @Test
-    public void testEmbeddedType() throws Exception {
+    public void testEmbeddedType() {
         getDatastore().save(new HasEmbeddedStringy());
         Assert.assertNotNull(getDatastore().find(HasEmbeddedStringy.class).get());
         Assert.assertEquals(1, getDatastore().find(HasEmbeddedStringy.class).count());

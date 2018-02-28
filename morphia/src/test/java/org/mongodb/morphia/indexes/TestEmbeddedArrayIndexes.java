@@ -32,7 +32,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class TestEmbeddedArrayIndexes extends TestBase {
     @Test
-    public void testParamEntity() throws Exception {
+    public void testParamEntity() {
         final MappedClass mc = getMorphia().getMapper().getMappedClass(A.class);
         assertNotNull(mc);
 

@@ -28,12 +28,12 @@ public class TestMaxMin extends TestBase {
 
     @SuppressWarnings("deprecation")
     @Test(expected = MongoException.class)
-    public void testExceptionForIndexMismatchOld() throws Exception {
+    public void testExceptionForIndexMismatchOld() {
         getDatastore().find(IndexedEntity.class).lowerIndexBound(new BasicDBObject("doesNotExist", 1)).get();
     }
 
     @Test(expected = MongoException.class)
-    public void testExceptionForIndexMismatch() throws Exception {
+    public void testExceptionForIndexMismatch() {
         getDatastore().find(IndexedEntity.class).get(new FindOptions()
                                                     .modifier("$min", new BasicDBObject("doesNotExist", 1)));
     }

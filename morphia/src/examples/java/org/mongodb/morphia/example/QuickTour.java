@@ -26,7 +26,7 @@ public final class QuickTour {
     private QuickTour() {
     }
 
-    public static void main(final String[] args) throws UnknownHostException {
+    public static void main(final String[] args) {
         final Morphia morphia = new Morphia();
 
         // tell morphia where to find your classes

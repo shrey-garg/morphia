@@ -12,7 +12,7 @@ public abstract class FatherEntity<T extends FatherEmbedded> {
 
     private List<? extends FatherEmbedded> embeddedList;
 
-    public FatherEntity() throws Exception {
+    public FatherEntity() {
         super();
     }
 

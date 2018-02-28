@@ -1,6 +1,7 @@
 package org.mongodb.morphia.optimisticlocks;
 
 
+import com.mongodb.client.result.UpdateResult;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Version;
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.validation.ConstraintViolationException;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
@@ -16,13 +18,11 @@ import org.mongodb.morphia.testutil.TestEntity;
 
 import java.util.ConcurrentModificationException;
 
-import static org.junit.Assert.assertEquals;
-
 public class VersionTest extends TestBase {
 
 
     @Test(expected = ConcurrentModificationException.class)
-    public void testConcurrentModDetection() throws Exception {
+    public void testConcurrentModDetection() {
         getMorphia().map(ALongPrimitive.class);
 
         final ALongPrimitive a = new ALongPrimitive();
@@ -35,7 +35,7 @@ public class VersionTest extends TestBase {
     }
 
     @Test(expected = ConcurrentModificationException.class)
-    public void testConcurrentModDetectionLong() throws Exception {
+    public void testConcurrentModDetectionLong() {
         final ALong a = new ALong();
         Assert.assertEquals(null, a.v);
         getDatastore().save(a);
@@ -46,7 +46,7 @@ public class VersionTest extends TestBase {
     }
 
     @Test(expected = ConcurrentModificationException.class)
-    public void testConcurrentModDetectionLongWithMerge() throws Exception {
+    public void testConcurrentModDetectionLongWithMerge() {
         final ALong a = new ALong();
         Assert.assertEquals(null, a.v);
         getDatastore().save(a);
@@ -59,18 +59,18 @@ public class VersionTest extends TestBase {
     }
 
     @Test(expected = ConstraintViolationException.class)
-    public void testInvalidVersionUse() throws Exception {
+    public void testInvalidVersionUse() {
         getMorphia().map(InvalidVersionUse.class);
     }
 
     @Test
-    public void testVersionFieldNameContribution() throws Exception {
+    public void testVersionFieldNameContribution() {
         final MappedField mappedFieldByJavaField = getMorphia().getMapper().getMappedClass(ALong.class).getMappedFieldByJavaField("v");
         Assert.assertEquals("versionNameContributedByAnnotation", mappedFieldByJavaField.getNameToStore());
     }
 
     @Test
-    public void testVersionInHashcode() throws Exception {
+    public void testVersionInHashcode() {
         getMorphia().mapPackage("com.example");
 
         final VersionInHashcode model = new VersionInHashcode();
@@ -80,7 +80,7 @@ public class VersionTest extends TestBase {
     }
 
     @Test
-    public void testVersions() throws Exception {
+    public void testVersions() {
         final ALongPrimitive a = new ALongPrimitive();
         Assert.assertEquals(0, a.version);
         getDatastore().save(a);
@@ -119,8 +119,8 @@ public class VersionTest extends TestBase {
                                      .field("id").equal(initial.getId());
         UpdateOperations<ALongPrimitive> update = ds.createUpdateOperations(ALongPrimitive.class)
                                                     .set("text", "some new value");
-        UpdateResults results = ds.update(query, update);
-        assertEquals(1, results.getUpdatedCount());
+        UpdateResult results = ds.updateOne(query, update);
+        Assert.assertEquals(1, results.getModifiedCount());
         ALongPrimitive postUpdate = ds.get(ALongPrimitive.class, initial.getId());
 
         Assert.assertEquals(initial.version + 1, postUpdate.version);

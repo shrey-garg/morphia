@@ -46,7 +46,7 @@ public class AnnotationBuilderTest {
         throws NoSuchMethodException {
 
         for (Method method : annotationType.getDeclaredMethods()) {
-            Method getter = builder.getDeclaredMethod(method.getName(), new Class<?>[]{method.getReturnType()});
+            Method getter = builder.getDeclaredMethod(method.getName(), method.getReturnType());
             assertNotNull(String.format("Looking for %s.%s(%s) on ", builder.getSimpleName(), method.getName(), method.getReturnType()
                                                                                                                       .getSimpleName()),
                           getter);

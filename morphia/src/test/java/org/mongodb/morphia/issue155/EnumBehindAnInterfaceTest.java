@@ -10,7 +10,7 @@ import org.mongodb.morphia.testutil.TestEntity;
 public class EnumBehindAnInterfaceTest extends TestBase {
     @Test
     @Ignore("does not work since the EnumConverter stores as a single string value -- no type info")
-    public void testEnumBehindAnInterfacePersistence() throws Exception {
+    public void testEnumBehindAnInterfacePersistence() {
         getMorphia().map(ContainerEntity.class);
         ContainerEntity n = new ContainerEntity();
         getDatastore().save(n);

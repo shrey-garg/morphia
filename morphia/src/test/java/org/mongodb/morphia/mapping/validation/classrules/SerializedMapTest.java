@@ -15,7 +15,7 @@ import java.util.Map;
 public class SerializedMapTest extends TestBase {
 
     @Test
-    public void testSerialization() throws Exception {
+    public void testSerialization() {
         Map1 map1 = new Map1();
         map1.shouldBeOk.put(3, new Foo("peter"));
         map1.shouldBeOk.put(27, new Foo("paul"));
@@ -29,7 +29,7 @@ public class SerializedMapTest extends TestBase {
     }
 
     @Test
-    public void testSerialization2() throws Exception {
+    public void testSerialization2() {
         Map2 map2 = new Map2();
         map2.shouldBeOk.put(3, new Foo("peter"));
         map2.shouldBeOk.put(27, new Foo("paul"));

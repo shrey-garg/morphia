@@ -28,7 +28,7 @@ public class CollectionInheritanceTest extends TestBase {
      * Issue's details...
      */
     @Test
-    public void testMappingBook() throws Exception {
+    public void testMappingBook() {
         // Mapping...
         getMorphia().map(Book.class /* , Authors.class, Author.class */);
 
@@ -44,7 +44,7 @@ public class CollectionInheritanceTest extends TestBase {
      * Real test
      */
     @Test
-    public void testSavingBook() throws Exception {
+    public void testSavingBook() {
         // Test saving
         getDatastore().save(newBook());
 

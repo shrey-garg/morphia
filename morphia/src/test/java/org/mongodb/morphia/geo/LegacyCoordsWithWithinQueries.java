@@ -21,7 +21,7 @@ import static org.junit.Assert.assertThat;
  */
 public class LegacyCoordsWithWithinQueries extends TestBase {
     @Test
-    public void shouldNotReturnAnyPointsIfNothingInsideCircle() throws Exception {
+    public void shouldNotReturnAnyPointsIfNothingInsideCircle() {
         // given
         checkMinServerVersion(2.4);
 
@@ -39,7 +39,7 @@ public class LegacyCoordsWithWithinQueries extends TestBase {
     }
 
     @Test
-    public void shouldNotReturnAnyValuesWhenTheQueryBoxDoesNotContainAnyPoints() throws Exception {
+    public void shouldNotReturnAnyValuesWhenTheQueryBoxDoesNotContainAnyPoints() {
         // given
         checkMinServerVersion(2.4);
 
@@ -57,7 +57,7 @@ public class LegacyCoordsWithWithinQueries extends TestBase {
     }
 
     @Test
-    public void shouldNotReturnAnyValuesWhenTheQueryPolygonDoesNotContainAnyPoints() throws Exception {
+    public void shouldNotReturnAnyValuesWhenTheQueryPolygonDoesNotContainAnyPoints() {
         // given
         checkMinServerVersion(2.4);
 
@@ -78,7 +78,7 @@ public class LegacyCoordsWithWithinQueries extends TestBase {
     }
 
     @Test
-    public void shouldReturnAPointThatIsFullyWithinQueryPolygon() throws Exception {
+    public void shouldReturnAPointThatIsFullyWithinQueryPolygon() {
         // given
         checkMinServerVersion(2.4);
 
@@ -99,7 +99,7 @@ public class LegacyCoordsWithWithinQueries extends TestBase {
     }
 
     @Test
-    public void shouldReturnOnlyThePointsWithinTheGivenCircle() throws Exception {
+    public void shouldReturnOnlyThePointsWithinTheGivenCircle() {
         // given
         checkMinServerVersion(2.4);
 
@@ -121,7 +121,7 @@ public class LegacyCoordsWithWithinQueries extends TestBase {
     }
 
     @Test
-    public void shouldReturnPointOnBoundaryOfQueryCircle() throws Exception {
+    public void shouldReturnPointOnBoundaryOfQueryCircle() {
         // given
         checkMinServerVersion(2.4);
 
@@ -139,7 +139,7 @@ public class LegacyCoordsWithWithinQueries extends TestBase {
     }
 
     @Test
-    public void shouldReturnPointOnBoundaryOfQueryCircleWithSphericalGeometry() throws Exception {
+    public void shouldReturnPointOnBoundaryOfQueryCircleWithSphericalGeometry() {
         // given
         checkMinServerVersion(2.4);
 
@@ -157,7 +157,7 @@ public class LegacyCoordsWithWithinQueries extends TestBase {
     }
 
     @Test
-    public void shouldReturnPointThatIsFullyInsideTheQueryBox() throws Exception {
+    public void shouldReturnPointThatIsFullyInsideTheQueryBox() {
         // given
         checkMinServerVersion(2.4);
 

@@ -14,7 +14,7 @@ import java.io.Serializable;
 public class AnonymousClassTest extends TestBase {
 
     @Test
-    public void testDelete() throws Exception {
+    public void testDelete() {
         final E e = new E();
         e.id = new CId("test");
 
@@ -23,7 +23,7 @@ public class AnonymousClassTest extends TestBase {
     }
 
     @Test
-    public void testMapping() throws Exception {
+    public void testMapping() {
         E e = new E();
         e.id = new CId("test");
 
@@ -34,7 +34,7 @@ public class AnonymousClassTest extends TestBase {
     }
 
     @Test
-    public void testOtherDelete() throws Exception {
+    public void testOtherDelete() {
         final E e = new E();
         e.id = new CId("test");
 

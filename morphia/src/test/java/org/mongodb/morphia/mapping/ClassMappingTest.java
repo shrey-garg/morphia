@@ -25,7 +25,7 @@ public class ClassMappingTest extends TestBase {
     }
 
     @Test
-    public void testMapping() throws Exception {
+    public void testMapping() {
         E e = new E();
 
         e.testClass = LinkedList.class;
@@ -36,7 +36,7 @@ public class ClassMappingTest extends TestBase {
     }
 
     @Test
-    public void testMappingWithoutAnnotation() throws Exception {
+    public void testMappingWithoutAnnotation() {
         E e = new E();
 
         e.testClass2 = LinkedList.class;

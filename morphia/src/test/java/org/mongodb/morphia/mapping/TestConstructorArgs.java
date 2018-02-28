@@ -25,7 +25,7 @@ import org.mongodb.morphia.annotations.Id;
 public class TestConstructorArgs extends TestBase {
 
     @Test
-    public void testBasic() throws Exception {
+    public void testBasic() {
         Normal n = new Normal();
         final ObjectId acId = n.ac.id;
 

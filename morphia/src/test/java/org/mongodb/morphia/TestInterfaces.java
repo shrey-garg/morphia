@@ -18,6 +18,8 @@ package org.mongodb.morphia;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
 import org.junit.Test;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
@@ -33,11 +35,11 @@ import static org.junit.Assert.assertTrue;
 public class TestInterfaces extends TestBase {
 
     @Test
-    public void testDynamicInstantiation() throws Exception {
-        final DBCollection shapes = getDatabase().getCollection("shapes");
-        final DBCollection shapeshifters = getDatabase().getCollection("shapeshifters");
+    public void testDynamicInstantiation() {
+        final MongoCollection<Document> shapes = getDatabase().getCollection("shapes");
+        final MongoCollection<Document> shapeshifters = getDatabase().getCollection("shapeshifters");
 
-        getMorphia().map(Circle.class).map(Rectangle.class).map(ShapeShifter.class);
+        getMorphia().map(Circle.class, Rectangle.class, ShapeShifter.class);
 
         final Shape rectangle = new Rectangle(2, 5);
 

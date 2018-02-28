@@ -183,7 +183,7 @@ public class TestVersionAnnotation extends TestBase {
     }
 
     @Test(expected = ConcurrentModificationException.class)
-    public void testThrowsExceptionWhenTryingToSaveAnOldVersion() throws Exception {
+    public void testThrowsExceptionWhenTryingToSaveAnOldVersion() {
         // given
         final Versioned version1 = new Versioned();
         getDatastore().save(version1);
@@ -211,7 +211,7 @@ public class TestVersionAnnotation extends TestBase {
     }
 
     @Test
-    public void testVersionNumbersIncrementWithEachSave() throws Exception {
+    public void testVersionNumbersIncrementWithEachSave() {
         final Versioned version1 = new Versioned();
         getDatastore().save(version1);
         assertEquals(new Long(1), version1.getVersion());
