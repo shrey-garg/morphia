@@ -85,16 +85,6 @@ MongoDB database remains available during the index building operation.  The Mon
 When ensuring indexes in the database, Morphia will attempt to ensure that the field names match either the Java field names or the
 mapped document names.  Setting this to `true` disables this validation.
 
-#### dropDups()
-*Default: false*
-
-When defining a [unique]({{< ref "#unique" >}}) index, if there are duplicate values found, the index creation will.  Setting this value to
-true will instruct MongoDB to drop the documents with duplicate values.
-
-{{% note class="important" %}}
-As of MongoDB version 3.0, the dropDups option is no longer available.
-{{% /note %}}
-
 #### expireAfterSeconds()
 *Optional*
 
