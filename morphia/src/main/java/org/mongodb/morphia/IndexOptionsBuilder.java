@@ -39,11 +39,6 @@ class IndexOptionsBuilder extends AnnotationBuilder<IndexOptions> implements Ind
     }
 
     @Override
-    public boolean dropDups() {
-        return get("dropDups");
-    }
-
-    @Override
     public int expireAfterSeconds() {
         return get("expireAfterSeconds");
     }
@@ -90,11 +85,6 @@ class IndexOptionsBuilder extends AnnotationBuilder<IndexOptions> implements Ind
 
     IndexOptionsBuilder disableValidation(final boolean disableValidation) {
         put("disableValidation", disableValidation);
-        return this;
-    }
-
-    IndexOptionsBuilder dropDups(final boolean dropDups) {
-        put("dropDups", dropDups);
         return this;
     }
 

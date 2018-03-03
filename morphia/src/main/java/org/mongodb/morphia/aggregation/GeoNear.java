@@ -16,7 +16,6 @@
 
 package org.mongodb.morphia.aggregation;
 
-import org.mongodb.morphia.geo.Geometry;
 import org.mongodb.morphia.geo.Point;
 import org.mongodb.morphia.query.Query;
 

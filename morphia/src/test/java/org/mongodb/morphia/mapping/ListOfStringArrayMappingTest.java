@@ -28,7 +28,7 @@ public class ListOfStringArrayMappingTest extends TestBase {
     }
 
     private static class ContainsListStringArray {
-        private final List<String[]> listOfStrings = new ArrayList<String[]>();
+        private final List<String[]> listOfStrings = new ArrayList<>();
         @Id
         private ObjectId id;
         private String[] arrayOfStrings;

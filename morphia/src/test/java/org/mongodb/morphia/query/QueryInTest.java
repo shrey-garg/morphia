@@ -15,11 +15,11 @@ import org.slf4j.Logger;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.Collections.singletonList;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class QueryInTest extends TestBase {
@@ -28,7 +28,7 @@ public class QueryInTest extends TestBase {
     @Test
     public void testAddEmpty() {
         Query<Data> query = getDatastore().find(Data.class);
-        List<ObjectId> memberships = new ArrayList<ObjectId>();
+        List<ObjectId> memberships = new ArrayList<>();
 
         query.or(
             query.criteria("id").hasAnyOf(memberships),
@@ -47,13 +47,13 @@ public class QueryInTest extends TestBase {
         getDatastore().save(b);
 
         HasIdOnly has = new HasIdOnly();
-        has.list = new ArrayList<ReferencedEntity>();
+        has.list = new ArrayList<>();
         has.list.add(b);
         has.entity = b;
         getDatastore().save(has);
 
         Query<HasIdOnly> q = getDatastore().find(HasIdOnly.class);
-        q.criteria("list").in(Arrays.asList(b));
+        q.criteria("list").in(singletonList(b));
         Assert.assertEquals(1, q.asList().size());
 
         q = getDatastore().find(HasIdOnly.class);
@@ -70,7 +70,7 @@ public class QueryInTest extends TestBase {
         // this works
         getDatastore().find(Doc.class).field("_id").equal(1).asList();
 
-        final List<Long> idList = new ArrayList<Long>();
+        final List<Long> idList = new ArrayList<>();
         idList.add(1L);
         // this causes an NPE
         getDatastore().find(Doc.class).field("_id").in(idList).asList();
@@ -97,13 +97,13 @@ public class QueryInTest extends TestBase {
     public void testInQueryByKey() {
         checkMinServerVersion(2.5);
         final HasRef hr = new HasRef();
-        List<Key<ReferencedEntity>> refs = new ArrayList<Key<ReferencedEntity>>();
+        List<Key<ReferencedEntity>> refs = new ArrayList<>();
         for (int x = 0; x < 10; x++) {
             final ReferencedEntity re = new ReferencedEntity("" + x);
             getDatastore().save(re);
-            refs.add(new Key<ReferencedEntity>(ReferencedEntity.class,
-                                               getMorphia().getMapper().getCollectionName(ReferencedEntity.class),
-                                               re.getId()));
+            refs.add(new Key<>(ReferencedEntity.class,
+                getMorphia().getMapper().getCollectionName(ReferencedEntity.class),
+                re.getId()));
         }
         hr.ref = refs.get(0);
 
@@ -142,7 +142,7 @@ public class QueryInTest extends TestBase {
         private Set<ObjectId> otherIds;
 
         private Data() {
-            otherIds = new HashSet<ObjectId>();
+            otherIds = new HashSet<>();
         }
     }
 
@@ -159,7 +159,7 @@ public class QueryInTest extends TestBase {
         @Id
         private ObjectId id = new ObjectId();
         @Reference
-        private List<ReferencedEntity> refs = new ArrayList<ReferencedEntity>();
+        private List<ReferencedEntity> refs = new ArrayList<>();
     }
 
     @Entity

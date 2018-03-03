@@ -66,7 +66,7 @@ public class EmbeddedAndSerializableTest extends TestBase {
         private Period period;
 
         @Embedded
-        private List<Period> periods = new ArrayList<Period>();
+        private List<Period> periods = new ArrayList<>();
     }
 
     @Embedded

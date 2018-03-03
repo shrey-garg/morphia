@@ -51,7 +51,7 @@ public class UpdateRetainsClassInfoTest extends TestBase {
     }
 
     public static class X {
-        private final Map<String, E> map = new HashMap<String, E>();
+        private final Map<String, E> map = new HashMap<>();
         @Id
         private ObjectId id;
 

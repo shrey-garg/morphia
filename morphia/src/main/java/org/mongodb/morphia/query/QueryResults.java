@@ -1,7 +1,6 @@
 package org.mongodb.morphia.query;
 
 
-import com.mongodb.Bytes;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.FindOptions;

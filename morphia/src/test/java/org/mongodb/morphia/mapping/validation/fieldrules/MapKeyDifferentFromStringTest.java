@@ -32,19 +32,19 @@ public class MapKeyDifferentFromStringTest extends TestBase {
 
     public static class MapWithWrongKeyType1 extends TestEntity {
         @Serialized
-        private Map<Integer, Integer> shouldBeOk = new HashMap<Integer, Integer>();
+        private Map<Integer, Integer> shouldBeOk = new HashMap<>();
 
     }
 
     public static class MapWithWrongKeyType2 extends TestEntity {
         @Reference
-        private Map<Integer, Integer> shouldBeOk = new HashMap<Integer, Integer>();
+        private Map<Integer, Integer> shouldBeOk = new HashMap<>();
 
     }
 
     public static class MapWithWrongKeyType3 extends TestEntity {
         @Embedded
-        private Map<BigDecimal, Integer> shouldBeOk = new HashMap<BigDecimal, Integer>();
+        private Map<BigDecimal, Integer> shouldBeOk = new HashMap<>();
 
     }
 

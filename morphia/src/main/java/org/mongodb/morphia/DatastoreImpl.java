@@ -20,11 +20,8 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.ValidationOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
-import org.bson.BsonDocument;
-import org.bson.BsonDocumentWriter;
 import org.bson.BsonValue;
 import org.bson.Document;
-import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodecProvider;
@@ -55,7 +52,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -321,22 +317,16 @@ public class DatastoreImpl implements AdvancedDatastore {
      * Find all instances by type in a different collection than what is mapped on the class given skipping some documents and returning a
      * fixed number of the remaining.
      *
+     * @param <T>        the type to query
+     * @param <V>        the type to filter value
      * @param collection The collection use when querying
      * @param clazz      the class to use for mapping the results
      * @param property   the document property to query against
      * @param value      the value to check for
-     * @param validate   if true, validate the query
-     * @param <T>        the type to query
-     * @param <V>        the type to filter value
      * @return the query
      */
-    public <T, V> Query<T> find(final String collection, final Class<T> clazz, final String property, final V value,
-                                final boolean validate) {
-        final Query<T> query = find(collection, clazz);
-        if (!validate) {
-            query.disableValidation();
-        }
-        return query.filter(property, value).enableValidation();
+    private <T, V> Query<T> find(final String collection, final Class<T> clazz, final String property, final V value) {
+        return find(collection, clazz).filter(property, value).enableValidation();
     }
 
     @Override
@@ -403,7 +393,7 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     @Override
     public <T, V> T get(final Class<T> clazz, final V id) {
-        return find(getCollection(clazz).getNamespace().getCollectionName(), clazz, Mapper.ID_KEY, id, true).get();
+        return find(getCollection(clazz).getNamespace().getCollectionName(), clazz, Mapper.ID_KEY, id).get();
     }
 
     @Override
@@ -552,7 +542,7 @@ public class DatastoreImpl implements AdvancedDatastore {
         if (mapper.getKey(entity) == null) {
             throw new MappingException("Could not get ID for " + entity.getClass().getName());
         }
-        Document document = toDocument(entity);
+        Document document = mapper.toDocument(entity);
 
         final Object idValue = document.remove(Mapper.ID_KEY);
 
@@ -584,19 +574,8 @@ public class DatastoreImpl implements AdvancedDatastore {
     private <T> Query<T> queryByExample(final MongoCollection<T> coll, final T example) {
         // TODO: think about remove className from baseQuery param below.
         final Class<T> type = (Class<T>) example.getClass();
-        final Document query = toDocument(example);
+        final Document query = mapper.toDocument(example);
         return newQuery(type, coll, query);
-    }
-
-    private <T> Document toDocument(final T entity) {
-        final BsonDocument bsonDocument = new BsonDocument();
-        final Class<T> aClass = (Class<T>) entity.getClass();
-        codecRegistry.get(aClass).encode(new BsonDocumentWriter(bsonDocument), entity,
-            EncoderContext.builder()
-                          .isEncodingCollectibleDocument(true)
-                          .build());
-
-        return new Document(new LinkedHashMap<>(bsonDocument));
     }
 
     /**
@@ -617,7 +596,7 @@ public class DatastoreImpl implements AdvancedDatastore {
         }
 
         // involvedObjects is used not only as a cache but also as a list of what needs to be called for life-cycle methods at the end.
-        final Document document = toDocument(entity);
+        final Document document = mapper.toDocument(entity);
 
         // try to do an update if there is a @Version field
         final MongoCollection<Document> collection = getDatabase()
@@ -893,7 +872,7 @@ public class DatastoreImpl implements AdvancedDatastore {
         return postSaveOperations(entities);
     }
 
-    protected <T> Key<T> insert(final MongoCollection<T> collection, final T entity, final InsertOneOptions options, WriteConcern wc) {
+    private <T> Key<T> insert(final MongoCollection<T> collection, final T entity, final InsertOneOptions options, WriteConcern wc) {
         collection
             .withWriteConcern(wc)
             .insertOne(entity, options);
@@ -969,7 +948,7 @@ public class DatastoreImpl implements AdvancedDatastore {
         return postSaveOperations(singletonList(entity)).get(0);
     }
 
-    protected <T> MongoCollection<T> getCollection(final String kind, final Class<T> aClass) {
+    private <T> MongoCollection<T> getCollection(final String kind, final Class<T> aClass) {
         return kind == null ? null : getDatabase().getCollection(kind, aClass);
     }
 

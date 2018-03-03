@@ -42,23 +42,23 @@ public class SerializedMapTest extends TestBase {
 
     }
 
-    public static class Map1 extends TestEntity {
-        @Serialized(disableCompression = false)
+    private static class Map1 extends TestEntity {
+        @Serialized()
         private final Map<Integer, Foo> shouldBeOk = new HashMap();
 
     }
 
-    public static class Map2 extends TestEntity {
+    private static class Map2 extends TestEntity {
         @Serialized(disableCompression = true)
         private final Map<Integer, Foo> shouldBeOk = new HashMap();
 
     }
 
-    public static class Foo implements Serializable {
+    static class Foo implements Serializable {
 
         private final String id;
 
-        public Foo(final String id) {
+        Foo(final String id) {
             this.id = id;
         }
     }

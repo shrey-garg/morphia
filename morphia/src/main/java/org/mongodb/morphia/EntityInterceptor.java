@@ -14,42 +14,52 @@ import org.mongodb.morphia.mapping.Mapper;
  */
 public interface EntityInterceptor {
     /**
-     * @param ent    the entity being processed
-     * @param document  the Document form of the entity
-     * @param mapper the Mapper being used
+     * @param ent      the entity being processed
+     * @param document the Document form of the entity
+     * @param mapper   the Mapper being used
      * @see PostLoad
      */
-    void postLoad(Object ent, Document document, Mapper mapper);
+    default void postLoad(Object ent, Document document, Mapper mapper) {
+
+    }
 
     /**
-     * @param ent    the entity being processed
-     * @param document  the Document form of the entity
-     * @param mapper the Mapper being used
+     * @param ent      the entity being processed
+     * @param document the Document form of the entity
+     * @param mapper   the Mapper being used
      * @see PostPersist
      */
-    void postPersist(Object ent, Document document, Mapper mapper);
+    default void postPersist(Object ent, Document document, Mapper mapper) {
+
+    }
 
     /**
-     * @param ent    the entity being processed
-     * @param document  the Document form of the entity
-     * @param mapper the Mapper being used
+     * @param ent      the entity being processed
+     * @param document the Document form of the entity
+     * @param mapper   the Mapper being used
      * @see PreLoad
      */
-    void preLoad(Object ent, Document document, Mapper mapper);
+    default void preLoad(Object ent, Document document, Mapper mapper) {
+
+    }
 
     /**
-     * @param ent    the entity being processed
-     * @param document  the Document form of the entity
-     * @param mapper the Mapper being used
+     * @param ent      the entity being processed
+     * @param document the Document form of the entity
+     * @param mapper   the Mapper being used
      * @see PostPersist
      */
-    void prePersist(Object ent, Document document, Mapper mapper);
+    default void prePersist(Object ent, Document document, Mapper mapper) {
+
+    }
 
     /**
-     * @param ent    the entity being processed
-     * @param document  the Document form of the entity
-     * @param mapper the Mapper being used
+     * @param ent      the entity being processed
+     * @param document the Document form of the entity
+     * @param mapper   the Mapper being used
      * @see PreSave
      */
-    void preSave(Object ent, Document document, Mapper mapper);
+    default void preSave(Object ent, Document document, Mapper mapper) {
+
+    }
 }

@@ -15,13 +15,8 @@ public class QueryImplCloneTest extends TestBase {
         final Query q = getDatastore().find(E1.class)
                                       .field("i")
                                       .equal(5)
-                                      .limit(5)
                                       .filter("a", "value_a")
                                       .filter("b", "value_b")
-                                      .offset(5)
-                                      .batchSize(10)
-                                      .disableCursorTimeout()
-                                      .hintIndex("a")
                                       .order("a");
         q.disableValidation().filter("foo", "bar");
         Assert.assertEquals(q, q.cloneQuery());
@@ -39,7 +34,7 @@ public class QueryImplCloneTest extends TestBase {
         Assert.assertEquals(q, q.cloneQuery());
     }
 
-    static class E1 {
+    private static class E1 {
         @Id
         private ObjectId id;
 
@@ -49,7 +44,7 @@ public class QueryImplCloneTest extends TestBase {
         private E2 e2 = new E2();
     }
 
-    static class E2 {
+    private static class E2 {
         private String foo;
     }
 }

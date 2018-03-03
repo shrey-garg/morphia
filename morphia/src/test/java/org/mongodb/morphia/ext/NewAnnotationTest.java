@@ -15,7 +15,7 @@
 package org.mongodb.morphia.ext;
 
 
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.EntityInterceptor;
@@ -60,33 +60,17 @@ public class NewAnnotationTest extends TestBase {
 
     private static class ToLowercaseHelper implements EntityInterceptor {
         @Override
-        public void postLoad(final Object ent, final DBObject dbObj, final Mapper mapper) {
-        }
-
-        @Override
-        public void postPersist(final Object ent, final DBObject dbObj, final Mapper mapper) {
-        }
-
-        @Override
-        public void preLoad(final Object ent, final DBObject dbObj, final Mapper mapper) {
-        }
-
-        @Override
-        public void prePersist(final Object ent, final DBObject dbObj, final Mapper mapper) {
+        public void prePersist(final Object ent, final Document document, final Mapper mapper) {
             final MappedClass mc = mapper.getMappedClass(ent);
             final List<MappedField> toLowercase = mc.getFieldsAnnotatedWith(Lowercase.class);
             for (final MappedField mf : toLowercase) {
                 try {
                     final Object fieldValue = mf.getFieldValue(ent);
-                    dbObj.put(mf.getNameToStore() + "_lowercase", fieldValue.toString().toLowerCase());
+                    document.put(mf.getNameToStore() + "_lowercase", fieldValue.toString().toLowerCase());
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
-        }
-
-        @Override
-        public void preSave(final Object ent, final DBObject dbObj, final Mapper mapper) {
         }
     }
 }

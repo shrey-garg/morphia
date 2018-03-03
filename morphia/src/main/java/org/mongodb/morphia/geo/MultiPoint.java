@@ -17,7 +17,7 @@ public class MultiPoint implements Geometry {
 
     @SuppressWarnings("UnusedDeclaration") // used by Morphia
     private MultiPoint() {
-        this.coordinates = new ArrayList<Point>();
+        this.coordinates = new ArrayList<>();
     }
 
     MultiPoint(final Point... points) {

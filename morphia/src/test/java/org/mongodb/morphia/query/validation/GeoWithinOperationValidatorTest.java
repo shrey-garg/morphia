@@ -5,9 +5,9 @@ import org.junit.Test;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -18,7 +18,7 @@ public class GeoWithinOperationValidatorTest {
     @Test
     public void shouldAllowGeoWithinOperatorForGeoEntityWithListOfIntegers() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
         MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("list");
         assertThat(GeoWithinOperationValidator.getInstance().apply(mappedField, GEO_WITHIN, new BasicDBObject("$box", 1),
@@ -28,7 +28,7 @@ public class GeoWithinOperationValidatorTest {
     @Test
     public void shouldAllowGeoWithinOperatorWithAllAppropriateTrimmings() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
         MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("array");
 
@@ -40,7 +40,7 @@ public class GeoWithinOperationValidatorTest {
     @Test
     public void shouldNotApplyValidationWhenOperatorIsNotGeoWithin() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = GeoWithinOperationValidator.getInstance().apply(null, EQUAL, null, validationFailures);
@@ -53,7 +53,7 @@ public class GeoWithinOperationValidatorTest {
     @Test
     public void shouldRejectGeoWithinOperatorWhenMappedFieldIsArrayThatDoesNotContainNumbers() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
         MappedClass mappedClass = new MappedClass(InvalidGeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("arrayOfStrings");
 
@@ -70,7 +70,7 @@ public class GeoWithinOperationValidatorTest {
     @Test
     public void shouldRejectGeoWithinOperatorWhenMappedFieldIsListThatDoesNotContainNumbers() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
         MappedClass mappedClass = new MappedClass(InvalidGeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("listOfStrings");
 
@@ -89,7 +89,7 @@ public class GeoWithinOperationValidatorTest {
     @Test
     public void shouldRejectGeoWithinWhenValueDoesNotContainKeyword() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
         MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("array");
 
@@ -109,7 +109,7 @@ public class GeoWithinOperationValidatorTest {
     @Test
     public void shouldRejectGeoWithinWhenValueIsNotADBObject() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
         MappedClass mappedClass = new MappedClass(GeoEntity.class, new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("array");
 
@@ -129,12 +129,12 @@ public class GeoWithinOperationValidatorTest {
     @SuppressWarnings("unused")
     private static class GeoEntity {
         private final int[] array = {1};
-        private final List<Integer> list = Arrays.asList(1);
+        private final List<Integer> list = singletonList(1);
     }
 
     @SuppressWarnings("unused")
     private static class InvalidGeoEntity {
         private final String[] arrayOfStrings = {"1"};
-        private final List<String> listOfStrings = Arrays.asList("1");
+        private final List<String> listOfStrings = singletonList("1");
     }
 }

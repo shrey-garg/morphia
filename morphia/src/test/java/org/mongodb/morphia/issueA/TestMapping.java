@@ -1,7 +1,7 @@
 package org.mongodb.morphia.issueA;
 
 
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
@@ -22,8 +22,8 @@ public class TestMapping extends TestBase {
         final ClassLevelThree sp = new ClassLevelThree();
 
         //Old way
-        final DBObject wrapObj = getMorphia().toDBObject(sp);  //the error points here from the user
-        getDatastore().getDatabase().getCollection("testColl").save(wrapObj);
+        final Document wrapObj = getMorphia().getMapper().toDocument(sp);  //the error points here from the user
+        getDatastore().getDatabase().getCollection("testColl").insertOne(wrapObj);
 
 
         //better way

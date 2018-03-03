@@ -47,7 +47,7 @@ public class URIMappingTest extends TestBase {
     }
 
     private static class ContainsURIKeyedMap {
-        private final Map<URI, String> uris = new HashMap<URI, String>();
+        private final Map<URI, String> uris = new HashMap<>();
         @Id
         private ObjectId id;
     }

@@ -35,12 +35,11 @@ public final class AllOperationValidator extends OperationValidator {
     @Override
     protected void validate(final MappedField mappedField, final Object value, final List<ValidationFailure> validationFailures) {
         if (value == null) {
-            validationFailures.add(new ValidationFailure(format("For an $all operation, value cannot be null.")));
+            validationFailures.add(new ValidationFailure("For an $all operation, value cannot be null."));
         } else if (!typeIsIterableOrArrayOrMap(value.getClass())) {
             validationFailures.add(new ValidationFailure(format("For an $all operation, value '%s' should be an array, "
                                                                 + "an Iterable, or a Map.  Instead it was a: %s",
-                                                                value, value.getClass()
-                                                               )));
+                                                                value, value.getClass())));
         }
     }
 

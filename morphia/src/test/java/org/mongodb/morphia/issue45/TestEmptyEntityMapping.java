@@ -83,9 +83,9 @@ public class TestEmptyEntityMapping extends TestBase {
         @Embedded
         private UserType userType = null;
         @Embedded
-        private Set<Rights> rights = new HashSet<Rights>();
+        private Set<Rights> rights = new HashSet<>();
         @Embedded
-        private Set<NotificationAddress> notificationAddresses = new HashSet<NotificationAddress>();
+        private Set<NotificationAddress> notificationAddresses = new HashSet<>();
 
         public String getFullName() {
             return fullName;

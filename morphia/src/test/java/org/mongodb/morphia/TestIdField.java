@@ -24,10 +24,10 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.testmodel.Rectangle;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -47,7 +47,7 @@ public class TestIdField extends TestBase {
 
         assertEquals(a.data, getDatastore().get(EmbeddedId.class, id).data);
 
-        final EmbeddedId embeddedId = getDatastore().find(EmbeddedId.class).field("_id").in(Arrays.asList(id)).asList().get(0);
+        final EmbeddedId embeddedId = getDatastore().find(EmbeddedId.class).field("_id").in(singletonList(id)).asList().get(0);
         Assert.assertEquals(a.data, embeddedId.data);
         Assert.assertEquals(a.id, embeddedId.id);
     }
@@ -105,7 +105,7 @@ public class TestIdField extends TestBase {
     @Entity
     private static class MapAsId {
         @Id
-        private final Map<String, String> id = new HashMap<String, String>();
+        private final Map<String, String> id = new HashMap<>();
     }
 
     @Entity(noClassnameStored = true)

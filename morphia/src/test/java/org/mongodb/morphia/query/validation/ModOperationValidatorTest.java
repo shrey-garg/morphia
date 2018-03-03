@@ -15,7 +15,7 @@ public class ModOperationValidatorTest {
     @Test
     public void shouldAllowModOperatorForArrayOfTwoIntegerValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = ModOperationValidator.getInstance().apply(null, MOD, new int[2], validationFailures);
@@ -28,7 +28,7 @@ public class ModOperationValidatorTest {
     @Test
     public void shouldNotApplyValidationWithANonModOperator() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = ModOperationValidator.getInstance().apply(null, EQUAL, new int[2], validationFailures);
@@ -41,7 +41,7 @@ public class ModOperationValidatorTest {
     @Test
     public void shouldNotErrorIfModOperatorIsUsedWithZeroLengthArrayOfIntegerValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = ModOperationValidator.getInstance().apply(null, MOD, new int[0], validationFailures);
@@ -55,7 +55,7 @@ public class ModOperationValidatorTest {
     @Test
     public void shouldRejectModOperatorWithNonArrayValue() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = ModOperationValidator.getInstance().apply(null, MOD, "Not an array", validationFailures);
@@ -69,7 +69,7 @@ public class ModOperationValidatorTest {
     @Test
     public void shouldRejectModOperatorWithNonIntegerArray() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = ModOperationValidator.getInstance().apply(null, MOD, new String[]{"1", "2"}, validationFailures);
@@ -83,7 +83,7 @@ public class ModOperationValidatorTest {
     @Test
     public void shouldRejectNullValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = ModOperationValidator.getInstance().apply(null, MOD, null, validationFailures);

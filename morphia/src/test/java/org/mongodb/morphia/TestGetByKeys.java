@@ -26,7 +26,7 @@ public class TestGetByKeys extends TestBase {
         Assert.assertFalse(i.hasNext());
     }
 
-    public static class A extends TestEntity {
+    private static class A extends TestEntity {
         private String foo = "bar";
     }
 

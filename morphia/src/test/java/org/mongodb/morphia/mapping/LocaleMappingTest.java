@@ -43,7 +43,7 @@ public class LocaleMappingTest extends TestBase {
         private Locale l1;
 
         @Embedded
-        private List<Locale> l2 = new ArrayList<Locale>();
+        private List<Locale> l2 = new ArrayList<>();
 
         private Locale[] l3;
     }

@@ -35,7 +35,7 @@ public class TestJavaMaps extends TestBase {
         Datastore ds = getDatastore();
         ds.delete(ds.find(Employee.class));
         Employee employee = new Employee();
-        HashMap<String, Byte> byteMap = new HashMap<String, Byte>();
+        HashMap<String, Byte> byteMap = new HashMap<>();
         byteMap.put("b", (byte) 1);
         employee.byteMap = byteMap;
         ds.save(employee);
@@ -100,7 +100,7 @@ public class TestJavaMaps extends TestBase {
     static class LinkedHashMapTestEntity extends TestEntity {
 
         @Embedded(concreteClass = java.util.LinkedHashMap.class)
-        private final Map<Integer, String> linkedHashMap = new LinkedHashMap<Integer, String>();
+        private final Map<Integer, String> linkedHashMap = new LinkedHashMap<>();
         private Map<Integer, String> getLinkedHashMap() {
             return linkedHashMap;
         }

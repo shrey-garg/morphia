@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
@@ -37,7 +36,7 @@ public class MorphiaTest extends TestBase {
         // then
         Collection<MappedClass> mappedClasses = morphia.getMapper().getMappedClasses();
         assertThat(mappedClasses.size(), is(3));
-        Collection<Class<?>> classes = new ArrayList<Class<?>>();
+        Collection<Class<?>> classes = new ArrayList<>();
         for (MappedClass mappedClass : mappedClasses) {
             classes.add(mappedClass.getClazz());
         }

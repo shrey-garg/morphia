@@ -11,6 +11,10 @@
 package org.mongodb.morphia.mapping;
 
 
+import org.bson.BsonDocument;
+import org.bson.BsonDocumentWriter;
+import org.bson.Document;
+import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodec;
@@ -24,6 +28,7 @@ import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -258,13 +263,7 @@ public class Mapper {
 
         Class type = (obj instanceof Class) ? (Class) obj : obj.getClass();
 
-        MappedClass mc = mappedClasses.get(type.getName());
-        if (mc == null) {
-            mc = new MappedClass(mc.getClassModel(), this);
-            // no validation
-            addMappedClass(mc, false);
-        }
-        return mc;
+        return mappedClasses.computeIfAbsent(type.getName(), s -> addMappedClass(type));
     }
 
     /**
@@ -363,4 +362,15 @@ public class Mapper {
         mapPackage(clazz.getPackage().getName());
     }
 
+
+    public <T> Document toDocument(final T entity) {
+        final BsonDocument bsonDocument = new BsonDocument();
+        final Class<T> aClass = (Class<T>) entity.getClass();
+        codecRegistry.get(aClass).encode(new BsonDocumentWriter(bsonDocument), entity,
+            EncoderContext.builder()
+                          .isEncodingCollectibleDocument(true)
+                          .build());
+
+        return new Document(new LinkedHashMap<>(bsonDocument));
+    }
 }

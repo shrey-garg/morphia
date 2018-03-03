@@ -25,7 +25,7 @@ public final class  Projection {
 
     private Projection(final String field, final Projection projection, final Projection... subsequent) {
         this(field);
-        this.projections = new ArrayList<Projection>();
+        this.projections = new ArrayList<>();
         projections.add(projection);
         projections.addAll(Arrays.asList(subsequent));
     }

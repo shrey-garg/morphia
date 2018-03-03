@@ -32,7 +32,7 @@ public class KeyMappingTest extends TestBase {
     public void testKeyComparisons() {
         final User user = new User("Luke Skywalker");
         getDatastore().save(user);
-        final Key<User> k1 = new Key<User>(User.class, "User", user.id);
+        final Key<User> k1 = new Key<>(User.class, "User", user.id);
         final Key<User> k2 = getDatastore().getKey(user);
 
         Assert.assertTrue(k1.equals(k2));
@@ -51,7 +51,7 @@ public class KeyMappingTest extends TestBase {
         Channel fitnessChannel = new Channel("Fitness channel");
         datastore.save(fitnessChannel);
 
-        final List<Key<Channel>> followedChannels = new ArrayList<Key<Channel>>();
+        final List<Key<Channel>> followedChannels = new ArrayList<>();
         followedChannels.add(datastore.getKey(sportChannel));
         followedChannels.add(datastore.getKey(fitnessChannel));
 
@@ -65,7 +65,7 @@ public class KeyMappingTest extends TestBase {
 
         private Key<Channel> favoriteChannels;
 
-        private List<Key<Channel>> followedChannels = new ArrayList<Key<Channel>>();
+        private List<Key<Channel>> followedChannels = new ArrayList<>();
 
         private String name;
 

@@ -10,7 +10,9 @@ import com.mongodb.client.model.geojson.Position;
  * Supported by server versions 2.4 and above.
  *
  * @see com.mongodb.client.model.geojson.Point
+ * @deprecated use PositionBuilder
  */
+@Deprecated
 public class PointBuilder {
     private double longitude;
     private double latitude;

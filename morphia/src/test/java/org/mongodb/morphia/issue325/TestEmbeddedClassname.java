@@ -67,9 +67,9 @@ public class TestEmbeddedClassname extends TestBase {
     @Entity(noClassnameStored = true)
     private static class Root {
         @Embedded
-        private final List<A> aList = new ArrayList<A>();
+        private final List<A> aList = new ArrayList<>();
         @Embedded
-        private final List<B> bList = new ArrayList<B>();
+        private final List<B> bList = new ArrayList<>();
         @Id
         private String id = "id";
         @Embedded

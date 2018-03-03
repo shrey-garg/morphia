@@ -23,7 +23,7 @@ public class Polygon implements Geometry {
     @SuppressWarnings("UnusedDeclaration") // used by Morphia
     private Polygon() {
         exteriorBoundary = null;
-        interiorBoundaries = new ArrayList<LineString>();
+        interiorBoundaries = new ArrayList<>();
     }
 
     Polygon(final LineString exteriorBoundary, final LineString... interiorBoundaries) {
@@ -36,13 +36,13 @@ public class Polygon implements Geometry {
         if (boundaries.size() > 1) {
             interiorBoundaries = boundaries.subList(1, boundaries.size());
         } else {
-            interiorBoundaries = new ArrayList<LineString>();
+            interiorBoundaries = new ArrayList<>();
         }
     }
 
     @Override
     public List<LineString> getCoordinates() {
-        List<LineString> polygonBoundaries = new ArrayList<LineString>();
+        List<LineString> polygonBoundaries = new ArrayList<>();
         polygonBoundaries.add(exteriorBoundary);
         polygonBoundaries.addAll(interiorBoundaries);
         return polygonBoundaries;

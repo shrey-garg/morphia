@@ -39,14 +39,14 @@ public class EmbeddedMappingTest extends TestBase {
     public void mapGenericEmbeds() {
         getMorphia().map(AuditEntry.class, Delta.class);
 
-        final AuditEntry<String> entry = new AuditEntry<String>();
+        final AuditEntry<String> entry = new AuditEntry<>();
 
-        final HashMap<String, Object> before = new HashMap<String, Object>();
-        final HashMap<String, Object> after = new HashMap<String, Object>();
+        final HashMap<String, Object> before = new HashMap<>();
+        final HashMap<String, Object> after = new HashMap<>();
         before.put("before", 42);
         after.put("after", 84);
 
-        entry.delta = new Delta<String>(before, after);
+        entry.delta = new Delta<>(before, after);
         getDatastore().save(entry);
 
         final AuditEntry fetched = getDatastore().find(AuditEntry.class)

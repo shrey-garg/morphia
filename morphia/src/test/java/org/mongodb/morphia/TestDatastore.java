@@ -89,7 +89,7 @@ public class TestDatastore extends TestBase {
     }
 
     @Test
-    public void shouldSaveGenericTypeVariables() throws Exception {
+    public void shouldSaveGenericTypeVariables() {
         // given
         ChildEntity child = new ChildEntity();
         child.setEmbeddedList(singletonList(new ChildEmbedded()));
@@ -261,15 +261,15 @@ public class TestDatastore extends TestBase {
 
     @Test
     public void testMorphiaDS() {
-        new Morphia().createDatastore(getMongoClient(), "test");
+        new Morphia(getMongoClient()).createDatastore("test");
     }
 
     @Test
     public void testMultipleDatabasesSingleThreaded() {
         getMorphia().map(FacebookUser.class);
 
-        final Datastore ds1 = getMorphia().createDatastore(getMongoClient(), "db1");
-        final Datastore ds2 = getMorphia().createDatastore(getMongoClient(), "db2");
+        final Datastore ds1 = getMorphia().createDatastore("db1");
+        final Datastore ds2 = getMorphia().createDatastore("db2");
 
         final FacebookUser db1Friend = new FacebookUser(3, "DB1 FaceBook Friend");
         ds1.save(db1Friend);
@@ -584,7 +584,7 @@ public class TestDatastore extends TestBase {
             username = name;
         }
 
-        public FacebookUser() {
+        FacebookUser() {
         }
 
         public long getId() {
@@ -601,7 +601,7 @@ public class TestDatastore extends TestBase {
     }
 
     @SuppressWarnings("UnusedDeclaration")
-    public static class LifecycleListener {
+    static class LifecycleListener {
         private static boolean prePersist;
         private static boolean prePersistWithEntity;
 
@@ -647,7 +647,7 @@ public class TestDatastore extends TestBase {
                 throw new RuntimeException("already called");
             }
             prePersistWithParamAndReturn = true;
-            return null;
+            return new Document();
         }
 
         @PrePersist

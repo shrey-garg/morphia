@@ -21,7 +21,7 @@ public class SizeOperationValidatorTest {
         MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
             mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("arrayListOfIntegers");
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = SizeOperationValidator.getInstance().apply(mappedField, SIZE, 3, validationFailures);
@@ -37,7 +37,7 @@ public class SizeOperationValidatorTest {
         MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
             mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("arrayOfInts");
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = SizeOperationValidator.getInstance().apply(mappedField, SIZE, 3, validationFailures);
@@ -53,7 +53,7 @@ public class SizeOperationValidatorTest {
         MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
             mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("arrayOfInts");
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = SizeOperationValidator.getInstance().apply(mappedField, SIZE, 3L, validationFailures);
@@ -69,7 +69,7 @@ public class SizeOperationValidatorTest {
         MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
             mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("setOfIntegers");
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = SizeOperationValidator.getInstance().apply(mappedField, SIZE, 3, validationFailures);
@@ -85,7 +85,7 @@ public class SizeOperationValidatorTest {
         MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
             mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("listOfIntegers");
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = SizeOperationValidator.getInstance().apply(mappedField, SIZE, 3, validationFailures);
@@ -101,7 +101,7 @@ public class SizeOperationValidatorTest {
         MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
             mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("listOfIntegers");
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = SizeOperationValidator.getInstance().apply(mappedField, SIZE, 3L, validationFailures);
@@ -117,7 +117,7 @@ public class SizeOperationValidatorTest {
         MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
             mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("notAnArrayOrList");
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = SizeOperationValidator.getInstance().apply(mappedField, SIZE, "value", validationFailures);
@@ -133,7 +133,7 @@ public class SizeOperationValidatorTest {
         MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
             mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("list");
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = SizeOperationValidator.getInstance().apply(mappedField, EQUAL, 1, validationFailures);
@@ -149,7 +149,7 @@ public class SizeOperationValidatorTest {
         MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
             mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("listOfStrings");
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = SizeOperationValidator.getInstance().apply(mappedField, SIZE, "value", validationFailures);
@@ -166,7 +166,7 @@ public class SizeOperationValidatorTest {
         MappedClass mappedClass = new MappedClass(EntityWithListsAndArrays.class, new Mapper(
             mongoClient.getMongoClientOptions().getCodecRegistry()));
         MappedField mappedField = mappedClass.getMappedField("notAnArrayOrList");
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = SizeOperationValidator.getInstance().apply(mappedField, SIZE, 3, validationFailures);

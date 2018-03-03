@@ -2,7 +2,9 @@ package org.mongodb.morphia.issue148;
 
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.model.FindOptions;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -12,8 +14,6 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
-import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
-import org.mongodb.morphia.mapping.cache.EntityCache;
 import org.mongodb.morphia.query.Query;
 
 import java.util.ArrayList;
@@ -69,15 +69,6 @@ public class TestAsListPerf extends TestBase {
     }
 
     @Test
-    public void compareDriverAndMorphiaQueryingOnce() {
-        final double driverAvg = driverQueryAndMorphiaConverter(nbOfAddresses);
-        final double morphiaAvg = morphiaQueryAndMorphiaConverter(nbOfAddresses);
-        LOG.debug(format("compareDriverAndMorphiaQueryingOnce - driver: %4.2f ms/pojo , morphia: %4.2f ms/pojo ", driverAvg,
-                         morphiaAvg));
-        Assert.assertNotNull(driverAvg);
-    }
-
-    @Test
     public void compareMorphiaAndDriverQueryingMultithreaded() throws InterruptedException {
         final Result morphiaQueryThreadsResult = new Result(nbOfTasks);
         final List<MorphiaQueryThread> morphiaThreads = new ArrayList<>(nbOfTasks);
@@ -112,14 +103,12 @@ public class TestAsListPerf extends TestBase {
 
     private double driverQueryAndMorphiaConverter(final int nbOfHits) {
         final long start = System.nanoTime();
-        final List<DBObject> list = getDatastore().getDatabase().getCollection("Address")
-                                                  .find()
-                                                  .sort(new BasicDBObject("name", 1))
-                                                  .toArray();
-        final EntityCache entityCache = new DefaultEntityCache();
+        final FindIterable<Document> sort = getDatastore().getDatabase().getCollection("Address")
+                                                          .find()
+                                                          .sort(new BasicDBObject("name", 1));
         final List<Address> resultList = new LinkedList<>();
-        for (final DBObject dbObject : list) {
-            final Address address = getMorphia().fromDBObject(getDatastore(), Address.class, dbObject, entityCache);
+        for (final Document document : sort) {
+            final Address address = getMorphia().fromDBObject(getDatastore(), Address.class, document);
             resultList.add(address);
         }
         final long duration = (System.nanoTime() - start) / 1000000; //ns -> ms
@@ -186,7 +175,7 @@ public class TestAsListPerf extends TestBase {
             }
             getDatastore().find(Address.class).filter("name", "random")
                           .fetch(new FindOptions()
-                              .limit(-1));
+                                     .limit(-1));
         }
     }
 

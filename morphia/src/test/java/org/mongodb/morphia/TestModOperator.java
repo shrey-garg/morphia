@@ -70,16 +70,16 @@ public class TestModOperator extends TestBase {
     }
 
     @Entity
-    public static class Inventory {
+    private static class Inventory {
         @Id
         private ObjectId id;
         private Integer quantity;
         private String name;
 
-        public Inventory() {
+        private Inventory() {
         }
 
-        public Inventory(final String name, final Integer quantity) {
+        private Inventory(final String name, final Integer quantity) {
             this.name = name;
             this.quantity = quantity;
         }

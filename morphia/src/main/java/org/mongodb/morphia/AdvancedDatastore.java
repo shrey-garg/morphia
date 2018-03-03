@@ -1,6 +1,5 @@
 package org.mongodb.morphia;
 
-import com.mongodb.DBRef;
 import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.model.DeleteOptions;

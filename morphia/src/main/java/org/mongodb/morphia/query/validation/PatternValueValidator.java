@@ -3,8 +3,6 @@ package org.mongodb.morphia.query.validation;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static java.lang.String.format;
-
 /**
  * Validates query values that are Pattern to check the field type is a String.
  */
@@ -31,7 +29,7 @@ public final class PatternValueValidator extends ValueValidator {
     @Override
     protected void validate(final Class<?> type, final Object value, final List<ValidationFailure> validationFailures) {
         if (!String.class.equals(type)) {
-            validationFailures.add(new ValidationFailure(format("Patterns can only be used as query values for Strings")));
+            validationFailures.add(new ValidationFailure("Patterns can only be used as query values for Strings"));
         }
     }
 }

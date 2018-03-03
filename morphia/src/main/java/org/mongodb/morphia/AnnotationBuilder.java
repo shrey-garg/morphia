@@ -26,7 +26,7 @@ import java.util.Map;
 import static java.lang.String.format;
 
 abstract class AnnotationBuilder<T extends Annotation> implements Annotation {
-    private final Map<String, Object> values = new HashMap<String, Object>();
+    private final Map<String, Object> values = new HashMap<>();
 
     AnnotationBuilder() {
         for (Method method : annotationType().getDeclaredMethods()) {
@@ -69,7 +69,7 @@ abstract class AnnotationBuilder<T extends Annotation> implements Annotation {
 
     @SuppressWarnings("unchecked")
     static <A extends Annotation> Map<String, Object> toMap(final A annotation) {
-        final Map<String, Object> map = new HashMap<String, Object>();
+        final Map<String, Object> map = new HashMap<>();
         try {
             Class<A> annotationType = (Class<A>) annotation.annotationType();
             for (Method method : annotationType.getDeclaredMethods()) {

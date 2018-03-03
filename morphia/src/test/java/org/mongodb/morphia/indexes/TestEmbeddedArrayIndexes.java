@@ -13,7 +13,7 @@
 
 package org.mongodb.morphia.indexes;
 
-import com.mongodb.DBCollection;
+import com.mongodb.client.MongoCollection;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
@@ -39,9 +39,9 @@ public class TestEmbeddedArrayIndexes extends TestBase {
         assertEquals(1, mc.getAnnotations(Indexes.class).size());
 
         getDatastore().ensureIndexes(A.class);
-        final DBCollection coll = getDatastore().getCollection(A.class);
+        final MongoCollection<A> coll = getDatastore().getCollection(A.class);
 
-        assertEquals("indexes found: coll.getIndexInfo()" + coll.getIndexInfo(), 3, coll.getIndexInfo().size());
+        assertEquals("indexes found: coll.getIndexInfo()" + coll.listIndexes(), 3, count(coll.listIndexes().iterator()));
 
     }
 

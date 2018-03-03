@@ -38,11 +38,6 @@ class IndexedBuilder extends AnnotationBuilder<Indexed> implements Indexed {
     }
 
     @Override
-    public boolean dropDups() {
-        return get("dropDups");
-    }
-
-    @Override
     public int expireAfterSeconds() {
         return get("expireAfterSeconds");
     }
@@ -74,11 +69,6 @@ class IndexedBuilder extends AnnotationBuilder<Indexed> implements Indexed {
 
     IndexedBuilder background(final boolean background) {
         put("background", background);
-        return this;
-    }
-
-    IndexedBuilder dropDups(final boolean dropDups) {
-        put("dropDups", dropDups);
         return this;
     }
 

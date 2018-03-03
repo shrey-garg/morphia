@@ -18,10 +18,10 @@ public class InOperationValidatorTest {
     @Test
     public void shouldAllowInOperatorForArrayListValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
-        ArrayList<Integer> arrayList = new ArrayList<Integer>(asList(1, 2));
+        ArrayList<Integer> arrayList = new ArrayList<>(asList(1, 2));
         boolean validationApplied = InOperationValidator.getInstance().apply(null, IN, arrayList, validationFailures);
 
         // then
@@ -32,7 +32,7 @@ public class InOperationValidatorTest {
     @Test
     public void shouldAllowInOperatorForArrayValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = InOperationValidator.getInstance().apply(null, IN, new int[0], validationFailures);
@@ -45,7 +45,7 @@ public class InOperationValidatorTest {
     @Test
     public void shouldAllowInOperatorForIterableValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = InOperationValidator.getInstance().apply(null, IN, Collections.emptySet(), validationFailures);
@@ -58,7 +58,7 @@ public class InOperationValidatorTest {
     @Test
     public void shouldAllowInOperatorForListValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = InOperationValidator.getInstance().apply(null, IN, asList(1, 2), validationFailures);
@@ -71,7 +71,7 @@ public class InOperationValidatorTest {
     @Test
     public void shouldAllowInOperatorForMapValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = InOperationValidator.getInstance().apply(null, IN, new HashMap<String, String>(), validationFailures);
@@ -84,7 +84,7 @@ public class InOperationValidatorTest {
     @Test
     public void shouldNotApplyForOperatorThatIsNotInOperator() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = InOperationValidator.getInstance().apply(null, EQUAL, "value", validationFailures);
@@ -97,7 +97,7 @@ public class InOperationValidatorTest {
     @Test
     public void shouldRejectNullValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = InOperationValidator.getInstance().apply(null, IN, null, validationFailures);
@@ -111,7 +111,7 @@ public class InOperationValidatorTest {
     @Test
     public void shouldRejectValuesThatAreNotTheCorrectType() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = InOperationValidator.getInstance().apply(null, IN, "value", validationFailures);

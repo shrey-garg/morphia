@@ -42,13 +42,13 @@ public class QueryHasAnyOfForReferencedList extends TestBase {
         long count = getDatastore().find(Org.class).field("name").equal("Test Org1").count();
         assertEquals(1, count);
 
-        List<Plan> plans = new ArrayList<Plan>();
+        List<Plan> plans = new ArrayList<>();
         plans.add(plan1);
 
         count = getDatastore().find(Org.class).field("plan").hasAnyOf(plans).count();
         assertEquals(1, count);
 
-        plans = new ArrayList<Plan>();
+        plans = new ArrayList<>();
         plans.add(plan1);
         plans.add(plan2);
 

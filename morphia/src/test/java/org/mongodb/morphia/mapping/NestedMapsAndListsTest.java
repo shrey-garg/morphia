@@ -50,10 +50,10 @@ public class NestedMapsAndListsTest extends TestBase {
         getMorphia().map(ListOfMap.class);
 
         ListOfMap entity = new ListOfMap();
-        HashMap<String, String> mapA = new HashMap<String, String>();
+        HashMap<String, String> mapA = new HashMap<>();
         mapA.put("a", "b");
         entity.listOfMap.add(mapA);
-        final Map<String, String> mapC = new HashMap<String, String>();
+        final Map<String, String> mapC = new HashMap<>();
         mapC.put("c", "d");
         entity.listOfMap.add(mapC);
 
@@ -96,7 +96,7 @@ public class NestedMapsAndListsTest extends TestBase {
         getMorphia().map(MapOfListString.class);
         MapOfListString ud = new MapOfListString();
         ud.id = "123";
-        ArrayList<String> d = new ArrayList<String>();
+        ArrayList<String> d = new ArrayList<>();
         d.add("1");
         d.add("2");
         d.add("3");
@@ -107,7 +107,7 @@ public class NestedMapsAndListsTest extends TestBase {
     @Test
     public void testMapOfListOfMapMap() {
         final HashMapOfMap mapOfMap = new HashMapOfMap();
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
         mapOfMap.mom.put("root", map);
         map.put("deep", "values");
         map.put("peer", "lame");
@@ -132,7 +132,7 @@ public class NestedMapsAndListsTest extends TestBase {
     @Test
     public void testMapOfMap() {
         HashMapOfMap mapOfMap = new HashMapOfMap();
-        final Map<String, String> map = new HashMap<String, String>();
+        final Map<String, String> map = new HashMap<>();
         mapOfMap.mom.put("root", map);
         map.put("deep", "values");
         map.put("peer", "lame");
@@ -147,14 +147,14 @@ public class NestedMapsAndListsTest extends TestBase {
     }
 
     private Map<String, Person> map(final String nick, final Person person) {
-        final HashMap<String, Person> map = new HashMap<String, Person>();
+        final HashMap<String, Person> map = new HashMap<>();
         map.put(nick, person);
         return map;
     }
     @Entity
     private static class ListOfMap {
         @Property
-        private final List<Map<String, String>> listOfMap = new ArrayList<Map<String, String>>();
+        private final List<Map<String, String>> listOfMap = new ArrayList<>();
 
         @Id
         private long id;
@@ -196,7 +196,7 @@ public class NestedMapsAndListsTest extends TestBase {
     @Entity
     private static class ListOfList {
         @Property
-        private final List<List<String>> list = new ArrayList<List<String>>();
+        private final List<List<String>> list = new ArrayList<>();
 
         @Id
         private long id;
@@ -231,7 +231,7 @@ public class NestedMapsAndListsTest extends TestBase {
     @Entity
     private static class ListListPerson {
         @Embedded
-        private final List<List<Person>> list = new ArrayList<List<Person>>();
+        private final List<List<Person>> list = new ArrayList<>();
 
         @Id
         private long id;
@@ -271,7 +271,7 @@ public class NestedMapsAndListsTest extends TestBase {
         @Id
         private ObjectId id;
 
-        private List<Map<String, Person>> list = new ArrayList<Map<String, Person>>();
+        private List<Map<String, Person>> list = new ArrayList<>();
 
         @Override
         public boolean equals(final Object o) {
@@ -343,20 +343,20 @@ public class NestedMapsAndListsTest extends TestBase {
     }
     private static class HashMapOfMap {
         @Embedded
-        private final Map<String, Map<String, String>> mom = new HashMap<String, Map<String, String>>();
+        private final Map<String, Map<String, String>> mom = new HashMap<>();
         @Id
         private ObjectId id;
 
     }
     private static class HashMapOfList {
-        private final Map<String, List<String>> mol = new HashMap<String, List<String>>();
+        private final Map<String, List<String>> mol = new HashMap<>();
         @Id
         private ObjectId id;
 
     }
     private static class HashMapOfListOfMapMap {
         @Embedded
-        private final Map<String, List<HashMapOfMap>> mol = new HashMap<String, List<HashMapOfMap>>();
+        private final Map<String, List<HashMapOfMap>> mol = new HashMap<>();
         @Id
         private ObjectId id;
 
@@ -366,7 +366,7 @@ public class NestedMapsAndListsTest extends TestBase {
         @Id
         private String id;
 
-        private Map<String, ArrayList<String>> data = new HashMap<String, ArrayList<String>>();
+        private Map<String, ArrayList<String>> data = new HashMap<>();
 
         MapOfListString() {
         }

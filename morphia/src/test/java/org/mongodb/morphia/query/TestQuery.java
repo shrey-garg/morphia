@@ -18,9 +18,7 @@ package org.mongodb.morphia.query;
 import com.jayway.awaitility.Awaitility;
 import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
-import com.mongodb.DBObject;
 import com.mongodb.MongoException;
-import com.mongodb.MongoInternalException;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.model.CollationStrength;
@@ -57,7 +55,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -82,14 +79,15 @@ import static org.mongodb.morphia.query.Sort.descending;
 import static org.mongodb.morphia.query.Sort.naturalAscending;
 import static org.mongodb.morphia.query.Sort.naturalDescending;
 
-@SuppressWarnings("unchecked")
+
+@SuppressWarnings({"unchecked", "unused"})
 public class TestQuery extends TestBase {
 
     @Test
     public void genericMultiKeyValueQueries() {
         getMorphia().map(GenericKeyValue.class);
         getDatastore().ensureIndexes(GenericKeyValue.class);
-        final GenericKeyValue<String> value = new GenericKeyValue<String>();
+        final GenericKeyValue<String> value = new GenericKeyValue<>();
         final List<Object> keys = Arrays.asList("key1", "key2");
         value.key = keys;
         getDatastore().save(value);
@@ -378,7 +376,7 @@ public class TestQuery extends TestBase {
     public void testDBObjectOrQuery() {
         getDatastore().save(new PhotoWithKeywords("scott", "hernandez"));
 
-        final List<Document> orList = new ArrayList<Document>();
+        final List<Document> orList = new ArrayList<>();
         orList.add(new Document("keywords.keyword", "scott"));
         orList.add(new Document("keywords.keyword", "ralph"));
         final Document orQuery = new Document("$or", orList);
@@ -442,7 +440,8 @@ public class TestQuery extends TestBase {
         getDatastore().save(asList(new PhotoWithKeywords(), new PhotoWithKeywords("Scott", "Joe", "Sarah")));
         assertNotNull(getDatastore().find(PhotoWithKeywords.class)
                                     .field("keywords")
-                                    .hasThisElement(new Keyword("Scott"))
+                                    .elemMatch(getDatastore().find(Keyword.class)
+                                        .filter("keyword = ", "Scott"))
                                     .get());
         // TODO add back when $and is done (> 1.5)  this needs multiple $elemMatch clauses
         //        query = getDs().find(PhotoWithKeywords.class)
@@ -453,7 +452,8 @@ public class TestQuery extends TestBase {
         //        assertNotNull(pwkScottSarah);
         assertNull(getDatastore().find(PhotoWithKeywords.class)
                                  .field("keywords")
-                                 .hasThisElement(new Keyword("Randy"))
+                                 .elemMatch(getDatastore().find(Keyword.class)
+                                     .filter("keyword = ", "Randy"))
                                  .get());
     }
 
@@ -473,7 +473,8 @@ public class TestQuery extends TestBase {
 
         assertEquals(asList(key3, key4), getDatastore().find(PhotoWithKeywords.class)
                                                        .field("keywords")
-                                                       .hasThisElement(new Keyword("Scott"))
+                                                       .elemMatch(getDatastore().find(Keyword.class)
+                                                           .filter("keyword = ", "Scott"))
                                                        .asKeyList());
 
         assertEquals(asList(key3, key4), getDatastore().find(PhotoWithKeywords.class)
@@ -485,7 +486,8 @@ public class TestQuery extends TestBase {
 
         assertEquals(singletonList(key4), getDatastore().find(PhotoWithKeywords.class)
                                                         .field("keywords")
-                                                        .hasThisElement(new Keyword(14))
+                                                        .elemMatch(getDatastore().find(Keyword.class)
+                                                            .filter("score = ", 14))
                                                         .asKeyList());
 
         assertEquals(singletonList(key4), getDatastore().find(PhotoWithKeywords.class)
@@ -497,7 +499,9 @@ public class TestQuery extends TestBase {
 
         assertEquals(asList(key1, key2), getDatastore().find(PhotoWithKeywords.class)
                                                        .field("keywords")
-                                                       .doesNotHaveThisElement(new Keyword("Scott"))
+                                                       .not()
+                                                       .elemMatch(getDatastore().find(Keyword.class)
+                                                           .filter("keyword = ", "Scott"))
                                                        .asKeyList());
 
         assertEquals(asList(key1, key2), getDatastore().find(PhotoWithKeywords.class)
@@ -599,7 +603,7 @@ public class TestQuery extends TestBase {
 
     @Test
     public void testGetByKeysHetero() {
-        final Iterable<Key<Object>> keys = getDatastore().save(asList(new FacebookUser(1, "scott"), new Rectangle(1, 1)));
+        final List<Key<Object>> keys = getDatastore().save(asList(new FacebookUser(1, "scott"), new Rectangle(1, 1)));
         final List<Object> entities = getDatastore().getByKeys(keys);
         assertNotNull(entities);
         assertEquals(2, entities.size());
@@ -664,7 +668,7 @@ public class TestQuery extends TestBase {
         final Iterable<Key<FacebookUser>> fbKeys = getDatastore().save(asList(fbUser1, fbUser2, fbUser3, fbUser4));
         assertEquals(1, fbUser1.getId());
 
-        final List<Key<FacebookUser>> fbUserKeys = new ArrayList<Key<FacebookUser>>();
+        final List<Key<FacebookUser>> fbUserKeys = new ArrayList<>();
         for (final Key<FacebookUser> key : fbKeys) {
             fbUserKeys.add(key);
         }
@@ -695,7 +699,7 @@ public class TestQuery extends TestBase {
         final Iterable<Key<FacebookUser>> fbKeys = getDatastore().save(asList(fbUser1, fbUser2, fbUser3, fbUser4));
         assertEquals(1, fbUser1.getId());
 
-        final List<Key<FacebookUser>> fbUserKeys = new ArrayList<Key<FacebookUser>>();
+        final List<Key<FacebookUser>> fbUserKeys = new ArrayList<>();
         for (final Key<FacebookUser> key : fbKeys) {
             fbUserKeys.add(key);
         }
@@ -723,7 +727,6 @@ public class TestQuery extends TestBase {
         assertEquals(4, fbUsers.size());
         for (final FacebookUser fbUser : fbUsers) {
             assertNotNull(fbUser);
-            assertNotNull(fbUser.getId());
             assertNotNull(fbUser.getUsername());
         }
     }
@@ -885,7 +888,9 @@ public class TestQuery extends TestBase {
         assertNotNull(query.get());
 
         getDatastore().find(ContainsPic.class)
-                      .field("pic").hasThisElement(queryPic);
+                      .field("pic").elemMatch(
+            getDatastore().find(Pic.class)
+                          .filter("name = ", "some pic"));
         assertFalse(queryPic.isPrePersist());
     }
 
@@ -1065,7 +1070,7 @@ public class TestQuery extends TestBase {
 
         try {
             getDatastore().find(ContainsPic.class).filter("pic.name", "foo").get();
-            assertNull("query validation should have thrown an exception");
+            fail("query validation should have thrown an exception");
         } catch (ValidationException e) {
             assertTrue(e.getMessage().contains("Cannot use dot-"));
         }
@@ -1200,17 +1205,13 @@ public class TestQuery extends TestBase {
         getMorphia().map(CappedPic.class);
         getDatastore().ensureCaps();
         final Query<CappedPic> query = getDatastore().find(CappedPic.class);
-        final List<CappedPic> found = new ArrayList<CappedPic>();
+        final List<CappedPic> found = new ArrayList<>();
         final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
 
         assertEquals(0, query.count());
 
-        executorService.scheduleAtFixedRate(new Runnable() {
-            @Override
-            public void run() {
-                getDatastore().save(new CappedPic(System.currentTimeMillis() + ""));
-            }
-        }, 0, 500, TimeUnit.MILLISECONDS);
+        executorService.scheduleAtFixedRate(
+            () -> getDatastore().save(new CappedPic(System.currentTimeMillis() + "")), 0, 500, TimeUnit.MILLISECONDS);
 
         final Iterator<CappedPic> tail = query
             .fetch(new FindOptions()
@@ -1219,14 +1220,11 @@ public class TestQuery extends TestBase {
             .await()
             .pollDelay(500, TimeUnit.MILLISECONDS)
             .atMost(10, TimeUnit.SECONDS)
-            .until(new Callable<Boolean>() {
-                @Override
-                public Boolean call() {
-                    if (tail.hasNext()) {
-                        found.add(tail.next());
-                    }
-                    return found.size() >= 10;
+            .until(() -> {
+                if (tail.hasNext()) {
+                    found.add(tail.next());
                 }
+                return found.size() >= 10;
             });
         executorService.shutdownNow();
         Assert.assertTrue(query.count() >= 10);
@@ -1251,14 +1249,18 @@ public class TestQuery extends TestBase {
         // find({ keywords: { $elemMatch: { keyword: "Scott", score: 12 } } })
         assertNotNull(getDatastore().find(PhotoWithKeywords.class)
                                     .field("keywords")
-                                    .hasThisElement(new Keyword("Scott")).get());
+                                    .elemMatch(getDatastore().find(Keyword.class)
+                                                             .filter("keyword = ", "Scott"))
+                                    .get());
         assertNotNull(getDatastore().find(PhotoWithKeywords.class)
                                     .field("keywords").elemMatch(getDatastore().find(Keyword.class)
                                                                                .filter("keyword", "Scott"))
                                     .get());
 
         assertNull(getDatastore().find(PhotoWithKeywords.class)
-                                 .field("keywords").hasThisElement(new Keyword("Randy"))
+                                 .field("keywords")
+                                 .elemMatch(getDatastore().find(Keyword.class)
+                                                          .filter("keyword = ", "Randy"))
                                  .get());
         assertNull(getDatastore().find(PhotoWithKeywords.class)
                                  .field("keywords").elemMatch(getDatastore().find(Keyword.class)
@@ -1289,8 +1291,6 @@ public class TestQuery extends TestBase {
             // must fail
             assertNotNull(getDatastore().find(PhotoWithKeywords.class).where(hasKeyword.getCode()).get());
             fail("Invalid javascript magically isn't invalid anymore?");
-        } catch (MongoInternalException e) {
-            // fine
         } catch (MongoException e) {
             // fine
         }
@@ -1334,12 +1334,12 @@ public class TestQuery extends TestBase {
     }
 
     @Entity
-    public static class Photo {
+    static class Photo {
         @Id
         private ObjectId id;
         private List<String> keywords = singletonList("amazing");
 
-        public Photo() {
+        Photo() {
         }
 
         Photo(final List<String> keywords) {
@@ -1351,13 +1351,13 @@ public class TestQuery extends TestBase {
         @Id
         private ObjectId id;
         @Embedded
-        private List<Keyword> keywords = new ArrayList<Keyword>();
+        private List<Keyword> keywords = new ArrayList<>();
 
         PhotoWithKeywords() {
         }
 
         PhotoWithKeywords(final String... words) {
-            keywords = new ArrayList<Keyword>(words.length);
+            keywords = new ArrayList<>(words.length);
             for (final String word : words) {
                 keywords.add(new Keyword(word));
             }
@@ -1442,9 +1442,9 @@ public class TestQuery extends TestBase {
         private String name = "test";
         @Reference
         private Pic pic;
-        @Reference(lazy = true)
+        @Reference
         private Pic lazyPic;
-        @Reference(lazy = true)
+        @Reference
         private PicWithObjectId lazyObjectIdPic;
         @Indexed
         private int size;
@@ -1712,7 +1712,7 @@ public class TestQuery extends TestBase {
 
     private void compareLists(final List<Rectangle> list, final Query<Rectangle> query1, final Query<Rectangle> query2,
                               final Comparator<Rectangle> comparator) {
-        Collections.sort(list, comparator);
+        list.sort(comparator);
         assertEquals(query1.asList(), list);
         assertEquals(query2.asList(), list);
     }

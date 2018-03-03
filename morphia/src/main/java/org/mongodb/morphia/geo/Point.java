@@ -1,5 +1,6 @@
 package org.mongodb.morphia.geo;
 
+import com.mongodb.client.model.geojson.Position;
 import org.mongodb.morphia.annotations.Embedded;
 
 import java.util.ArrayList;
@@ -12,10 +13,12 @@ import java.util.List;
  * The builder for creating a Point is the {@code GeoJson.pointBuilder} method, or the helper {@code GeoJson.point} factory method.
  *
  * @see org.mongodb.morphia.geo.GeoJson#point(double, double)
+ * @deprecated use {@link Position}
  */
 @Embedded
+@Deprecated
 public class Point implements Geometry {
-    private final List<Double> coordinates = new ArrayList<Double>();
+    private final List<Double> coordinates = new ArrayList<>();
 
     Point(final double latitude, final double longitude) {
         coordinates.add(longitude);

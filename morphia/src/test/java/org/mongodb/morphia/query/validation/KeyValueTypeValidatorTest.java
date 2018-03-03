@@ -14,7 +14,7 @@ public class KeyValueTypeValidatorTest {
     @Test
     public void shouldAllowTypeThatMatchesKeyKindWhenValueIsAKey() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
         boolean validationApplied = KeyValueTypeValidator.getInstance().apply(Integer.class,
                                                                               new Key<Number>(Integer.class, "Integer", new ObjectId()),
@@ -27,7 +27,7 @@ public class KeyValueTypeValidatorTest {
     @Test
     public void shouldNotValidateWhenValueIsNotAKey() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
         boolean validationApplied = KeyValueTypeValidator.getInstance().apply(String.class, new SimpleEntity(), validationFailures);
         // then
@@ -38,7 +38,7 @@ public class KeyValueTypeValidatorTest {
     @Test
     public void shouldRejectTypeThatDoesNotMatchKeyKindWhenValueIsAKey() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
         boolean validationApplied = KeyValueTypeValidator.getInstance().apply(String.class,
                                                                               new Key<Number>(Integer.class, "Integer", new ObjectId()),

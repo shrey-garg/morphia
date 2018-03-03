@@ -9,7 +9,7 @@ import java.util.List;
  * Morphia's logging factory that can return either an slf4j LoggerFactory or a JDK LoggerFactory.
  */
 public final class MorphiaLoggerFactory {
-    private static final List<String> FACTORIES = new ArrayList<String>();
+    private static final List<String> FACTORIES = new ArrayList<>();
     private static LoggerFactory loggerFactory;
 
     static {

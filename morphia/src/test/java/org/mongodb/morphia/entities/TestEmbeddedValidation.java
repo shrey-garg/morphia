@@ -23,7 +23,6 @@ import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.dao.BasicDAO;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
@@ -42,7 +41,6 @@ public class TestEmbeddedValidation extends TestBase {
     @SuppressWarnings("unchecked")
     public void testCreateEntityWithBasicDBList() {
         getMorphia().map(TestEntity.class);
-        BasicDAO<TestEntity, ObjectId> dao = new BasicDAO<TestEntity, ObjectId>(TestEntity.class, getDatastore());
         TestEntity entity = new TestEntity();
 
         Map<String, Object> map = mapOf("type", "text");
@@ -53,12 +51,12 @@ public class TestEmbeddedValidation extends TestBase {
         List<Map<String, Object>> data = asList(map, map1);
 
         entity.setData(data);
-        dao.save(entity);
+        getDatastore().save(entity);
 
-        TestEntity testEntity = dao.get(entity.getId());
+        TestEntity testEntity = getDatastore().get(TestEntity.class, entity.getId());
         assertEquals(entity, testEntity);
 
-        Query<TestEntity> query = dao.createQuery();
+        Query<TestEntity> query = getDatastore().createQuery(TestEntity.class);
         query.disableValidation();
         query.criteria("data.data.id").equal("123");
 
@@ -101,7 +99,7 @@ public class TestEmbeddedValidation extends TestBase {
         UpdateOperations<EntityWithListsAndArrays> operations = getDatastore()
             .createUpdateOperations(EntityWithListsAndArrays.class)
             .set("listEmbeddedType.$.number", 0);
-        getDatastore().update(query, operations);
+        getDatastore().updateMany(query, operations);
 
         Assert.assertEquals(0, query.count());
 
@@ -116,7 +114,7 @@ public class TestEmbeddedValidation extends TestBase {
     }
 
     private Map<String, Object> mapOf(final String key, final Object value) {
-        HashMap<String, Object> map = new HashMap<String, Object>();
+        HashMap<String, Object> map = new HashMap<>();
         map.put(key, value);
         return map;
     }
@@ -133,7 +131,7 @@ public class TestEmbeddedValidation extends TestBase {
         }
 
         public void setData(final List<Map<String, Object>> data) {
-            this.data = new ArrayList<Map<String, Object>>();
+            this.data = new ArrayList<>();
             this.data.addAll(data);
         }
 

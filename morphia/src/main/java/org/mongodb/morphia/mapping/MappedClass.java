@@ -156,11 +156,10 @@ public class MappedClass {
      * @param entity   the entity to process
      * @param document the document to use
      * @param mapper   the Mapper to use
-     * @return the document
      */
     @SuppressWarnings("unchecked")
-    public Document callLifecycleMethods(final Class<? extends Annotation> event, final Object entity, final Document document,
-                                         final Mapper mapper) {
+    public void callLifecycleMethods(final Class<? extends Annotation> event, final Object entity, final Document document,
+                                     final Mapper mapper) {
         final List<ClassMethodPair> methodPairs = lifecycleMethods.get(event);
         Document retDbObj = document;
         try {
@@ -210,7 +209,6 @@ public class MappedClass {
             throw new RuntimeException(e);
         }
 
-        return retDbObj;
     }
 
     /**

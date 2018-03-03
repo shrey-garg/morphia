@@ -2,6 +2,8 @@ package org.mongodb.morphia.indexes;
 
 import com.mongodb.DBObject;
 import com.mongodb.MongoCommandException;
+import com.mongodb.client.ListIndexesIterable;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Before;
@@ -15,8 +17,6 @@ import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.annotations.Text;
-
-import java.util.List;
 
 import static org.mongodb.morphia.utils.IndexType.TEXT;
 
@@ -41,13 +41,13 @@ public class TestTextIndexing extends TestBase {
         getMorphia().map(TextIndexAll.class);
         getDatastore().ensureIndexes();
 
-        List<DBObject> indexInfo = getDatastore().getCollection(TextIndexAll.class).getIndexInfo();
-        Assert.assertEquals(2, indexInfo.size());
-        for (DBObject dbObject : indexInfo) {
-            if (!dbObject.get("name").equals("_id_")) {
-                Assert.assertEquals(1, ((DBObject) dbObject.get("weights")).get("$**"));
-                Assert.assertEquals("english", dbObject.get("default_language"));
-                Assert.assertEquals("language", dbObject.get("language_override"));
+        ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(TextIndexAll.class).listIndexes();
+        Assert.assertEquals(2, count(indexInfo.iterator()));
+        for (Document document : indexInfo) {
+            if (!document.get("name").equals("_id_")) {
+                Assert.assertEquals(1, ((DBObject) document.get("weights")).get("$**"));
+                Assert.assertEquals("english", document.get("default_language"));
+                Assert.assertEquals("language", document.get("language_override"));
             }
         }
     }
@@ -58,17 +58,17 @@ public class TestTextIndexing extends TestBase {
         getDatastore().getCollection(CompoundTextIndex.class).drop();
         getDatastore().ensureIndexes();
 
-        List<DBObject> indexInfo = getDatastore().getCollection(CompoundTextIndex.class).getIndexInfo();
-        Assert.assertEquals(2, indexInfo.size());
+        ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(CompoundTextIndex.class).listIndexes();
+        Assert.assertEquals(2, count(indexInfo.iterator()));
         boolean found = false;
-        for (DBObject dbObject : indexInfo) {
-            if (dbObject.get("name").equals("indexing_test")) {
+        for (Document document : indexInfo) {
+            if (document.get("name").equals("indexing_test")) {
                 found = true;
-                Assert.assertEquals(dbObject.toString(), "russian", dbObject.get("default_language"));
-                Assert.assertEquals(dbObject.toString(), "nativeTongue", dbObject.get("language_override"));
-                Assert.assertEquals(dbObject.toString(), 1, ((DBObject) dbObject.get("weights")).get("name"));
-                Assert.assertEquals(dbObject.toString(), 10, ((DBObject) dbObject.get("weights")).get("nick"));
-                Assert.assertEquals(dbObject.toString(), 1, ((DBObject) dbObject.get("key")).get("age"));
+                Assert.assertEquals(document.toString(), "russian", document.get("default_language"));
+                Assert.assertEquals(document.toString(), "nativeTongue", document.get("language_override"));
+                Assert.assertEquals(document.toString(), 1, ((DBObject) document.get("weights")).get("name"));
+                Assert.assertEquals(document.toString(), 10, ((DBObject) document.get("weights")).get("nick"));
+                Assert.assertEquals(document.toString(), 1, ((DBObject) document.get("key")).get("age"));
             }
         }
         Assert.assertTrue(found);
@@ -82,15 +82,15 @@ public class TestTextIndexing extends TestBase {
         getDatastore().getCollection(clazz).drop();
         getDatastore().ensureIndexes();
 
-        List<DBObject> indexInfo = getDatastore().getCollection(clazz).getIndexInfo();
-        Assert.assertEquals(indexInfo.toString(), 2, indexInfo.size());
+        ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(clazz).listIndexes();
+        Assert.assertEquals(2, count(indexInfo.iterator()));
         boolean found = false;
-        for (DBObject dbObject : indexInfo) {
-            if (dbObject.get("name").equals("single_annotation")) {
+        for (Document document : indexInfo) {
+            if (document.get("name").equals("single_annotation")) {
                 found = true;
-                Assert.assertEquals(dbObject.toString(), "english", dbObject.get("default_language"));
-                Assert.assertEquals(dbObject.toString(), "nativeTongue", dbObject.get("language_override"));
-                Assert.assertEquals(dbObject.toString(), 10, ((DBObject) dbObject.get("weights")).get("nickName"));
+                Assert.assertEquals(document.toString(), "english", document.get("default_language"));
+                Assert.assertEquals(document.toString(), "nativeTongue", document.get("language_override"));
+                Assert.assertEquals(document.toString(), 10, ((DBObject) document.get("weights")).get("nickName"));
             }
         }
         Assert.assertTrue(indexInfo.toString(), found);
@@ -100,15 +100,15 @@ public class TestTextIndexing extends TestBase {
     @Test
     public void testTextIndexOnNamedCollection() {
         getMorphia().map(TextIndexAll.class);
-        getAds().ensureIndexes("randomCollection", TextIndexAll.class);
+        getAds().ensureIndexes("randomCollection", TextIndexAll.class, false);
 
-        List<DBObject> indexInfo = getDatabase().getCollection("randomCollection").getIndexInfo();
-        Assert.assertEquals(2, indexInfo.size());
-        for (DBObject dbObject : indexInfo) {
-            if (!dbObject.get("name").equals("_id_")) {
-                Assert.assertEquals(1, ((DBObject) dbObject.get("weights")).get("$**"));
-                Assert.assertEquals("english", dbObject.get("default_language"));
-                Assert.assertEquals("language", dbObject.get("language_override"));
+        ListIndexesIterable<Document> indexInfo = getDatabase().getCollection("randomCollection").listIndexes();
+        Assert.assertEquals(2, count(indexInfo.iterator()));
+        for (Document document : indexInfo) {
+            if (!document.get("name").equals("_id_")) {
+                Assert.assertEquals(1, ((Document) document.get("weights")).get("$**"));
+                Assert.assertEquals("english", document.get("default_language"));
+                Assert.assertEquals("language", document.get("language_override"));
             }
         }
     }

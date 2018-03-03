@@ -2,7 +2,6 @@ package org.mongodb.morphia.query;
 
 import com.mongodb.client.model.geojson.Geometry;
 import org.bson.Document;
-import org.mongodb.morphia.geo.CoordinateReferenceSystem;
 
 import static org.mongodb.morphia.query.FilterOperator.NEAR;
 

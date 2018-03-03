@@ -48,12 +48,12 @@ public class EnumMappingTest extends TestBase {
 
         CustomerWithArrayList customer = new CustomerWithArrayList();
 
-        List<WebTemplate> templates1 = new ArrayList<WebTemplate>();
+        List<WebTemplate> templates1 = new ArrayList<>();
         templates1.add(new WebTemplate("template #1.1"));
         templates1.add(new WebTemplate("template #1.2"));
         customer.add(WebTemplateType.CrewContract, templates1);
 
-        List<WebTemplate> templates2 = new ArrayList<WebTemplate>();
+        List<WebTemplate> templates2 = new ArrayList<>();
         templates1.add(new WebTemplate("template #2.1"));
         templates1.add(new WebTemplate("template #2.2"));
         customer.add(WebTemplateType.CrewContractHeader, templates2);
@@ -71,12 +71,12 @@ public class EnumMappingTest extends TestBase {
         getMorphia().map(CustomerWithArrayList.class);
         CustomerWithList customer = new CustomerWithList();
 
-        List<WebTemplate> templates1 = new ArrayList<WebTemplate>();
+        List<WebTemplate> templates1 = new ArrayList<>();
         templates1.add(new WebTemplate("template #1.1"));
         templates1.add(new WebTemplate("template #1.2"));
         customer.add(WebTemplateType.CrewContract, templates1);
 
-        List<WebTemplate> templates2 = new ArrayList<WebTemplate>();
+        List<WebTemplate> templates2 = new ArrayList<>();
         templates1.add(new WebTemplate("template #2.1"));
         templates1.add(new WebTemplate("template #2.2"));
         customer.add(WebTemplateType.CrewContractHeader, templates2);
@@ -127,7 +127,7 @@ public class EnumMappingTest extends TestBase {
     public static class Class1 {
         @Id
         private ObjectId id;
-        private Map<String, Foo> map = new HashMap<String, Foo>();
+        private Map<String, Foo> map = new HashMap<>();
 
         public Map<String, Foo> getMap() {
             return map;
@@ -194,7 +194,7 @@ public class EnumMappingTest extends TestBase {
 
     @Entity(noClassnameStored = true)
     public static class Customer {
-        private final Map<WebTemplateType, WebTemplate> map = new HashMap<WebTemplateType, WebTemplate>();
+        private final Map<WebTemplateType, WebTemplate> map = new HashMap<>();
         @Id
         private ObjectId id;
 
@@ -206,7 +206,7 @@ public class EnumMappingTest extends TestBase {
 
     @Entity(noClassnameStored = true)
     public static class CustomerWithList {
-        private final Map<WebTemplateType, List<WebTemplate>> mapWithList = new HashMap<WebTemplateType, List<WebTemplate>>();
+        private final Map<WebTemplateType, List<WebTemplate>> mapWithList = new HashMap<>();
         @Id
         private ObjectId id;
 
@@ -218,7 +218,7 @@ public class EnumMappingTest extends TestBase {
     @Entity(noClassnameStored = true)
     public static class CustomerWithArrayList {
         private final Map<WebTemplateType, List<WebTemplate>> mapWithArrayList
-            = new HashMap<WebTemplateType, List<WebTemplate>>();
+            = new HashMap<>();
         @Id
         private ObjectId id;
 

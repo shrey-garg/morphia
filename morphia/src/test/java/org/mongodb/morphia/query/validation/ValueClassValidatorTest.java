@@ -12,7 +12,7 @@ public class ValueClassValidatorTest {
     @Test
     public void shouldAllowClassesWithExactlyTheSameType() {
         // expect
-        assertThat(ValueClassValidator.valueIsClassOrSubclassOf(new Integer(1), Integer.class), is(true));
+        assertThat(ValueClassValidator.valueIsClassOrSubclassOf(1, Integer.class), is(true));
     }
 
     @Test

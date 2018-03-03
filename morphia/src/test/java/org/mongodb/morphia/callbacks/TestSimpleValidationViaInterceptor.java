@@ -1,15 +1,16 @@
 package org.mongodb.morphia.callbacks;
 
 
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mongodb.morphia.AbstractEntityInterceptor;
+import org.mongodb.morphia.EntityInterceptor;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.PrePersist;
 import org.mongodb.morphia.callbacks.TestSimpleValidationViaInterceptor.NonNullValidation.NonNullValidationException;
+import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
@@ -41,7 +42,7 @@ public class TestSimpleValidationViaInterceptor extends TestBase {
 
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.FIELD})
-    public @interface NonNull {
+    private @interface NonNull {
     }
 
     static class E {
@@ -57,7 +58,7 @@ public class TestSimpleValidationViaInterceptor extends TestBase {
         }
     }
 
-    static class E2 {
+    private static class E2 {
         @Id
         private final ObjectId id = new ObjectId();
 
@@ -65,9 +66,9 @@ public class TestSimpleValidationViaInterceptor extends TestBase {
         private String mustFailValidation;
     }
 
-    public static class NonNullValidation extends AbstractEntityInterceptor {
+    public static class NonNullValidation implements EntityInterceptor {
         @Override
-        public void prePersist(final Object ent, final DBObject dbObj, final Mapper mapper) {
+        public void prePersist(final Object ent, final Document document, final Mapper mapper) {
             final MappedClass mc = mapper.getMappedClass(ent);
             final List<MappedField> fieldsToTest = mc.getFieldsAnnotatedWith(NonNull.class);
             for (final MappedField mf : fieldsToTest) {
@@ -80,7 +81,7 @@ public class TestSimpleValidationViaInterceptor extends TestBase {
         static class NonNullValidationException extends RuntimeException {
 
             NonNullValidationException(final MappedField mf) {
-                super("NonNull field is null " + mf.getFullName());
+                super("NonNull field is null " + mf.getNameToStore());
             }
 
         }

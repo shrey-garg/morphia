@@ -282,7 +282,7 @@ public class TestIndexed extends TestBase {
     private static class MixedIndexDefinitions {
         @Id
         private ObjectId id;
-        @Indexed(unique = true, options = @IndexOptions(dropDups = true))
+        @Indexed(unique = true)
         private String name;
     }
 }

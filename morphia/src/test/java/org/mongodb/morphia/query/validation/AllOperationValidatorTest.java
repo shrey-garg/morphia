@@ -17,7 +17,7 @@ public class AllOperationValidatorTest {
     @Test
     public void shouldAllowAllOperatorForIterableMapAndArrayValues() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = AllOperationValidator.getInstance().apply(null, ALL, new int[0], validationFailures);
@@ -30,7 +30,7 @@ public class AllOperationValidatorTest {
     @Test
     public void shouldAllowAllOperatorForIterableValues() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = AllOperationValidator.getInstance().apply(null, ALL, Collections.emptySet(), validationFailures);
@@ -43,7 +43,7 @@ public class AllOperationValidatorTest {
     @Test
     public void shouldAllowAllOperatorForListValues() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = AllOperationValidator.getInstance().apply(null, ALL, asList(1, 2), validationFailures);
@@ -56,7 +56,7 @@ public class AllOperationValidatorTest {
     @Test
     public void shouldAllowAllOperatorForMapValues() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = AllOperationValidator.getInstance().apply(null, ALL, new HashMap<String, String>(), validationFailures);
@@ -69,7 +69,7 @@ public class AllOperationValidatorTest {
     @Test
     public void shouldGiveAValidationErrorForANullValue() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = AllOperationValidator.getInstance().apply(null, ALL, null, validationFailures);
@@ -83,7 +83,7 @@ public class AllOperationValidatorTest {
     @Test
     public void shouldGiveAValidationErrorForAValueThatIsNotAnArrayIterableOrMap() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = AllOperationValidator.getInstance().apply(null, ALL, "invalid value", validationFailures);
@@ -97,7 +97,7 @@ public class AllOperationValidatorTest {
     @Test
     public void shouldNotApplyValidationIfOperatorIsNotAllOperation() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = AllOperationValidator.getInstance().apply(null, EQUAL, "invalid value", validationFailures);

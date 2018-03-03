@@ -18,7 +18,7 @@ public class MultiLineString implements Geometry {
 
     @SuppressWarnings("UnusedDeclaration") // needed for Morphia
     private MultiLineString() {
-        this.coordinates = new ArrayList<LineString>();
+        this.coordinates = new ArrayList<>();
     }
 
     MultiLineString(final LineString... lineStrings) {

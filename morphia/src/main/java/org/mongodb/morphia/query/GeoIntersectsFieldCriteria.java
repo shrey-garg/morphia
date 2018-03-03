@@ -1,8 +1,8 @@
 package org.mongodb.morphia.query;
 
+import com.mongodb.client.model.geojson.CoordinateReferenceSystem;
 import com.mongodb.client.model.geojson.Geometry;
 import org.bson.Document;
-import com.mongodb.client.model.geojson.CoordinateReferenceSystem ;
 
 /**
  * Creates queries for GeoJson geo queries on MongoDB. These queries generally require MongoDB 2.4 and above, and usually work on 2d sphere

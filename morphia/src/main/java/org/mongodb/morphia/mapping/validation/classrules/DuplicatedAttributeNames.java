@@ -11,7 +11,7 @@ import org.mongodb.morphia.mapping.validation.ConstraintViolation.Level;
 import java.util.HashSet;
 import java.util.Set;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 
 public class DuplicatedAttributeNames implements ClassConstraint {
 

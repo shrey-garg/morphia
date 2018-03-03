@@ -21,9 +21,9 @@ public class Article extends TestEntity {
     private Map<String, Article> related;
 
     public Article() {
-        translations = new HashMap<String, Translation>();
+        translations = new HashMap<>();
         attributes = new HashMap<String, Object>();
-        related = new HashMap<String, Article>();
+        related = new HashMap<>();
     }
 
     public Object getAttribute(final String name) {

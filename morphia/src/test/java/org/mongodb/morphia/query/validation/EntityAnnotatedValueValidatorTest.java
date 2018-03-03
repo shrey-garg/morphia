@@ -13,7 +13,7 @@ public class EntityAnnotatedValueValidatorTest {
     @Test
     public void shouldAllowValueWithEntityAnnotationAndTypeOfKey() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
         boolean validationApplied = EntityAnnotatedValueValidator.getInstance().apply(Key.class, new SimpleEntity(), validationFailures);
         // then
@@ -24,7 +24,7 @@ public class EntityAnnotatedValueValidatorTest {
     @Test
     public void shouldNotValidateValueWithEntityAnnotationAndNonKeyType() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
         boolean validationApplied = EntityAnnotatedValueValidator.getInstance().apply(String.class, new SimpleEntity(), validationFailures);
         // then
@@ -35,7 +35,7 @@ public class EntityAnnotatedValueValidatorTest {
     @Test
     public void shouldRejectValueWithoutEntityAnnotationAndTypeOfKey() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
         boolean validationApplied = EntityAnnotatedValueValidator.getInstance().apply(Key.class, "value", validationFailures);
         // then

@@ -1,11 +1,11 @@
 package org.mongodb.morphia.query;
 
 
+import com.mongodb.client.model.geojson.CoordinateReferenceSystem;
 import com.mongodb.client.model.geojson.Geometry;
 import com.mongodb.client.model.geojson.MultiPolygon;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Polygon;
-import com.mongodb.client.model.geojson.CoordinateReferenceSystem;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.utils.Assert;
@@ -124,20 +124,6 @@ public class FieldEndImpl<T extends CriteriaContainerImpl> implements FieldEnd<T
         Assert.parametersNotNull("values", values);
         Assert.parameterNotEmpty("values", values);
         return addCriteria(FilterOperator.NOT_IN, values);
-    }
-
-    @Override
-    @Deprecated
-    public T doesNotHaveThisElement(final Object val) {
-        Assert.parametersNotNull("val", val);
-        return addCriteria(FilterOperator.ELEMENT_MATCH, val, true);
-    }
-
-    @Override
-    @Deprecated
-    public T hasThisElement(final Object val) {
-        Assert.parametersNotNull("val", val);
-        return addCriteria(FilterOperator.ELEMENT_MATCH, val, not);
     }
 
     @Override
@@ -306,7 +292,7 @@ public class FieldEndImpl<T extends CriteriaContainerImpl> implements FieldEnd<T
     }
 
     private Map<String, Object> opts(final String s, final Object v) {
-        final Map<String, Object> opts = new HashMap<String, Object>();
+        final Map<String, Object> opts = new HashMap<>();
         opts.put(s, v);
         return opts;
     }

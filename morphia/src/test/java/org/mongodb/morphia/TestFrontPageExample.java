@@ -59,7 +59,7 @@ public class TestFrontPageExample extends TestBase {
     private static class Employee {
 
         @Reference
-        private final List<Employee> underlings = new ArrayList<Employee>(); // refs are stored*, and loaded automatically
+        private final List<Employee> underlings = new ArrayList<>(); // refs are stored*, and loaded automatically
         private final transient boolean stored = true; // not @Transient, will be ignored by Serialization/GWT for example.
         @Id
         private ObjectId id; // auto-generated, if not set (see ObjectId)

@@ -17,7 +17,7 @@
 package org.mongodb.morphia;
 
 import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import com.mongodb.client.ListIndexesIterable;
 import com.mongodb.client.MongoCollection;
 import org.bson.BsonDocument;
 import org.bson.BsonInt32;
@@ -37,12 +37,12 @@ import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.annotations.Text;
+import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.MappingException;
 import org.mongodb.morphia.utils.IndexDirection;
 import org.mongodb.morphia.utils.IndexType;
 
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.mongodb.BasicDBObject.parse;
@@ -58,6 +58,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+@SuppressWarnings("unused")
 public class IndexHelperTest extends TestBase {
     private final IndexHelper indexHelper = new IndexHelper(getMorphia().getMapper(), getDatabase());
 
@@ -108,40 +109,48 @@ public class IndexHelperTest extends TestBase {
     @Test
     public void createIndex() {
         checkMinServerVersion(3.4);
-        String collectionName = getDatastore().getCollection(IndexedClass.class).getName();
+        String collectionName = getDatastore().getCollection(IndexedClass.class).getNamespace().getCollectionName();
         MongoCollection<Document> collection = getDatabase().getCollection(collectionName);
         Mapper mapper = getMorphia().getMapper();
 
         indexHelper.createIndex(collection, mapper.getMappedClass(IndexedClass.class), false);
-        List<DBObject> indexInfo = getDatastore().getCollection(IndexedClass.class)
-                                                 .getIndexInfo();
-        assertEquals("Should have 6 indexes", 6, indexInfo.size());
-        for (DBObject dbObject : indexInfo) {
-            String name = dbObject.get("name").toString();
-            if (name.equals("latitude_1")) {
-                assertEquals(parse("{ 'latitude' : 1 }"), dbObject.get("key"));
-            } else if (name.equals("behind_interface")) {
-                assertEquals(parse("{ 'nest.name' : -1} "), dbObject.get("key"));
-                assertEquals(parse("{ 'locale' : 'en' , 'caseLevel' : false , 'caseFirst' : 'off' , 'strength' : 2 , 'numericOrdering' :"
-                                       + " false , 'alternate' : 'non-ignorable' , 'maxVariable' : 'punct' , 'normalization' : false , "
-                                       + "'backwards' : false , 'version' : '57.1'}"), dbObject.get("collation"));
-            } else if (name.equals("nest.name_1")) {
-                assertEquals(parse("{ 'nest.name' : 1} "), dbObject.get("key"));
-            } else if (name.equals("searchme")) {
-                assertEquals(parse("{ 'text' : 10 }"), dbObject.get("weights"));
-            } else if (name.equals("indexName_1")) {
-                assertEquals(parse("{'indexName': 1 }"), dbObject.get("key"));
-            } else {
-                if (!"_id_".equals(dbObject.get("name"))) {
-                    throw new MappingException("Found an index I wasn't expecting:  " + dbObject);
-                }
+        ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(IndexedClass.class)
+                                                                .listIndexes();
+        assertEquals("Should have 6 indexes", 6, count(indexInfo.iterator()));
+        for (Document document : indexInfo) {
+            String name = document.get("name").toString();
+            switch (name) {
+                case "latitude_1":
+                    assertEquals(parse("{ 'latitude' : 1 }"), document.get("key"));
+                    break;
+                case "behind_interface":
+                    assertEquals(parse("{ 'nest.name' : -1} "), document.get("key"));
+                    assertEquals(
+                        parse("{ 'locale' : 'en' , 'caseLevel' : false , 'caseFirst' : 'off' , 'strength' : 2 , 'numericOrdering' :"
+                              + " false , 'alternate' : 'non-ignorable' , 'maxVariable' : 'punct' , 'normalization' : false , "
+                              + "'backwards' : false , 'version' : '57.1'}"), document.get("collation"));
+                    break;
+                case "nest.name_1":
+                    assertEquals(parse("{ 'nest.name' : 1} "), document.get("key"));
+                    break;
+                case "searchme":
+                    assertEquals(parse("{ 'text' : 10 }"), document.get("weights"));
+                    break;
+                case "indexName_1":
+                    assertEquals(parse("{'indexName': 1 }"), document.get("key"));
+                    break;
+                default:
+                    if (!"_id_".equals(document.get("name"))) {
+                        throw new MappingException("Found an index I wasn't expecting:  " + document);
+                    }
+                    break;
             }
         }
 
-        collection = getDatabase().getCollection(getDatastore().getCollection(AbstractParent.class).getName());
+        collection = getDatabase().getCollection(getDatastore().getCollection(AbstractParent.class).getNamespace().getCollectionName());
         indexHelper.createIndex(collection, mapper.getMappedClass(AbstractParent.class), false);
-        indexInfo = getDatastore().getCollection(AbstractParent.class).getIndexInfo();
-        assertTrue("Shouldn't find any indexes: " + indexInfo, indexInfo.isEmpty());
+        indexInfo = getDatastore().getCollection(AbstractParent.class).listIndexes();
+        assertFalse("Shouldn't find any indexes: " + indexInfo, indexInfo.iterator().hasNext());
 
     }
 
@@ -179,14 +188,14 @@ public class IndexHelperTest extends TestBase {
                         .type(IndexType.DESC))
             .options(indexOptions());
         indexHelper.createIndex(indexes, mappedClass, index, false);
-        List<DBObject> indexInfo = getDatastore().getCollection(IndexedClass.class)
-                                                 .getIndexInfo();
-        for (DBObject dbObject : indexInfo) {
-            if (dbObject.get("name").equals("indexName")) {
-                checkIndex(dbObject);
+        ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(IndexedClass.class)
+                                                                .listIndexes();
+        for (Document document : indexInfo) {
+            if (document.get("name").equals("indexName")) {
+                checkIndex(document);
 
-                assertEquals("en", dbObject.get("default_language"));
-                assertEquals("de", dbObject.get("language_override"));
+                assertEquals("en", document.get("default_language"));
+                assertEquals("de", document.get("language_override"));
 
                 assertEquals(new BasicDBObject()
                                  .append("locale", "en")
@@ -199,7 +208,7 @@ public class IndexHelperTest extends TestBase {
                                  .append("backwards", true)
                                  .append("normalization", true)
                                  .append("version", "57.1"),
-                             dbObject.get("collation"));
+                             document.get("collation"));
             }
         }
     }
@@ -241,61 +250,12 @@ public class IndexHelperTest extends TestBase {
     }
 
     @Test
-    public void oldIndexForm() {
-        MongoCollection<Document> indexes = getDatabase().getCollection("indexes");
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(IndexedClass.class);
-
-        indexes.drop();
-        Index index = new IndexBuilder()
-            .name("index_name")
-            .background(true)
-            .disableValidation(true)
-            .dropDups(true)
-            .expireAfterSeconds(42)
-            .sparse(true)
-            .unique(true)
-            .value("indexName, -text");
-        indexHelper.createIndex(indexes, mappedClass, index, false);
-        List<DBObject> indexInfo = getDatastore().getCollection(IndexedClass.class)
-                                                 .getIndexInfo();
-        for (DBObject dbObject : indexInfo) {
-            if (dbObject.get("name").equals("index_indexName")) {
-                checkIndex(dbObject);
-            }
-        }
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void oldIndexedForm() {
-        Indexed indexed = new IndexedBuilder()
-            .name("index_name")
-            .background(true)
-            .dropDups(true)
-            .expireAfterSeconds(42)
-            .sparse(true)
-            .unique(true)
-            .value(IndexDirection.DESC);
-        assertEquals(indexed.options().name(), "");
-
-        Index converted = indexHelper.convert(indexed, "oldstyle");
-        assertEquals(converted.options().name(), "index_name");
-        assertTrue(converted.options().background());
-        assertTrue(converted.options().dropDups());
-        assertTrue(converted.options().sparse());
-        assertTrue(converted.options().unique());
-        assertEquals(new FieldBuilder().value("oldstyle").type(IndexType.DESC), converted.fields()[0]);
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
     public void convertTextIndex() {
         TextBuilder text = new TextBuilder()
             .value(4)
             .options(new IndexOptionsBuilder()
                          .name("index_name")
                          .background(true)
-                         .dropDups(true)
                          .expireAfterSeconds(42)
                          .sparse(true)
                          .unique(true));
@@ -303,7 +263,6 @@ public class IndexHelperTest extends TestBase {
         Index index = indexHelper.convert(text, "search_field");
         assertEquals(index.options().name(), "index_name");
         assertTrue(index.options().background());
-        assertTrue(index.options().dropDups());
         assertTrue(index.options().sparse());
         assertTrue(index.options().unique());
         assertEquals(new FieldBuilder()
@@ -321,7 +280,6 @@ public class IndexHelperTest extends TestBase {
             .value(IndexDirection.DESC)
             .options(new IndexOptionsBuilder().name("index_name")
                                               .background(true)
-                                              .dropDups(true)
                                               .expireAfterSeconds(42)
                                               .sparse(true)
                                               .unique(true));
@@ -329,7 +287,6 @@ public class IndexHelperTest extends TestBase {
         Index converted = indexHelper.convert(indexed, "oldstyle");
         assertEquals(converted.options().name(), "index_name");
         assertTrue(converted.options().background());
-        assertTrue(converted.options().dropDups());
         assertTrue(converted.options().sparse());
         assertTrue(converted.options().unique());
         assertEquals(new FieldBuilder().value("oldstyle").type(IndexType.DESC), converted.fields()[0]);
@@ -347,10 +304,10 @@ public class IndexHelperTest extends TestBase {
 
         indexHelper.createIndex(indexes, mappedClass, index, false);
 
-        List<DBObject> wildcard = getDatabase().getCollection("indexes").getIndexInfo();
+        ListIndexesIterable<Document> wildcard = getDatabase().getCollection("indexes").listIndexes();
         boolean found = false;
-        for (DBObject dbObject : wildcard) {
-            found |= dbObject.get("name").equals("$**_text");
+        for (Document document : wildcard) {
+            found |= document.get("name").equals("$**_text");
         }
         assertTrue("Should have found the wildcard index", found);
     }
@@ -408,20 +365,20 @@ public class IndexHelperTest extends TestBase {
         findPartialIndex(BasicDBObject.parse(text.options().partialFilter()));
     }
 
-    private void checkIndex(final DBObject dbObject) {
-        assertTrue((Boolean) dbObject.get("background"));
-        assertTrue((Boolean) dbObject.get("unique"));
-        assertTrue((Boolean) dbObject.get("sparse"));
-        assertEquals(42L, dbObject.get("expireAfterSeconds"));
-        assertEquals(new BasicDBObject("name", 1).append("text", -1), dbObject.get("key"));
+    private void checkIndex(final Document document) {
+        assertTrue((Boolean) document.get("background"));
+        assertTrue((Boolean) document.get("unique"));
+        assertTrue((Boolean) document.get("sparse"));
+        assertEquals(42L, document.get("expireAfterSeconds"));
+        assertEquals(new BasicDBObject("name", 1).append("text", -1), document.get("key"));
     }
 
     private void findPartialIndex(final BasicDBObject expected) {
-        List<DBObject> indexInfo = getDatastore().getCollection(IndexedClass.class)
-                                                 .getIndexInfo();
-        for (DBObject dbObject : indexInfo) {
-            if (!dbObject.get("name").equals("_id_")) {
-                Assert.assertEquals(expected, dbObject.get("partialFilterExpression"));
+        ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(IndexedClass.class)
+                                                                .listIndexes();
+        for (Document document : indexInfo) {
+            if (!document.get("name").equals("_id_")) {
+                Assert.assertEquals(expected, document.get("partialFilterExpression"));
             }
         }
     }
@@ -445,7 +402,6 @@ public class IndexHelperTest extends TestBase {
             .background(true)
             .collation(collation())
             .disableValidation(true)
-            .dropDups(true)
             .expireAfterSeconds(42)
             .language("en")
             .languageOverride("de")

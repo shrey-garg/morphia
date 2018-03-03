@@ -18,10 +18,10 @@ public class NotInOperationValidatorTest {
     @Test
     public void shouldAllowNotInOperatorForArrayListValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
-        ArrayList<Integer> arrayList = new ArrayList<Integer>(asList(1, 2));
+        ArrayList<Integer> arrayList = new ArrayList<>(asList(1, 2));
         boolean validationApplied = NotInOperationValidator.getInstance().apply(null, NOT_IN, arrayList, validationFailures);
 
         // then
@@ -32,7 +32,7 @@ public class NotInOperationValidatorTest {
     @Test
     public void shouldAllowNotInOperatorForArrayValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = NotInOperationValidator.getInstance().apply(null, NOT_IN, new int[0], validationFailures);
@@ -45,7 +45,7 @@ public class NotInOperationValidatorTest {
     @Test
     public void shouldAllowNotInOperatorForIterableValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = NotInOperationValidator.getInstance().apply(null, NOT_IN, Collections.emptySet(), validationFailures);
@@ -58,7 +58,7 @@ public class NotInOperationValidatorTest {
     @Test
     public void shouldAllowNotInOperatorForListValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = NotInOperationValidator.getInstance().apply(null, NOT_IN, asList(1, 2), validationFailures);
@@ -71,7 +71,7 @@ public class NotInOperationValidatorTest {
     @Test
     public void shouldAllowNotInOperatorForMapValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = NotInOperationValidator.getInstance()
@@ -85,7 +85,7 @@ public class NotInOperationValidatorTest {
     @Test
     public void shouldNotApplyForOperatorThatIsNotANotInOperator() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = NotInOperationValidator.getInstance().apply(null, EQUAL, "value", validationFailures);
@@ -98,7 +98,7 @@ public class NotInOperationValidatorTest {
     @Test
     public void shouldRejectNullValues() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = NotInOperationValidator.getInstance().apply(null, NOT_IN, null, validationFailures);
@@ -112,7 +112,7 @@ public class NotInOperationValidatorTest {
     @Test
     public void shouldRejectValuesThatAreNotTheCorrectType() {
         // given
-        List<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        List<ValidationFailure> validationFailures = new ArrayList<>();
 
         // when
         boolean validationApplied = NotInOperationValidator.getInstance().apply(null, NOT_IN, "value", validationFailures);

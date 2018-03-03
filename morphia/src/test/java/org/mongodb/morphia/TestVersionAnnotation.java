@@ -73,7 +73,7 @@ public class TestVersionAnnotation extends TestBase {
 
         Collection<MappedClass> mappedClasses = morphia.getMapper().getMappedClasses();
         assertThat(mappedClasses.size(), is(2));
-        List<Class<?>> list = new ArrayList<Class<?>>();
+        List<Class<?>> list = new ArrayList<>();
         for (MappedClass mappedClass : mappedClasses) {
             list.add(mappedClass.getClazz());
         }
@@ -87,7 +87,7 @@ public class TestVersionAnnotation extends TestBase {
 
         Collection<MappedClass> mappedClasses = morphia.getMapper().getMappedClasses();
         assertThat(mappedClasses.size(), is(2));
-        List<Class<?>> list = new ArrayList<Class<?>>();
+        List<Class<?>> list = new ArrayList<>();
         for (MappedClass mappedClass : mappedClasses) {
             list.add(mappedClass.getClazz());
         }

@@ -1,16 +1,17 @@
 package org.mongodb.morphia.geo;
 
+import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.utils.IndexDirection;
+import com.mongodb.client.model.geojson.Polygon;
 
+@Entity
 public final class Area {
     private String name;
 
     @Indexed(IndexDirection.GEO2DSPHERE)
     private Polygon area;
 
-    @SuppressWarnings("UnusedDeclaration")
-        // Used by Morphia
     Area() {
     }
 

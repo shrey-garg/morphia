@@ -63,11 +63,11 @@ final class IndexHelper {
         this.database = database;
     }
 
-    private static String join(final List<String> path, final char delimiter) {
+    private static String join(final List<String> path) {
         StringBuilder builder = new StringBuilder();
         for (String element : path) {
             if (builder.length() != 0) {
-                builder.append(delimiter);
+                builder.append('.');
             }
             builder.append(element);
         }
@@ -100,9 +100,6 @@ final class IndexHelper {
 
     @SuppressWarnings("deprecation")
     Index convert(final Indexed indexed, final String nameToStore) {
-        if (indexed.dropDups() || indexed.options().dropDups()) {
-            LOG.warning("Support for dropDups has been removed from the server.  Please remove this setting.");
-        }
         final Map<String, Object> newOptions = extractOptions(indexed.options());
         if (!extractOptions(indexed).isEmpty() && !newOptions.isEmpty()) {
             throw new MappingException("Mixed usage of deprecated @Indexed values with the new @IndexOption values is not "
@@ -192,22 +189,15 @@ final class IndexHelper {
             if (annotations != null) {
                 for (final Indexes indexes : annotations) {
                     for (final Index index : indexes.value()) {
-                        Index updated = index;
-                        if (index.fields().length == 0) {
-                            LOG.warning(format("This index on '%s' is using deprecated configuration options.  Please update to use the "
-                                                   + "fields value on @Index: %s", mc.getClazz().getName(), index.toString()));
-                            updated = new IndexBuilder()
-                                .migrate(index);
-                        }
                         List<Field> fields = new ArrayList<>();
-                        for (Field field : updated.fields()) {
+                        for (Field field : index.fields()) {
                             fields.add(new FieldBuilder()
                                            .value(findField(mc, index.options(), asList(field.value().split("\\."))))
                                            .type(field.type())
                                            .weight(field.weight()));
                         }
 
-                        list.add(replaceFields(updated, fields));
+                        list.add(replaceFields(index, fields));
                     }
                 }
             }
@@ -231,7 +221,7 @@ final class IndexHelper {
     }
 
     private MappingException pathFail(final MappedClass mc, final List<String> path) {
-        return new MappingException(format("Could not resolve path '%s' against '%s'.", join(path, '.'), mc.getClazz().getName()));
+        return new MappingException(format("Could not resolve path '%s' against '%s'.", join(path), mc.getClazz().getName()));
     }
 
     private Index replaceFields(final Index original, final List<Field> list) {
@@ -271,9 +261,6 @@ final class IndexHelper {
 
     @SuppressWarnings("deprecation")
     com.mongodb.client.model.IndexOptions convert(final IndexOptions options, final boolean background) {
-        if (options.dropDups()) {
-            LOG.warning("Support for dropDups has been removed from the server.  Please remove this setting.");
-        }
         com.mongodb.client.model.IndexOptions indexOptions = new com.mongodb.client.model.IndexOptions()
             .background(options.background() || background)
             .sparse(options.sparse())
@@ -341,7 +328,7 @@ final class IndexHelper {
             if (!options.disableValidation()) {
                 throw pathFail(mc, path);
             } else {
-                return join(path, '.');
+                return join(path);
             }
         }
         if (path.size() > 1) {
@@ -352,7 +339,7 @@ final class IndexHelper {
                 if (!options.disableValidation()) {
                     throw pathFail(mc, path);
                 } else {
-                    return join(path, '.');
+                    return join(path);
                 }
             }
         }
@@ -368,11 +355,10 @@ final class IndexHelper {
     }
 
     void createIndex(final MongoCollection collection, final MappedClass mc, final Index index, final boolean background) {
-        Index normalized = IndexBuilder.normalize(index);
 
-        BsonDocument keys = calculateKeys(mc, normalized);
-        com.mongodb.client.model.IndexOptions indexOptions = convert(normalized.options(), background);
-        calculateWeights(normalized, indexOptions);
+        BsonDocument keys = calculateKeys(mc, index);
+        com.mongodb.client.model.IndexOptions indexOptions = convert(index.options(), background);
+        calculateWeights(index, indexOptions);
 
         collection.createIndex(keys, indexOptions);
     }

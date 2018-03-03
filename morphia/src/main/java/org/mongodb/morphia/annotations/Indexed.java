@@ -34,14 +34,6 @@ public @interface Indexed {
     boolean background() default false;
 
     /**
-     * @return if true, tells the unique index to drop duplicates silently when creating; only the first will be kept
-     *
-     * @deprecated Support for this has been removed from the server.  This value is ignored.
-     */
-    @Deprecated
-    boolean dropDups() default false;
-
-    /**
      * @return the time to live for documents in the collection
      *
      * @deprecated use the {@link IndexOptions} found in {@link #options()}

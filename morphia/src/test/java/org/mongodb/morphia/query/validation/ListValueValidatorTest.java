@@ -14,7 +14,7 @@ public class ListValueValidatorTest {
     @Test
     public void shouldAllowSubclassesOfList() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
         boolean validationApplied = ListValueValidator.getInstance().apply(null, new ArrayList<String>(), validationFailures);
         // then
@@ -25,7 +25,7 @@ public class ListValueValidatorTest {
     @Test
     public void shouldAllowValuesOfList() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
         List<Integer> list = asList(1, 2);
         boolean validationApplied = ListValueValidator.getInstance().apply(null, list, validationFailures);
@@ -37,7 +37,7 @@ public class ListValueValidatorTest {
     @Test
     public void shouldNotApplyIfValueIsNotAList() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
         boolean validationApplied = ListValueValidator.getInstance().apply(null, new HashMap<String, Object>(), validationFailures);
         // then

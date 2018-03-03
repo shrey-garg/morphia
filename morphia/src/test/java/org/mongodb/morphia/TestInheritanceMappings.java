@@ -219,7 +219,7 @@ public class TestInheritanceMappings extends TestBase {
 
     @Entity(noClassnameStored = true)
     public static class MapLike implements MapPlusIterableStringString {
-        private final HashMap<String, String> realMap = new HashMap<String, String>();
+        private final HashMap<String, String> realMap = new HashMap<>();
         @Id
         private ObjectId id;
 

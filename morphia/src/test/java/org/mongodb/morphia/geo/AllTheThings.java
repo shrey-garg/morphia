@@ -2,6 +2,7 @@ package org.mongodb.morphia.geo;
 
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.utils.IndexDirection;
+import com.mongodb.client.model.geojson.GeometryCollection;
 
 public final class AllTheThings {
     private String name;

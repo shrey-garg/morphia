@@ -24,7 +24,7 @@ public class GeometryCollection {
 
     @SuppressWarnings("UnusedDeclaration") // needed by morphia
     private GeometryCollection() {
-        geometries = new ArrayList<Geometry>();
+        geometries = new ArrayList<>();
     }
 
     GeometryCollection(final List<Geometry> geometries) {
@@ -36,13 +36,6 @@ public class GeometryCollection {
     }
 
     @Override
-    public int hashCode() {
-        int result = type.hashCode();
-        result = 31 * result + geometries.hashCode();
-        return result;
-    }
-
-    @Override
     public boolean equals(final Object o) {
         if (this == o) {
             return true;
@@ -51,16 +44,19 @@ public class GeometryCollection {
             return false;
         }
 
-        GeometryCollection that = (GeometryCollection) o;
+        final GeometryCollection that = (GeometryCollection) o;
 
-        if (!geometries.equals(that.geometries)) {
+        if (type != null ? !type.equals(that.type) : that.type != null) {
             return false;
         }
-        if (!type.equals(that.type)) {
-            return false;
-        }
+        return geometries != null ? geometries.equals(that.geometries) : that.geometries == null;
+    }
 
-        return true;
+    @Override
+    public int hashCode() {
+        int result = type != null ? type.hashCode() : 0;
+        result = 31 * result + (geometries != null ? geometries.hashCode() : 0);
+        return result;
     }
 
     @Override

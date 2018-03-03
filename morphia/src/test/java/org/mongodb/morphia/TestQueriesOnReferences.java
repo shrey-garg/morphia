@@ -89,11 +89,11 @@ public class TestQueriesOnReferences extends TestBase {
         getDatastore().save(cpk);
 
         ContainsPic containsPic = getDatastore().find(ContainsPic.class)
-                                                .field("pic").equal(new Key<Pic>(Pic.class, "Pic", p.getId()))
+                                                .field("pic").equal(new Key<>(Pic.class, "Pic", p.getId()))
                                                 .get();
         Assert.assertEquals(cpk.getId(), containsPic.getId());
 
-        containsPic = getDatastore().find(ContainsPic.class).field("pic").equal(new Key<Pic>(Pic.class, "Pic", p.getId())).get();
+        containsPic = getDatastore().find(ContainsPic.class).field("pic").equal(new Key<>(Pic.class, "Pic", p.getId())).get();
         Assert.assertEquals(cpk.getId(), containsPic.getId());
     }
 }

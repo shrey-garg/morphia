@@ -29,7 +29,6 @@ import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.mapping.DefaultCreator;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.MappingException;
-import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
 import org.mongodb.morphia.testmodel.Address;
 import org.mongodb.morphia.testmodel.Article;
 import org.mongodb.morphia.testmodel.Circle;
@@ -433,8 +432,7 @@ public class TestMapping extends TestBase {
         final Article relatedLoaded = fromDocument(getDatastore(), Article.class,
             articles.find(new Document(Mapper.ID_KEY,
                 relatedDocument.get(Mapper.ID_KEY)))
-                    .iterator().tryNext(),
-            new DefaultEntityCache());
+                    .iterator().tryNext());
 
         final Article article = new Article();
         article.setTranslation("en", new Translation("Hello World", "Just a test"));
@@ -451,8 +449,7 @@ public class TestMapping extends TestBase {
 
         final Article articleLoaded = fromDocument(getDatastore(), Article.class,
             articles.find(new Document(Mapper.ID_KEY, articleDocument.get(Mapper.ID_KEY)))
-                    .iterator().tryNext(),
-            new DefaultEntityCache());
+                    .iterator().tryNext());
 
         assertEquals(article.getTranslations().size(), articleLoaded.getTranslations().size());
         assertEquals(article.getTranslation("en").getTitle(), articleLoaded.getTranslation("en").getTitle());
@@ -536,11 +533,9 @@ public class TestMapping extends TestBase {
         stuff.insertOne(childDocument);
 
         final RecursiveParent parentLoaded = fromDocument(getDatastore(), RecursiveParent.class,
-            stuff.find(new Document(Mapper.ID_KEY, parentDocument.get(Mapper.ID_KEY))).iterator().tryNext(),
-            new DefaultEntityCache());
+            stuff.find(new Document(Mapper.ID_KEY, parentDocument.get(Mapper.ID_KEY))).iterator().tryNext());
         final RecursiveChild childLoaded = fromDocument(getDatastore(), RecursiveChild.class,
-            stuff.find(new Document(Mapper.ID_KEY, childDocument.get(Mapper.ID_KEY))).iterator().tryNext(),
-            new DefaultEntityCache());
+            stuff.find(new Document(Mapper.ID_KEY, childDocument.get(Mapper.ID_KEY))).iterator().tryNext());
 
         parentLoaded.setChild(childLoaded);
         childLoaded.setParent(parentLoaded);
@@ -549,11 +544,9 @@ public class TestMapping extends TestBase {
         stuff.insertOne(toDocument(childLoaded));
 
         final RecursiveParent finalParentLoaded = fromDocument(getDatastore(), RecursiveParent.class,
-            stuff.find(new Document(Mapper.ID_KEY, parentDocument.get(Mapper.ID_KEY))).iterator().tryNext(),
-            new DefaultEntityCache());
+            stuff.find(new Document(Mapper.ID_KEY, parentDocument.get(Mapper.ID_KEY))).iterator().tryNext());
         final RecursiveChild finalChildLoaded = fromDocument(getDatastore(), RecursiveChild.class,
-            stuff.find(new Document(Mapper.ID_KEY, childDocument.get(Mapper.ID_KEY))).iterator().tryNext(),
-            new DefaultEntityCache());
+            stuff.find(new Document(Mapper.ID_KEY, childDocument.get(Mapper.ID_KEY))).iterator().tryNext());
 
         assertNotNull(finalParentLoaded.getChild());
         assertNotNull(finalChildLoaded.getParent());
@@ -645,7 +638,7 @@ public class TestMapping extends TestBase {
 
         hotels.insertOne(hotelDoc);
 
-        Hotel borgLoaded = fromDocument(getDatastore(), Hotel.class, hotelDoc, new DefaultEntityCache());
+        Hotel borgLoaded = fromDocument(getDatastore(), Hotel.class, hotelDoc);
 
         assertEquals(borg.getName(), borgLoaded.getName());
         assertEquals(borg.getStars(), borgLoaded.getStars());
@@ -670,8 +663,7 @@ public class TestMapping extends TestBase {
         final TravelAgency agencyLoaded = fromDocument(getDatastore(), TravelAgency.class,
             agencies.find(new Document(Mapper.ID_KEY,
                 agencyDoc.get(Mapper.ID_KEY)))
-                    .iterator().tryNext(),
-            new DefaultEntityCache());
+                    .iterator().tryNext());
 
         assertEquals(agency.getName(), agencyLoaded.getName());
         assertEquals(1, agency.getHotels().size());
@@ -687,7 +679,7 @@ public class TestMapping extends TestBase {
 
         hotelDoc = hotels.find(new Document(Mapper.ID_KEY, hotelDoc.get(Mapper.ID_KEY))).iterator().tryNext();
 
-        borgLoaded = fromDocument(getDatastore(), Hotel.class, hotelDoc, new DefaultEntityCache());
+        borgLoaded = fromDocument(getDatastore(), Hotel.class, hotelDoc);
         assertNull(borgLoaded.getAddress());
         assertEquals(0, borgLoaded.getPhoneNumbers().size());
         assertNull(borgLoaded.getName());

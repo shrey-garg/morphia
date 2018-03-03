@@ -18,7 +18,7 @@ public class LineString implements Geometry {
 
     @SuppressWarnings("UnusedDeclaration") // used by Morphia
     private LineString() {
-        coordinates = new ArrayList<Point>();
+        coordinates = new ArrayList<>();
     }
 
     LineString(final Point... points) {

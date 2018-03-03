@@ -15,14 +15,10 @@
 package org.mongodb.morphia;
 
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.junit.Test;
 import org.mongodb.morphia.mapping.Mapper;
-import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
 import org.mongodb.morphia.testmodel.Circle;
 import org.mongodb.morphia.testmodel.Rectangle;
 import org.mongodb.morphia.testmodel.Shape;
@@ -43,12 +39,13 @@ public class TestInterfaces extends TestBase {
 
         final Shape rectangle = new Rectangle(2, 5);
 
-        final DBObject rectangleDbObj = getMorphia().toDBObject(rectangle);
-        shapes.save(rectangleDbObj);
+        final Document rectangleDoc = getMorphia().toDBObject(rectangle);
+        shapes.insertOne(rectangleDoc);
 
-        final BasicDBObject rectangleDbObjLoaded = (BasicDBObject) shapes.findOne(new BasicDBObject(Mapper.ID_KEY,
-                                                                                                    rectangleDbObj.get(Mapper.ID_KEY)));
-        final Shape rectangleLoaded = getMorphia().fromDBObject(getDatastore(), Shape.class, rectangleDbObjLoaded, new DefaultEntityCache());
+        final Document rectangleDocLoaded = shapes.find(new Document(Mapper.ID_KEY, rectangleDoc.get(Mapper.ID_KEY)))
+                                                  .iterator()
+                                                  .tryNext();
+        final Shape rectangleLoaded = getMorphia().fromDBObject(getDatastore(), Shape.class, rectangleDocLoaded);
 
         assertTrue(rectangle.getArea() == rectangleLoaded.getArea());
         assertTrue(rectangleLoaded instanceof Rectangle);
@@ -59,18 +56,16 @@ public class TestInterfaces extends TestBase {
         shifter.getAvailableShapes().add(new Rectangle(3, 3));
         shifter.getAvailableShapes().add(new Circle(4.4));
 
-        final DBObject shifterDbObj = getMorphia().toDBObject(shifter);
-        shapeshifters.save(shifterDbObj);
+        final Document shifterDoc = getMorphia().toDBObject(shifter);
+        shapeshifters.insertOne(shifterDoc);
 
-        final BasicDBObject shifterDbObjLoaded = (BasicDBObject) shapeshifters.findOne(new BasicDBObject(Mapper.ID_KEY,
-                                                                                                         shifterDbObj.get(Mapper.ID_KEY)));
-        final ShapeShifter shifterLoaded = getMorphia().fromDBObject(getDatastore(), ShapeShifter.class, shifterDbObjLoaded,
-                                                                     new DefaultEntityCache());
+        final Document shifterDocLoaded = shapeshifters.find(new Document(Mapper.ID_KEY, shifterDoc.get(Mapper.ID_KEY)))
+                                                       .iterator()
+                                                       .tryNext();
+        final ShapeShifter shifterLoaded = getMorphia().fromDBObject(getDatastore(), ShapeShifter.class, shifterDocLoaded);
         assertNotNull(shifterLoaded);
         assertNotNull(shifterLoaded.getReferencedShape());
-        assertNotNull(shifterLoaded.getReferencedShape().getArea());
         assertNotNull(rectangle);
-        assertNotNull(rectangle.getArea());
 
         assertTrue(rectangle.getArea() == shifterLoaded.getReferencedShape().getArea());
         assertTrue(shifterLoaded.getReferencedShape() instanceof Rectangle);

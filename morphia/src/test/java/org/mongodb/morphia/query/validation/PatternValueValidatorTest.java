@@ -12,7 +12,7 @@ public class PatternValueValidatorTest {
     @Test
     public void shouldAllowValueOfPatternWithTypeOfString() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
         boolean validationApplied = PatternValueValidator.getInstance().apply(String.class, Pattern.compile("."), validationFailures);
         // then
@@ -23,7 +23,7 @@ public class PatternValueValidatorTest {
     @Test
     public void shouldNotApplyValidationWhenValueIsNotAPattern() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
         boolean validationApplied = PatternValueValidator.getInstance().apply(String.class, ".", validationFailures);
         // then
@@ -34,7 +34,7 @@ public class PatternValueValidatorTest {
     @Test
     public void shouldRejectNonStringTypeWithValueOfPattern() {
         // given
-        ArrayList<ValidationFailure> validationFailures = new ArrayList<ValidationFailure>();
+        ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
         boolean validationApplied = PatternValueValidator.getInstance().apply(Pattern.class, Pattern.compile("."), validationFailures);
         // then

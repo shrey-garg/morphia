@@ -21,6 +21,9 @@ import com.mongodb.MongoWriteException;
 import com.mongodb.WriteConcernException;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.InsertOneOptions;
+import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.ValidationAction;
 import com.mongodb.client.model.ValidationLevel;
 import com.mongodb.client.model.ValidationOptions;
@@ -30,6 +33,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mongodb.morphia.annotations.Validation;
 import org.mongodb.morphia.entities.DocumentValidation;
+import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
@@ -134,17 +138,19 @@ public class TestDocumentValidation extends TestBase {
         Query<DocumentValidation> query = getDatastore().find(DocumentValidation.class);
         UpdateOperations<DocumentValidation> updates = getDatastore().createUpdateOperations(DocumentValidation.class)
                                                                      .set("number", 5);
-        FindAndModifyOptions options = new FindAndModifyOptions()
-            .bypassDocumentValidation(false);
+        FindOneAndUpdateOptions options = new FindOneAndUpdateOptions()
+                                              .bypassDocumentValidation(false);
         try {
-            getDatastore().findAndModify(query, updates, options);
+            getDatastore().findAndModify(query, updates, options,
+                getDatastore().getDefaultWriteConcern());
             fail("Document validation should have complained");
         } catch (MongoCommandException e) {
             // expected
         }
 
         options.bypassDocumentValidation(true);
-        getDatastore().findAndModify(query, updates, options);
+        getDatastore().findAndModify(query, updates, options,
+            getDatastore().getDefaultWriteConcern());
 
         Assert.assertNotNull(query.field("number").equal(5).get());
     }
@@ -160,16 +166,18 @@ public class TestDocumentValidation extends TestBase {
         UpdateOperations<DocumentValidation> updates = getDatastore().createUpdateOperations(DocumentValidation.class)
                                                                      .set("number", 5);
         UpdateOptions options = new UpdateOptions()
-            .bypassDocumentValidation(false);
+                                    .bypassDocumentValidation(false);
         try {
-            getDatastore().update(query, updates, options);
+            getDatastore().updateMany(query, updates, options,
+                getDatastore().getDefaultWriteConcern());
             fail("Document validation should have complained");
         } catch (WriteConcernException e) {
             // expected
         }
 
         options.bypassDocumentValidation(true);
-        getDatastore().update(query, updates, options);
+        getDatastore().updateMany(query, updates, options,
+            getDatastore().getDefaultWriteConcern());
 
         Assert.assertNotNull(query.field("number").equal(5).get());
     }
@@ -186,18 +194,19 @@ public class TestDocumentValidation extends TestBase {
             // expected
         }
 
-        getDatastore().save(new DocumentValidation("Harold", 8, new Date()), new InsertOptions()
-                    .bypassDocumentValidation(true));
+        getDatastore().save(new DocumentValidation("Harold", 8, new Date()), new InsertOneOptions()
+                                                                                 .bypassDocumentValidation(true),
+            getDatastore().getDefaultWriteConcern());
 
         Query<DocumentValidation> query = getDatastore().find(DocumentValidation.class)
                                                         .field("number").equal(8);
         Assert.assertNotNull(query.get());
 
         List<DocumentValidation> list = asList(new DocumentValidation("Harold", 8, new Date()),
-                                               new DocumentValidation("Harold", 8, new Date()),
-                                               new DocumentValidation("Harold", 8, new Date()),
-                                               new DocumentValidation("Harold", 8, new Date()),
-                                               new DocumentValidation("Harold", 8, new Date()));
+            new DocumentValidation("Harold", 8, new Date()),
+            new DocumentValidation("Harold", 8, new Date()),
+            new DocumentValidation("Harold", 8, new Date()),
+            new DocumentValidation("Harold", 8, new Date()));
         try {
             getDatastore().save(list);
             fail("Document validation should have complained");
@@ -205,7 +214,8 @@ public class TestDocumentValidation extends TestBase {
             // expected
         }
 
-        getDatastore().save(list, new InsertOptions().bypassDocumentValidation(true));
+        getDatastore().save(list, new InsertOneOptions().bypassDocumentValidation(true),
+            getDatastore().getDefaultWriteConcern());
 
         Assert.assertFalse(query.field("number").equal(8).asList().isEmpty());
     }
@@ -224,11 +234,12 @@ public class TestDocumentValidation extends TestBase {
             // expected
         }
 
-        getAds().save(collection, new DocumentValidation("Harold", 8, new Date()), new InsertOptions()
-                    .bypassDocumentValidation(true));
+        getAds().save(collection, new DocumentValidation("Harold", 8, new Date()), new InsertOneOptions()
+                                                                                       .bypassDocumentValidation(true),
+            getDatastore().getDefaultWriteConcern());
 
         Query<DocumentValidation> query = getAds().createQuery(collection, DocumentValidation.class)
-                                                 .field("number").equal(8);
+                                                  .field("number").equal(8);
         Assert.assertNotNull(query.get());
     }
 
@@ -244,18 +255,19 @@ public class TestDocumentValidation extends TestBase {
             // expected
         }
 
-        getAds().insert(new DocumentValidation("Harold", 8, new Date()), new InsertOptions()
-            .bypassDocumentValidation(true));
+        getAds().insert(new DocumentValidation("Harold", 8, new Date()), new InsertOneOptions()
+                                                                             .bypassDocumentValidation(true),
+            getDatastore().getDefaultWriteConcern());
 
         Query<DocumentValidation> query = getDatastore().find(DocumentValidation.class)
                                                         .field("number").equal(8);
         Assert.assertNotNull(query.get());
 
         List<DocumentValidation> list = asList(new DocumentValidation("Harold", 8, new Date()),
-                                               new DocumentValidation("John", 8, new Date()),
-                                               new DocumentValidation("Sarah", 8, new Date()),
-                                               new DocumentValidation("Amy", 8, new Date()),
-                                               new DocumentValidation("James", 8, new Date()));
+            new DocumentValidation("John", 8, new Date()),
+            new DocumentValidation("Sarah", 8, new Date()),
+            new DocumentValidation("Amy", 8, new Date()),
+            new DocumentValidation("James", 8, new Date()));
         try {
             getAds().insert(list);
             fail("Document validation should have complained");
@@ -263,8 +275,8 @@ public class TestDocumentValidation extends TestBase {
             // expected
         }
 
-        getAds().insert(list, new InsertOptions()
-            .bypassDocumentValidation(true));
+        getAds().insert(list, new InsertOneOptions()
+                                  .bypassDocumentValidation(true), getDatastore().getDefaultWriteConcern());
 
         Assert.assertFalse(query.field("number").equal(8).asList().isEmpty());
     }

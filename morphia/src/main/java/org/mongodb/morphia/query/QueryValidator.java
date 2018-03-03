@@ -38,16 +38,16 @@ final class QueryValidator {
     /**
      * Validate the path, and value type, returning the mapped field for the field at the path
      */
-    static MappedField validateQuery(final Class clazz, final Mapper mapper, final StringBuilder origProp, final FilterOperator op,
-                                     final Object val, final boolean validateNames, final boolean validateTypes) {
-        MappedField mf = null;
+    static void validateQuery(final Class clazz, final Mapper mapper, final StringBuilder origProp, final FilterOperator op,
+                              final Object val, final boolean validateNames, final boolean validateTypes) {
+        MappedField mf;
         final String prop = origProp.toString();
         boolean hasTranslations = false;
 
         if (!origProp.substring(0, 1).equals("$")) {
             final String[] parts = prop.split("\\.");
             if (clazz == null) {
-                return null;
+                return;
             }
 
             MappedClass mc = mapper.getMappedClass(clazz);
@@ -110,9 +110,9 @@ final class QueryValidator {
             }
 
             if (validateTypes && mf != null) {
-                List<ValidationFailure> typeValidationFailures = new ArrayList<ValidationFailure>();
+                List<ValidationFailure> typeValidationFailures = new ArrayList<>();
                 boolean compatibleForType = isCompatibleForOperator(mc, mf, mf.getType(), op, val, typeValidationFailures);
-                List<ValidationFailure> subclassValidationFailures = new ArrayList<ValidationFailure>();
+                List<ValidationFailure> subclassValidationFailures = new ArrayList<>();
                 boolean compatibleForSubclass = isCompatibleForOperator(mc, mf, mf.getSpecializedType(), op, val, subclassValidationFailures);
 
                 if ((mf.isSingleValue() && !compatibleForType)
@@ -129,7 +129,6 @@ final class QueryValidator {
                 }
             }
         }
-        return mf;
     }
 
     private static boolean canQueryPast(final MappedField mf) {

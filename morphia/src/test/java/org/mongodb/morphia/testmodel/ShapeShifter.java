@@ -35,7 +35,7 @@ public class ShapeShifter extends TestEntity {
     private Set<Shape> availableShapes;
 
     public ShapeShifter() {
-        availableShapes = new HashSet<Shape>();
+        availableShapes = new HashSet<>();
     }
 
     public Set<Shape> getAvailableShapes() {

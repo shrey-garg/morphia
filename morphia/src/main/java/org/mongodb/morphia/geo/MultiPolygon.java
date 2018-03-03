@@ -18,7 +18,7 @@ public class MultiPolygon implements Geometry {
 
     @SuppressWarnings("UnusedDeclaration") // used by Morphia
     private MultiPolygon() {
-        coordinates = new ArrayList<Polygon>();
+        coordinates = new ArrayList<>();
     }
 
     MultiPolygon(final Polygon... polygons) {

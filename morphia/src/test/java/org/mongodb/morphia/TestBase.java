@@ -7,7 +7,6 @@ import org.bson.Document;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
-import org.mongodb.morphia.mapping.cache.DefaultEntityCache;
 
 import java.util.Iterator;
 
@@ -121,8 +120,7 @@ public abstract class TestBase {
 
     protected <T> T fromDocument(final Datastore datastore,
                                  final Class<T> clazz,
-                                 final Document document,
-                                 final DefaultEntityCache defaultEntityCache) {
+                                 final Document document) {
         return null;
     }
 }

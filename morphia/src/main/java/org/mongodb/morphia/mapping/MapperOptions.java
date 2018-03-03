@@ -4,8 +4,6 @@ package org.mongodb.morphia.mapping;
 import org.mongodb.morphia.ObjectFactory;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
-import org.mongodb.morphia.mapping.cache.DefaultEntityCacheFactory;
-import org.mongodb.morphia.mapping.cache.EntityCacheFactory;
 
 /**
  * Options to control mapping behavior.
@@ -18,7 +16,6 @@ public class MapperOptions {
     private boolean useLowerCaseCollectionNames;
     private boolean mapSubPackages = false;
     private ObjectFactory objectFactory = new DefaultCreator();
-    private EntityCacheFactory cacheFactory = new DefaultEntityCacheFactory();
 
     /**
      * Creates a default options instance.
@@ -37,23 +34,6 @@ public class MapperOptions {
         setStoreEmpties(options.isStoreEmpties());
         setUseLowerCaseCollectionNames(options.isUseLowerCaseCollectionNames());
         setObjectFactory(options.getObjectFactory());
-        setCacheFactory(options.getCacheFactory());
-    }
-
-    /**
-     * @return the factory to create an EntityCache
-     */
-    public EntityCacheFactory getCacheFactory() {
-        return cacheFactory;
-    }
-
-    /**
-     * Sets the factory to create an EntityCache
-     *
-     * @param cacheFactory the factory
-     */
-    public void setCacheFactory(final EntityCacheFactory cacheFactory) {
-        this.cacheFactory = cacheFactory;
     }
 
     /**
