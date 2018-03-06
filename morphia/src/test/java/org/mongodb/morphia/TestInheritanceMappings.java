@@ -40,7 +40,7 @@ public class TestInheritanceMappings extends TestBase {
     @Override
     public void setUp() {
         super.setUp();
-        getMorphia().map(Car.class).map(AbstractVehicle.class).map(FlyingCar.class);
+        getMorphia().map(Car.class, AbstractVehicle.class, FlyingCar.class);
     }
 
     @Test(expected = ConstraintViolationException.class)

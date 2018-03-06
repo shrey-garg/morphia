@@ -16,7 +16,8 @@
 
 package org.mongodb.morphia.mapping;
 
-import com.mongodb.DBObject;
+import com.mongodb.client.ListIndexesIterable;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
@@ -61,10 +62,10 @@ public class EmbeddedMappingTest extends TestBase {
         getMorphia().map(WithNested.class, NestedImpl.class);
         getDatastore().ensureIndexes();
 
-        final List<DBObject> indexInfo = getDatastore().getCollection(WithNested.class).getIndexInfo();
+        final ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(WithNested.class).listIndexes();
         boolean indexFound = false;
-        for (DBObject dbObject : indexInfo) {
-            indexFound |= "nested.field.fail".equals(((DBObject) dbObject.get("key")).keySet().iterator().next());
+        for (Document document : indexInfo) {
+            indexFound |= "nested.field.fail".equals(((Document) document.get("key")).keySet().iterator().next());
         }
         Assert.assertTrue("Should find the nested field index", indexFound);
         WithNested nested = new WithNested();
@@ -104,10 +105,10 @@ public class EmbeddedMappingTest extends TestBase {
                                     + ".EmbeddedMappingTest$WithNestedValidated'.", e.getMessage());
         }
 
-        final List<DBObject> indexInfo = getDatastore().getCollection(WithNestedValidated.class).getIndexInfo();
+        final ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(WithNestedValidated.class).listIndexes();
         boolean indexFound = false;
-        for (DBObject dbObject : indexInfo) {
-            indexFound |= "nested.field.fail".equals(((DBObject) dbObject.get("key")).keySet().iterator().next());
+        for (Document dbObject : indexInfo) {
+            indexFound |= "nested.field.fail".equals(((Document) dbObject.get("key")).keySet().iterator().next());
         }
         Assert.assertFalse("Should not find the nested field index", indexFound);
     }

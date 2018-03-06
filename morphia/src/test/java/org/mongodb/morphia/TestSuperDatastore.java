@@ -13,7 +13,8 @@
 
 package org.mongodb.morphia;
 
-import com.mongodb.BasicDBObject;
+import com.mongodb.client.model.FindOptions;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 import org.mongodb.morphia.testmodel.Circle;
@@ -26,7 +27,7 @@ public class TestSuperDatastore extends TestBase {
     public void testDeleteDoesNotDeleteAnythingWhenGivenAnIncorrectId() {
         // given
         final String ns = "someCollectionName";
-        getDatabase().getCollection(ns).remove(new BasicDBObject());
+        getDatabase().getCollection(ns).deleteMany(new Document());
 
         final Rectangle rect = new Rectangle(10, 10);
         ObjectId id = new ObjectId();
@@ -46,7 +47,7 @@ public class TestSuperDatastore extends TestBase {
     public void testDeleteWillRemoveAnyDocumentWithAMatchingId() {
         // given
         final String ns = "someCollectionName";
-        getDatabase().getCollection(ns).remove(new BasicDBObject());
+        getDatabase().getCollection(ns).deleteMany(new Document());
 
         final Rectangle rect = new Rectangle(10, 10);
         ObjectId rectangleId = new ObjectId();
@@ -70,7 +71,7 @@ public class TestSuperDatastore extends TestBase {
     public void testDeleteWithAnEntityTypeAndId() {
         // given
         final String ns = "someCollectionName";
-        getDatabase().getCollection(ns).remove(new BasicDBObject());
+        getDatabase().getCollection(ns).deleteMany(new Document());
 
         final Rectangle rect = new Rectangle(10, 10);
         ObjectId id = new ObjectId();
@@ -93,7 +94,7 @@ public class TestSuperDatastore extends TestBase {
         ObjectId id = new ObjectId();
         rect.setId(id);
 
-        getDatabase().getCollection(ns).remove(new BasicDBObject());
+        getDatabase().getCollection(ns).deleteMany(new Document());
 
         getAds().save(ns, rect);
         assertEquals(1, getAds().getCount(ns));
@@ -102,11 +103,11 @@ public class TestSuperDatastore extends TestBase {
         assertEquals(rect.getArea(), rectLoaded.getArea(), 0);
 
         rect = new Rectangle(2, 1);
-        getAds().save(rect); //saved to default collection name (kind)
+        getAds().save(rect);
         assertEquals(1, getAds().getCount(rect));
 
         rect.setId(null);
-        getAds().save(rect); //saved to default collection name (kind)
+        getAds().save(rect);
         assertEquals(2, getAds().getCount(rect));
 
         rect = new Rectangle(4, 3);
@@ -117,7 +118,12 @@ public class TestSuperDatastore extends TestBase {
         assertEquals(rect.getId(), rectLoaded.getId());
         assertEquals(rect.getArea(), rectLoaded.getArea(), 0);
 
-        getAds().find(ns, Rectangle.class, "_id !=", "-1", 1, 1).get();
+        getAds()
+            .find(ns, Rectangle.class)
+            .filter("_id !=", "-1")
+            .get(new FindOptions()
+                     .skip(1)
+                     .limit(1));
     }
 
     @Test
@@ -125,7 +131,7 @@ public class TestSuperDatastore extends TestBase {
         final String ns = "hotels";
         final Rectangle rect = new Rectangle(10, 10);
 
-        getDatabase().getCollection(ns).remove(new BasicDBObject());
+        getDatabase().getCollection(ns).deleteMany(new Document());
 
         getAds().save(ns, rect);
         assertEquals(1, getAds().getCount(ns));

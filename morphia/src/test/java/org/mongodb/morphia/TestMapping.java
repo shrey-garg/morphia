@@ -26,18 +26,13 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Serialized;
-import org.mongodb.morphia.mapping.DefaultCreator;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.MappingException;
-import org.mongodb.morphia.testmodel.Address;
 import org.mongodb.morphia.testmodel.Article;
 import org.mongodb.morphia.testmodel.Circle;
-import org.mongodb.morphia.testmodel.Hotel;
-import org.mongodb.morphia.testmodel.PhoneNumber;
 import org.mongodb.morphia.testmodel.RecursiveChild;
 import org.mongodb.morphia.testmodel.RecursiveParent;
 import org.mongodb.morphia.testmodel.Translation;
-import org.mongodb.morphia.testmodel.TravelAgency;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -51,7 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.Vector;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -63,24 +57,6 @@ import static org.junit.Assert.fail;
 
 @SuppressWarnings("unused")
 public class TestMapping extends TestBase {
-
-    @Test
-    public void testAlsoLoad() {
-        final ContainsIntegerList cil = new ContainsIntegerList();
-        cil.intList.add(1);
-        getDatastore().save(cil);
-        final ContainsIntegerList cilLoaded = getDatastore().get(cil);
-        assertNotNull(cilLoaded);
-        assertNotNull(cilLoaded.intList);
-        assertEquals(cilLoaded.intList.size(), cil.intList.size());
-        assertEquals(cilLoaded.intList.get(0), cil.intList.get(0));
-
-        final ContainsIntegerListNew cilNew = getDatastore().get(ContainsIntegerListNew.class, cil.id);
-        assertNotNull(cilNew);
-        assertNotNull(cilNew.integers);
-        assertEquals(1, cilNew.integers.size());
-        assertEquals(1, (int) cil.intList.get(0));
-    }
 
     @Test
     public void testBadMappings() {
@@ -130,13 +106,6 @@ public class TestMapping extends TestBase {
     @Test
     public void testBaseEntityValidity() {
         getMorphia().map(UsesBaseEntity.class);
-    }
-
-    @Test
-    public void testBasicMapping() {
-        performBasicMappingTest();
-        final DefaultCreator objectFactory = (DefaultCreator) getMorphia().getMapper().getOptions().getObjectFactory();
-        assertTrue(objectFactory.getClassNameCache().isEmpty());
     }
 
     @Test
@@ -606,83 +575,6 @@ public class TestMapping extends TestBase {
         assertNotNull(loaded);
         assertNotNull(loaded.id);
         assertEquals(before, loaded.id);
-    }
-
-    private void performBasicMappingTest() {
-        final MongoCollection<Document> hotels = getDatabase().getCollection("hotels");
-        final MongoCollection<Document> agencies = getDatabase().getCollection("agencies");
-
-        getMorphia().map(Hotel.class);
-        getMorphia().map(TravelAgency.class);
-
-        final Hotel borg = new Hotel();
-        borg.setName("Hotel Borg");
-        borg.setStars(4);
-        borg.setTakesCreditCards(true);
-        borg.setStartDate(new Date());
-        borg.setType(Hotel.Type.LEISURE);
-        borg.getTags().add("Swimming pool");
-        borg.getTags().add("Room service");
-        borg.setTemp("A temporary transient value");
-        borg.getPhoneNumbers().add(new PhoneNumber(354, 5152233, PhoneNumber.Type.PHONE));
-        borg.getPhoneNumbers().add(new PhoneNumber(354, 5152244, PhoneNumber.Type.FAX));
-
-        final Address address = new Address();
-        address.setStreet("Posthusstraeti 11");
-        address.setPostCode("101");
-        borg.setAddress(address);
-
-        Document hotelDoc = toDocument(borg);
-        assertTrue(!(((Document) ((List) hotelDoc.get("phoneNumbers")).get(0)).containsKey(Mapper.CLASS_NAME_FIELDNAME)));
-
-
-        hotels.insertOne(hotelDoc);
-
-        Hotel borgLoaded = fromDocument(getDatastore(), Hotel.class, hotelDoc);
-
-        assertEquals(borg.getName(), borgLoaded.getName());
-        assertEquals(borg.getStars(), borgLoaded.getStars());
-        assertEquals(borg.getStartDate(), borgLoaded.getStartDate());
-        assertEquals(borg.getType(), borgLoaded.getType());
-        assertEquals(borg.getAddress().getStreet(), borgLoaded.getAddress().getStreet());
-        assertEquals(borg.getTags().size(), borgLoaded.getTags().size());
-        assertEquals(borg.getTags(), borgLoaded.getTags());
-        assertEquals(borg.getPhoneNumbers().size(), borgLoaded.getPhoneNumbers().size());
-        assertEquals(borg.getPhoneNumbers().get(1), borgLoaded.getPhoneNumbers().get(1));
-        assertNull(borgLoaded.getTemp());
-        assertTrue(borgLoaded.getPhoneNumbers() instanceof Vector);
-        assertNotNull(borgLoaded.getId());
-
-        final TravelAgency agency = new TravelAgency();
-        agency.setName("Lastminute.com");
-        agency.getHotels().add(borgLoaded);
-
-        final Document agencyDoc = toDocument(agency);
-        agencies.insertOne(agencyDoc);
-
-        final TravelAgency agencyLoaded = fromDocument(getDatastore(), TravelAgency.class,
-            agencies.find(new Document(Mapper.ID_KEY,
-                agencyDoc.get(Mapper.ID_KEY)))
-                    .iterator().tryNext());
-
-        assertEquals(agency.getName(), agencyLoaded.getName());
-        assertEquals(1, agency.getHotels().size());
-        assertEquals(agency.getHotels().get(0).getName(), borg.getName());
-
-        // try clearing values
-        borgLoaded.setAddress(null);
-        borgLoaded.getPhoneNumbers().clear();
-        borgLoaded.setName(null);
-
-        hotelDoc = toDocument(borgLoaded);
-        hotels.insertOne(hotelDoc);
-
-        hotelDoc = hotels.find(new Document(Mapper.ID_KEY, hotelDoc.get(Mapper.ID_KEY))).iterator().tryNext();
-
-        borgLoaded = fromDocument(getDatastore(), Hotel.class, hotelDoc);
-        assertNull(borgLoaded.getAddress());
-        assertEquals(0, borgLoaded.getPhoneNumbers().size());
-        assertNull(borgLoaded.getName());
     }
 
     public enum Enum1 {

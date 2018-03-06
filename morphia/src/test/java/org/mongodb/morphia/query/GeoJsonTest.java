@@ -1,12 +1,13 @@
 package org.mongodb.morphia.query;
 
 import org.junit.Test;
-import org.mongodb.morphia.geo.GeoJson;
 
+import static java.util.Collections.emptyList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertThat;
-import static org.mongodb.morphia.geo.GeoJson.point;
+import static org.mongodb.morphia.geo.GeoJson.polygon;
+import static org.mongodb.morphia.geo.GeoJson.position;
 
 /**
  * Unit test - more complete testing that uses the GeoJson factory is contained in functional Geo tests.
@@ -15,13 +16,16 @@ public class GeoJsonTest {
     @Test(expected = IllegalArgumentException.class)
     public void shouldErrorIfStartAndEndOfPolygonAreNotTheSame() {
         // expect
-        GeoJson.polygon(point(1.1, 2.0), point(2.3, 3.5), point(3.7, 1.0));
+        polygon(
+            position(1.1, 2.0),
+            position(2.3, 3.5),
+            position(3.7, 1.0));
     }
 
     @Test
     public void shouldNotErrorIfPolygonIsEmpty() {
         // expect
-        assertThat(GeoJson.polygon(), is(notNullValue()));
+        assertThat(polygon(emptyList()), is(notNullValue()));
     }
 
 }

@@ -1,20 +1,7 @@
 package org.mongodb.morphia.query.validation;
 
-import org.hamcrest.Matchers;
-import org.junit.Test;
-import org.mongodb.morphia.entities.EntityWithListsAndArrays;
-import org.mongodb.morphia.mapping.Mapper;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
-import static org.mongodb.morphia.query.FilterOperator.EQUAL;
-import static org.mongodb.morphia.query.FilterOperator.SIZE;
-
 public class SizeOperationValidatorTest {
+/*
     @Test
     public void shouldAllowSizeOperatorForArrayListTypesAndIntegerValues() {
         // given
@@ -176,4 +163,5 @@ public class SizeOperationValidatorTest {
         assertThat(validationFailures.size(), is(1));
         assertThat(validationFailures.get(0).toString(), containsString("should be a List or array."));
     }
+*/
 }

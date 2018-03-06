@@ -12,6 +12,7 @@ package org.mongodb.morphia.mapping;
 
 
 import org.bson.BsonDocument;
+import org.bson.BsonDocumentReader;
 import org.bson.BsonDocumentWriter;
 import org.bson.Document;
 import org.bson.codecs.EncoderContext;
@@ -20,6 +21,7 @@ import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodec;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.codecs.pojo.PojoCodecProvider.Builder;
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.EntityInterceptor;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Entity;
@@ -87,6 +89,7 @@ public class Mapper {
     public Mapper(final CodecRegistry codecRegistry, final MapperOptions opts) {
         this.codecRegistry = codecRegistry;
         this.opts = opts;
+        providerBuilder.automatic(true);
     }
 
     public PojoCodecProvider getPojoCodecProvider() {
@@ -111,6 +114,7 @@ public class Mapper {
     public MappedClass addMappedClass(final Class c) {
         MappedClass mappedClass = mappedClasses.get(c.getName());
         if (mappedClass == null) {
+            providerBuilder.register(c);
             final PojoCodec codec = (PojoCodec) getPojoCodecProvider().get(c, codecRegistry);
             mappedClass = new MappedClass(codec.getClassModel(), this);
             return addMappedClass(mappedClass, true);

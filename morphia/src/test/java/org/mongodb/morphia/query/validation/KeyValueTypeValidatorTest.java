@@ -12,7 +12,7 @@ import static org.junit.Assert.assertThat;
 
 public class KeyValueTypeValidatorTest {
     @Test
-    public void shouldAllowTypeThatMatchesKeyKindWhenValueIsAKey() {
+    public void shouldAllowTypeThatMatchesKeyTypeWhenValueIsAKey() {
         // given
         ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when
@@ -36,7 +36,7 @@ public class KeyValueTypeValidatorTest {
     }
 
     @Test
-    public void shouldRejectTypeThatDoesNotMatchKeyKindWhenValueIsAKey() {
+    public void shouldRejectTypeThatDoesNotMatchKeyTypeWhenValueIsAKey() {
         // given
         ArrayList<ValidationFailure> validationFailures = new ArrayList<>();
         // when

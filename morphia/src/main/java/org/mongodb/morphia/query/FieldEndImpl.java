@@ -6,11 +6,11 @@ import com.mongodb.client.model.geojson.Geometry;
 import com.mongodb.client.model.geojson.MultiPolygon;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Polygon;
+import org.bson.Document;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.utils.Assert;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -189,8 +189,8 @@ public class FieldEndImpl<T extends CriteriaContainerImpl> implements FieldEnd<T
     @Override
     public T near(final double longitude, final double latitude, final double radius, final boolean spherical) {
         return addGeoCriteria(spherical ? FilterOperator.NEAR_SPHERE : FilterOperator.NEAR,
-                              new double[]{longitude, latitude},
-                              opts("$maxDistance", radius));
+            new double[]{longitude, latitude},
+            new Document("$maxDistance", radius));
     }
 
     @Override
@@ -246,7 +246,7 @@ public class FieldEndImpl<T extends CriteriaContainerImpl> implements FieldEnd<T
     @Override
     public T within(final Shape shape) {
         Assert.parametersNotNull("shape", shape);
-        return addCriteria(GEO_WITHIN, shape.toDBObject());
+        return addCriteria(GEO_WITHIN, shape);
     }
 
     @Override
@@ -292,8 +292,6 @@ public class FieldEndImpl<T extends CriteriaContainerImpl> implements FieldEnd<T
     }
 
     private Map<String, Object> opts(final String s, final Object v) {
-        final Map<String, Object> opts = new HashMap<>();
-        opts.put(s, v);
-        return opts;
+        return new Document(s, v);
     }
 }

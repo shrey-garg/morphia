@@ -15,6 +15,8 @@ package org.mongodb.morphia.indexes;
 
 import com.mongodb.DBObject;
 import com.mongodb.DuplicateKeyException;
+import com.mongodb.client.ListIndexesIterable;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Before;
@@ -52,7 +54,7 @@ public class TestIndexed extends TestBase {
     @Override
     public void setUp() {
         super.setUp();
-        getMorphia().map(UniqueIndexOnValue.class).map(IndexOnValue.class).map(NamedIndexOnValue.class);
+        getMorphia().map(UniqueIndexOnValue.class, IndexOnValue.class, NamedIndexOnValue.class);
     }
 
     @Test
@@ -67,8 +69,8 @@ public class TestIndexed extends TestBase {
         ds.save(new NoIndexes());
 
         // then
-        List<DBObject> indexes = getDatabase().getCollection("NoIndexes").getIndexInfo();
-        assertEquals(1, indexes.size());
+        ListIndexesIterable<Document> indexes = getDatabase().getCollection("NoIndexes").listIndexes();
+        assertEquals(1, count(indexes.iterator()));
     }
 
     @Test
@@ -118,8 +120,8 @@ public class TestIndexed extends TestBase {
         getDatastore().ensureIndexes();
 
         // then
-        List<DBObject> indexInfo = getDatastore().getCollection(Place.class).getIndexInfo();
-        assertThat(indexInfo.size(), is(2));
+        ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(Place.class).listIndexes();
+        assertThat(count(indexInfo.iterator()), is(2));
         assertThat(indexInfo, hasIndexNamed("location_2dsphere"));
     }
 
@@ -132,7 +134,7 @@ public class TestIndexed extends TestBase {
         getDatastore().ensureIndexes();
 
         // then
-        List<DBObject> indexInfo = getDatastore().getCollection(LegacyPlace.class).getIndexInfo();
+        ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(LegacyPlace.class).listIndexes();
         assertThat(indexInfo, hasIndexNamed("location_2dsphere"));
     }
 
@@ -140,59 +142,48 @@ public class TestIndexed extends TestBase {
     public void testEmbeddedIndex() {
         final MappedClass mc = getMorphia().getMapper().addMappedClass(ContainsIndexedEmbed.class);
 
-        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), doesNotHaveIndexNamed("e.name_-1"));
+        assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), doesNotHaveIndexNamed("e.name_-1"));
         getDatastore().ensureIndexes(ContainsIndexedEmbed.class);
-        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("e.name_-1"));
+        assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), hasIndexNamed("e.name_-1"));
     }
 
     @Test
     public void testIndexedEntity() {
         getDatastore().ensureIndexes();
-        assertThat(getDatastore().getCollection(IndexOnValue.class).getIndexInfo(), hasIndexNamed("value_1"));
+        assertThat(getDatastore().getCollection(IndexOnValue.class).listIndexes(), hasIndexNamed("value_1"));
 
         getDatastore().save(new IndexOnValue());
         getDatastore().ensureIndexes();
-        assertThat(getDatastore().getCollection(IndexOnValue.class).getIndexInfo(), hasIndexNamed("value_1"));
+        assertThat(getDatastore().getCollection(IndexOnValue.class).listIndexes(), hasIndexNamed("value_1"));
     }
 
     @Test
     public void testIndexedRecursiveEntity() {
         final MappedClass mc = getMorphia().getMapper().getMappedClass(CircularEmbeddedEntity.class);
         getDatastore().ensureIndexes();
-        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("a_1"));
+        assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), hasIndexNamed("a_1"));
     }
 
     @Test
     public void testIndexes() {
         final MappedClass mc = getMorphia().getMapper().addMappedClass(Ad2.class);
 
-        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), doesNotHaveIndexNamed("active_1_lastMod_-1"));
+        assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), doesNotHaveIndexNamed("active_1_lastMod_-1"));
         getDatastore().ensureIndexes(Ad2.class);
-        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("active_1_lastMod_-1"));
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testMultipleIndexedFields() {
-        final MappedClass mc = getMorphia().getMapper().getMappedClass(Ad.class);
-        getMorphia().map(Ad.class);
-
-        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), doesNotHaveIndexNamed("lastMod_1_active_-1"));
-        getDatastore().ensureIndex(Ad.class, "lastMod, -active");
-        assertThat(getDatabase().getCollection(mc.getCollectionName()).getIndexInfo(), hasIndexNamed("lastMod_1_active_-1"));
+        assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), hasIndexNamed("active_1_lastMod_-1"));
     }
 
     @Test
     public void testNamedIndexEntity() {
         getDatastore().ensureIndexes();
 
-        assertThat(getDatastore().getCollection(NamedIndexOnValue.class).getIndexInfo(), hasIndexNamed("value_ascending"));
+        assertThat(getDatastore().getCollection(NamedIndexOnValue.class).listIndexes(), hasIndexNamed("value_ascending"));
     }
 
     @Test(expected = DuplicateKeyException.class)
     public void testUniqueIndexedEntity() {
         getDatastore().ensureIndexes();
-        assertThat(getDatastore().getCollection(UniqueIndexOnValue.class).getIndexInfo(), hasIndexNamed("l_ascending"));
+        assertThat(getDatastore().getCollection(UniqueIndexOnValue.class).listIndexes(), hasIndexNamed("l_ascending"));
         getDatastore().save(new UniqueIndexOnValue("a"));
 
         // this should throw...

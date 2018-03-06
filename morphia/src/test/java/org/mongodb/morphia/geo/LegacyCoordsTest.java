@@ -1,7 +1,8 @@
 package org.mongodb.morphia.geo;
 
-import com.mongodb.DBObject;
 import com.mongodb.MongoException;
+import com.mongodb.client.ListIndexesIterable;
+import org.bson.Document;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.query.Query;
@@ -36,7 +37,7 @@ public class LegacyCoordsTest extends TestBase {
         getDatastore().ensureIndexes();
 
         // then
-        List<DBObject> indexes = getDatastore().getCollection(PlaceWithLegacyCoords.class).getIndexInfo();
+        ListIndexesIterable<Document> indexes = getDatastore().getCollection(PlaceWithLegacyCoords.class).listIndexes();
         assertThat(indexes, hasIndexNamed("location_2d"));
     }
 
@@ -153,7 +154,7 @@ public class LegacyCoordsTest extends TestBase {
         // given
         final PlaceWithLegacyCoords nearbyPlace = new PlaceWithLegacyCoords(new double[]{1.1, 2.3}, "Nearby Place");
         getDatastore().save(nearbyPlace);
-        List<DBObject> indexes = getDatastore().getCollection(PlaceWithLegacyCoords.class).getIndexInfo();
+        ListIndexesIterable<Document> indexes = getDatastore().getCollection(PlaceWithLegacyCoords.class).listIndexes();
         assertThat(indexes, doesNotHaveIndexNamed("location_2d"));
 
         // when

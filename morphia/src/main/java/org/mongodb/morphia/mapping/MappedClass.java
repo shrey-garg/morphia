@@ -111,7 +111,7 @@ public class MappedClass {
         }
 
         if (!Modifier.isStatic(type.getModifiers()) && type.isMemberClass()) {
-            throw new MappingException(String.format("Cannot use non-static inner class: %s. Please make static.", type));
+            throw new MappingException(format("Cannot use non-static inner class: %s. Please make static.", type));
         }
         discover(mapper);
 
@@ -377,7 +377,7 @@ public class MappedClass {
 
     @Override
     public String toString() {
-        return "MappedClass - kind:" + getCollectionName() + " for " + getClazz().getName() + " fields:" + persistenceFields;
+        return format("MappedClass - collection:%s for %s fields:%s", getCollectionName(), getClazz().getName(), persistenceFields);
     }
 
     /**
@@ -440,8 +440,17 @@ public class MappedClass {
 
         update();
 
+        discoverFields(this);
+    }
+
+    private void discoverFields(final MappedClass mappedClass) {
+        if( mappedClass == null ) {
+            return;
+        }
+
+        discoverFields(getSuperClass());
         /*mapper.getOptions().getDefaultMapper()*/
-        classModel.getPropertyModels().forEach(model -> {
+        mappedClass.classModel.getPropertyModels().forEach(model -> {
             final MappedField field = new MappedField(this, model);
             if (field.hasAnnotation(Id.class)) {
                 persistenceFields.add(field);

@@ -5,6 +5,7 @@ import com.mongodb.MapReduceCommand.OutputType;
 import com.mongodb.MongoCommandException;
 import com.mongodb.MongoException;
 import com.mongodb.client.MapReduceIterable;
+import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.CollationStrength;
@@ -62,13 +63,12 @@ public class TestMapreduce extends TestBase {
         final String reduce = "function (key, values) { var total = 0; for ( var i=0; i<values.length; i++ ) {total += values[i].count;} "
                               + "return { count : total }; }";
 
-        final MapReduceIterable<ResultEntity> mrRes =
-            getDatastore().mapReduce(new MapReduceOptions<ResultEntity>()
-                                         .outputType(MapreduceType.REPLACE.toOutputType())
-                                         .query(getDatastore().find(Shape.class))
-                                         .map(map)
-                                         .reduce(reduce)
-                                         .resultType(ResultEntity.class));
+        final MapReduceIterable<ResultEntity> mrRes = getDatastore().mapReduce(new MapReduceOptions<ResultEntity>()
+                                                       .outputType(MapreduceType.REPLACE.toOutputType())
+                                                       .query(getDatastore().find(Shape.class))
+                                                       .map(map)
+                                                       .reduce(reduce)
+                                                       .resultType(ResultEntity.class));
         mrRes.toCollection();
 
         final Query<ResultEntity> query = getDatastore().find(ResultEntity.class);
@@ -83,7 +83,7 @@ public class TestMapreduce extends TestBase {
                                          .map(map)
                                          .reduce(reduce)
                                          .resultType(ResultEntity.class));
-        final Iterator<ResultEntity> iterator = inline.iterator();
+        final MongoCursor<ResultEntity> iterator = inline.iterator();
         Assert.assertEquals(2, count(iterator));
         Assert.assertEquals(100, inline.iterator().next().getValue().count, 0);
     }

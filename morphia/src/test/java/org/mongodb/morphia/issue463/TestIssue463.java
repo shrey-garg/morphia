@@ -21,8 +21,8 @@ public class TestIssue463 extends TestBase {
         getDatastore().save(class2);
 
         final BasicDBObject query = new BasicDBObject("_id", class2.getId());
-        Assert.assertFalse(getDatastore().getCollection(Class1.class).find(query).hasNext());
-        Assert.assertTrue(getDatastore().getCollection(Class2.class).find(query).hasNext());
+        Assert.assertFalse(getDatastore().getCollection(Class1.class).find(query).iterator().hasNext());
+        Assert.assertTrue(getDatastore().getCollection(Class2.class).find(query).iterator().hasNext());
     }
 
     @Entity(value = "class1", noClassnameStored = true)

@@ -243,7 +243,7 @@ public class MapReduceOptions<T> {
     }
 
     @SuppressWarnings("deprecation")
-    MapReduceIterable<?> apply(final MapReduceIterable<?> iterable) {
+    MapReduceIterable<T> apply(final MapReduceIterable<T> iterable) {
 
         if (outputCollection != null) {
             iterable.collectionName(outputCollection);

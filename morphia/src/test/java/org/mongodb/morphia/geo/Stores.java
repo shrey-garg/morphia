@@ -1,5 +1,7 @@
 package org.mongodb.morphia.geo;
 
+import com.mongodb.client.model.geojson.MultiPoint;
+
 @SuppressWarnings("UnusedDeclaration")
 public final class Stores {
     private String name;

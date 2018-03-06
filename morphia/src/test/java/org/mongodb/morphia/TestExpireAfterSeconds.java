@@ -1,9 +1,10 @@
 package org.mongodb.morphia;
 
 
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.DBObject;
+import com.mongodb.client.ListIndexesIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,7 +17,6 @@ import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
 
 import java.util.Date;
-import java.util.List;
 
 public class TestExpireAfterSeconds extends TestBase {
 
@@ -27,20 +27,20 @@ public class TestExpireAfterSeconds extends TestBase {
 
         getDatastore().save(new ClassAnnotation());
 
-        final DB db = getDatastore().getDatabase();
-        final DBCollection dbCollection = db.getCollection("ClassAnnotation");
-        final List<DBObject> indexes = dbCollection.getIndexInfo();
+        final MongoDatabase db = getDatastore().getDatabase();
+        final MongoCollection<Document> dbCollection = db.getCollection("ClassAnnotation");
+        final ListIndexesIterable<Document> indexes = dbCollection.listIndexes();
 
         Assert.assertNotNull(indexes);
-        Assert.assertEquals(2, indexes.size());
-        DBObject index = null;
-        for (final DBObject candidateIndex : indexes) {
-            if (candidateIndex.containsField("expireAfterSeconds")) {
+        Assert.assertEquals(2, count(indexes.iterator()));
+        Document index = null;
+        for (final Document candidateIndex : indexes) {
+            if (candidateIndex.containsKey("expireAfterSeconds")) {
                 index = candidateIndex;
             }
         }
         Assert.assertNotNull(index);
-        Assert.assertTrue(index.containsField("expireAfterSeconds"));
+        Assert.assertTrue(index.containsKey("expireAfterSeconds"));
         Assert.assertEquals(5, ((Number) index.get("expireAfterSeconds")).intValue());
     }
 
@@ -51,15 +51,15 @@ public class TestExpireAfterSeconds extends TestBase {
 
         getDatastore().save(new HasExpiryField());
 
-        final DB db = getDatastore().getDatabase();
-        final DBCollection dbCollection = db.getCollection("HasExpiryField");
-        final List<DBObject> indexes = dbCollection.getIndexInfo();
+        final MongoDatabase db = getDatastore().getDatabase();
+        final MongoCollection<Document> dbCollection = db.getCollection("HasExpiryField");
+        final ListIndexesIterable<Document> indexes = dbCollection.listIndexes();
 
         Assert.assertNotNull(indexes);
-        Assert.assertEquals(2, indexes.size());
-        DBObject index = null;
-        for (final DBObject candidateIndex : indexes) {
-            if (candidateIndex.containsField("expireAfterSeconds")) {
+        Assert.assertEquals(2, count(indexes.iterator()));
+        Document index = null;
+        for (final Document candidateIndex : indexes) {
+            if (candidateIndex.containsKey("expireAfterSeconds")) {
                 index = candidateIndex;
             }
         }

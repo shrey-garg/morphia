@@ -16,8 +16,7 @@
 
 package org.mongodb.morphia;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -26,6 +25,7 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Reference;
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.query.Query;
 
 import java.io.BufferedReader;
@@ -44,9 +44,7 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("Since15")
 public class TestSerializedFormat extends TestBase {
     @Test
-    @SuppressWarnings("deprecation")
     public void testQueryFormat() {
-        Assume.assumeTrue("This test requires Java 8", JAVA_8);
         Query<ReferenceType> query = getDatastore().find(ReferenceType.class)
                                                    .field("id").equal(new ObjectId(0, 0, (short) 0, 0))
                                                    .field("referenceType").equal(new ReferenceType(2, "far"))
@@ -83,28 +81,26 @@ public class TestSerializedFormat extends TestBase {
                                                    .field("referenceMap.foo").equal(new ReferenceType(1, "chance"))
                                                    .field("referenceMap.bar").equal(new EmbeddedReferenceType(1, "chance"));
 
-        DBObject dbObject = query.getQueryDocument();
-        Assert.assertEquals(BasicDBObject.parse(readFully("/QueryStructure.json")), dbObject);
+        Document document = query.getQueryDocument();
+        Assert.assertEquals(Document.parse(readFully("/QueryStructure.json")), document);
     }
 
-    private void verifyCoverage(final DBObject dbObject) {
+    private void verifyCoverage(final Document document) {
         for (MappedField field : getMorphia().getMapper().getMappedClass(ReferenceType.class).getPersistenceFields()) {
             String name = field.getNameToStore();
-            boolean found = dbObject.containsField(name);
+            boolean found = document.containsKey(name);
             if (!found) {
-                for (String s : dbObject.keySet()) {
+                for (String s : document.keySet()) {
                     found |= s.startsWith(name + ".");
 
                 }
             }
-            assertTrue("Not found in dbObject: " + name, found);
+            assertTrue("Not found in document: " + name, found);
         }
     }
 
     @Test
     public void testSavedEntityFormat() {
-        Assume.assumeTrue("This test requires Java 8", JAVA_8);
-
         ReferenceType entity = new ReferenceType(1, "I'm a field value");
 
         entity.setReferenceType(new ReferenceType(42, "reference"));
@@ -151,9 +147,9 @@ public class TestSerializedFormat extends TestBase {
 
         getDatastore().save(entity);
 
-        DBObject dbObject = getDatastore().getCollection(ReferenceType.class).findOne();
-        Assert.assertEquals(BasicDBObject.parse(readFully("/ReferenceType.json")), dbObject);
-        verifyCoverage(dbObject);
+        Document document = getMorphia().getMapper().toDocument(entity);
+        Assert.assertEquals(Document.parse(readFully("/ReferenceType.json")), document);
+        verifyCoverage(document);
     }
 
     private String readFully(final String name) {

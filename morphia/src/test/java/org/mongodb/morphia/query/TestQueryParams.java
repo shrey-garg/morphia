@@ -53,7 +53,7 @@ public class TestQueryParams extends TestBase {
 
     @Test(expected = Assert.AssertionFailedException.class)
     public void testHasThisNullElement() {
-        e.hasThisElement(null);
+        e.elemMatch(null);
     }
 
     @Test(expected = Assert.AssertionFailedException.class)

@@ -61,4 +61,32 @@ public class ShapeShifter extends TestEntity {
     public void setReferencedShape(final Shape referencedShape) {
         this.referencedShape = referencedShape;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ShapeShifter)) {
+            return false;
+        }
+
+        final ShapeShifter that = (ShapeShifter) o;
+
+        if (getMainShape() != null ? !getMainShape().equals(that.getMainShape()) : that.getMainShape() != null) {
+            return false;
+        }
+        if (getReferencedShape() != null ? !getReferencedShape().equals(that.getReferencedShape()) : that.getReferencedShape() != null) {
+            return false;
+        }
+        return getAvailableShapes() != null ? getAvailableShapes().equals(that.getAvailableShapes()) : that.getAvailableShapes() == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getMainShape() != null ? getMainShape().hashCode() : 0;
+        result = 31 * result + (getReferencedShape() != null ? getReferencedShape().hashCode() : 0);
+        result = 31 * result + (getAvailableShapes() != null ? getAvailableShapes().hashCode() : 0);
+        return result;
+    }
 }

@@ -26,6 +26,7 @@ import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.CollationStrength;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.ValidationOptions;
+import com.mongodb.client.model.geojson.Point;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
@@ -36,8 +37,8 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Validation;
 import org.mongodb.morphia.geo.City;
+import org.mongodb.morphia.geo.GeoJson;
 import org.mongodb.morphia.geo.PlaceWithLegacyCoords;
-import org.mongodb.morphia.geo.Point;
 import org.mongodb.morphia.query.Query;
 
 import java.text.ParseException;

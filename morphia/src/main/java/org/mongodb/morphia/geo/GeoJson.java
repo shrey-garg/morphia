@@ -11,8 +11,10 @@ import com.mongodb.client.model.geojson.Position;
 import com.mongodb.client.model.geojson.Geometry;
 import com.mongodb.client.model.geojson.GeometryCollection;
 
+import java.util.Arrays;
 import java.util.List;
 
+import static java.util.Arrays.*;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
@@ -27,29 +29,25 @@ public final class GeoJson {
     }
 
     /**
-     * Create a new Point representing a GeoJSON point type.  For a safer way to create points with latitude and longitude coordinates
-     * without mixing up the order, {@link PointBuilder}.
-     *
-     * @param latitude  the point's latitude coordinate
-     * @param longitude the point's longitude coordinate
-     * @return a Point instance representing a single location point defined by the given latitude and longitude
-     * @mongodb.server.release 2.4
-     * @see org.mongodb.morphia.geo.PointBuilder
-     * @see <a href="http://docs.mongodb.org/manual/apps/geospatial-indexes/#geojson-objects">GeoJSON</a>
-     */
-    public static Point point(final double latitude, final double longitude) {
-        return new Point(new Position(latitude, longitude));
-    }
-
-    /**
-     * Create a new Position representing a GeoJSON position type.  For a safer way to create positions with latitude and longitude coordinates
-     * without mixing up the order, {@link PositionBuilder}.
+     * Create a new Position representing a GeoJSON position type.
      *
      * @param latitude  the position's latitude coordinate
      * @param longitude the position's longitude coordinate
      * @return a Position instance representing a single location position defined by the given latitude and longitude
      * @mongodb.server.release 2.4
-     * @see org.mongodb.morphia.geo.PositionBuilder
+     * @see <a href="http://docs.mongodb.org/manual/apps/geospatial-indexes/#geojson-objects">GeoJSON</a>
+     */
+    public static Point point(final double latitude, final double longitude) {
+        return new Point(position(latitude, longitude));
+    }
+
+    /**
+     * Create a new Position representing a GeoJSON position type.
+     *
+     * @param latitude  the position's latitude coordinate
+     * @param longitude the position's longitude coordinate
+     * @return a Position instance representing a single location position defined by the given latitude and longitude
+     * @mongodb.server.release 2.4
      * @see <a href="http://docs.mongodb.org/manual/apps/geospatial-indexes/#geojson-objects">GeoJSON</a>
      */
     public static Position position(final double latitude, final double longitude) {
@@ -86,6 +84,21 @@ public final class GeoJson {
      */
     public static Polygon polygon(final List<Position> exterior, final List<Position>... holes) {
         return new Polygon(exterior, holes);
+    }
+
+    /**
+     * Create a new Polygon representing a GeoJSON Polygon type. This helper method uses {@link #polygon(LineString, LineString...)} to
+     * create the Polygon.  If you need to create Polygons with interior rings (holes), use that method.
+     *
+     * @param exterior an ordered series of Position that make up the polygon.  The first and last points should be the same to close the
+     *               polygon
+     * @return a Polygon as defined by the points.
+     * @throws java.lang.IllegalArgumentException if the start and end points are not the same
+     * @mongodb.server.release 2.4
+     * @see <a href="http://docs.mongodb.org/manual/apps/geospatial-indexes/#geojson-objects">GeoJSON</a>
+     */
+    public static Polygon polygon(final Position... exterior) {
+        return new Polygon(asList(exterior));
     }
 
     /**
@@ -148,8 +161,24 @@ public final class GeoJson {
      * @return a MultiLineString object containing all the given lines
      * @mongodb.server.release 2.6
      * @see <a href="http://docs.mongodb.org/manual/apps/geospatial-indexes/#geojson-objects">GeoJSON</a>
+     * @deprecated use {@link #multiLineString(List)}
      */
+    @Deprecated
     public static MultiLineString multiLineString(final LineString... lines) {
+        final List<List<Position>> list = stream(lines).map(line -> line.getCoordinates())
+                                                .collect(toList());
+        return new MultiLineString(list);
+    }
+
+    /**
+     * Create a new MultiLineString representing a GeoJSON MultiLineString type.
+     *
+     * @param lines a set of lines that make up the MultiLineString object
+     * @return a MultiLineString object containing all the given lines
+     * @mongodb.server.release 2.6
+     * @see <a href="http://docs.mongodb.org/manual/apps/geospatial-indexes/#geojson-objects">GeoJSON</a>
+     */
+    public static MultiLineString multiLineString(final List<List<Position>> lines) {
         return new MultiLineString(lines);
     }
 

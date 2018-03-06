@@ -13,11 +13,14 @@
 
 package org.mongodb.morphia;
 
+import com.mongodb.WriteConcern;
+import com.mongodb.client.model.UpdateOptions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.entities.version.AbstractVersionedBase;
 import org.mongodb.morphia.entities.version.Versioned;
 import org.mongodb.morphia.entities.version.VersionedChildEntity;
+import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
@@ -32,7 +35,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 public class TestVersionAnnotation extends TestBase {
 
@@ -60,7 +62,7 @@ public class TestVersionAnnotation extends TestBase {
         query.filter("id", entity.getId());
         UpdateOperations<Versioned> ops = datastore.createUpdateOperations(Versioned.class);
         ops.set("name", "Value 3");
-        datastore.update(query, ops);
+        datastore.updateMany(query, ops);
 
         entity = datastore.get(Versioned.class, entity.getId());
         Assert.assertEquals("Value 3", entity.getName());
@@ -69,9 +71,9 @@ public class TestVersionAnnotation extends TestBase {
 
     @Test
     public void testCanMapAPackageContainingAVersionedAbstractBaseClass() {
-        Morphia morphia = getMorphia().mapPackage("org.mongodb.morphia.entities.version");
+        getMorphia().getMapper().mapPackage("org.mongodb.morphia.entities.version");
 
-        Collection<MappedClass> mappedClasses = morphia.getMapper().getMappedClasses();
+        Collection<MappedClass> mappedClasses = getMorphia().getMapper().getMappedClasses();
         assertThat(mappedClasses.size(), is(2));
         List<Class<?>> list = new ArrayList<>();
         for (MappedClass mappedClass : mappedClasses) {
@@ -83,9 +85,9 @@ public class TestVersionAnnotation extends TestBase {
 
     @Test
     public void testCanMapAnEntityWithAnAbstractVersionedParent() {
-        Morphia morphia = getMorphia().map(VersionedChildEntity.class);
+        getMorphia().map(VersionedChildEntity.class);
 
-        Collection<MappedClass> mappedClasses = morphia.getMapper().getMappedClasses();
+        Collection<MappedClass> mappedClasses = getMorphia().getMapper().getMappedClasses();
         assertThat(mappedClasses.size(), is(2));
         List<Class<?>> list = new ArrayList<>();
         for (MappedClass mappedClass : mappedClasses) {
@@ -117,8 +119,8 @@ public class TestVersionAnnotation extends TestBase {
 
         UpdateOperations<Versioned> ops = datastore.createUpdateOperations(Versioned.class);
         ops.set("name", "Value 3");
-        Assert.assertEquals(1, datastore.update(entity, ops).getUpdatedCount());
-        Assert.assertEquals(0, datastore.update(entity, ops).getUpdatedCount());
+        Assert.assertEquals(1, datastore.update(entity, ops).getModifiedCount());
+        Assert.assertEquals(0, datastore.update(entity, ops).getModifiedCount());
 
         entity = datastore.get(Versioned.class, entity.getId());
         Assert.assertEquals("Value 3", entity.getName());
@@ -126,39 +128,11 @@ public class TestVersionAnnotation extends TestBase {
 
         ops = datastore.createUpdateOperations(Versioned.class);
         ops.set("name", "Value 4");
-        datastore.update(datastore.getKey(entity), ops);
+        datastore.update(datastore.getKey(entity), ops, new UpdateOptions(), WriteConcern.ACKNOWLEDGED);
 
         entity = datastore.get(Versioned.class, entity.getId());
         Assert.assertEquals("Value 4", entity.getName());
         Assert.assertEquals(4, entity.getVersion().longValue());
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testUpdateFirst() {
-        final Datastore datastore = getDatastore();
-
-        Versioned original = new Versioned();
-        original.setName("Value 1");
-        original.setCount(42);
-        getDatastore().save(original);
-
-        Versioned update = new Versioned();
-        update.setName("Value 2");
-
-        Query<Versioned> query = datastore.find(Versioned.class).field("name").equal("Value 1");
-        try {
-            datastore.updateFirst(
-                query,
-                update, true);
-            fail("This call should have been rejected");
-        } catch (UnsupportedOperationException ignored) {
-        }
-
-        datastore.updateFirst(
-            query,
-            datastore.createUpdateOperations(Versioned.class).inc("count"), true);
-        assertEquals(43, query.get().getCount());
     }
 
     @Test
@@ -174,7 +148,7 @@ public class TestVersionAnnotation extends TestBase {
         query.field("_id").equal(version1.getId());
         UpdateOperations<Versioned> up = getDatastore().createUpdateOperations(Versioned.class).inc("count");
 
-        getDatastore().update(query, up, new UpdateOptions().upsert(true));
+        getDatastore().updateOne(query, up, new UpdateOptions().upsert(true), getDatastore().getDefaultWriteConcern());
 
         final Versioned version2 = getDatastore().get(Versioned.class, version1.getId());
 
@@ -241,7 +215,7 @@ public class TestVersionAnnotation extends TestBase {
         query.filter("name", "Value 1");
         UpdateOperations<Versioned> ops = datastore.createUpdateOperations(Versioned.class);
         ops.set("name", "Value 3");
-        datastore.update(query, ops, new UpdateOptions().upsert(true));
+        datastore.updateOne(query, ops, new UpdateOptions().upsert(true), getDatastore().getDefaultWriteConcern());
 
         entity = datastore.find(Versioned.class).get();
         Assert.assertEquals("Value 3", entity.getName());

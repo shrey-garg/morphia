@@ -317,7 +317,7 @@ public class QueryValidatorTest extends TestBase {
         MappedClass mappedClass = getMorphia().getMapper().getMappedClass(EntityWithListsAndArrays.class);
         MappedField mappedField = mappedClass.getMappedField("listOfIntegers");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, SimpleEntity.class, EQUAL,
-            new Key<>(String.class, "kind", new ObjectId()),
+            new Key<>(String.class, "collection", new ObjectId()),
             new ArrayList<>()),
             is(false));
     }

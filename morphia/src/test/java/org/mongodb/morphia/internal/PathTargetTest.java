@@ -29,6 +29,7 @@ import org.mongodb.morphia.mapping.EmbeddedMappingTest.AnotherNested;
 import org.mongodb.morphia.mapping.EmbeddedMappingTest.Nested;
 import org.mongodb.morphia.mapping.EmbeddedMappingTest.NestedImpl;
 import org.mongodb.morphia.mapping.EmbeddedMappingTest.WithNested;
+import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.testmodel.Article;
 

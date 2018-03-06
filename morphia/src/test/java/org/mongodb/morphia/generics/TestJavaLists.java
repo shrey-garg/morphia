@@ -16,8 +16,6 @@
 
 package org.mongodb.morphia.generics;
 
-import com.mongodb.BasicDBObject;
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Test;
 import org.mongodb.morphia.Datastore;
@@ -48,14 +46,6 @@ public class TestJavaLists extends TestBase {
     }
 
     @Test
-    public void jsonObjects() {
-        getMorphia().map(JsonList.class);
-        populate(new BasicDBObject(Document.parse("{\"jsonObject\": { \"array\": [{ \"foo\": \"bar\" }]},}")));
-        populate(new BasicDBObject(Document.parse("{\"jsonList\" : [ 1, \"string\", true, null ],}")));
-        populate(new BasicDBObject(Document.parse("{\"jsonList\" : [ {  \"foo\" : \"bar\" }],}")));
-    }
-
-    @Test
     public void mapperTest() {
         getMorphia().map(Employee.class);
 
@@ -63,26 +53,18 @@ public class TestJavaLists extends TestBase {
             for (boolean empties : new boolean[]{true, false}) {
                 getMorphia().getMapper().getOptions().setStoreNulls(nulls);
                 getMorphia().getMapper().getOptions().setStoreEmpties(empties);
-                empties();
+                Datastore ds = getDatastore();
+                ds.delete(ds.find(Employee.class));
+                Employee employee = new Employee();
+                employee.byteList = asList((byte) 1, (byte) 2);
+                ds.save(employee);
+
+                Employee loaded = ds.find(Employee.class).get();
+
+                assertEquals(employee.byteList, loaded.byteList);
+                assertNull(loaded.floatList);
             }
         }
-    }
-
-    private void empties() {
-        Datastore ds = getDatastore();
-        ds.delete(ds.find(Employee.class));
-        Employee employee = new Employee();
-        employee.byteList = asList((byte) 1, (byte) 2);
-        ds.save(employee);
-
-        Employee loaded = ds.find(Employee.class).get();
-
-        assertEquals(employee.byteList, loaded.byteList);
-        assertNull(loaded.floatList);
-    }
-
-    private void populate(final BasicDBObject jsonObject) {
-        getMorphia().fromDBObject(null, JsonList.class, jsonObject);
     }
 
     @Entity

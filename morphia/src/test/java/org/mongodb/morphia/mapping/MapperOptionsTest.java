@@ -1,9 +1,7 @@
 package org.mongodb.morphia.mapping;
 
 
-import com.mongodb.DBObject;
 import org.bson.types.ObjectId;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Entity;
@@ -15,6 +13,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 public class MapperOptionsTest extends TestBase {
 
@@ -108,13 +109,13 @@ public class MapperOptionsTest extends TestBase {
     public void lowercaseDefaultCollection() {
         DummyEntity entity = new DummyEntity();
 
-        String collectionName = getMorphia().getMapper().getCollectionName(entity);
-        Assert.assertEquals("uppercase", "DummyEntity", collectionName);
+        String collectionName = getMorphia().getMapper().getCollectionName(entity.getClass());
+        assertEquals("uppercase", "DummyEntity", collectionName);
 
         getMorphia().getMapper().getOptions().setUseLowerCaseCollectionNames(true);
 
-        collectionName = getMorphia().getMapper().getCollectionName(entity);
-        Assert.assertEquals("lowercase", "dummyentity", collectionName);
+        collectionName = getMorphia().getMapper().getCollectionName(entity.getClass());
+        assertEquals("lowercase", "dummyentity", collectionName);
     }
 
     @Test
@@ -156,61 +157,42 @@ public class MapperOptionsTest extends TestBase {
 
     private void shouldFindField(final HasList hl, final List<String> expected) {
         getDatastore().save(hl);
-        final DBObject dbObj = getDatastore().getCollection(HasList.class).findOne();
-        Assert.assertTrue("Should find the field", dbObj.containsField("names"));
-        Assert.assertEquals(expected, getDatastore().find(HasList.class).get().names);
+        assertEquals(expected, getDatastore().find(HasList.class).get().names);
     }
 
     private void shouldFindField(final HasMap hl, final Map<String, String> expected) {
-        final DBObject dbObj;
         getDatastore().save(hl);
-        dbObj = getDatastore().getCollection(HasMap.class).findOne();
-        Assert.assertTrue("Should find the field", dbObj.containsField("properties"));
-        Assert.assertEquals(expected, getDatastore().find(HasMap.class).get().properties);
+        assertEquals(expected, getDatastore().find(HasMap.class).get().properties);
     }
 
     private void shouldFindField(final HasCollectionValuedMap hm, final Map<String, Collection<String>> expected) {
-        final DBObject dbObj;
         getDatastore().save(hm);
-        dbObj = getDatastore().getCollection(HasCollectionValuedMap.class).findOne();
-        Assert.assertTrue("Should find the field", dbObj.containsField("properties"));
-        Assert.assertEquals(expected, getDatastore().find(HasCollectionValuedMap.class).get().properties);
+        assertEquals(expected, getDatastore().find(HasCollectionValuedMap.class).get().properties);
     }
 
     private void shouldFindField(final HasComplexObjectValuedMap hm, final Map<String, ComplexObject> expected) {
-        final DBObject dbObj;
         getDatastore().save(hm);
-        dbObj = getDatastore().getCollection(HasComplexObjectValuedMap.class).findOne();
-        Assert.assertTrue("Should find the field", dbObj.containsField("properties"));
-        Assert.assertEquals(expected, getDatastore().find(HasComplexObjectValuedMap.class).get().properties);
+        assertEquals(expected, getDatastore().find(HasComplexObjectValuedMap.class).get().properties);
     }
 
     private void shouldNotFindField(final HasMap hl) {
         getDatastore().save(hl);
-        DBObject dbObj = getDatastore().getCollection(HasMap.class).findOne();
-        Assert.assertFalse("field should not exist, value = " + dbObj.get("properties"), dbObj.containsField("properties"));
-        Assert.assertNull(getDatastore().find(HasMap.class).get().properties);
+        assertNull(getDatastore().find(HasMap.class).get().properties);
     }
 
     private void shouldNotFindField(final HasList hl) {
         getDatastore().save(hl);
-        DBObject dbObj = getDatastore().getCollection(HasList.class).findOne();
-        Assert.assertFalse("field should not exist, value = " + dbObj.get("names"), dbObj.containsField("names"));
-        Assert.assertNull(getDatastore().find(HasList.class).get().names);
+        assertNull(getDatastore().find(HasList.class).get().names);
     }
 
     private void shouldNotFindField(final HasCollectionValuedMap hm) {
         getDatastore().save(hm);
-        DBObject dbObj = getDatastore().getCollection(HasCollectionValuedMap.class).findOne();
-        Assert.assertFalse("field should not exist, value = " + dbObj.get("properties"), dbObj.containsField("properties"));
-        Assert.assertNull(getDatastore().find(HasCollectionValuedMap.class).get().properties);
+        assertNull(getDatastore().find(HasCollectionValuedMap.class).get().properties);
     }
 
     private void shouldNotFindField(final HasComplexObjectValuedMap hm) {
         getDatastore().save(hm);
-        DBObject dbObj = getDatastore().getCollection(HasComplexObjectValuedMap.class).findOne();
-        Assert.assertFalse("field should not exist, value = " + dbObj.get("properties"), dbObj.containsField("properties"));
-        Assert.assertNull(getDatastore().find(HasComplexObjectValuedMap.class).get().properties);
+        assertNull(getDatastore().find(HasComplexObjectValuedMap.class).get().properties);
     }
 
     private static class HasList implements Serializable {

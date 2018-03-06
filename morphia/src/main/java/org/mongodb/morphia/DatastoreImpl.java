@@ -56,11 +56,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.mongodb.BasicDBObject.parse;
 import static com.mongodb.DBCollection.ID_FIELD_NAME;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.bson.Document.*;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
@@ -422,7 +422,7 @@ public class DatastoreImpl implements AdvancedDatastore {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public <T> List<T> getByKeys(final Class<T> clazz, final List<Key<T>> keys) {
 
-        final Map<String, List<Key>> kindMap = new HashMap<>();
+        final Map<String, List<Key>> collections = new HashMap<>();
         final List<T> entities = new ArrayList<>();
         // String clazzKind = (clazz==null) ? null :
         // getMapper().getCollectionName(clazz);
@@ -434,21 +434,20 @@ public class DatastoreImpl implements AdvancedDatastore {
             // clazz + "!=" + key.getKindClass() +
             // ") for key and method parameter clazz");
             //
-            if (kindMap.containsKey(key.getCollection())) {
-                kindMap.get(key.getCollection()).add(key);
+            if (collections.containsKey(key.getCollection())) {
+                collections.get(key.getCollection()).add(key);
             } else {
-                kindMap.put(key.getCollection(), new ArrayList<>(singletonList((Key) key)));
+                collections.put(key.getCollection(), new ArrayList<>(singletonList((Key) key)));
             }
         }
-        for (final Map.Entry<String, List<Key>> entry : kindMap.entrySet()) {
-            final List<Key> kindKeys = entry.getValue();
+        for (final Map.Entry<String, List<Key>> entry : collections.entrySet()) {
 
             final List<Object> objIds = new ArrayList<>();
-            for (final Key key : kindKeys) {
+            for (final Key key : entry.getValue()) {
                 objIds.add(key.getId());
             }
-            final List kindResults = find(entry.getKey(), null).disableValidation().filter("_id in", objIds).asList();
-            entities.addAll(kindResults);
+            final List results = find(entry.getKey(), null).disableValidation().filter("_id in", objIds).asList();
+            entities.addAll(results);
         }
 
         // TODO: order them based on the incoming Keys.
@@ -519,10 +518,11 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
-    public <T> MapReduceIterable<?> mapReduce(final MapReduceOptions<T> options) {
+    public <T> MapReduceIterable<T> mapReduce(final MapReduceOptions<T> options) {
         MongoCollection<?> collection = options.getQuery().getCollection();
 
-        final MapReduceIterable<?> iterable = options.apply(collection.mapReduce(options.getMap(), options.getReduce()));
+        final MapReduceIterable<T> iterable = options.apply(
+            (MapReduceIterable<T>) collection.mapReduce(options.getMap(), options.getReduce()));
 
         if (!OutputType.INLINE.equals(options.getOutputType())) {
             iterable.toCollection();
@@ -948,8 +948,8 @@ public class DatastoreImpl implements AdvancedDatastore {
         return postSaveOperations(singletonList(entity)).get(0);
     }
 
-    private <T> MongoCollection<T> getCollection(final String kind, final Class<T> aClass) {
-        return kind == null ? null : getDatabase().getCollection(kind, aClass);
+    private <T> MongoCollection<T> getCollection(final String collectionName, final Class<T> aClass) {
+        return collectionName == null ? null : getDatabase().getCollection(collectionName, aClass);
     }
 
     @Deprecated

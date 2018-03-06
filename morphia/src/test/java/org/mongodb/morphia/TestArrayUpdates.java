@@ -35,7 +35,7 @@ public class TestArrayUpdates extends TestBase {
 
         UpdateOperations<Student> operations = datastore.createUpdateOperations(Student.class);
         operations.set("grades.$.data.name", "Makeup Test");
-        datastore.update(testQuery, operations);
+        datastore.updateMany(testQuery, operations);
 
         Assert.assertNull(testQuery.get());
 
@@ -62,7 +62,7 @@ public class TestArrayUpdates extends TestBase {
         // Update the second element. Array indexes are zero-based.
         UpdateOperations<Student> operations = datastore.createUpdateOperations(Student.class);
         operations.set("grades.1.data.name", "Makeup Test");
-        datastore.update(testQuery, operations);
+        datastore.updateMany(testQuery, operations);
 
         Assert.assertNull(testQuery.get());
 
@@ -89,7 +89,7 @@ public class TestArrayUpdates extends TestBase {
         UpdateOperations<BatchData> updateOperations = getDatastore().createUpdateOperations(BatchData.class)
                                                                      .set("files.$.fileHash", "new hash");
 
-        getDatastore().update(getDatastore().find(BatchData.class)
+        getDatastore().updateMany(getDatastore().find(BatchData.class)
                                             .filter("_id", id)
                                             .filter("files.fileName", "fileName1"),
                        updateOperations);

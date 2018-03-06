@@ -1,9 +1,7 @@
 package org.mongodb.morphia.query;
 
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import com.mongodb.client.model.geojson.Point;
 
 /**
  * This encapsulates the data necessary to define a shape for queries.
@@ -68,25 +66,7 @@ public class Shape {
         return new Shape("$polygon", points);
     }
 
-    /**
-     * @return the geometry of the shape
-     */
-    public String getGeometry() {
-        return geometry;
-    }
-
-    /**
-     * @return the points of the shape
-     */
-    public Point[] getPoints() {
-        return copy(points);
-    }
-
-    /**
-     * Creates a DBObject from this Shape
-     *
-     * @return the DBObject
-     */
+/*
     public DBObject toDBObject() {
         final BasicDBList list = new BasicDBList();
         for (final Point point : points) {
@@ -95,43 +75,7 @@ public class Shape {
 
         return new BasicDBObject(geometry, list);
     }
-
-    private Point[] copy(final Point[] array) {
-        Point[] copy = new Point[array.length];
-        System.arraycopy(array, 0, copy, 0, array.length);
-        return copy;
-    }
-
-    /**
-     * Defines a Point
-     */
-    public static class Point {
-        private final double longitude;
-        private final double latitude;
-
-        /**
-         * Creates a point using longitude and latitude values
-         *
-         * @param longitude the longitude
-         * @param latitude  the latitude
-         */
-        public Point(final double longitude, final double latitude) {
-            this.latitude = latitude;
-            this.longitude = longitude;
-        }
-
-        /**
-         * Creates a DBObject from this Point
-         *
-         * @return the DBObject
-         */
-        public DBObject toDBObject() {
-            final BasicDBList list = new BasicDBList();
-            list.add(longitude);
-            list.add(latitude);
-            return list;
-        }
-    }
+*/
 
     private static class Center extends Shape {
         private final Point center;
@@ -142,7 +86,7 @@ public class Shape {
             this.center = center;
             this.radius = radius;
         }
-
+/*
         @Override
         public DBObject toDBObject() {
             final BasicDBList list = new BasicDBList();
@@ -151,5 +95,6 @@ public class Shape {
 
             return new BasicDBObject(this.getGeometry(), list);
         }
+*/
     }
 }

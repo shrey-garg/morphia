@@ -31,7 +31,7 @@ public class UpdateRetainsClassInfoTest extends TestBase {
         final UpdateOperations<X> update = getDatastore().createUpdateOperations(X.class);
         update.set("map.k2", e2);
 
-        getDatastore().update(query, update);
+        getDatastore().updateMany(query, update);
 
         // fails due to type now missing
         getDatastore().find(X.class).get();

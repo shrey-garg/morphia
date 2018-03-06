@@ -1,7 +1,6 @@
 package org.mongodb.morphia;
 
 
-import com.mongodb.DBCollection;
 import com.mongodb.MapReduceCommand;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MapReduceIterable;
@@ -35,7 +34,7 @@ import java.util.concurrent.TimeUnit;
  */
 public interface Datastore {
     /**
-     * Returns a new query bound to the kind (a specific {@link DBCollection})
+     * Returns a new query bound to the kind (a specific {@link MongoCollection})
      *
      * @param source The class to create aggregation against
      * @return the aggregation pipeline
@@ -43,7 +42,7 @@ public interface Datastore {
     AggregationPipeline createAggregation(Class source);
 
     /**
-     * Returns a new query bound to the collection (a specific {@link DBCollection})
+     * Returns a new query bound to the collection (a specific {@link MongoCollection})
      *
      * @param collection The collection to query
      * @param <T>        the type of the query
@@ -335,7 +334,7 @@ public interface Datastore {
     <T> MongoCollection<T> getCollection(Class<T> clazz);
 
     /**
-     * Gets the count this kind ({@link DBCollection})
+     * Gets the count this kind ({@link MongoCollection})
      *
      * @param entity The entity whose type to count
      * @param <T>    the type to count
@@ -344,7 +343,7 @@ public interface Datastore {
     <T> long getCount(T entity);
 
     /**
-     * Gets the count this kind ({@link DBCollection})
+     * Gets the count this kind ({@link MongoCollection})
      *
      * @param clazz The clazz type to count
      * @param <T>   the type to count
@@ -420,7 +419,7 @@ public interface Datastore {
      * @return the results
      * @since 1.3
      */
-    <T> MapReduceIterable<?> mapReduce(MapReduceOptions<T> options);
+    <T> MapReduceIterable<T> mapReduce(MapReduceOptions<T> options);
 
     /**
      * Runs a map/reduce job at the server; this should be used with a server version 1.7.4 or higher

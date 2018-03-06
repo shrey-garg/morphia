@@ -15,7 +15,7 @@
 package org.mongodb.morphia;
 
 
-import com.mongodb.BasicDBObject;
+import org.bson.Document;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.annotations.Embedded;
@@ -55,10 +55,10 @@ public class TestIdField extends TestBase {
     @Test
     public void testIdFieldNameMapping() {
         final Rectangle r = new Rectangle(1, 12);
-        final BasicDBObject dbObj = (BasicDBObject) getMorphia().toDBObject(r);
-        assertFalse(dbObj.containsField("id"));
-        assertTrue(dbObj.containsField(Mapper.ID_KEY));
-        assertEquals(4, dbObj.size()); //_id, h, w, className
+        final Document document = getMorphia().getMapper().toDocument(r);
+        assertFalse(document.containsKey("id"));
+        assertTrue(document.containsKey(Mapper.ID_KEY));
+        assertEquals(4, document.size()); //_id, h, w, className
     }
 
     @Test
@@ -84,7 +84,7 @@ public class TestIdField extends TestBase {
         final MapAsId mai = new MapAsId();
         mai.id.put("test", "string");
         final Key<MapAsId> maiKey = getDatastore().save(mai);
-        final MapAsId maiLoaded = getDatastore().get(MapAsId.class, new BasicDBObject("test", "string"));
+        final MapAsId maiLoaded = getDatastore().get(MapAsId.class, new Document("test", "string"));
         assertNotNull(maiLoaded);
         assertNotNull(maiKey);
     }

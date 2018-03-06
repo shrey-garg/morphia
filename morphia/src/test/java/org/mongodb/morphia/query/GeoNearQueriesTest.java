@@ -7,7 +7,6 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.geo.AllTheThings;
 import org.mongodb.morphia.geo.Area;
 import org.mongodb.morphia.geo.City;
-import org.mongodb.morphia.geo.GeoJson;
 import org.mongodb.morphia.geo.Regions;
 import org.mongodb.morphia.geo.Route;
 
@@ -21,7 +20,7 @@ import static org.mongodb.morphia.geo.GeoJson.multiPoint;
 import static org.mongodb.morphia.geo.GeoJson.multiPolygon;
 import static org.mongodb.morphia.geo.GeoJson.point;
 import static org.mongodb.morphia.geo.GeoJson.polygon;
-import static org.mongodb.morphia.geo.PointBuilder.pointBuilder;
+import static org.mongodb.morphia.geo.GeoJson.position;
 
 public class GeoNearQueriesTest extends TestBase {
     @Override
@@ -35,30 +34,31 @@ public class GeoNearQueriesTest extends TestBase {
     @Test
     public void shouldFindAreasCloseToAGivenPointWithinARadiusOfMeters() {
         // given
-        Area sevilla = new Area("Spain", polygon(pointBuilder().latitude(37.40759155713022).longitude(-5.964911067858338).build(),
-                                                 pointBuilder().latitude(37.40341208875179).longitude(-5.9643941558897495).build(),
-                                                 pointBuilder().latitude(37.40297396667302).longitude(-5.970452763140202).build(),
-                                                 pointBuilder().latitude(37.40759155713022).longitude(-5.964911067858338).build())
+        Area sevilla = new Area("Spain", polygon(
+            point(37.40759155713022, -5.964911067858338),
+            point(37.40341208875179, -5.9643941558897495),
+            point(37.40297396667302, -5.970452763140202),
+            point(37.40759155713022, -5.964911067858338))
         );
         getDatastore().save(sevilla);
-        Area newYork = new Area("New York", polygon(pointBuilder().latitude(40.75981395319104).longitude(-73.98302106186748).build(),
-                                                    pointBuilder().latitude(40.7636824529618).longitude(-73.98049869574606).build(),
-                                                    pointBuilder().latitude(40.76962974853814).longitude(-73.97964206524193).build(),
-                                                    pointBuilder().latitude(40.75981395319104).longitude(-73.98302106186748).build()));
+        Area newYork = new Area("New York", polygon(
+            point(40.75981395319104, -73.98302106186748),
+            point(40.7636824529618, -73.98049869574606),
+            point(40.76962974853814, -73.97964206524193),
+            point(40.75981395319104, -73.98302106186748)));
         getDatastore().save(newYork);
-        Area london = new Area("London", polygon(pointBuilder().latitude(51.507780365645885).longitude(-0.21786745637655258).build(),
-                                                 pointBuilder().latitude(51.50802478194237).longitude(-0.21474729292094707).build(),
-                                                 pointBuilder().latitude(51.5086863655597).longitude(-0.20895397290587425).build(),
-                                                 pointBuilder().latitude(51.507780365645885).longitude(-0.21786745637655258).build()));
+        Area london = new Area("London", polygon(
+            point(51.507780365645885, -0.21786745637655258),
+            point(51.50802478194237, -0.21474729292094707),
+            point(51.5086863655597, -0.20895397290587425),
+            point(51.507780365645885, -0.21786745637655258)));
         getDatastore().save(london);
         getDatastore().ensureIndexes();
 
         // when
         List<Area> routesOrderedByDistanceFromLondon = getDatastore().find(Area.class)
                                                                      .field("area")
-                                                                     .near(pointBuilder()
-                                                                        .latitude(51.5286416)
-                                                                        .longitude(-0.1015987).build(), 20000)
+                                                                     .near(point(51.5286416, -0.1015987), 20000)
                                                                      .asList();
 
         // then
@@ -69,30 +69,31 @@ public class GeoNearQueriesTest extends TestBase {
     @Test
     public void shouldFindAreasOrderedByDistanceFromAGivenPoint() {
         // given
-        Area sevilla = new Area("Spain", polygon(pointBuilder().latitude(37.40759155713022).longitude(-5.964911067858338).build(),
-                                                 pointBuilder().latitude(37.40341208875179).longitude(-5.9643941558897495).build(),
-                                                 pointBuilder().latitude(37.40297396667302).longitude(-5.970452763140202).build(),
-                                                 pointBuilder().latitude(37.40759155713022).longitude(-5.964911067858338).build())
+        Area sevilla = new Area("Spain", polygon(
+            point(37.40759155713022, -5.964911067858338),
+            point(37.40341208875179, -5.9643941558897495),
+            point(37.40297396667302, -5.970452763140202),
+            point(37.40759155713022, -5.964911067858338))
         );
         getDatastore().save(sevilla);
-        Area newYork = new Area("New York", polygon(pointBuilder().latitude(40.75981395319104).longitude(-73.98302106186748).build(),
-                                                    pointBuilder().latitude(40.7636824529618).longitude(-73.98049869574606).build(),
-                                                    pointBuilder().latitude(40.76962974853814).longitude(-73.97964206524193).build(),
-                                                    pointBuilder().latitude(40.75981395319104).longitude(-73.98302106186748).build()));
+        Area newYork = new Area("New York", polygon(
+            point(40.75981395319104, -73.98302106186748),
+            point(40.7636824529618, -73.98049869574606),
+            point(40.76962974853814, -73.97964206524193),
+            point(40.75981395319104, -73.98302106186748)));
         getDatastore().save(newYork);
-        Area london = new Area("London", polygon(pointBuilder().latitude(51.507780365645885).longitude(-0.21786745637655258).build(),
-                                                 pointBuilder().latitude(51.50802478194237).longitude(-0.21474729292094707).build(),
-                                                 pointBuilder().latitude(51.5086863655597).longitude(-0.20895397290587425).build(),
-                                                 pointBuilder().latitude(51.507780365645885).longitude(-0.21786745637655258).build()));
+        Area london = new Area("London", polygon(
+            point(51.507780365645885, -0.21786745637655258),
+            point(51.50802478194237, -0.21474729292094707),
+            point(51.5086863655597, -0.20895397290587425),
+            point(51.507780365645885, -0.21786745637655258)));
         getDatastore().save(london);
         getDatastore().ensureIndexes();
 
         // when
         List<Area> routesOrderedByDistanceFromLondon = getDatastore().find(Area.class)
                                                                      .field("area")
-                                                                     .near(pointBuilder()
-                                                                        .latitude(51.5286416)
-                                                                        .longitude(-0.1015987).build())
+                                                                     .near(point(51.5286416, -0.1015987))
                                                                      .asList();
 
         // then
@@ -120,7 +121,7 @@ public class GeoNearQueriesTest extends TestBase {
         // when
         List<City> citiesOrderedByDistanceFromLondon = datastore.find(City.class)
                                                                 .field("location")
-                                                                .near(GeoJson.point(latitude, longitude), 200000)
+                                                                .near(point(latitude, longitude), 200000)
                                                                 .asList();
 
         // then
@@ -146,9 +147,7 @@ public class GeoNearQueriesTest extends TestBase {
         List<City> citiesOrderedByDistanceFromLondon;
         citiesOrderedByDistanceFromLondon = getDatastore().find(City.class)
                                                           .field("location")
-                                                          .near(pointBuilder()
-                                                             .latitude(latitudeLondon)
-                                                             .longitude(longitudeLondon).build())
+                                                          .near(point(latitudeLondon, longitudeLondon))
                                                           .asList();
 
         // then
@@ -162,48 +161,56 @@ public class GeoNearQueriesTest extends TestBase {
     public void shouldFindGeometryCollectionsCloseToAGivenPointWithinARadiusOfMeters() {
         checkMinServerVersion(2.6);
         // given
-        AllTheThings sevilla = new AllTheThings("Spain", geometryCollection(multiPoint(point(37.40759155713022, -5.964911067858338),
-                                                                                       point(37.40341208875179, -5.9643941558897495),
-                                                                                       point(37.40297396667302, -5.970452763140202)),
-                                                                            polygon(point(37.40759155713022, -5.964911067858338),
-                                                                                    point(37.40341208875179, -5.9643941558897495),
-                                                                                    point(37.40297396667302, -5.970452763140202),
-                                                                                    point(37.40759155713022, -5.964911067858338)),
-                                                                            polygon(point(37.38744598813355, -6.001141928136349),
-                                                                                    point(37.385990973562, -6.002588979899883),
-                                                                                    point(37.386126928031445, -6.002463921904564),
-                                                                                    point(37.38744598813355, -6.001141928136349))));
+        AllTheThings sevilla = new AllTheThings("Spain", geometryCollection(
+            multiPoint(
+                position(37.40759155713022, -5.964911067858338),
+                position(37.40341208875179, -5.9643941558897495),
+                position(37.40297396667302, -5.970452763140202)),
+            polygon(
+                position(37.40759155713022, -5.964911067858338),
+                position(37.40341208875179, -5.9643941558897495),
+                position(37.40297396667302, -5.970452763140202),
+                position(37.40759155713022, -5.964911067858338)),
+            polygon(
+                position(37.38744598813355, -6.001141928136349),
+                position(37.385990973562, -6.002588979899883),
+                position(37.386126928031445, -6.002463921904564),
+                position(37.38744598813355, -6.001141928136349))));
         getDatastore().save(sevilla);
 
         // insert something that's not a geocollection
-        Regions usa = new Regions("US", multiPolygon(polygon(point(40.75981395319104, -73.98302106186748),
-                                                             point(40.7636824529618, -73.98049869574606),
-                                                             point(40.76962974853814, -73.97964206524193),
-                                                             point(40.75981395319104, -73.98302106186748)),
-                                                     polygon(point(28.326568258926272, -81.60542246885598),
-                                                             point(28.327541397884488, -81.6022228449583),
-                                                             point(28.32950334995985, -81.60564735531807),
-                                                             point(28.326568258926272, -81.60542246885598))));
+        Regions usa = new Regions("US", multiPolygon(
+            polygon(
+                position(40.75981395319104, -73.98302106186748),
+                position(40.7636824529618, -73.98049869574606),
+                position(40.76962974853814, -73.97964206524193),
+                position(40.75981395319104, -73.98302106186748)),
+            polygon(
+                position(28.326568258926272, -81.60542246885598),
+                position(28.327541397884488, -81.6022228449583),
+                position(28.32950334995985, -81.60564735531807),
+                position(28.326568258926272, -81.60542246885598))));
         getDatastore().save(usa);
 
-        AllTheThings london = new AllTheThings("London", geometryCollection(point(53.4722454, -2.2235922),
-                                                                            lineString(point(51.507780365645885, -0.21786745637655258),
-                                                                                       point(51.50802478194237, -0.21474729292094707),
-                                                                                       point(51.5086863655597, -0.20895397290587425)),
-                                                                            polygon(point(51.498216362670064, 0.0074849557131528854),
-                                                                                    point(51.49176875129342, 0.01821178011596203),
-                                                                                    point(51.492886897176504, 0.05523204803466797),
-                                                                                    point(51.49393044412136, 0.06663135252892971),
-                                                                                    point(51.498216362670064, 0.0074849557131528854))));
+        AllTheThings london = new AllTheThings("London", geometryCollection(
+            point(53.4722454, -2.2235922),
+            lineString(
+                position(51.507780365645885, -0.21786745637655258),
+                position(51.50802478194237, -0.21474729292094707),
+                position(51.5086863655597, -0.20895397290587425)),
+            polygon(
+                position(51.498216362670064, 0.0074849557131528854),
+                position(51.49176875129342, 0.01821178011596203),
+                position(51.492886897176504, 0.05523204803466797),
+                position(51.49393044412136, 0.06663135252892971),
+                position(51.498216362670064, 0.0074849557131528854))));
         getDatastore().save(london);
         getDatastore().ensureIndexes();
 
         // when
         List<AllTheThings> resultsOrderedByDistanceFromSeville = getDatastore().find(AllTheThings.class)
                                                                                .field("everything")
-                                                                               .near(pointBuilder()
-                                                                                  .latitude(37.3753707)
-                                                                                  .longitude(-5.9550583).build(), 20000)
+                                                                               .near(point(37.3753707, -5.9550583), 20000)
                                                                                .asList();
 
         // then
@@ -215,48 +222,56 @@ public class GeoNearQueriesTest extends TestBase {
     public void shouldFindGeometryCollectionsOrderedByDistanceFromAGivenPoint() {
         checkMinServerVersion(2.6);
         // given
-        AllTheThings sevilla = new AllTheThings("Spain", geometryCollection(multiPoint(point(37.40759155713022, -5.964911067858338),
-                                                                                       point(37.40341208875179, -5.9643941558897495),
-                                                                                       point(37.40297396667302, -5.970452763140202)),
-                                                                            polygon(point(37.40759155713022, -5.964911067858338),
-                                                                                    point(37.40341208875179, -5.9643941558897495),
-                                                                                    point(37.40297396667302, -5.970452763140202),
-                                                                                    point(37.40759155713022, -5.964911067858338)),
-                                                                            polygon(point(37.38744598813355, -6.001141928136349),
-                                                                                    point(37.385990973562, -6.002588979899883),
-                                                                                    point(37.386126928031445, -6.002463921904564),
-                                                                                    point(37.38744598813355, -6.001141928136349))));
+        AllTheThings sevilla = new AllTheThings("Spain", geometryCollection(
+            multiPoint(
+                position(37.40759155713022, -5.964911067858338),
+                position(37.40341208875179, -5.9643941558897495),
+                position(37.40297396667302, -5.970452763140202)),
+            polygon(
+                position(37.40759155713022, -5.964911067858338),
+                position(37.40341208875179, -5.9643941558897495),
+                position(37.40297396667302, -5.970452763140202),
+                position(37.40759155713022, -5.964911067858338)),
+            polygon(
+                position(37.38744598813355, -6.001141928136349),
+                position(37.385990973562, -6.002588979899883),
+                position(37.386126928031445, -6.002463921904564),
+                position(37.38744598813355, -6.001141928136349))));
         getDatastore().save(sevilla);
 
         // insert something that's not a geocollection
-        Regions usa = new Regions("US", multiPolygon(polygon(point(40.75981395319104, -73.98302106186748),
-                                                             point(40.7636824529618, -73.98049869574606),
-                                                             point(40.76962974853814, -73.97964206524193),
-                                                             point(40.75981395319104, -73.98302106186748)),
-                                                     polygon(point(28.326568258926272, -81.60542246885598),
-                                                             point(28.327541397884488, -81.6022228449583),
-                                                             point(28.32950334995985, -81.60564735531807),
-                                                             point(28.326568258926272, -81.60542246885598))));
+        Regions usa = new Regions("US", multiPolygon(
+            polygon(
+                position(40.75981395319104, -73.98302106186748),
+                position(40.7636824529618, -73.98049869574606),
+                position(40.76962974853814, -73.97964206524193),
+                position(40.75981395319104, -73.98302106186748)),
+            polygon(
+                position(28.326568258926272, -81.60542246885598),
+                position(28.327541397884488, -81.6022228449583),
+                position(28.32950334995985, -81.60564735531807),
+                position(28.326568258926272, -81.60542246885598))));
         getDatastore().save(usa);
 
-        AllTheThings london = new AllTheThings("London", geometryCollection(point(53.4722454, -2.2235922),
-                                                                            lineString(point(51.507780365645885, -0.21786745637655258),
-                                                                                       point(51.50802478194237, -0.21474729292094707),
-                                                                                       point(51.5086863655597, -0.20895397290587425)),
-                                                                            polygon(point(51.498216362670064, 0.0074849557131528854),
-                                                                                    point(51.49176875129342, 0.01821178011596203),
-                                                                                    point(51.492886897176504, 0.05523204803466797),
-                                                                                    point(51.49393044412136, 0.06663135252892971),
-                                                                                    point(51.498216362670064, 0.0074849557131528854))));
+        AllTheThings london = new AllTheThings("London", geometryCollection(
+            point(53.4722454, -2.2235922),
+            lineString(
+                position(51.507780365645885, -0.21786745637655258),
+                position(51.50802478194237, -0.21474729292094707),
+                position(51.5086863655597, -0.20895397290587425)),
+            polygon(
+                position(51.498216362670064, 0.0074849557131528854),
+                position(51.49176875129342, 0.01821178011596203),
+                position(51.492886897176504, 0.05523204803466797),
+                position(51.49393044412136, 0.06663135252892971),
+                position(51.498216362670064, 0.0074849557131528854))));
         getDatastore().save(london);
         getDatastore().ensureIndexes();
 
         // when
         List<AllTheThings> resultsOrderedByDistanceFromLondon = getDatastore().find(AllTheThings.class)
                                                                               .field("everything")
-                                                                              .near(pointBuilder()
-                                                                                 .latitude(51.5286416)
-                                                                                 .longitude(-0.1015987).build())
+                                                                              .near(point(51.5286416, -0.1015987))
                                                                               .asList();
 
         // then
@@ -269,44 +284,51 @@ public class GeoNearQueriesTest extends TestBase {
     public void shouldFindRegionsCloseToAGivenPointWithinARadiusOfMeters() {
         checkMinServerVersion(2.6);
         // given
-        Regions sevilla = new Regions("Spain", multiPolygon(polygon(point(37.40759155713022, -5.964911067858338),
-                                                                    point(37.40341208875179, -5.9643941558897495),
-                                                                    point(37.40297396667302, -5.970452763140202),
-                                                                    point(37.40759155713022, -5.964911067858338)),
-                                                            polygon(point(37.38744598813355, -6.001141928136349),
-                                                                    point(37.385990973562, -6.002588979899883),
-                                                                    point(37.386126928031445, -6.002463921904564),
-                                                                    point(37.38744598813355, -6.001141928136349))));
+        Regions sevilla = new Regions("Spain", multiPolygon(
+            polygon(
+                position(37.40759155713022, -5.964911067858338),
+                position(37.40341208875179, -5.9643941558897495),
+                position(37.40297396667302, -5.970452763140202),
+                position(37.40759155713022, -5.964911067858338)),
+            polygon(
+                position(37.38744598813355, -6.001141928136349),
+                position(37.385990973562, -6.002588979899883),
+                position(37.386126928031445, -6.002463921904564),
+                position(37.38744598813355, -6.001141928136349))));
         getDatastore().save(sevilla);
 
-        Regions usa = new Regions("US", multiPolygon(polygon(point(40.75981395319104, -73.98302106186748),
-                                                             point(40.7636824529618, -73.98049869574606),
-                                                             point(40.76962974853814, -73.97964206524193),
-                                                             point(40.75981395319104, -73.98302106186748)),
-                                                     polygon(point(28.326568258926272, -81.60542246885598),
-                                                             point(28.327541397884488, -81.6022228449583),
-                                                             point(28.32950334995985, -81.60564735531807),
-                                                             point(28.326568258926272, -81.60542246885598))));
+        Regions usa = new Regions("US", multiPolygon(
+            polygon(
+                position(40.75981395319104, -73.98302106186748),
+                position(40.7636824529618, -73.98049869574606),
+                position(40.76962974853814, -73.97964206524193),
+                position(40.75981395319104, -73.98302106186748)),
+            polygon(
+                position(28.326568258926272, -81.60542246885598),
+                position(28.327541397884488, -81.6022228449583),
+                position(28.32950334995985, -81.60564735531807),
+                position(28.326568258926272, -81.60542246885598))));
         getDatastore().save(usa);
 
-        Regions london = new Regions("London", multiPolygon(polygon(point(51.507780365645885, -0.21786745637655258),
-                                                                    point(51.50802478194237, -0.21474729292094707),
-                                                                    point(51.5086863655597, -0.20895397290587425),
-                                                                    point(51.507780365645885, -0.21786745637655258)),
-                                                            polygon(point(51.498216362670064, 0.0074849557131528854),
-                                                                    point(51.49176875129342, 0.01821178011596203),
-                                                                    point(51.492886897176504, 0.05523204803466797),
-                                                                    point(51.49393044412136, 0.06663135252892971),
-                                                                    point(51.498216362670064, 0.0074849557131528854))));
+        Regions london = new Regions("London", multiPolygon(
+            polygon(
+                position(51.507780365645885, -0.21786745637655258),
+                position(51.50802478194237, -0.21474729292094707),
+                position(51.5086863655597, -0.20895397290587425),
+                position(51.507780365645885, -0.21786745637655258)),
+            polygon(
+                position(51.498216362670064, 0.0074849557131528854),
+                position(51.49176875129342, 0.01821178011596203),
+                position(51.492886897176504, 0.05523204803466797),
+                position(51.49393044412136, 0.06663135252892971),
+                position(51.498216362670064, 0.0074849557131528854))));
         getDatastore().save(london);
         getDatastore().ensureIndexes();
 
         // when
         List<Regions> regionsOrderedByDistanceFromLondon = getDatastore().find(Regions.class)
                                                                          .field("regions")
-                                                                         .near(pointBuilder()
-                                                                            .latitude(51.5286416)
-                                                                            .longitude(-0.1015987).build(), 20000)
+                                                                         .near(point(51.5286416, -0.1015987), 20000)
                                                                          .asList();
 
         // then
@@ -318,44 +340,51 @@ public class GeoNearQueriesTest extends TestBase {
     public void shouldFindRegionsOrderedByDistanceFromAGivenPoint() {
         checkMinServerVersion(2.6);
         // given
-        Regions sevilla = new Regions("Spain", multiPolygon(polygon(point(37.40759155713022, -5.964911067858338),
-                                                                    point(37.40341208875179, -5.9643941558897495),
-                                                                    point(37.40297396667302, -5.970452763140202),
-                                                                    point(37.40759155713022, -5.964911067858338)),
-                                                            polygon(point(37.38744598813355, -6.001141928136349),
-                                                                    point(37.385990973562, -6.002588979899883),
-                                                                    point(37.386126928031445, -6.002463921904564),
-                                                                    point(37.38744598813355, -6.001141928136349))));
+        Regions sevilla = new Regions("Spain", multiPolygon(
+            polygon(
+                position(37.40759155713022, -5.964911067858338),
+                position(37.40341208875179, -5.9643941558897495),
+                position(37.40297396667302, -5.970452763140202),
+                position(37.40759155713022, -5.964911067858338)),
+            polygon(
+                position(37.38744598813355, -6.001141928136349),
+                position(37.385990973562, -6.002588979899883),
+                position(37.386126928031445, -6.002463921904564),
+                position(37.38744598813355, -6.001141928136349))));
         getDatastore().save(sevilla);
 
-        Regions usa = new Regions("US", multiPolygon(polygon(point(40.75981395319104, -73.98302106186748),
-                                                             point(40.7636824529618, -73.98049869574606),
-                                                             point(40.76962974853814, -73.97964206524193),
-                                                             point(40.75981395319104, -73.98302106186748)),
-                                                     polygon(point(28.326568258926272, -81.60542246885598),
-                                                             point(28.327541397884488, -81.6022228449583),
-                                                             point(28.32950334995985, -81.60564735531807),
-                                                             point(28.326568258926272, -81.60542246885598))));
+        Regions usa = new Regions("US", multiPolygon(
+            polygon(
+                position(40.75981395319104, -73.98302106186748),
+                position(40.7636824529618, -73.98049869574606),
+                position(40.76962974853814, -73.97964206524193),
+                position(40.75981395319104, -73.98302106186748)),
+            polygon(
+                position(28.326568258926272, -81.60542246885598),
+                position(28.327541397884488, -81.6022228449583),
+                position(28.32950334995985, -81.60564735531807),
+                position(28.326568258926272, -81.60542246885598))));
         getDatastore().save(usa);
 
-        Regions london = new Regions("London", multiPolygon(polygon(point(51.507780365645885, -0.21786745637655258),
-                                                                    point(51.50802478194237, -0.21474729292094707),
-                                                                    point(51.5086863655597, -0.20895397290587425),
-                                                                    point(51.507780365645885, -0.21786745637655258)),
-                                                            polygon(point(51.498216362670064, 0.0074849557131528854),
-                                                                    point(51.49176875129342, 0.01821178011596203),
-                                                                    point(51.492886897176504, 0.05523204803466797),
-                                                                    point(51.49393044412136, 0.06663135252892971),
-                                                                    point(51.498216362670064, 0.0074849557131528854))));
+        Regions london = new Regions("London", multiPolygon(
+            polygon(
+                position(51.507780365645885, -0.21786745637655258),
+                position(51.50802478194237, -0.21474729292094707),
+                position(51.5086863655597, -0.20895397290587425),
+                position(51.507780365645885, -0.21786745637655258)),
+            polygon(
+                position(51.498216362670064, 0.0074849557131528854),
+                position(51.49176875129342, 0.01821178011596203),
+                position(51.492886897176504, 0.05523204803466797),
+                position(51.49393044412136, 0.06663135252892971),
+                position(51.498216362670064, 0.0074849557131528854))));
         getDatastore().save(london);
         getDatastore().ensureIndexes();
 
         // when
         List<Regions> regionsOrderedByDistanceFromLondon = getDatastore().find(Regions.class)
                                                                          .field("regions")
-                                                                         .near(pointBuilder()
-                                                                            .latitude(51.5286416)
-                                                                            .longitude(-0.1015987).build())
+                                                                         .near(point(51.5286416, -0.1015987))
                                                                          .asList();
 
         // then
@@ -368,26 +397,27 @@ public class GeoNearQueriesTest extends TestBase {
     @Test
     public void shouldFindRoutesCloseToAGivenPointWithinARadiusOfMeters() {
         // given
-        Route sevilla = new Route("Spain", lineString(pointBuilder().latitude(37.40759155713022).longitude(-5.964911067858338).build(),
-                                                      pointBuilder().latitude(37.40341208875179).longitude(-5.9643941558897495).build(),
-                                                      pointBuilder().latitude(37.40297396667302).longitude(-5.970452763140202).build()));
+        Route sevilla = new Route("Spain", lineString(
+            position(37.40759155713022, -5.964911067858338),
+            position(37.40341208875179, -5.9643941558897495),
+            position(37.40297396667302, -5.970452763140202)));
         getDatastore().save(sevilla);
-        Route newYork = new Route("New York", lineString(pointBuilder().latitude(40.75981395319104).longitude(-73.98302106186748).build(),
-                                                         pointBuilder().latitude(40.7636824529618).longitude(-73.98049869574606).build(),
-                                                         pointBuilder().latitude(40.76962974853814).longitude(-73.97964206524193).build()));
+        Route newYork = new Route("New York", lineString(
+            position(40.75981395319104, -73.98302106186748),
+            position(40.7636824529618, -73.98049869574606),
+            position(40.76962974853814, -73.97964206524193)));
         getDatastore().save(newYork);
-        Route london = new Route("London", lineString(pointBuilder().latitude(51.507780365645885).longitude(-0.21786745637655258).build(),
-                                                      pointBuilder().latitude(51.50802478194237).longitude(-0.21474729292094707).build(),
-                                                      pointBuilder().latitude(51.5086863655597).longitude(-0.20895397290587425).build()));
+        Route london = new Route("London", lineString(
+            position(51.507780365645885, -0.21786745637655258),
+            position(51.50802478194237, -0.21474729292094707),
+            position(51.5086863655597, -0.20895397290587425)));
         getDatastore().save(london);
         getDatastore().ensureIndexes();
 
         // when
         List<Route> routesOrderedByDistanceFromLondon = getDatastore().find(Route.class)
                                                                       .field("route")
-                                                                      .near(pointBuilder()
-                                                                         .latitude(51.5286416)
-                                                                         .longitude(-0.1015987).build(), 20000)
+                                                                      .near(point(51.5286416, -0.1015987), 20000)
                                                                       .asList();
 
         // then
@@ -398,26 +428,27 @@ public class GeoNearQueriesTest extends TestBase {
     @Test
     public void shouldFindRoutesOrderedByDistanceFromAGivenPoint() {
         // given
-        Route sevilla = new Route("Spain", lineString(pointBuilder().latitude(37.40759155713022).longitude(-5.964911067858338).build(),
-                                                      pointBuilder().latitude(37.40341208875179).longitude(-5.9643941558897495).build(),
-                                                      pointBuilder().latitude(37.40297396667302).longitude(-5.970452763140202).build()));
+        Route sevilla = new Route("Spain", lineString(
+            position(37.40759155713022, -5.964911067858338),
+            position(37.40341208875179, -5.9643941558897495),
+            position(37.40297396667302, -5.970452763140202)));
         getDatastore().save(sevilla);
-        Route newYork = new Route("New York", lineString(pointBuilder().latitude(40.75981395319104).longitude(-73.98302106186748).build(),
-                                                         pointBuilder().latitude(40.7636824529618).longitude(-73.98049869574606).build(),
-                                                         pointBuilder().latitude(40.76962974853814).longitude(-73.97964206524193).build()));
+        Route newYork = new Route("New York", lineString(
+            position(40.75981395319104, -73.98302106186748),
+            position(40.7636824529618, -73.98049869574606),
+            position(40.76962974853814, -73.97964206524193)));
         getDatastore().save(newYork);
-        Route london = new Route("London", lineString(pointBuilder().latitude(51.507780365645885).longitude(-0.21786745637655258).build(),
-                                                      pointBuilder().latitude(51.50802478194237).longitude(-0.21474729292094707).build(),
-                                                      pointBuilder().latitude(51.5086863655597).longitude(-0.20895397290587425).build()));
+        Route london = new Route("London", lineString(
+            position(51.507780365645885, -0.21786745637655258),
+            position(51.50802478194237, -0.21474729292094707),
+            position(51.5086863655597, -0.20895397290587425)));
         getDatastore().save(london);
         getDatastore().ensureIndexes();
 
         // when
         List<Route> routesOrderedByDistanceFromLondon = getDatastore().find(Route.class)
                                                                       .field("route")
-                                                                      .near(pointBuilder()
-                                                                         .latitude(51.5286416)
-                                                                         .longitude(-0.1015987).build())
+                                                                      .near(point(51.5286416, -0.1015987))
                                                                       .asList();
 
         // then

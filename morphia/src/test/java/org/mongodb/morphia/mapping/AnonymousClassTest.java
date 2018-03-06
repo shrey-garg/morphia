@@ -39,7 +39,7 @@ public class AnonymousClassTest extends TestBase {
         e.id = new CId("test");
 
         getDatastore().save(e);
-        getAds().delete(getDatastore().getCollection(E.class).getName(), E.class, e.id);
+        getAds().delete(getDatastore().getCollection(E.class).getNamespace().getCollectionName(), E.class, e.id);
     }
 
     @Embedded

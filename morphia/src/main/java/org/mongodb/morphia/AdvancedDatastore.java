@@ -15,7 +15,7 @@ import java.util.List;
 
 /**
  * This interface exposes advanced {@link Datastore} features, like interacting with Document and low-level options. It implements matching
- * methods from the {@code Datastore} interface but with a specified kind (collection name), or raw types (Document).
+ * methods from the {@code Datastore} interface but with a specified collection name, or raw types (Document).
  */
 public interface AdvancedDatastore extends Datastore {
 

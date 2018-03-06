@@ -6,7 +6,7 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.testutil.JSONMatcher;
 
 import static org.junit.Assert.assertThat;
-import static org.mongodb.morphia.geo.PointBuilder.pointBuilder;
+import static org.mongodb.morphia.geo.GeoJson.point;
 
 public class GeoFieldCriteriaTest extends TestBase {
     @Test
@@ -17,10 +17,7 @@ public class GeoFieldCriteriaTest extends TestBase {
         double longitude = 5.7;
         QueryImpl<Object> stubQuery = (QueryImpl<Object>) getDatastore().find(Object.class);
         stubQuery.disableValidation();
-        GeoNearFieldCriteria criteria = new GeoNearFieldCriteria(stubQuery, "location", pointBuilder()
-                                                                                            .latitude(latitude)
-                                                                                            .longitude(longitude)
-                                                                                            .build(),
+        GeoNearFieldCriteria criteria = new GeoNearFieldCriteria(stubQuery, "location", point(latitude, longitude),
             maxDistanceMeters);
 
         // when
@@ -48,10 +45,7 @@ public class GeoFieldCriteriaTest extends TestBase {
         QueryImpl<Object> stubQuery = (QueryImpl<Object>) getDatastore().find(Object.class);
         stubQuery.disableValidation();
 
-        GeoNearFieldCriteria criteria = new GeoNearFieldCriteria(stubQuery, "location", pointBuilder()
-                                                                                            .latitude(latitude)
-                                                                                            .longitude(longitude)
-                                                                                            .build());
+        GeoNearFieldCriteria criteria = new GeoNearFieldCriteria(stubQuery, "location", point(latitude, longitude));
 
         // when
         Document queryDocument = new Document();

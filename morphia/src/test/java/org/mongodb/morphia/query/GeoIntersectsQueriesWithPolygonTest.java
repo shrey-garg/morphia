@@ -11,6 +11,7 @@ import org.mongodb.morphia.geo.Route;
 
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mongodb.morphia.geo.GeoJson.geometryCollection;
@@ -19,6 +20,7 @@ import static org.mongodb.morphia.geo.GeoJson.multiPoint;
 import static org.mongodb.morphia.geo.GeoJson.multiPolygon;
 import static org.mongodb.morphia.geo.GeoJson.point;
 import static org.mongodb.morphia.geo.GeoJson.polygon;
+import static org.mongodb.morphia.geo.GeoJson.position;
 
 public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
     @Override
@@ -44,10 +46,11 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
         // when
         List<City> matchingCity = getDatastore().find(City.class)
                                                 .field("location")
-                                                .intersects(polygon(point(37.40759155713022, -5.964911067858338),
-                                                             point(37.40341208875179, -5.9643941558897495),
-                                                             point(37.40297396667302, -5.970452763140202),
-                                                             point(37.40759155713022, -5.964911067858338)))
+                                                .intersects(polygon(
+                                                    position(37.40759155713022, -5.964911067858338),
+                                                    position(37.40341208875179, -5.9643941558897495),
+                                                    position(37.40297396667302, -5.970452763140202),
+                                                    position(37.40759155713022, -5.964911067858338)))
                                                 .asList();
 
         // then
@@ -59,33 +62,37 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
     public void shouldFindAreasThatAPolygonIntersects() {
         // given
         Area sevilla = new Area("Spain",
-                                polygon(point(37.40759155713022, -5.964911067858338),
-                                        point(37.40341208875179, -5.9643941558897495),
-                                        point(37.40297396667302, -5.970452763140202),
-                                        point(37.40759155713022, -5.964911067858338))
+            polygon(asList(
+                position(37.40759155713022, -5.964911067858338),
+                position(37.40341208875179, -5.9643941558897495),
+                position(37.40297396667302, -5.970452763140202),
+                position(37.40759155713022, -5.964911067858338)))
         );
         getDatastore().save(sevilla);
         Area newYork = new Area("New York",
-                                polygon(point(40.75981395319104, -73.98302106186748),
-                                        point(40.7636824529618, -73.98049869574606),
-                                        point(40.76962974853814, -73.97964206524193),
-                                        point(40.75981395319104, -73.98302106186748)));
+            polygon(
+                position(40.75981395319104, -73.98302106186748),
+                position(40.7636824529618, -73.98049869574606),
+                position(40.76962974853814, -73.97964206524193),
+                position(40.75981395319104, -73.98302106186748)));
         getDatastore().save(newYork);
         Area london = new Area("London",
-                               polygon(point(51.507780365645885, -0.21786745637655258),
-                                       point(51.50802478194237, -0.21474729292094707),
-                                       point(51.5086863655597, -0.20895397290587425),
-                                       point(51.507780365645885, -0.21786745637655258)));
+            polygon(
+                position(51.507780365645885, -0.21786745637655258),
+                position(51.50802478194237, -0.21474729292094707),
+                position(51.5086863655597, -0.20895397290587425),
+                position(51.507780365645885, -0.21786745637655258)));
         getDatastore().save(london);
         getDatastore().ensureIndexes();
 
         // when
         List<Area> areaContainingPoint = getDatastore().find(Area.class)
                                                        .field("area")
-                                                       .intersects(polygon(point(37.4056048, -5.9666089),
-                                                                    point(37.404497, -5.9640557),
-                                                                    point(37.407239, -5.962988),
-                                                                    point(37.4056048, -5.9666089)))
+                                                       .intersects(polygon(
+                                                           position(37.4056048, -5.9666089),
+                                                           position(37.404497, -5.9640557),
+                                                           position(37.407239, -5.962988),
+                                                           position(37.4056048, -5.9666089)))
                                                        .asList();
 
         // then
@@ -98,50 +105,58 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
         checkMinServerVersion(2.6);
         // given
         AllTheThings sevilla = new AllTheThings("Spain", geometryCollection(
-                                                                               multiPoint(point(37.40759155713022, -5.964911067858338),
-                                                                                          point(37.40341208875179, -5.9643941558897495),
-                                                                                          point(37.40297396667302, -5.970452763140202)),
-                                                                               polygon(point(37.40759155713022, -5.964911067858338),
-                                                                                       point(37.40341208875179, -5.9643941558897495),
-                                                                                       point(37.40297396667302, -5.970452763140202),
-                                                                                       point(37.40759155713022, -5.964911067858338)),
-                                                                               polygon(point(37.38744598813355, -6.001141928136349),
-                                                                                       point(37.385990973562, -6.002588979899883),
-                                                                                       point(37.386126928031445, -6.002463921904564),
-                                                                                       point(37.38744598813355, -6.001141928136349))));
+            multiPoint(
+                position(37.40759155713022, -5.964911067858338),
+                position(37.40341208875179, -5.9643941558897495),
+                position(37.40297396667302, -5.970452763140202)),
+            polygon(
+                position(37.40759155713022, -5.964911067858338),
+                position(37.40341208875179, -5.9643941558897495),
+                position(37.40297396667302, -5.970452763140202),
+                position(37.40759155713022, -5.964911067858338)),
+            polygon(position(37.38744598813355, -6.001141928136349),
+                position(37.385990973562, -6.002588979899883),
+                position(37.386126928031445, -6.002463921904564),
+                position(37.38744598813355, -6.001141928136349))));
         getDatastore().save(sevilla);
 
         // insert something that's not a geocollection
-        Regions usa = new Regions("US", multiPolygon(polygon(point(40.75981395319104, -73.98302106186748),
-                                                             point(40.7636824529618, -73.98049869574606),
-                                                             point(40.76962974853814, -73.97964206524193),
-                                                             point(40.75981395319104, -73.98302106186748)),
-                                                     polygon(point(28.326568258926272, -81.60542246885598),
-                                                             point(28.327541397884488, -81.6022228449583),
-                                                             point(28.32950334995985, -81.60564735531807),
-                                                             point(28.326568258926272, -81.60542246885598))));
+        Regions usa = new Regions("US", multiPolygon(
+            polygon(
+                position(40.75981395319104, -73.98302106186748),
+                position(40.7636824529618, -73.98049869574606),
+                position(40.76962974853814, -73.97964206524193),
+                position(40.75981395319104, -73.98302106186748)),
+            polygon(
+                position(28.326568258926272, -81.60542246885598),
+                position(28.327541397884488, -81.6022228449583),
+                position(28.32950334995985, -81.60564735531807),
+                position(28.326568258926272, -81.60542246885598))));
         getDatastore().save(usa);
 
         AllTheThings london = new AllTheThings("London", geometryCollection(
-                                                                               point(53.4722454, -2.2235922),
-                                                                               lineString(point(51.507780365645885, -0.21786745637655258),
-                                                                                          point(51.50802478194237, -0.21474729292094707),
-                                                                                          point(51.5086863655597, -0.20895397290587425)),
-                                                                               polygon(point(51.498216362670064, 0.0074849557131528854),
-                                                                                       point(51.49176875129342, 0.01821178011596203),
-                                                                                       point(51.492886897176504, 0.05523204803466797),
-                                                                                       point(51.49393044412136, 0.06663135252892971),
-                                                                                       point(51.498216362670064, 0.0074849557131528854))));
+            point(53.4722454, -2.2235922),
+            lineString(
+                position(51.507780365645885, -0.21786745637655258),
+                position(51.50802478194237, -0.21474729292094707),
+                position(51.5086863655597, -0.20895397290587425)),
+            polygon(
+                position(51.498216362670064, 0.0074849557131528854),
+                position(51.49176875129342, 0.01821178011596203),
+                position(51.492886897176504, 0.05523204803466797),
+                position(51.49393044412136, 0.06663135252892971),
+                position(51.498216362670064, 0.0074849557131528854))));
         getDatastore().save(london);
         getDatastore().ensureIndexes();
 
         // when
         List<AllTheThings> everythingInTheUK = getDatastore().find(AllTheThings.class)
                                                              .field("everything")
-                                                             .intersects(polygon(point(37.4056048, -5.9666089),
-                                                                          point(37.404497, -5.9640557),
-                                                                          point(37.407239, -5.962988),
-                                                                          point(37.4056048, -5.9666089)))
+                                                             .intersects(polygon(
+                                                                 position(37.4056048, -5.9666089),
+                                                                 position(37.404497, -5.9640557),
+                                                                 position(37.407239, -5.962988),
+                                                                 position(37.4056048, -5.9666089)))
                                                              .asList();
 
         // then
@@ -153,45 +168,55 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
     public void shouldFindRegionsThatAPolygonCrosses() {
         checkMinServerVersion(2.6);
         // given
-        Regions sevilla = new Regions("Spain", multiPolygon(polygon(point(37.40759155713022, -5.964911067858338),
-                                                                    point(37.40341208875179, -5.9643941558897495),
-                                                                    point(37.40297396667302, -5.970452763140202),
-                                                                    point(37.40759155713022, -5.964911067858338)),
-                                                            polygon(point(37.38744598813355, -6.001141928136349),
-                                                                    point(37.385990973562, -6.002588979899883),
-                                                                    point(37.386126928031445, -6.002463921904564),
-                                                                    point(37.38744598813355, -6.001141928136349))));
+        Regions sevilla = new Regions("Spain", multiPolygon(
+            polygon(
+                position(37.40759155713022, -5.964911067858338),
+                position(37.40341208875179, -5.9643941558897495),
+                position(37.40297396667302, -5.970452763140202),
+                position(37.40759155713022, -5.964911067858338)),
+            polygon(
+                position(37.38744598813355, -6.001141928136349),
+                position(37.385990973562, -6.002588979899883),
+                position(37.386126928031445, -6.002463921904564),
+                position(37.38744598813355, -6.001141928136349))));
         getDatastore().save(sevilla);
 
-        Regions usa = new Regions("US", multiPolygon(polygon(point(40.75981395319104, -73.98302106186748),
-                                                             point(40.7636824529618, -73.98049869574606),
-                                                             point(40.76962974853814, -73.97964206524193),
-                                                             point(40.75981395319104, -73.98302106186748)),
-                                                     polygon(point(28.326568258926272, -81.60542246885598),
-                                                             point(28.327541397884488, -81.6022228449583),
-                                                             point(28.32950334995985, -81.60564735531807),
-                                                             point(28.326568258926272, -81.60542246885598))));
+        Regions usa = new Regions("US", multiPolygon(
+            polygon(
+                position(40.75981395319104, -73.98302106186748),
+                position(40.7636824529618, -73.98049869574606),
+                position(40.76962974853814, -73.97964206524193),
+                position(40.75981395319104, -73.98302106186748)),
+            polygon(
+                position(28.326568258926272, -81.60542246885598),
+                position(28.327541397884488, -81.6022228449583),
+                position(28.32950334995985, -81.60564735531807),
+                position(28.326568258926272, -81.60542246885598))));
         getDatastore().save(usa);
 
-        Regions london = new Regions("London", multiPolygon(polygon(point(51.507780365645885, -0.21786745637655258),
-                                                                    point(51.50802478194237, -0.21474729292094707),
-                                                                    point(51.5086863655597, -0.20895397290587425),
-                                                                    point(51.507780365645885, -0.21786745637655258)),
-                                                            polygon(point(51.498216362670064, 0.0074849557131528854),
-                                                                    point(51.49176875129342, 0.01821178011596203),
-                                                                    point(51.492886897176504, 0.05523204803466797),
-                                                                    point(51.49393044412136, 0.06663135252892971),
-                                                                    point(51.498216362670064, 0.0074849557131528854))));
+        Regions london = new Regions("London", multiPolygon(
+            polygon(
+                position(51.507780365645885, -0.21786745637655258),
+                position(51.50802478194237, -0.21474729292094707),
+                position(51.5086863655597, -0.20895397290587425),
+                position(51.507780365645885, -0.21786745637655258)),
+            polygon(
+                position(51.498216362670064, 0.0074849557131528854),
+                position(51.49176875129342, 0.01821178011596203),
+                position(51.492886897176504, 0.05523204803466797),
+                position(51.49393044412136, 0.06663135252892971),
+                position(51.498216362670064, 0.0074849557131528854))));
         getDatastore().save(london);
         getDatastore().ensureIndexes();
 
         // when
         List<Regions> regionsInTheUK = getDatastore().find(Regions.class)
                                                      .field("regions")
-                                                     .intersects(polygon(point(37.4056048, -5.9666089),
-                                                                  point(37.404497, -5.9640557),
-                                                                  point(37.407239, -5.962988),
-                                                                  point(37.4056048, -5.9666089)))
+                                                     .intersects(polygon(
+                                                         position(37.4056048, -5.9666089),
+                                                         position(37.404497, -5.9640557),
+                                                         position(37.407239, -5.962988),
+                                                         position(37.4056048, -5.9666089)))
                                                      .asList();
 
         // then
@@ -202,29 +227,30 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
     @Test
     public void shouldFindRoutesThatCrossAQueryPolygon() {
         // given
-        Route sevilla = new Route("Spain", lineString(point(37.4056048, -5.9666089),
-                                                      point(37.404497, -5.9640557)));
+        Route sevilla = new Route("Spain", lineString(position(37.4056048, -5.9666089),
+            position(37.404497, -5.9640557)));
         getDatastore().save(sevilla);
-        Route newYork = new Route("New York", lineString(point(40.75981395319104, -73.98302106186748),
-                                                         point(40.7636824529618, -73.98049869574606),
-                                                         point(40.76962974853814, -73.97964206524193)));
+        Route newYork = new Route("New York", lineString(position(40.75981395319104, -73.98302106186748),
+            position(40.7636824529618, -73.98049869574606),
+            position(40.76962974853814, -73.97964206524193)));
         getDatastore().save(newYork);
-        Route london = new Route("London", lineString(point(51.507780365645885, -0.21786745637655258),
-                                                      point(51.50802478194237, -0.21474729292094707),
-                                                      point(51.5086863655597, -0.20895397290587425)));
+        Route london = new Route("London", lineString(position(51.507780365645885, -0.21786745637655258),
+            position(51.50802478194237, -0.21474729292094707),
+            position(51.5086863655597, -0.20895397290587425)));
         getDatastore().save(london);
-        Route londonToParis = new Route("London To Paris", lineString(point(51.5286416, -0.1015987),
-                                                                      point(48.858859, 2.3470599)));
+        Route londonToParis = new Route("London To Paris", lineString(position(51.5286416, -0.1015987),
+            position(48.858859, 2.3470599)));
         getDatastore().save(londonToParis);
         getDatastore().ensureIndexes();
 
         // when
         List<Route> routeContainingPoint = getDatastore().find(Route.class)
                                                          .field("route")
-                                                         .intersects(polygon(point(37.40759155713022, -5.964911067858338),
-                                                                      point(37.40341208875179, -5.9643941558897495),
-                                                                      point(37.40297396667302, -5.970452763140202),
-                                                                      point(37.40759155713022, -5.964911067858338)))
+                                                         .intersects(polygon(
+                                                             position(37.40759155713022, -5.964911067858338),
+                                                             position(37.40341208875179, -5.9643941558897495),
+                                                             position(37.40297396667302, -5.970452763140202),
+                                                             position(37.40759155713022, -5.964911067858338)))
                                                          .asList();
 
         // then

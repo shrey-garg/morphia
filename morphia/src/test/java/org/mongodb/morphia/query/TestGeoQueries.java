@@ -11,7 +11,7 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.utils.IndexDirection;
 
-import static org.mongodb.morphia.query.Shape.Point;
+import static org.mongodb.morphia.geo.GeoJson.point;
 
 
 public class TestGeoQueries extends TestBase {
@@ -22,32 +22,6 @@ public class TestGeoQueries extends TestBase {
     }
 
     @Test
-    public void testGeoWithinBox() {
-        checkMinServerVersion(2.4);
-        getDatastore().ensureIndexes();
-        final Place place1 = new Place("place1", new double[]{1, 1});
-        getDatastore().save(place1);
-        final Place found = getDatastore().find(Place.class)
-                                          .field("loc")
-                                          .within(Shape.box(new Point(0, 0), new Point(2, 2)))
-                                          .get();
-        Assert.assertNotNull(found);
-    }
-
-    @Test
-    public void testGeoWithinOutsideBox() {
-        checkMinServerVersion(2.4);
-        getDatastore().ensureIndexes();
-        final Place place1 = new Place("place1", new double[]{1, 1});
-        getDatastore().save(place1);
-        final Place found = getDatastore().find(Place.class)
-                                          .field("loc")
-                                          .within(Shape.box(new Point(0, 0), new Point(.4, .5)))
-                                          .get();
-        Assert.assertNull(found);
-    }
-
-    @Test
     public void testGeoWithinPolygon() {
         checkMinServerVersion(2.4);
         getDatastore().ensureIndexes();
@@ -55,7 +29,7 @@ public class TestGeoQueries extends TestBase {
         getDatastore().save(place1);
         final Place found = getDatastore().find(Place.class)
                                           .field("loc")
-                                          .within(Shape.polygon(new Point(0, 0), new Point(0, 5), new Point(2, 3), new Point(2, 0)))
+                                          .within(Shape.polygon(point(0, 0), point(0, 5), point(2, 3), point(2, 0)))
                                           .get();
         Assert.assertNotNull(found);
     }
@@ -68,7 +42,7 @@ public class TestGeoQueries extends TestBase {
         getDatastore().save(place1);
         final Place found = getDatastore().find(Place.class)
                                           .field("loc")
-                                          .within(Shape.polygon(new Point(0, 0), new Point(0, 5), new Point(2, 3), new Point(2, 0)))
+                                          .within(Shape.polygon(point(0, 0), point(0, 5), point(2, 3), point(2, 0)))
                                           .get();
         Assert.assertNull(found);
     }
@@ -81,7 +55,7 @@ public class TestGeoQueries extends TestBase {
         getDatastore().save(place1);
         final Place found = getDatastore().find(Place.class)
                                           .field("loc")
-                                          .within(Shape.center(new Point(0, 1), 1.1))
+                                          .within(Shape.center(point(0, 1), 1.1))
                                           .get();
         Assert.assertNotNull(found);
     }
@@ -94,7 +68,7 @@ public class TestGeoQueries extends TestBase {
         getDatastore().save(place1);
         final Place found = getDatastore().find(Place.class)
                                           .field("loc")
-                                          .within(Shape.center(new Point(0.5, 0.5), 0.77))
+                                          .within(Shape.center(point(0.5, 0.5), 0.77))
                                           .get();
         Assert.assertNotNull(found);
     }
@@ -107,7 +81,7 @@ public class TestGeoQueries extends TestBase {
         getDatastore().save(place1);
         final Place found = getDatastore().find(Place.class)
                                           .field("loc")
-                                          .within(Shape.centerSphere(new Point(0, 1), 1))
+                                          .within(Shape.centerSphere(point(0, 1), 1))
                                           .get();
         Assert.assertNotNull(found);
     }
@@ -168,7 +142,7 @@ public class TestGeoQueries extends TestBase {
         getDatastore().save(place1);
         final Place found = getDatastore().find(Place.class)
                                           .field("loc")
-                                          .within(Shape.box(new Point(0, 0), new Point(2, 2)))
+                                          .within(Shape.box(point(0, 0), point(2, 2)))
                                           .get();
         Assert.assertNotNull(found);
     }
@@ -181,7 +155,7 @@ public class TestGeoQueries extends TestBase {
         getDatastore().save(place1);
         final Place found = getDatastore().find(Place.class)
                                           .field("loc")
-                                          .within(Shape.box(new Point(0, 0), new Point(.4, .5)))
+                                          .within(Shape.box(point(0, 0), point(.4, .5)))
                                           .get();
         Assert.assertNull(found);
     }
@@ -194,7 +168,7 @@ public class TestGeoQueries extends TestBase {
         getDatastore().save(place1);
         final Place found = getDatastore().find(Place.class)
                                           .field("loc")
-                                          .within(Shape.center(new Point(2, 2), .4))
+                                          .within(Shape.center(point(2, 2), .4))
                                           .get();
         Assert.assertNull(found);
     }
@@ -207,7 +181,7 @@ public class TestGeoQueries extends TestBase {
         getDatastore().save(place1);
         final Place found = getDatastore().find(Place.class)
                                           .field("loc")
-                                          .within(Shape.center(new Point(0, 1), 1.1))
+                                          .within(Shape.center(point(0, 1), 1.1))
                                           .get();
         Assert.assertNotNull(found);
     }
@@ -220,7 +194,7 @@ public class TestGeoQueries extends TestBase {
         getDatastore().save(place1);
         final Place found = getDatastore().find(Place.class)
                                           .field("loc")
-                                          .within(Shape.center(new Point(0.5, 0.5), 0.77))
+                                          .within(Shape.center(point(0.5, 0.5), 0.77))
                                           .get();
         Assert.assertNotNull(found);
     }
@@ -233,7 +207,7 @@ public class TestGeoQueries extends TestBase {
         getDatastore().save(place1);
         final Place found = getDatastore().find(Place.class)
                                           .field("loc")
-                                          .within(Shape.centerSphere(new Point(0, 1), 1))
+                                          .within(Shape.centerSphere(point(0, 1), 1))
                                           .get();
         Assert.assertNotNull(found);
     }

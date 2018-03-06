@@ -12,6 +12,7 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.mapping.Mapper;
+import org.mongodb.morphia.query.UpdateOperations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +28,7 @@ public class TestEmbeddedClassname extends TestBase {
         r.singleA = new A();
         ds.save(r);
 
-        ds.update(ds.find(Root.class), ds.createUpdateOperations(Root.class).addToSet("aList", new A()));
+        ds.updateOne(ds.find(Root.class), ds.createUpdateOperations(Root.class).addToSet("aList", new A()));
         r = ds.get(Root.class, "id");
         DBObject aRaw = r.singleA.raw;
 
@@ -39,7 +40,7 @@ public class TestEmbeddedClassname extends TestBase {
         Assert.assertFalse(aRaw.containsField(Mapper.CLASS_NAME_FIELDNAME));
 
         // Test that bList does not contain the class name of the subclass
-        ds.update(ds.find(Root.class), ds.createUpdateOperations(Root.class).addToSet("bList", new B()));
+        ds.updateOne(ds.find(Root.class), ds.createUpdateOperations(Root.class).addToSet("bList", new B()));
         r = ds.get(Root.class, "id");
 
         aRaw = r.aList.get(0).raw;
@@ -54,7 +55,7 @@ public class TestEmbeddedClassname extends TestBase {
         Root entity = new Root();
         entity.singleA = new B();
         ds.save(entity);
-        ds.update(ds.find(Root.class), ds.createUpdateOperations(Root.class).addToSet("aList", new B()));
+        ds.updateOne(ds.find(Root.class), ds.createUpdateOperations(Root.class).addToSet("aList", new B()));
         r = ds.get(Root.class, "id");
 
         // test that singleA.raw *does* contain the classname because we stored a subclass there
