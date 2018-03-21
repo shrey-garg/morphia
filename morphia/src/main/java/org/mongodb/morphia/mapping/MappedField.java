@@ -18,7 +18,7 @@ package org.mongodb.morphia.mapping;
 
 
 import com.mongodb.DBRef;
-import org.bson.codecs.pojo.PropertyModel;
+import org.bson.codecs.pojo.FieldModel;
 import org.bson.codecs.pojo.TypeData;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Embedded;
@@ -35,7 +35,6 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -49,10 +48,10 @@ import static java.util.stream.Collectors.groupingBy;
  */
 @SuppressWarnings("unchecked")
 public class MappedField {
-    private final Map<Class<? extends Annotation>, List<Annotation>> annotations;
+    private final Map<Class<?>, List<Annotation>> annotations;
     private final List<MappedField> typeParameters = new ArrayList<>();
     private MappedClass declaringClass;
-    private PropertyModel property; // the field :)
+    private FieldModel property; // the field :)
     private Class realType; // the real type
     private Class specializedType; // the type (T) for the Collection<T>/T[]/Map<?,T>
     private Type mapKeyType; // the type (T) for the Map<T,?>
@@ -65,26 +64,156 @@ public class MappedField {
     private boolean isCollection; // indicated if the collection is a list)
     private TypeData<?> typeData;
 
-    MappedField(final MappedClass declaringClass, final PropertyModel f) {
+    MappedField(final MappedClass declaringClass, final FieldModel f) {
         this.declaringClass = declaringClass;
         property = f;
         typeData = property.getTypeData();
         realType = typeData.getType();
 
-        annotations = Arrays.stream(realType.getAnnotations())
-                            .collect(groupingBy(
-                                annotation -> (Class<? extends Annotation>) annotation.getClass()));
-        discoverMultivalued();
+        final List<Annotation> list = property.getAnnotations();
+        this.annotations = list.stream()
+                               .collect(groupingBy(annotation -> annotation.annotationType()));
+//        discoverMultivalued();
+    }
+
+    private void discoverMultivalued() {
+        if (realType.isArray()
+            || Collection.class.isAssignableFrom(realType)
+            || Map.class.isAssignableFrom(realType)
+            || GenericArrayType.class.isAssignableFrom(realType.getClass())) {
+
+            isSingleValue = false;
+
+            isMap = Map.class.isAssignableFrom(realType);
+            isSet = Set.class.isAssignableFrom(realType);
+            isCollection = Collection.class.isAssignableFrom(realType);
+            isArray = realType.isArray();
+
+            // get the specializedType T, T[]/List<T>/Map<?,T>; subtype of Long[], List<Long> is Long
+            specializedType = (realType.isArray()) ? realType.getComponentType() : typeData.getTypeParameters().get(0).getType();
+
+            if (isMap) {
+                mapKeyType = typeData.getTypeParameters().get(0).getType();
+            }
+        }
     }
 
     /**
-     * @param clazz the annotation to search for
-     * @param <T>   the type of the annotation
-     * @return the annotation instance if it exists on this field
+     * @return the declaring class of the java field
      */
-    @SuppressWarnings("unchecked")
-    public <T extends Annotation> T getAnnotation(final Class<T> clazz) {
-        return (T) annotations.get(clazz);
+    public Class getDeclaringClass() {
+        return declaringClass.getClazz();
+    }
+
+    /**
+     * Gets the value of the field mapped on the instance given.
+     *
+     * @param instance the instance to use
+     * @return the value stored in the java field
+     */
+    public Object getFieldValue(final Object instance) {
+        try {
+            return property.getField().get(instance);
+        } catch (IllegalAccessException e) {
+            throw new MappingException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * @return the name of the java field, as declared on the class
+     */
+    public String getJavaFieldName() {
+        return property.getName();
+    }
+
+    /**
+     * If the java field is a list/array/map then the sub-type T is returned (ex. List<T>, T[], Map<?,T>
+     *
+     * @return the parameterized type of the field
+     */
+    public Class getSpecializedType() {
+        return specializedType;
+    }
+
+    /**
+     * @return true if this field is marked as serializable
+     */
+    public boolean isSerializable() {
+        return hasAnnotation(Serialized.class)
+               && Serializable.class.isAssignableFrom(getType());
+
+    }
+
+    /**
+     * Indicates whether the annotation is present in the mapping (does not check the java field annotations, just the ones discovered)
+     *
+     * @param ann the annotation to search for
+     * @return true if the annotation was found
+     */
+    public boolean hasAnnotation(final Class ann) {
+        return annotations.containsKey(ann);
+    }
+
+    /**
+     * @return the type of the underlying java field
+     */
+    public Class getType() {
+        return realType;
+    }
+
+    /**
+     * @return true if this field is marked as transient
+     */
+    public boolean isTransient() {
+        return !hasAnnotation(Transient.class)
+               && !hasAnnotation(java.beans.Transient.class)
+               && Modifier.isTransient(getType().getModifiers());
+    }
+
+    /**
+     * @return the type parameters defined on the field
+     */
+    public List<MappedField> getTypeParameters() {
+        return typeParameters;
+    }
+
+    /**
+     * @return true if the MappedField is an array
+     */
+    public boolean isArray() {
+        return isArray;
+    }
+
+    /**
+     * @return true if the MappedField is a Map
+     */
+    public boolean isMap() {
+        return isMap;
+    }
+
+    /**
+     * @return true if this field is a container type such as a List, Map, Set, or array
+     */
+    public boolean isMultipleValues() {
+        return !isSingleValue();
+    }
+
+    /**
+     * @return true if this field is not a container type such as a List, Map, Set, or array
+     */
+    public boolean isSingleValue() {
+        // TODO:  This is almost certainly broken.  revisit when things compile.
+        return true;
+    }
+
+    /**
+     * @return true if this field is a reference to a foreign document
+     * @see Reference
+     * @see Key
+     * @see DBRef
+     */
+    public boolean isReference() {
+        return hasAnnotation(Reference.class) || Key.class == getConcreteType() || DBRef.class == getConcreteType();
     }
 
     /**
@@ -110,116 +239,13 @@ public class MappedField {
     }
 
     /**
-     * @return the declaring class of the java field
+     * @param clazz the annotation to search for
+     * @param <T>   the type of the annotation
+     * @return the annotation instance if it exists on this field
      */
-    public Class getDeclaringClass() {
-        return declaringClass.getClazz();
-    }
-
-    /**
-     * Gets the value of the field mapped on the instance given.
-     *
-     * @param instance the instance to use
-     * @return the value stored in the java field
-     */
-    public Object getFieldValue(final Object instance) {
-        return property.getPropertyAccessor().get(instance);
-    }
-
-    /**
-     * @return the name of the java field, as declared on the class
-     */
-    public String getJavaFieldName() {
-        return property.getName();
-    }
-
-    /**
-     * @return the name of the field's (key)name for mongodb
-     */
-    public String getNameToStore() {
-        return getMappedFieldName();
-    }
-
-    /**
-     * If the java field is a list/array/map then the sub-type T is returned (ex. List<T>, T[], Map<?,T>
-     *
-     * @return the parameterized type of the field
-     */
-    public Class getSpecializedType() {
-        return specializedType;
-    }
-
-    /**
-     * @return true if this field is marked as serializable
-     */
-    public boolean isSerializable() {
-        return hasAnnotation(Serialized.class)
-               && Serializable.class.isAssignableFrom(getType());
-
-    }
-
-    /**
-     * @return true if this field is marked as transient
-     */
-    public boolean isTransient() {
-        return !hasAnnotation(Transient.class)
-               && !hasAnnotation(java.beans.Transient.class)
-               && Modifier.isTransient(getType().getModifiers());
-    }
-
-    /**
-     * @return the type of the underlying java field
-     */
-    public Class getType() {
-        return realType;
-    }
-
-    /**
-     * @return the type parameters defined on the field
-     */
-    public List<MappedField> getTypeParameters() {
-        return typeParameters;
-    }
-
-    /**
-     * Indicates whether the annotation is present in the mapping (does not check the java field annotations, just the ones discovered)
-     *
-     * @param ann the annotation to search for
-     * @return true if the annotation was found
-     */
-    public boolean hasAnnotation(final Class ann) {
-        return annotations.containsKey(ann);
-    }
-
-    /**
-     * @return true if the MappedField is an array
-     */
-    public boolean isArray() {
-        return isArray;
-    }
-
-    /**
-     * @return true if the MappedField is a Map
-     */
-    public boolean isMap() {
-        return isMap;
-    }
-
-    /**
-     * @return true if this field is a container type such as a List, Map, Set, or array
-     */
-    public boolean isMultipleValues() {
-        return !isSingleValue();
-    }
-
-    /**
-     * @return true if this field is a reference to a foreign document
-     * @see Reference
-     * @see Key
-     * @see DBRef
-     */
-    public boolean isReference() {
-        return hasAnnotation(Reference.class) || Key.class == getConcreteType() || DBRef.class == getConcreteType();
+    @SuppressWarnings("unchecked")
+    public <T extends Annotation> T getAnnotation(final Class<T> clazz) {
+        return (T) annotations.get(clazz);
     }
 
     /**
@@ -230,26 +256,29 @@ public class MappedField {
     }
 
     /**
-     * @return true if this field is not a container type such as a List, Map, Set, or array
-     */
-    public boolean isSingleValue() {
-        // TODO:  This is almost certainly broken.  revisit when things compile.
-        return true;
-    }
-
-    /**
      * Sets the value for the java field
      *
      * @param instance the instance to update
      * @param value    the value to set
      */
     public void setFieldValue(final Object instance, final Object value) {
-        property.getPropertyAccessor().set(instance, value);
+        try {
+            property.getField().set(instance, value);
+        } catch (IllegalAccessException e) {
+            throw new MappingException(e.getMessage(), e);
+        }
     }
 
     @Override
     public String toString() {
         return getNameToStore();
+    }
+
+    /**
+     * @return the name of the field's (key)name for mongodb
+     */
+    public String getNameToStore() {
+        return getMappedFieldName();
     }
 
     /**
@@ -286,28 +315,6 @@ public class MappedField {
         }
 
         return property.getName();
-    }
-
-    private void discoverMultivalued() {
-        if (realType.isArray()
-            || Collection.class.isAssignableFrom(realType)
-            || Map.class.isAssignableFrom(realType)
-            || GenericArrayType.class.isAssignableFrom(realType.getClass())) {
-
-            isSingleValue = false;
-
-            isMap = Map.class.isAssignableFrom(realType);
-            isSet = Set.class.isAssignableFrom(realType);
-            isCollection = Collection.class.isAssignableFrom(realType);
-            isArray = realType.isArray();
-
-            // get the specializedType T, T[]/List<T>/Map<?,T>; subtype of Long[], List<Long> is Long
-            specializedType = (realType.isArray()) ? realType.getComponentType() : typeData.getTypeParameters().get(0).getType();
-
-            if (isMap) {
-                mapKeyType = typeData.getTypeParameters().get(0).getType();
-            }
-        }
     }
 
     public TypeData<?> getTypeData() {

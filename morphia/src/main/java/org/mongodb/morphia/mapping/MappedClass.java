@@ -40,7 +40,6 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -406,9 +405,9 @@ public class MappedClass {
      * Discovers interesting (that we care about) things about the class.
      */
     private void discover(final Mapper mapper) {
-        annotations = Arrays.stream(type.getAnnotations())
-                                    .collect(groupingBy(
-                                annotation -> (Class<? extends Annotation>) annotation.getClass()));
+        this.annotations = classModel.getAnnotations().stream()
+                                     .collect(groupingBy(
+                                         annotation -> (Class<? extends Annotation>) annotation.getClass()));
 
 
         Class<?> superclass = type.getSuperclass();
@@ -438,9 +437,9 @@ public class MappedClass {
             }
         }
 
-        update();
-
         discoverFields(this);
+
+        update();
     }
 
     private void discoverFields(final MappedClass mappedClass) {
@@ -450,7 +449,7 @@ public class MappedClass {
 
         discoverFields(getSuperClass());
         /*mapper.getOptions().getDefaultMapper()*/
-        mappedClass.classModel.getPropertyModels().forEach(model -> {
+        mappedClass.classModel.getFieldModels().forEach(model -> {
             final MappedField field = new MappedField(this, model);
             if (field.hasAnnotation(Id.class)) {
                 persistenceFields.add(field);

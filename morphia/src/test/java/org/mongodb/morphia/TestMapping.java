@@ -120,9 +120,12 @@ public class TestMapping extends TestBase {
     @Test
     public void testCollectionMapping() {
         getMorphia().map(ContainsCollection.class);
-        final Key<ContainsCollection> savedKey = getDatastore().save(new ContainsCollection());
+
+        final ContainsCollection entity = new ContainsCollection();
+        final Key<ContainsCollection> savedKey = getDatastore().save(entity);
         final ContainsCollection loaded = getDatastore().get(ContainsCollection.class, savedKey.getId());
-        assertEquals(loaded.coll, (new ContainsCollection()).coll);
+
+        assertEquals(loaded.coll, entity.coll);
         assertNotNull(loaded.id);
     }
 

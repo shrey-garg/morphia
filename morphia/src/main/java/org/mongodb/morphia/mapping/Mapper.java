@@ -12,7 +12,6 @@ package org.mongodb.morphia.mapping;
 
 
 import org.bson.BsonDocument;
-import org.bson.BsonDocumentReader;
 import org.bson.BsonDocumentWriter;
 import org.bson.Document;
 import org.bson.codecs.EncoderContext;
@@ -21,7 +20,6 @@ import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodec;
 import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.codecs.pojo.PojoCodecProvider.Builder;
-import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.EntityInterceptor;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Entity;
@@ -30,6 +28,7 @@ import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -39,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 
 
 /**
@@ -64,8 +64,8 @@ public class Mapper {
     /**
      * Set of classes that registered by this mapper
      */
-    private final Map<String, MappedClass> mappedClasses = new ConcurrentHashMap<>();
-    private final ConcurrentHashMap<String, Set<MappedClass>> mappedClassesByCollection = new ConcurrentHashMap<>();
+    private final Map<String, MappedClass> mappedClasses = new HashMap<>();
+    private final HashMap<String, Set<MappedClass>> mappedClassesByCollection = new HashMap<>();
 
     //EntityInterceptors; these are called after EntityListeners and lifecycle methods on an Entity, for all Entities
     private final List<EntityInterceptor> interceptors = new LinkedList<>();
@@ -89,7 +89,9 @@ public class Mapper {
     public Mapper(final CodecRegistry codecRegistry, final MapperOptions opts) {
         this.codecRegistry = codecRegistry;
         this.opts = opts;
-        providerBuilder.automatic(true);
+        providerBuilder
+            .conventions(asList(new MorphiaConvention()))
+            .automatic(true);
     }
 
     public PojoCodecProvider getPojoCodecProvider() {
@@ -377,4 +379,5 @@ public class Mapper {
 
         return new Document(new LinkedHashMap<>(bsonDocument));
     }
+
 }

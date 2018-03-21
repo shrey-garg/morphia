@@ -25,6 +25,7 @@ import org.bson.Document;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.aggregation.AggregationPipeline;
 import org.mongodb.morphia.aggregation.AggregationPipelineImpl;
 import org.mongodb.morphia.annotations.CappedAt;
@@ -595,10 +596,6 @@ public class DatastoreImpl implements AdvancedDatastore {
             return null;
         }
 
-        // involvedObjects is used not only as a cache but also as a list of what needs to be called for life-cycle methods at the end.
-        final Document document = mapper.toDocument(entity);
-
-        // try to do an update if there is a @Version field
         final MongoCollection<Document> collection = getDatabase()
                                                          .getCollection(origCollection.getNamespace().getCollectionName())
                                                          .withWriteConcern(writeConcern);
@@ -609,6 +606,7 @@ public class DatastoreImpl implements AdvancedDatastore {
         Long oldVersion = (Long) mfVersion.getFieldValue(entity);
         long newVersion = oldVersion == null ? 1 : oldVersion + 1;
 
+        final Document document = mapper.toDocument(entity);
         document.put(versionKeyName, newVersion);
         final Object idValue = document.remove(Mapper.ID_KEY);
 
@@ -937,6 +935,16 @@ public class DatastoreImpl implements AdvancedDatastore {
                             WriteConcern writeConcern) {
         if (entity == null) {
             throw new UpdateException("Can not persist a null entity");
+        }
+
+        final MappedClass mc = mapper.getMappedClass(entity);
+        final MappedField idField = mc.getIdField();
+        if(idField.getFieldValue(entity) == null) {
+            if(idField.getType().equals(ObjectId.class)) {
+                idField.setFieldValue(entity, new ObjectId());
+            } else {
+                throw new MappingException("If the ID type is not ObjectID, ID values must be set manually");
+            }
         }
 
         if (tryVersionedUpdate(collection, entity, options, writeConcern) == null) {
