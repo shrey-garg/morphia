@@ -90,7 +90,7 @@ public class Mapper {
         this.codecRegistry = codecRegistry;
         this.opts = opts;
         providerBuilder
-            .conventions(asList(new MorphiaConvention()))
+            .conventions(asList(new MorphiaConvention(opts)))
             .automatic(true);
     }
 

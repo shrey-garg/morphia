@@ -29,18 +29,17 @@ import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.annotations.Version;
 
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static java.util.stream.Collectors.groupingBy;
+import static java.lang.String.format;
 
 
 /**
@@ -48,8 +47,7 @@ import static java.util.stream.Collectors.groupingBy;
  */
 @SuppressWarnings("unchecked")
 public class MappedField {
-    private final Map<Class<?>, List<Annotation>> annotations;
-    private final List<MappedField> typeParameters = new ArrayList<>();
+    private final Map<Class<? extends Annotation>, Annotation> annotations;
     private MappedClass declaringClass;
     private FieldModel property; // the field :)
     private Class realType; // the real type
@@ -72,8 +70,18 @@ public class MappedField {
 
         final List<Annotation> list = property.getAnnotations();
         this.annotations = list.stream()
-                               .collect(groupingBy(annotation -> annotation.annotationType()));
-//        discoverMultivalued();
+                               .map(ann -> this.<Class<? extends Annotation>, Annotation>map(ann.annotationType(), ann))
+                               .reduce(new HashMap<>(), (map1, update) -> {
+                                   map1.putAll(update);
+                                   return map1;
+                               });
+        discoverMultivalued();
+    }
+
+    private <K, V> Map<K, V> map(final K key, final V value) {
+        final HashMap<K, V> map = new HashMap<>();
+        map.put(key, value);
+        return map;
     }
 
     private void discoverMultivalued() {
@@ -90,7 +98,12 @@ public class MappedField {
             isArray = realType.isArray();
 
             // get the specializedType T, T[]/List<T>/Map<?,T>; subtype of Long[], List<Long> is Long
-            specializedType = (realType.isArray()) ? realType.getComponentType() : typeData.getTypeParameters().get(0).getType();
+            if (realType.isArray()) {
+                specializedType = realType.getComponentType();
+            } else {
+                final List<TypeData<?>> typeParameters = typeData.getTypeParameters();
+                specializedType = !typeParameters.isEmpty() ? typeParameters.get(0).getType() : null;
+            }
 
             if (isMap) {
                 mapKeyType = typeData.getTypeParameters().get(0).getType();
@@ -136,15 +149,6 @@ public class MappedField {
     }
 
     /**
-     * @return true if this field is marked as serializable
-     */
-    public boolean isSerializable() {
-        return hasAnnotation(Serialized.class)
-               && Serializable.class.isAssignableFrom(getType());
-
-    }
-
-    /**
      * Indicates whether the annotation is present in the mapping (does not check the java field annotations, just the ones discovered)
      *
      * @param ann the annotation to search for
@@ -168,13 +172,6 @@ public class MappedField {
         return !hasAnnotation(Transient.class)
                && !hasAnnotation(java.beans.Transient.class)
                && Modifier.isTransient(getType().getModifiers());
-    }
-
-    /**
-     * @return the type parameters defined on the field
-     */
-    public List<MappedField> getTypeParameters() {
-        return typeParameters;
     }
 
     /**
@@ -271,7 +268,7 @@ public class MappedField {
 
     @Override
     public String toString() {
-        return getNameToStore();
+        return format("%s : %s", getNameToStore(), typeData.toString());
     }
 
     /**

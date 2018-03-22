@@ -9,7 +9,6 @@ import org.mongodb.morphia.logging.MorphiaLoggerFactory;
  * Options to control mapping behavior.
  */
 public class MapperOptions {
-    private static final Logger LOG = MorphiaLoggerFactory.get(MapperOptions.class);
     private boolean ignoreFinals; //ignore final fields.
     private boolean storeNulls;
     private boolean storeEmpties;

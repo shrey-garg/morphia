@@ -42,23 +42,6 @@ public class CollectionOfValuesTest extends TestBase {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
-    public void testCreateEntityWithBasicDBList() {
-
-        TestEntity entity = new TestEntity();
-
-        List<Map<String, Object>> data = new ArrayList<>();
-        data.add(new BasicDBObject("type", "text")
-                     .append("data", new BasicDBObject("text", "sometext")));
-
-        entity.setData(data);
-        getDatastore().save(entity);
-
-        final TestEntity fetched = getDatastore().get(TestEntity.class, entity.getId());
-        Assert.assertEquals(entity, fetched);
-    }
-
-    @Test
     public void testListOfListMapping() {
         getMorphia().map(ContainsListOfList.class);
         getDatastore().delete(getDatastore().find(ContainsListOfList.class));
@@ -111,49 +94,6 @@ public class CollectionOfValuesTest extends TestBase {
 
     private void compare(final int[] left, final int[] right) {
         Assert.assertArrayEquals(left, right);
-    }
-
-    @Entity("CreateEntityWithDBListIT-TestEntity")
-    public static class TestEntity {
-
-        @Id
-        private ObjectId id;
-        private BasicDBList data;
-
-        public BasicDBList getData() {
-            return data;
-        }
-
-        public void setData(final List<?> data) {
-            this.data = new BasicDBList();
-            this.data.addAll(data);
-        }
-
-        public ObjectId getId() {
-            return id;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = id != null ? id.hashCode() : 0;
-            result = 31 * result + (data != null ? data.hashCode() : 0);
-            return result;
-        }
-
-        @Override
-        public boolean equals(final Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            final TestEntity that = (TestEntity) o;
-
-            return id != null ? id.equals(that.id) : that.id == null && !(data != null ? !data.equals(that.data) : that.data != null);
-
-        }
     }
 
     private static class ContainsListOfList {

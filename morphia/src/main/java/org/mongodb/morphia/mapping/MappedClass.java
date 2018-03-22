@@ -29,8 +29,6 @@ import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.PrePersist;
 import org.mongodb.morphia.annotations.PreSave;
-import org.mongodb.morphia.annotations.Property;
-import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
@@ -376,7 +374,7 @@ public class MappedClass {
 
     @Override
     public String toString() {
-        return format("MappedClass - collection:%s for %s fields:%s", getCollectionName(), getClazz().getName(), persistenceFields);
+        return format("%s[%s] : %s", getClazz().getSimpleName(), getCollectionName(), persistenceFields);
     }
 
     /**
@@ -447,18 +445,9 @@ public class MappedClass {
             return;
         }
 
-        discoverFields(getSuperClass());
-        /*mapper.getOptions().getDefaultMapper()*/
         mappedClass.classModel.getFieldModels().forEach(model -> {
             final MappedField field = new MappedField(this, model);
-            if (field.hasAnnotation(Id.class)) {
-                persistenceFields.add(field);
-                update();
-            } else if (field.hasAnnotation(Property.class)
-                       || field.hasAnnotation(Reference.class)
-                       || field.hasAnnotation(Embedded.class)
-                       || field.isSerializable()
-                       && !field.isTransient()) {
+            if (!field.isTransient()) {
                 persistenceFields.add(field);
             } else {
                 LOG.warning(format("Ignoring (will not persist) field: %s.%s [type:%s]", type.getName(),
