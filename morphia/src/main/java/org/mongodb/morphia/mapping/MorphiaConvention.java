@@ -14,9 +14,9 @@ import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.annotations.Version;
 
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Iterator;
 
 import static org.bson.codecs.pojo.PojoBuilderHelper.createPropertyModelBuilder;
 
@@ -30,45 +30,44 @@ class MorphiaConvention implements Convention {
 
     @Override
     public void apply(final ClassModelBuilder<?> classModelBuilder) {
-        classModelBuilder
-            .getFieldModelBuilders()
-            .forEach(builder -> {
-                final Field field = builder.getField();
+        Iterator<FieldModelBuilder<?>> iterator = classModelBuilder.getFieldModelBuilders().iterator();
+        while (iterator.hasNext()) {
+            final FieldModelBuilder<?> builder = iterator.next();
+            final Field field = builder.getField();
 
-                PropertyModelBuilder<?> property = classModelBuilder.getProperty(builder.getName());
+            PropertyModelBuilder<?> property = classModelBuilder.getProperty(builder.getName());
 
-                if (Modifier.isStatic(field.getModifiers()) || isTransient(builder)) {
-                    classModelBuilder.removeField(field.getName());
-                    if (property != null) {
-                        classModelBuilder.removeProperty(property.getName());
-                    }
-                } else {
+            if (Modifier.isStatic(field.getModifiers()) || isTransient(builder)) {
+                iterator.remove();
+                if (property != null) {
+                    classModelBuilder.removeProperty(property.getName());
+                }
+            } else {
+                if (property == null) {
+                    final PropertyMetadata<?> propertyMetadata = new PropertyMetadata<>(builder.getName(),
+                        classModelBuilder.getType().getName(), builder.getTypeData())
+                                                                     .field(field);
+                    property = createPropertyModelBuilder(propertyMetadata);
+                    classModelBuilder.addProperty(property);
+                }
 
-                    if (property == null) {
-                        final PropertyMetadata<?> propertyMetadata = new PropertyMetadata<>(builder.getName(),
-                            classModelBuilder.getType().getName(), builder.getTypeData())
-                                                                         .field(field);
-                        property = createPropertyModelBuilder(propertyMetadata);
-                        classModelBuilder.addProperty(property);
-                    }
-
-                    final String mappedName = getMappedFieldName(builder);
+                final String mappedName = getMappedFieldName(builder);
 /*
-                if (builder.hasAnnotation(Id.class)) {
-                    builder
-                        .readName(ClassModelBuilder.ID_PROPERTY_NAME)
-                        .writeName(ClassModelBuilder.ID_PROPERTY_NAME);
-                    property
-                        .readName(ClassModelBuilder.ID_PROPERTY_NAME)
-                        .writeName(ClassModelBuilder.ID_PROPERTY_NAME);
-                }
+if (builder.hasAnnotation(Id.class)) {
+builder
+.readName(ClassModelBuilder.ID_PROPERTY_NAME)
+.writeName(ClassModelBuilder.ID_PROPERTY_NAME);
+property
+.readName(ClassModelBuilder.ID_PROPERTY_NAME)
+.writeName(ClassModelBuilder.ID_PROPERTY_NAME);
+}
 */
-                    property.readName(mappedName)
-                            .writeName(mappedName)
-                            .propertyAccessor(new FieldAccessor(field));
+                property.readName(mappedName)
+                        .writeName(mappedName)
+                        .propertyAccessor(new FieldAccessor(field));
 
-                }
-            });
+            }
+        }
     }
 
     private static boolean isTransient(final FieldModelBuilder<?> field) {

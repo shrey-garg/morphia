@@ -234,7 +234,7 @@ public class TestDatastore extends TestBase {
     @Test
     public void testLifecycle() {
         final LifecycleTestObj life1 = new LifecycleTestObj();
-        getMorphia().getMapper().addMappedClass(LifecycleTestObj.class);
+        getMorphia().getMapper().addMappedClass(LifecycleTestObj.class, true);
         getDatastore().save(life1);
         assertTrue(life1.prePersist);
         assertTrue(life1.prePersistWithParam);
@@ -253,7 +253,7 @@ public class TestDatastore extends TestBase {
     @Test
     public void testLifecycleListeners() {
         final LifecycleTestObj life1 = new LifecycleTestObj();
-        getMorphia().getMapper().addMappedClass(LifecycleTestObj.class);
+        getMorphia().getMapper().addMappedClass(LifecycleTestObj.class, true);
         getDatastore().save(life1);
         assertTrue(LifecycleListener.prePersist);
         assertTrue(LifecycleListener.prePersistWithEntity);

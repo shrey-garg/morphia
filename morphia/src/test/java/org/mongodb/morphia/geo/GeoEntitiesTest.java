@@ -10,6 +10,7 @@ import com.mongodb.client.model.geojson.Polygon;
 import org.bson.Document;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
+import org.mongodb.morphia.annotations.Id;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.CoreMatchers.is;
@@ -761,6 +762,7 @@ public class GeoEntitiesTest extends TestBase {
 
     @SuppressWarnings("UnusedDeclaration")
     private static final class Paths {
+        @Id
         private String name;
         private MultiLineString paths;
 

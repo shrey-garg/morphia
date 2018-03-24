@@ -13,7 +13,6 @@
 
 package org.mongodb.morphia.indexes;
 
-import com.mongodb.DBObject;
 import com.mongodb.DuplicateKeyException;
 import com.mongodb.client.ListIndexesIterable;
 import org.bson.Document;
@@ -40,8 +39,6 @@ import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappingException;
 import org.mongodb.morphia.utils.IndexDirection;
 import org.mongodb.morphia.utils.IndexType;
-
-import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -140,7 +137,7 @@ public class TestIndexed extends TestBase {
 
     @Test
     public void testEmbeddedIndex() {
-        final MappedClass mc = getMorphia().getMapper().addMappedClass(ContainsIndexedEmbed.class);
+        final MappedClass mc = getMorphia().getMapper().addMappedClass(ContainsIndexedEmbed.class, true);
 
         assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), doesNotHaveIndexNamed("e.name_-1"));
         getDatastore().ensureIndexes(ContainsIndexedEmbed.class);
@@ -166,7 +163,7 @@ public class TestIndexed extends TestBase {
 
     @Test
     public void testIndexes() {
-        final MappedClass mc = getMorphia().getMapper().addMappedClass(Ad2.class);
+        final MappedClass mc = getMorphia().getMapper().addMappedClass(Ad2.class, true);
 
         assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), doesNotHaveIndexNamed("active_1_lastMod_-1"));
         getDatastore().ensureIndexes(Ad2.class);

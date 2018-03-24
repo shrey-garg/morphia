@@ -62,12 +62,6 @@ public class EmbeddedMappingTest extends TestBase {
         getMorphia().map(WithNested.class, NestedImpl.class);
         getDatastore().ensureIndexes();
 
-        final ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(WithNested.class).listIndexes();
-        boolean indexFound = false;
-        for (Document document : indexInfo) {
-            indexFound |= "nested.field.fail".equals(((Document) document.get("key")).keySet().iterator().next());
-        }
-        Assert.assertTrue("Should find the nested field index", indexFound);
         WithNested nested = new WithNested();
         nested.nested = new NestedImpl("nested value");
         getDatastore().save(nested);
@@ -192,6 +186,7 @@ public class EmbeddedMappingTest extends TestBase {
 
     @Embedded
     public static class NestedImpl implements Nested {
+        @Id
         private String field;
 
         public NestedImpl() {
@@ -224,6 +219,7 @@ public class EmbeddedMappingTest extends TestBase {
 
     @Embedded
     public static class AnotherNested implements Nested {
+        @Id
         private Long value;
     }
 

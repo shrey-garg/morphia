@@ -1,11 +1,13 @@
 package org.mongodb.morphia.geo;
 
 import com.mongodb.client.model.geojson.MultiPolygon;
+import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.utils.IndexDirection;
 
 @SuppressWarnings("UnusedDeclaration")
 public final class Regions {
+    @Id
     private String name;
 
     @Indexed(IndexDirection.GEO2DSPHERE)

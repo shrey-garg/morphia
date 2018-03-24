@@ -1,5 +1,6 @@
 package org.mongodb.morphia.geo;
 
+import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.utils.IndexDirection;
 import com.mongodb.client.model.geojson.Point;
@@ -7,6 +8,7 @@ import com.mongodb.client.model.geojson.Point;
 public class City {
     @Indexed(IndexDirection.GEO2DSPHERE)
     private Point location;
+    @Id
     private String name;
 
     //needed for Morphia serialisation

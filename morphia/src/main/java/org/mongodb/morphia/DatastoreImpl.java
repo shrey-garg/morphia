@@ -93,11 +93,11 @@ public class DatastoreImpl implements AdvancedDatastore {
         this.defaultWriteConcern = mongoClient.getWriteConcern();
 
         pojoCodecProvider = mapper.getPojoCodecProvider();
-        codecRegistry = fromRegistries(MongoClient.getDefaultCodecRegistry(),
+        codecRegistry = fromRegistries(mapper.getCodecRegistry(),
             fromProviders(pojoCodecProvider));
 
         this.database = mongoClient.getDatabase(dbName)
-                                   .withCodecRegistry(codecRegistry);
+                                   .withCodecRegistry(mapper.getCodecRegistry());
 
         this.indexHelper = new IndexHelper(this.mapper, database);
     }
@@ -863,6 +863,9 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     private <T> List<Key<T>> insert(final MongoCollection<T> collection, final List<T> entities, final InsertManyOptions options,
                                     WriteConcern wc) {
+
+        entities.forEach(this::ensureId);
+
         collection
             .withWriteConcern(wc)
             .insertMany(entities, options);
@@ -871,6 +874,7 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     private <T> Key<T> insert(final MongoCollection<T> collection, final T entity, final InsertOneOptions options, WriteConcern wc) {
+        ensureId(entity);
         collection
             .withWriteConcern(wc)
             .insertOne(entity, options);
@@ -902,14 +906,16 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     @Override
-    public <T> List<Key<T>> save(final List<T> entities, final InsertManyOptions options, WriteConcern writeConcern) {
+    public <T> List<Key<T>> save(final List<T> entities, final InsertManyOptions options, WriteConcern wc) {
         if (entities.isEmpty()) {
             return emptyList();
         }
         final Class<T> first = (Class<T>) entities.get(0).getClass();
 
+        entities.forEach(this::ensureId);
+
         getCollection(first)
-            .withWriteConcern(writeConcern)
+            .withWriteConcern(wc)
             .insertMany(entities, options);
 
         return entities.stream().map(mapper::getKey)
@@ -937,6 +943,18 @@ public class DatastoreImpl implements AdvancedDatastore {
             throw new UpdateException("Can not persist a null entity");
         }
 
+        ensureId(entity);
+
+        if (tryVersionedUpdate(collection, entity, options, writeConcern) == null) {
+            collection
+                .withWriteConcern(writeConcern)
+                .insertOne(entity, options);
+        }
+
+        return postSaveOperations(singletonList(entity)).get(0);
+    }
+
+    private <T> void ensureId(final T entity) {
         final MappedClass mc = mapper.getMappedClass(entity);
         final MappedField idField = mc.getIdField();
         if(idField.getFieldValue(entity) == null) {
@@ -946,14 +964,6 @@ public class DatastoreImpl implements AdvancedDatastore {
                 throw new MappingException("If the ID type is not ObjectID, ID values must be set manually");
             }
         }
-
-        if (tryVersionedUpdate(collection, entity, options, writeConcern) == null) {
-            collection
-                .withWriteConcern(writeConcern)
-                .insertOne(entity, options);
-        }
-
-        return postSaveOperations(singletonList(entity)).get(0);
     }
 
     private <T> MongoCollection<T> getCollection(final String collectionName, final Class<T> aClass) {

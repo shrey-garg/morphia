@@ -46,11 +46,13 @@ public class TestMaxMin extends TestBase {
         ds.save(b);
         ds.save(c);
 
-        Assert.assertEquals("last", b.id, ds.find(IndexedEntity.class)
-                                            .order("-id")
-                                            .get(new FindOptions()
-                                                     .max(new Document("testField", "c")))
-                                              .id);
+        Assert.assertEquals("last",
+            b.id,
+            ds.find(IndexedEntity.class)
+              .order("-id")
+              .get(new FindOptions()
+                       .max(new Document("testField", "c")))
+                .id);
     }
 
     @Test

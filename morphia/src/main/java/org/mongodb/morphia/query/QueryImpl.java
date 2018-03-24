@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.mongodb.morphia.query.QueryValidator.validateQuery;
 
 
@@ -513,12 +514,36 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
             LOG.trace(String.format("Running query(%s) : %s, options: %s,", collection.getNamespace().getCollectionName(), query, findOptions));
         }
 
-        return collection
+        return apply(collection
                    .withReadPreference(readPreference)
                    .withReadConcern(readConcern)
                    .find(query)
                          .projection(getFields())
-                         .sort(getSortDocument());
+                         .sort(getSortDocument()),
+            findOptions);
+    }
+
+    private FindIterable<T> apply(final FindIterable<T> iterable, final FindOptions options) {
+        iterable.batchSize(options.getBatchSize());
+        iterable.limit(options.getLimit());
+        iterable.modifiers(options.getModifiers());
+        iterable.maxTime(options.getMaxTime(MILLISECONDS), MILLISECONDS);
+        iterable.maxAwaitTime(options.getMaxAwaitTime(MILLISECONDS), MILLISECONDS);
+        iterable.skip(options.getSkip());
+        iterable.cursorType(options.getCursorType());
+        iterable.noCursorTimeout(options.isNoCursorTimeout());
+        iterable.oplogReplay(options.isOplogReplay());
+        iterable.partial(options.isPartial());
+        iterable.comment(options.getComment());
+        iterable.hint(options.getHint());
+        iterable.max(options.getMax());
+        iterable.min(options.getMin());
+        iterable.maxScan(options.getMaxScan());
+        iterable.returnKey(options.isReturnKey());
+        iterable.showRecordId(options.isShowRecordId());
+        iterable.snapshot(options.isSnapshot());
+
+        return iterable;
     }
 
     @Override

@@ -1,12 +1,12 @@
 package org.mongodb.morphia.geo;
 
-import org.mongodb.morphia.annotations.Entity;
+import com.mongodb.client.model.geojson.Polygon;
+import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.utils.IndexDirection;
-import com.mongodb.client.model.geojson.Polygon;
 
-@Entity
 public final class Area {
+    @Id
     private String name;
 
     @Indexed(IndexDirection.GEO2DSPHERE)

@@ -20,6 +20,9 @@ import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.Set;
 
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+
 
 public class Morphia {
     private final Mapper mapper;
@@ -32,6 +35,7 @@ public class Morphia {
      */
     public Morphia(final MongoClient mongoClient) {
         this.mongoClient = mongoClient;
+
         mapper = new Mapper(mongoClient.getMongoClientOptions().getCodecRegistry());
     }
 

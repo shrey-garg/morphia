@@ -191,8 +191,9 @@ public final class GeoJson {
      * @see <a href="http://docs.mongodb.org/manual/apps/geospatial-indexes/#geojson-objects">GeoJSON</a>
      */
     public static MultiPolygon multiPolygon(final Polygon... polygons) {
-        throw new UnsupportedOperationException();
-        /*return new MultiPolygon(polygons);*/
+        return new MultiPolygon(stream(polygons)
+                                    .map(p -> new PolygonCoordinates(p.getExterior()))
+                                    .collect(toList()));
     }
 
     /**

@@ -25,6 +25,7 @@ import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
+import org.mongodb.morphia.mapping.codec.MorphiaCodecProvider;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,7 +39,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import static java.lang.String.format;
-import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
+import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 
 /**
@@ -65,20 +68,20 @@ public class Mapper {
      * Set of classes that registered by this mapper
      */
     private final Map<String, MappedClass> mappedClasses = new HashMap<>();
-    private final HashMap<String, Set<MappedClass>> mappedClassesByCollection = new HashMap<>();
+    private final Map<String, Set<MappedClass>> mappedClassesByCollection = new HashMap<>();
 
     //EntityInterceptors; these are called after EntityListeners and lifecycle methods on an Entity, for all Entities
     private final List<EntityInterceptor> interceptors = new LinkedList<>();
 
     //A general cache of instances of classes; used by MappedClass for EntityListener(s)
     private final Map<Class, Object> instanceCache = new ConcurrentHashMap();
+    private final Builder providerBuilder = PojoCodecProvider.builder();
     private CodecRegistry codecRegistry;
     private MapperOptions opts;
-
-    private final Builder providerBuilder = PojoCodecProvider.builder();
+    private PojoCodecProvider pojoCodecProvider;
 
     public Mapper(final CodecRegistry codecRegistry) {
-        this(codecRegistry,  new MapperOptions());
+        this(codecRegistry, new MapperOptions());
     }
 
     /**
@@ -87,15 +90,19 @@ public class Mapper {
      * @param opts the options to use
      */
     public Mapper(final CodecRegistry codecRegistry, final MapperOptions opts) {
-        this.codecRegistry = codecRegistry;
+
         this.opts = opts;
-        providerBuilder
-            .conventions(asList(new MorphiaConvention(opts)))
-            .automatic(true);
+        pojoCodecProvider = providerBuilder
+                                .conventions(singletonList(new MorphiaConvention(opts)))
+                                .automatic(true)
+                                .build();
+
+        this.codecRegistry = fromRegistries(codecRegistry,
+            fromProviders(new MorphiaCodecProvider(this), pojoCodecProvider));
     }
 
-    public PojoCodecProvider getPojoCodecProvider() {
-        return providerBuilder.build();
+    public CodecRegistry getCodecRegistry() {
+        return codecRegistry;
     }
 
     /**
@@ -108,27 +115,9 @@ public class Mapper {
     }
 
     /**
-     * Creates a MappedClass and validates it.
-     *
-     * @param c the Class to map
-     * @return the MappedClass for the given Class
-     */
-    public MappedClass addMappedClass(final Class c) {
-        MappedClass mappedClass = mappedClasses.get(c.getName());
-        if (mappedClass == null) {
-            providerBuilder.register(c);
-            final PojoCodec codec = (PojoCodec) getPojoCodecProvider().get(c, codecRegistry);
-            mappedClass = new MappedClass(codec.getClassModel(), this);
-            return addMappedClass(mappedClass, true);
-        }
-        return mappedClass;
-    }
-
-    /**
      * Finds any subtypes for the given MappedClass.
      *
      * @param mc the parent type
-     *
      * @return the list of subtypes
      * @since 1.3
      */
@@ -141,6 +130,13 @@ public class Mapper {
         }
 
         return subtypes;
+    }
+
+    /**
+     * @return collection of MappedClasses
+     */
+    public Collection<MappedClass> getMappedClasses() {
+        return new ArrayList<>(mappedClasses.values());
     }
 
     /**
@@ -187,22 +183,19 @@ public class Mapper {
     }
 
     /**
-     * Gets the ID value for an entity
-     *
-     * @param entity the entity to process
-     * @return the ID value
+     * @return the options used by this Mapper
      */
-    public Object getId(final Object entity) {
-        if (entity == null) {
-            return null;
-        }
-        try {
-            final MappedClass mappedClass = getMappedClass(entity.getClass());
-            final MappedField idField = mappedClass.getIdField();
-            return idField.getFieldValue(entity);
-        } catch (Exception e) {
-            return null;
-        }
+    public MapperOptions getOptions() {
+        return opts;
+    }
+
+    /**
+     * Sets the options this Mapper should use
+     *
+     * @param options the options to use
+     */
+    public void setOptions(final MapperOptions options) {
+        opts = options;
     }
 
     /**
@@ -239,21 +232,22 @@ public class Mapper {
     }
 
     /**
-     * Gets the Key for an entity and a specific collection
+     * Gets the ID value for an entity
      *
-     * @param entity     the entity to process
-     * @param collection the collection to use in the Key rather than the mapped collection as defined on the entity's class
-     * @param <T>        the type of the entity
-     * @return the Key
+     * @param entity the entity to process
+     * @return the ID value
      */
-    public <T> Key<T> getKey(final T entity, final String collection) {
-        if (entity instanceof Key) {
-            return (Key<T>) entity;
+    public Object getId(final Object entity) {
+        if (entity == null) {
+            return null;
         }
-
-        final Object id = getId(entity);
-        final Class<T> aClass = (Class<T>) entity.getClass();
-        return id == null ? null : new Key<>(aClass, collection, id);
+        try {
+            final MappedClass mappedClass = getMappedClass(entity.getClass());
+            final MappedField idField = mappedClass.getIdField();
+            return idField.getFieldValue(entity);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -269,49 +263,35 @@ public class Mapper {
 
         Class type = (obj instanceof Class) ? (Class) obj : obj.getClass();
 
-        return mappedClasses.computeIfAbsent(type.getName(), s -> addMappedClass(type));
-    }
-
-    /**
-     * @return collection of MappedClasses
-     */
-    public Collection<MappedClass> getMappedClasses() {
-        return new ArrayList<>(mappedClasses.values());
-    }
-
-    /**
-     * @return the options used by this Mapper
-     */
-    public MapperOptions getOptions() {
-        return opts;
-    }
-
-    /**
-     * Sets the options this Mapper should use
-     *
-     * @param options the options to use
-     */
-    public void setOptions(final MapperOptions options) {
-        opts = options;
-    }
-
-    /**
-     * Updates the collection value on a Key with the mapped value on the Key's type Class
-     *
-     * @param key the Key to update
-     */
-    public void coerceCollection(final Key key) {
-        if (key.getCollection() == null && key.getType() == null) {
-            throw new IllegalStateException("Key is invalid! " + toString());
-        } else if (key.getCollection() == null) {
-            key.setCollection(getMappedClass(key.getType()).getCollectionName());
+        MappedClass mc = mappedClasses.get(type.getName());
+        if (mc == null) {
+            mc = addMappedClass(type, false);
         }
-
+        return mc;
     }
 
     /**
-     * Add MappedClass to internal cache, possibly validating first.
+     * Creates a MappedClass and validates it.
+     *
+     * @param c        the Class to map
+     * @param validate if true, validate the mapping
+     * @return the MappedClass for the given Class
      */
+    public MappedClass addMappedClass(final Class c, final boolean validate) {
+        MappedClass mappedClass = mappedClasses.get(c.getName());
+        if (mappedClass == null) {
+            providerBuilder.register(c);
+            final PojoCodec codec = (PojoCodec) getPojoCodecProvider().get(c, codecRegistry);
+            mappedClass = new MappedClass(codec.getClassModel(), this);
+            return addMappedClass(mappedClass, validate);
+        }
+        return mappedClass;
+    }
+
+    public PojoCodecProvider getPojoCodecProvider() {
+        return pojoCodecProvider;
+    }
+
     private MappedClass addMappedClass(final MappedClass mc, final boolean validate) {
         if (validate && !mc.isInterface()) {
             mc.validate(this);
@@ -334,29 +314,54 @@ public class Mapper {
     }
 
     /**
+     * Gets the Key for an entity and a specific collection
+     *
+     * @param entity     the entity to process
+     * @param collection the collection to use in the Key rather than the mapped collection as defined on the entity's class
+     * @param <T>        the type of the entity
+     * @return the Key
+     */
+    public <T> Key<T> getKey(final T entity, final String collection) {
+        if (entity instanceof Key) {
+            return (Key<T>) entity;
+        }
+
+        final Object id = getId(entity);
+        final Class<T> aClass = (Class<T>) entity.getClass();
+        return id == null ? null : new Key<>(aClass, collection, id);
+    }
+
+    /**
+     * Updates the collection value on a Key with the mapped value on the Key's type Class
+     *
+     * @param key the Key to update
+     */
+    public void coerceCollection(final Key key) {
+        if (key.getCollection() == null && key.getType() == null) {
+            throw new IllegalStateException("Key is invalid! " + toString());
+        } else if (key.getCollection() == null) {
+            key.setCollection(getMappedClass(key.getType()).getCollectionName());
+        }
+
+    }
+
+    /**
      * Maps a set of classes
      *
      * @param entityClasses the classes to map
      */
     public void map(final Class... entityClasses) {
-        providerBuilder.register(entityClasses);
+        for (final Class entityClass : entityClasses) {
+            addMappedClass(entityClass, true);
+        }
     }
 
     public void map(final Set<Class> entityClasses) {
         if (entityClasses != null && !entityClasses.isEmpty()) {
             for (final Class entityClass : entityClasses) {
-                providerBuilder.register(entityClass);
+                addMappedClass(entityClass, true);
             }
         }
-    }
-
-    /**
-     * Tries to map all classes in the package specified. Fails if one of the classes is not valid for mapping.
-     *
-     * @param packageName the name of the package to process
-     */
-    public void mapPackage(final String packageName) {
-        providerBuilder.register(packageName);
     }
 
     /**
@@ -368,6 +373,14 @@ public class Mapper {
         mapPackage(clazz.getPackage().getName());
     }
 
+    /**
+     * Tries to map all classes in the package specified. Fails if one of the classes is not valid for mapping.
+     *
+     * @param packageName the name of the package to process
+     */
+    public void mapPackage(final String packageName) {
+        providerBuilder.register(packageName);
+    }
 
     public <T> Document toDocument(final T entity) {
         final BsonDocument bsonDocument = new BsonDocument();

@@ -56,6 +56,7 @@ public class TestMapper extends TestBase {
 
         Mapper mapper = getMorphia().getMapper();
         List<MappedClass> subTypes = mapper.getSubTypes(mapper.getMappedClass(Nested.class));
+        Assert.assertFalse(subTypes.isEmpty());
         Assert.assertTrue(subTypes.contains(mapper.getMappedClass(NestedImpl.class)));
         Assert.assertTrue(subTypes.contains(mapper.getMappedClass(AnotherNested.class)));
     }

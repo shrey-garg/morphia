@@ -305,12 +305,10 @@ public class TestDocumentValidation extends TestBase {
         return (Document) firstBatch.get(0).get("options");
     }
 
-    @SuppressWarnings("unchecked")
     private Document getValidator() {
         return (Document) getValidation().get("validator");
     }
 
-    @SuppressWarnings("deprecation")
     private void updateValidation(final MappedClass mappedClass, final ValidationLevel level, final ValidationAction action) {
         ((DatastoreImpl) getDatastore()).process(mappedClass, new ValidationBuilder().value("{ jelly : { $ne : 'rhubarb' } }")
                                                                                      .level(level)

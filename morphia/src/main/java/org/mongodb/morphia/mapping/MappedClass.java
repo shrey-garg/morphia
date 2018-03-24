@@ -405,7 +405,7 @@ public class MappedClass {
     private void discover(final Mapper mapper) {
         this.annotations = classModel.getAnnotations().stream()
                                      .collect(groupingBy(
-                                         annotation -> (Class<? extends Annotation>) annotation.getClass()));
+                                         annotation -> (Class<? extends Annotation>) annotation.annotationType()));
 
 
         Class<?> superclass = type.getSuperclass();
