@@ -397,18 +397,20 @@ public class TestDatastore extends TestBase {
         assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
         assertEquals(1, results.loginCount);
 
-        results = getDatastore().findAndModify(query, updateOperations, new FindOneAndUpdateOptions()
-            .returnDocument(AFTER), getDatastore().getDefaultWriteConcern());
+        results = getDatastore().findAndModify(query, updateOperations, new FindOneAndUpdateOptions(),
+            getDatastore().getDefaultWriteConcern());
         assertEquals(0, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
         assertEquals(2, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
         assertEquals(1, results.loginCount);
 
-        results = getDatastore().findAndModify(getDatastore().find(FacebookUser.class)
-                                                             .field("id").equal(3L)
-                                                             .field("username").equal("Jon Snow"), updateOperations,
-            new FindOneAndUpdateOptions()
-                .returnDocument(AFTER)
-                .upsert(true), getDatastore().getDefaultWriteConcern());
+        results = getDatastore()
+                      .findAndModify(getDatastore()
+                                         .find(FacebookUser.class)
+                                         .field("id").equal(3L)
+                                         .field("username").equal("Jon Snow"), updateOperations,
+                          new FindOneAndUpdateOptions()
+                              .returnDocument(BEFORE)
+                              .upsert(true), getDatastore().getDefaultWriteConcern());
         assertNull(results);
         FacebookUser user = getDatastore().find(FacebookUser.class).filter("id", 3).get();
         assertEquals(1, user.loginCount);

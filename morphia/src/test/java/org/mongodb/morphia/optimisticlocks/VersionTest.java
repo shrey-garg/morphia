@@ -1,6 +1,8 @@
 package org.mongodb.morphia.optimisticlocks;
 
 
+import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
@@ -29,7 +31,8 @@ public class VersionTest extends TestBase {
         Assert.assertEquals(0, a.version);
         getDatastore().save(a);
 
-        getDatastore().save(getDatastore().get(a));
+        final ALongPrimitive a2 = getDatastore().get(a);
+        getDatastore().save(a2);
 
         getDatastore().save(a);
     }

@@ -35,25 +35,17 @@ public class VersionMisuse extends FieldConstraint {
                 //TODO: Replace this will a read ObjectFactory call -- requires Mapper instance.
                 final Object testInstance = creator.createInstance(mc.getClazz());
 
-                // check initial value
-                if (Long.class.equals(type)) {
-                    if (mf.getFieldValue(testInstance) != null) {
-                        ve.add(new ConstraintViolation(Level.FATAL, mc, mf, getClass(),
-                                                       format("When using @%s on a Long field, it must be initialized to null.",
-                                                              Version.class.getSimpleName())));
-                    }
-                } else if (long.class.equals(type)) {
-                    if ((Long) mf.getFieldValue(testInstance) != 0L) {
-                        ve.add(new ConstraintViolation(Level.FATAL, mc, mf, getClass(),
-                                                       format("When using @%s on a long field, it must be initialized to 0.",
-                                                              Version.class.getSimpleName())));
-                    }
+                final Object value = mf.getFieldValue(testInstance);
+                if (value != null && (!value.equals(0L))) {
+                    ve.add(new ConstraintViolation(Level.FATAL, mc, mf, getClass(),
+                        format("When using @%s on a field, it must be initialized to null or 0.",
+                            Version.class.getSimpleName())));
                 }
             } else {
                 ve.add(new ConstraintViolation(Level.FATAL, mc, mf, getClass(),
-                                               format("@%s can only be used on a Long/long field.", Version.class.getSimpleName())));
+                    format("@%s can only be used on a Long/long field.", Version.class.getSimpleName())));
             }
         }
     }
-
 }
+

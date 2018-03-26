@@ -8,6 +8,7 @@ import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.List;
 
+import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 
 
@@ -256,5 +257,10 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
     protected UpdateOperations<T> remove(final String fieldExpr, final boolean firstNotLast) {
         add(UpdateOperator.POP, fieldExpr, (firstNotLast) ? -1 : 1);
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return operations.toString();
     }
 }

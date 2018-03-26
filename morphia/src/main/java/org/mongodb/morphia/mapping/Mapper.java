@@ -27,6 +27,7 @@ import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.mapping.codec.MorphiaCodecProvider;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -280,10 +281,11 @@ public class Mapper {
     public MappedClass addMappedClass(final Class c, final boolean validate) {
         MappedClass mappedClass = mappedClasses.get(c.getName());
         if (mappedClass == null) {
-            providerBuilder.register(c);
+//            providerBuilder.register(c);
             final PojoCodec codec = (PojoCodec) getPojoCodecProvider().get(c, codecRegistry);
-            mappedClass = new MappedClass(codec.getClassModel(), this);
-            return addMappedClass(mappedClass, validate);
+            if(codec != null) {
+                return addMappedClass(new MappedClass(codec.getClassModel(), this), validate);
+            }
         }
         return mappedClass;
     }

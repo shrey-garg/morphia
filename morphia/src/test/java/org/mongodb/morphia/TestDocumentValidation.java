@@ -17,11 +17,13 @@
 package org.mongodb.morphia;
 
 import com.mongodb.MongoCommandException;
+import com.mongodb.MongoException;
 import com.mongodb.MongoWriteException;
-import com.mongodb.WriteConcernException;
+import com.mongodb.MongoException;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
+import com.mongodb.client.model.InsertManyOptions;
 import com.mongodb.client.model.InsertOneOptions;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.ValidationAction;
@@ -62,7 +64,7 @@ public class TestDocumentValidation extends TestBase {
         try {
             getDatastore().save(new DocumentValidation("John", 1, new Date()));
             fail("Document should have failed validation");
-        } catch (WriteConcernException e) {
+        } catch (MongoException e) {
             assertTrue(e.getMessage().contains("Document failed validation"));
         }
 
@@ -99,7 +101,7 @@ public class TestDocumentValidation extends TestBase {
         try {
             getDatastore().save(new DocumentValidation("John", 1, new Date()));
             fail("Document should have failed validation");
-        } catch (WriteConcernException e) {
+        } catch (MongoException e) {
             assertTrue(e.getMessage().contains("Document failed validation"));
         }
     }
@@ -171,7 +173,7 @@ public class TestDocumentValidation extends TestBase {
             getDatastore().updateMany(query, updates, options,
                 getDatastore().getDefaultWriteConcern());
             fail("Document validation should have complained");
-        } catch (WriteConcernException e) {
+        } catch (MongoException e) {
             // expected
         }
 
@@ -190,7 +192,7 @@ public class TestDocumentValidation extends TestBase {
         try {
             getDatastore().save(new DocumentValidation("Harold", 8, new Date()));
             fail("Document validation should have complained");
-        } catch (WriteConcernException e) {
+        } catch (MongoException e) {
             // expected
         }
 
@@ -210,11 +212,12 @@ public class TestDocumentValidation extends TestBase {
         try {
             getDatastore().save(list);
             fail("Document validation should have complained");
-        } catch (WriteConcernException e) {
+        } catch (MongoException e) {
             // expected
         }
 
-        getDatastore().save(list, new InsertOneOptions().bypassDocumentValidation(true),
+        getDatastore().save(list, new InsertManyOptions()
+                                      .bypassDocumentValidation(true),
             getDatastore().getDefaultWriteConcern());
 
         Assert.assertFalse(query.field("number").equal(8).asList().isEmpty());
@@ -230,7 +233,7 @@ public class TestDocumentValidation extends TestBase {
         try {
             getAds().save(collection, new DocumentValidation("Harold", 8, new Date()));
             fail("Document validation should have complained");
-        } catch (WriteConcernException e) {
+        } catch (MongoException e) {
             // expected
         }
 
@@ -251,7 +254,7 @@ public class TestDocumentValidation extends TestBase {
         try {
             getAds().insert(new DocumentValidation("Harold", 8, new Date()));
             fail("Document validation should have complained");
-        } catch (WriteConcernException e) {
+        } catch (MongoWriteException e) {
             // expected
         }
 
@@ -271,11 +274,11 @@ public class TestDocumentValidation extends TestBase {
         try {
             getAds().insert(list);
             fail("Document validation should have complained");
-        } catch (WriteConcernException e) {
+        } catch (MongoException e) {
             // expected
         }
 
-        getAds().insert(list, new InsertOneOptions()
+        getAds().insert(list, new InsertManyOptions()
                                   .bypassDocumentValidation(true), getDatastore().getDefaultWriteConcern());
 
         Assert.assertFalse(query.field("number").equal(8).asList().isEmpty());

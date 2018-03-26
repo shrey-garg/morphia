@@ -2,6 +2,7 @@ package org.mongodb.morphia;
 
 import com.mongodb.MapReduceCommand.OutputType;
 import com.mongodb.MongoClient;
+import com.mongodb.MongoCommandException;
 import com.mongodb.ReadPreference;
 import com.mongodb.WriteConcern;
 import com.mongodb.client.MapReduceIterable;
@@ -57,11 +58,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.mongodb.DBCollection.ID_FIELD_NAME;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.bson.Document.*;
+import static org.bson.Document.parse;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
@@ -247,23 +247,25 @@ public class DatastoreImpl implements AdvancedDatastore {
     void process(final MappedClass mc, final Validation validation) {
         if (validation != null) {
             String collectionName = mc.getCollectionName();
-            Document result = getDatabase().runCommand(new Document("collMod", collectionName)
-                                                           .append("validator", parse(validation.value()))
-                                                           .append("validationLevel", validation.level().getValue())
-                                                           .append("validationAction", validation.action().getValue())
-                                                      );
+            try {
+                Document result = getDatabase().runCommand(new Document("collMod", collectionName)
+                                                               .append("validator", parse(validation.value()))
+                                                               .append("validationLevel", validation.level().getValue())
+                                                               .append("validationAction", validation.action().getValue())
+                                                          );
 
-            if (!result.getBoolean("ok")) {
-                if (result.getInteger("code") == 26) {
-                    ValidationOptions options = new ValidationOptions()
-                                                    .validator(parse(validation.value()))
-                                                    .validationLevel(validation.level())
-                                                    .validationAction(validation.action());
-                    getDatabase().createCollection(collectionName, new CreateCollectionOptions().validationOptions(options));
-                } else {
-                    //                    result.throwOnError();
-                    throw new UnsupportedOperationException("need to be updated to extract error: " + result);
-                }
+                //            if (!result.getBoolean("ok")) {
+                //                if (result.getInteger("code") == 26) {
+            } catch (MongoCommandException mce) {
+                ValidationOptions options = new ValidationOptions()
+                                                .validator(parse(validation.value()))
+                                                .validationLevel(validation.level())
+                                                .validationAction(validation.action());
+                getDatabase().createCollection(collectionName, new CreateCollectionOptions().validationOptions(options));
+                //                } else {
+                //                                        result.throwOnError();
+                //                    throw new UnsupportedOperationException("need to be updated to extract error: " + result);
+                //                }
             }
         }
     }
@@ -364,8 +366,10 @@ public class DatastoreImpl implements AdvancedDatastore {
 
         updateVersion(query, operations);
 
+        final Document queryDocument = query.getQueryDocument();
+        final Document ops = ((UpdateOpsImpl<T>) operations).getOperations();
         return collection.withWriteConcern(writeConcern)
-                         .findOneAndUpdate(query.getQueryDocument(), ((UpdateOpsImpl<T>) operations).getOperations(),
+                         .findOneAndUpdate(queryDocument, ops,
                              options.sort(query.getSortDocument())
                                     .projection(query.getFields()));
     }
@@ -590,7 +594,7 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     private <T> UpdateResult tryVersionedUpdate(final MongoCollection<T> origCollection, final T entity,
                                                 final InsertOneOptions options, final WriteConcern writeConcern) {
-        UpdateResult result;
+        UpdateResult result = null;
         final MappedClass mc = mapper.getMappedClass(entity);
         if (mc.getFieldsAnnotatedWith(Version.class).isEmpty()) {
             return null;
@@ -600,48 +604,35 @@ public class DatastoreImpl implements AdvancedDatastore {
                                                          .getCollection(origCollection.getNamespace().getCollectionName())
                                                          .withWriteConcern(writeConcern);
 
-        final MappedField mfVersion = mc.getMappedVersionField();
-        final String versionKeyName = mfVersion.getNameToStore();
+        final MappedField version = mc.getMappedVersionField();
+        final String versionKeyName = version.getNameToStore();
 
-        Long oldVersion = (Long) mfVersion.getFieldValue(entity);
-        long newVersion = oldVersion == null ? 1 : oldVersion + 1;
+        Long oldVersion = (Long) version.getFieldValue(entity);
+        long newVersion = oldVersion == null ? 1L : oldVersion + 1L;
+        version.setFieldValue(entity, newVersion);
 
         final Document document = mapper.toDocument(entity);
         document.put(versionKeyName, newVersion);
         final Object idValue = document.remove(Mapper.ID_KEY);
 
-        if (idValue != null && newVersion != 1) {
+        if (/*idValue != null || */newVersion != 1L) {
             final Query<?> query = newQuery(Document.class, collection)
                                        .disableValidation()
                                        .filter(Mapper.ID_KEY, idValue)
-                                       .enableValidation()
                                        .filter(versionKeyName, oldVersion);
-            result = updateOne(query, document, new UpdateOptions()
-                                                 .bypassDocumentValidation(options.getBypassDocumentValidation()), writeConcern);
+            result = updateOne(query, new Document("$set", document), new UpdateOptions()
+                                                    .bypassDocumentValidation(options.getBypassDocumentValidation())
+                                                    .upsert(true),
+                writeConcern);
 
 
             if (result.getModifiedCount() != 1) {
                 throw new ConcurrentModificationException(format("Entity of class %s (id='%s',version='%d') was concurrently updated.",
                     entity.getClass().getName(), idValue, oldVersion));
             }
-        } else {
-            result = saveDocument(collection, document, options);
         }
 
         return result;
-    }
-
-    private UpdateResult saveDocument(final MongoCollection<Document> collection, final Document document,
-                                      final InsertOneOptions options) {
-        if (document.get(ID_FIELD_NAME) == null) {
-            collection.insertOne(document, options);
-            return new InsertResult(collection.getWriteConcern().isAcknowledged());
-        } else {
-            return collection.updateOne(new Document(ID_FIELD_NAME, document.get(ID_FIELD_NAME)), document,
-                new UpdateOptions()
-                    .bypassDocumentValidation(options.getBypassDocumentValidation())
-                    .upsert(true));
-        }
     }
 
     private <T> List<Key<T>> postSaveOperations(final List<T> entities/*, final Map<Object, Document> involvedObjects*/) {
