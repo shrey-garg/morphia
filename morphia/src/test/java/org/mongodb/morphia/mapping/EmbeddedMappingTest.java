@@ -186,7 +186,6 @@ public class EmbeddedMappingTest extends TestBase {
 
     @Embedded
     public static class NestedImpl implements Nested {
-        @Id
         private String field;
 
         public NestedImpl() {

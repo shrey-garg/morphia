@@ -14,6 +14,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class MapImplTest extends TestBase {
@@ -61,10 +62,9 @@ public class MapImplTest extends TestBase {
                                                         .find()
                                                         .limit(1)
                                                         .iterator().next()
-                                                        .get("second"))
-                                            .get("first");
-        final boolean hasF = goo.containsKey(Mapper.CLASS_NAME_FIELDNAME);
-        assertTrue("className should not be here.", !hasF);
+                                                        .get("values"))
+                                            .get("second");
+        assertFalse("className should not be here.", goo.containsKey(Mapper.CLASS_NAME_FIELDNAME));
     }
 
     @Test

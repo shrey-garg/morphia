@@ -21,7 +21,7 @@ public class KeyCodec implements Codec<Key> {
     @Override
     public void encode(final BsonWriter writer, final Key value, final EncoderContext encoderContext) {
         writer.writeStartDocument();
-        writer.writeString("$ref", value.getCollection());
+        writer.writeString("$ref", value.getType().getName());
         writer.writeName("$id");
         Codec codec = mapper.getCodecRegistry().get(value.getId().getClass());
         codec.encode(writer, value.getId(), encoderContext);
@@ -38,17 +38,17 @@ public class KeyCodec implements Codec<Key> {
     public Key decode(final BsonReader reader, final DecoderContext decoderContext) {
         reader.readStartDocument();
 
-        final String ref = reader.readString("$ref");
-        final Class<?> classFromCollection = mapper.getClassFromCollection(ref);
-        final MappedClass mappedClass = mapper.getMappedClass(classFromCollection);
-
-        reader.readName();
-        final Class<?> idType = mappedClass.getIdField().getTypeData().getType();
-        final Object idValue = mapper.getCodecRegistry().get(idType).decode(reader, decoderContext);
-        final String type = reader.readString("type");
-
-        reader.readEndDocument();
         try {
+            final String ref = reader.readString("$ref");
+            final Class<?> classFromCollection = Class.forName(ref);
+            final MappedClass mappedClass = mapper.getMappedClass(classFromCollection);
+
+            reader.readName();
+            final Class<?> idType = mappedClass.getIdField().getTypeData().getType();
+            final Object idValue = mapper.getCodecRegistry().get(idType).decode(reader, decoderContext);
+            final String type = reader.readString("type");
+
+            reader.readEndDocument();
             return new Key(Class.forName(type), ref, idValue);
         } catch (ClassNotFoundException e) {
             throw new MappingException(e.getMessage(), e);

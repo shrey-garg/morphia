@@ -7,6 +7,7 @@ import org.bson.codecs.pojo.PropertyAccessor;
 import org.bson.codecs.pojo.PropertyMetadata;
 import org.bson.codecs.pojo.PropertyModelBuilder;
 import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.annotations.Reference;
@@ -16,7 +17,9 @@ import org.mongodb.morphia.annotations.Version;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import static org.bson.codecs.pojo.PojoBuilderHelper.createPropertyModelBuilder;
 
@@ -30,6 +33,18 @@ class MorphiaConvention implements Convention {
 
     @Override
     public void apply(final ClassModelBuilder<?> classModelBuilder) {
+        if(classModelBuilder.hasAnnotation(Entity.class)) {
+            Entity entity = classModelBuilder.getAnnotation(Entity.class);
+            final boolean enableDiscriminator = entity.noClassnameStored();
+            if(enableDiscriminator) {
+                classModelBuilder.enableDiscriminator(true);
+            }
+        }
+
+        classModelBuilder.discriminator(classModelBuilder.getType().getName())
+                         .discriminatorKey("className");
+
+
         Iterator<FieldModelBuilder<?>> iterator = classModelBuilder.getFieldModelBuilders().iterator();
         while (iterator.hasNext()) {
             final FieldModelBuilder<?> builder = iterator.next();
@@ -52,19 +67,17 @@ class MorphiaConvention implements Convention {
                 }
 
                 final String mappedName = getMappedFieldName(builder);
-/*
-if (builder.hasAnnotation(Id.class)) {
-builder
-.readName(ClassModelBuilder.ID_PROPERTY_NAME)
-.writeName(ClassModelBuilder.ID_PROPERTY_NAME);
-property
-.readName(ClassModelBuilder.ID_PROPERTY_NAME)
-.writeName(ClassModelBuilder.ID_PROPERTY_NAME);
-}
-*/
                 property.readName(mappedName)
                         .writeName(mappedName)
                         .propertyAccessor(new FieldAccessor(field));
+
+                if (classModelBuilder.hasAnnotation(Embedded.class)
+                    || Collection.class.isAssignableFrom(property.getTypeData().getType())
+                    || Map.class.isAssignableFrom(property.getTypeData().getType())
+                    /*property.getTypeData().getTypeParameters().size() != 0
+                    && property.getTypeData().getTypeParameters().get(0).getAnnotationsByType(Embedded.class).length == 1*/) {
+                    property.discriminatorEnabled(true);
+                }
 
             }
         }

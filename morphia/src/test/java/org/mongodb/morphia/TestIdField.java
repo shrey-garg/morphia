@@ -63,7 +63,7 @@ public class TestIdField extends TestBase {
 
     @Test
     public void testKeyAsId() {
-        getMorphia().map(KeyAsId.class);
+        getMorphia().map(KeyAsId.class, Rectangle.class);
 
         final Rectangle r = new Rectangle(1, 1);
         //        Rectangle r2 = new Rectangle(11,11);

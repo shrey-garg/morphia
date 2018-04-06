@@ -14,7 +14,10 @@ public class WildcardsTest extends TestBase {
     @Test
     public void example() {
         ChildEntity entity = new ChildEntity();
-        entity.setEmbeddedList(asList(new ChildEmbedded("first"), new ChildEmbedded("second"), new AnotherChildEmbedded("third")));
+        entity.setEmbeddedList(asList(
+            new ChildEmbedded("first"),
+            new ChildEmbedded("second"),
+            new AnotherChildEmbedded("third")));
         getDatastore().save(entity);
 
         ChildEntity childEntity = getDatastore().find(ChildEntity.class).get();

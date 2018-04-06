@@ -8,9 +8,9 @@ import java.util.List;
 public abstract class FatherEntity<T extends FatherEmbedded> {
 
     @Id
-    private ObjectId id = new ObjectId();
+    private ObjectId id;
 
-    private List<? extends FatherEmbedded> embeddedList;
+    private List<FatherEmbedded> embeddedList;
 
     public FatherEntity() {
         super();
@@ -38,7 +38,7 @@ public abstract class FatherEntity<T extends FatherEmbedded> {
 
     }
 
-    public void setEmbeddedList(final List<? extends FatherEmbedded> embeddedList) {
+    public void setEmbeddedList(final List<FatherEmbedded> embeddedList) {
         this.embeddedList = embeddedList;
     }
 }

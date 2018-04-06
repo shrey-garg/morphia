@@ -2,6 +2,7 @@ package org.mongodb.morphia;
 
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.mapping.MappingException;
 import org.mongodb.morphia.query.Query;
@@ -9,7 +10,7 @@ import org.mongodb.morphia.query.TestQuery.ContainsPic;
 import org.mongodb.morphia.query.TestQuery.Pic;
 import org.mongodb.morphia.query.TestQuery.PicWithObjectId;
 
-
+@Ignore
 public class TestQueriesOnReferences extends TestBase {
     @Test
     public void testKeyExists() {
