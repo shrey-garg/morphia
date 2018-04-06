@@ -16,7 +16,6 @@
 
 package org.mongodb.morphia;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.client.ListIndexesIterable;
 import com.mongodb.client.MongoCollection;
 import org.bson.BsonDocument;
@@ -45,7 +44,6 @@ import org.mongodb.morphia.utils.IndexType;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.mongodb.BasicDBObject.parse;
 import static com.mongodb.client.model.CollationAlternate.SHIFTED;
 import static com.mongodb.client.model.CollationCaseFirst.UPPER;
 import static com.mongodb.client.model.CollationMaxVariable.SPACE;
@@ -53,6 +51,7 @@ import static com.mongodb.client.model.CollationStrength.IDENTICAL;
 import static com.mongodb.client.model.CollationStrength.SECONDARY;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static org.bson.Document.parse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -116,7 +115,7 @@ public class IndexHelperTest extends TestBase {
         indexHelper.createIndex(collection, mapper.getMappedClass(IndexedClass.class), false);
         ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(IndexedClass.class)
                                                                 .listIndexes();
-        assertEquals("Should have 6 indexes", 6, count(indexInfo.iterator()));
+        assertEquals("Should have 4 indexes", 4, count(indexInfo.iterator()));
         for (Document document : indexInfo) {
             String name = document.get("name").toString();
             switch (name) {
@@ -197,7 +196,7 @@ public class IndexHelperTest extends TestBase {
                 assertEquals("en", document.get("default_language"));
                 assertEquals("de", document.get("language_override"));
 
-                assertEquals(new BasicDBObject()
+                assertEquals(new Document()
                                  .append("locale", "en")
                                  .append("caseLevel", true)
                                  .append("caseFirst", "upper")
@@ -336,7 +335,7 @@ public class IndexHelperTest extends TestBase {
                          .partialFilter("{ name : { $gt : 13 } }"));
 
         indexHelper.createIndex(collection, mappedClass, index, false);
-        findPartialIndex(BasicDBObject.parse(index.options().partialFilter()));
+        findPartialIndex(parse(index.options().partialFilter()));
     }
     @Test
     public void indexedPartialFilters() {
@@ -348,7 +347,7 @@ public class IndexHelperTest extends TestBase {
                          .partialFilter("{ name : { $gt : 13 } }"));
 
         indexHelper.createIndex(collection, mappedClass, indexHelper.convert(indexed, "text"), false);
-        findPartialIndex(BasicDBObject.parse(indexed.options().partialFilter()));
+        findPartialIndex(parse(indexed.options().partialFilter()));
     }
 
     @Test
@@ -362,7 +361,7 @@ public class IndexHelperTest extends TestBase {
                          .partialFilter("{ name : { $gt : 13 } }"));
 
         indexHelper.createIndex(collection, mappedClass, indexHelper.convert(text, "text"), false);
-        findPartialIndex(BasicDBObject.parse(text.options().partialFilter()));
+        findPartialIndex(parse(text.options().partialFilter()));
     }
 
     private void checkIndex(final Document document) {
@@ -370,10 +369,10 @@ public class IndexHelperTest extends TestBase {
         assertTrue((Boolean) document.get("unique"));
         assertTrue((Boolean) document.get("sparse"));
         assertEquals(42L, document.get("expireAfterSeconds"));
-        assertEquals(new BasicDBObject("name", 1).append("text", -1), document.get("key"));
+        assertEquals(new Document("name", 1).append("text", -1), document.get("key"));
     }
 
-    private void findPartialIndex(final BasicDBObject expected) {
+    private void findPartialIndex(final Document expected) {
         ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(IndexedClass.class)
                                                                 .listIndexes();
         for (Document document : indexInfo) {
