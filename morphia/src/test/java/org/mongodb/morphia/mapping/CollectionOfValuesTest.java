@@ -41,7 +41,7 @@ public class CollectionOfValuesTest extends TestBase {
     @Test
     public void testListOfListMapping() {
         getMorphia().map(ContainsListOfList.class);
-        getDatastore().delete(getDatastore().find(ContainsListOfList.class));
+        getDatastore().deleteMany(getDatastore().find(ContainsListOfList.class));
         final ContainsListOfList entity = new ContainsListOfList();
 
         entity.strings = new ArrayList<>();

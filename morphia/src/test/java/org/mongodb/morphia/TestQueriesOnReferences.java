@@ -36,7 +36,7 @@ public class TestQueriesOnReferences extends TestBase {
         getDatastore().save(p);
         getDatastore().save(cpk);
 
-        getDatastore().delete(p);
+        getDatastore().deleteOne(p);
 
         getDatastore().find(ContainsPic.class).asList();
     }

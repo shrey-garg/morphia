@@ -56,8 +56,8 @@ public class TestMapreduce extends TestBase {
 
         //create 100 circles and rectangles
         for (int i = 0; i < 100; i++) {
-            getAds().insert("shapes", new Circle(rnd.nextDouble()));
-            getAds().insert("shapes", new Rectangle(rnd.nextDouble(), rnd.nextDouble()));
+            getAds().insertOne("shapes", new Circle(rnd.nextDouble()));
+            getAds().insertOne("shapes", new Rectangle(rnd.nextDouble(), rnd.nextDouble()));
         }
         final String map = "function () { if(this['radius']) { emit('circle', {count:1}); return; } emit('rect', {count:1}); }";
         final String reduce = "function (key, values) { var total = 0; for ( var i=0; i<values.length; i++ ) {total += values[i].count;} "
@@ -94,8 +94,8 @@ public class TestMapreduce extends TestBase {
 
         //create 100 circles and rectangles
         for (int i = 0; i < 100; i++) {
-            getAds().insert("shapes", new Circle(rnd.nextDouble()));
-            getAds().insert("shapes", new Rectangle(rnd.nextDouble(), rnd.nextDouble()));
+            getAds().insertOne("shapes", new Circle(rnd.nextDouble()));
+            getAds().insertOne("shapes", new Rectangle(rnd.nextDouble(), rnd.nextDouble()));
         }
         final String map = "function () { if(this['radius']) { emit('circle', {count:1}); return; } emit('rect', {count:1}); }";
         final String reduce = "function (key, values) { var total = 0; for ( var i=0; i<values.length; i++ ) {total += values[i].count;} "
@@ -128,7 +128,7 @@ public class TestMapreduce extends TestBase {
     @Test
     public void testCollation() {
         checkMinServerVersion(3.4);
-        getDatastore().save(asList(new Book("The Banquet", "Dante", 2),
+        getDatastore().saveMany(asList(new Book("The Banquet", "Dante", 2),
                             new Book("Divine Comedy", "Dante", 1),
                             new Book("Eclogues", "Dante", 2),
                             new Book("The Odyssey", "Homer", 10),
@@ -163,7 +163,7 @@ public class TestMapreduce extends TestBase {
     @Test
     public void testBypassDocumentValidation() {
         checkMinServerVersion(3.4);
-        getDatastore().save(asList(new Book("The Banquet", "Dante", 2),
+        getDatastore().saveMany(asList(new Book("The Banquet", "Dante", 2),
                             new Book("Divine Comedy", "Dante", 1),
                             new Book("Eclogues", "Dante", 2),
                             new Book("The Odyssey", "Homer", 10),

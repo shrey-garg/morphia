@@ -48,7 +48,7 @@ public class TestEmbeddedClassname extends TestBase {
         Document bRaw = r.bList.get(0).getRaw();
         Assert.assertFalse(bRaw.containsKey(Mapper.CLASS_NAME_FIELDNAME));
 
-        ds.delete(ds.find(Root.class));
+        ds.deleteMany(ds.find(Root.class));
 
         //test saving an B in aList, and it should have the classname.
         Root entity = new Root();

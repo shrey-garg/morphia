@@ -23,7 +23,7 @@ public class CompoundIdTest extends TestBase {
         entity.id = new CompoundId("test");
 
         getDatastore().save(entity);
-        getDatastore().delete(CompoundIdEntity.class, entity.id);
+        getDatastore().deleteOne(CompoundIdEntity.class, entity.id);
     }
 
     @Test

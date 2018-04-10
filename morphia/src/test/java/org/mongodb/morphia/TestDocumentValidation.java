@@ -19,7 +19,6 @@ package org.mongodb.morphia;
 import com.mongodb.MongoCommandException;
 import com.mongodb.MongoException;
 import com.mongodb.MongoWriteException;
-import com.mongodb.MongoException;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CreateCollectionOptions;
 import com.mongodb.client.model.FindOneAndUpdateOptions;
@@ -210,13 +209,13 @@ public class TestDocumentValidation extends TestBase {
             new DocumentValidation("Harold", 8, new Date()),
             new DocumentValidation("Harold", 8, new Date()));
         try {
-            getDatastore().save(list);
+            getDatastore().saveMany(list);
             fail("Document validation should have complained");
         } catch (MongoException e) {
             // expected
         }
 
-        getDatastore().save(list, new InsertManyOptions()
+        getDatastore().saveMany(list, new InsertManyOptions()
                                       .bypassDocumentValidation(true),
             getDatastore().getDefaultWriteConcern());
 
@@ -252,13 +251,13 @@ public class TestDocumentValidation extends TestBase {
         getDatastore().enableDocumentValidation();
 
         try {
-            getAds().insert(new DocumentValidation("Harold", 8, new Date()));
+            getAds().insertOne(new DocumentValidation("Harold", 8, new Date()));
             fail("Document validation should have complained");
         } catch (MongoWriteException e) {
             // expected
         }
 
-        getAds().insert(new DocumentValidation("Harold", 8, new Date()), new InsertOneOptions()
+        getAds().insertOne(new DocumentValidation("Harold", 8, new Date()), new InsertOneOptions()
                                                                              .bypassDocumentValidation(true),
             getDatastore().getDefaultWriteConcern());
 
@@ -272,13 +271,13 @@ public class TestDocumentValidation extends TestBase {
             new DocumentValidation("Amy", 8, new Date()),
             new DocumentValidation("James", 8, new Date()));
         try {
-            getAds().insert(list);
+            getAds().insertMany(list);
             fail("Document validation should have complained");
         } catch (MongoException e) {
             // expected
         }
 
-        getAds().insert(list, new InsertManyOptions()
+        getAds().insertMany(list, new InsertManyOptions()
                                   .bypassDocumentValidation(true), getDatastore().getDefaultWriteConcern());
 
         Assert.assertFalse(query.field("number").equal(8).asList().isEmpty());

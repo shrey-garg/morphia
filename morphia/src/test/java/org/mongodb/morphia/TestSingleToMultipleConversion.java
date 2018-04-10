@@ -15,7 +15,7 @@ import java.util.Set;
 public class TestSingleToMultipleConversion extends TestBase {
     @Test
     public void testBasicType() {
-        getDatastore().delete(getDatastore().find(HasSingleString.class));
+        getDatastore().deleteMany(getDatastore().find(HasSingleString.class));
         getDatastore().save(new HasSingleString());
         Assert.assertNotNull(getDatastore().find(HasSingleString.class).get());
         Assert.assertEquals(1, getDatastore().find(HasSingleString.class).count());

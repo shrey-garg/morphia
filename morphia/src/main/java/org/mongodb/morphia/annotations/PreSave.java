@@ -10,7 +10,9 @@ import java.lang.annotation.Target;
 
 
 /**
- * Called right before DBCollection.save() is called. Changes made to the entity (java class) will not be persisted. This event will be
+ * Called right before insert is called on MongoCollection is called. Changes made to the entity (java class) will not be
+ * persisted. This event
+ * will be
  * called on top level Entities.
  */
 @Documented

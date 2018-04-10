@@ -44,7 +44,7 @@ public class TestMapper extends TestBase {
         HoldsMultipleA holder = new HoldsMultipleA();
         holder.a1 = a;
         holder.a2 = a;
-        getDatastore().save(asList(a, holder));
+        getDatastore().saveMany(asList(a, holder));
         holder = getDatastore().get(HoldsMultipleA.class, holder.id);
         Assert.assertEquals(1, A.loadCount);
         Assert.assertTrue(holder.a1 == holder.a2);

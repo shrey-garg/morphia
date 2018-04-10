@@ -16,7 +16,7 @@ public class TestGetByKeys extends TestBase {
         final A a1 = new A();
         final A a2 = new A();
 
-        final List<Key<A>> keys = getDatastore().save(asList(a1, a2));
+        final List<Key<A>> keys = getDatastore().saveMany(asList(a1, a2));
 
         final List<A> reloaded = getDatastore().getByKeys(keys);
 

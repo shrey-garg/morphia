@@ -36,7 +36,7 @@ public class TestEmptyEntityMapping extends TestBase {
         Assert.assertNull("Should not find the user.", getDatastore().find(User.class).filter("rights size", 0).get());
         Assert.assertNull("Should not find the user.", getDatastore().find(User.class).field("rights").sizeEq(0).get());
         Assert.assertNotNull("Should find the user.", getDatastore().find(User.class).field("rights").doesNotExist().get());
-        getDatastore().delete(getDatastore().find(User.class));
+        getDatastore().deleteMany(getDatastore().find(User.class));
 
         u = new User();
         u.setFullName("User Name");

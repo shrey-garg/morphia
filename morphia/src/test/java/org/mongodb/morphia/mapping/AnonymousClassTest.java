@@ -19,7 +19,7 @@ public class AnonymousClassTest extends TestBase {
         e.id = new CId("test");
 
         final Key<E> key = getDatastore().save(e);
-        getDatastore().delete(E.class, e.id);
+        getDatastore().deleteOne(E.class, e.id);
     }
 
     @Test
