@@ -85,7 +85,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
      * @param clazz    the class to use when validating
      * @param mapper   the Mapper to use
      * @param validate true if the results should be validated
-     * @return the DBObject
+     * @return the Document
      */
     private static Document parseFieldsString(final String str, final Class clazz, final Mapper mapper, final boolean validate) {
         Document ret = new Document();

@@ -1,6 +1,5 @@
 package org.mongodb.morphia.indexes;
 
-import com.mongodb.DBObject;
 import com.mongodb.MongoCommandException;
 import com.mongodb.client.ListIndexesIterable;
 import org.bson.Document;
@@ -20,6 +19,7 @@ import org.mongodb.morphia.annotations.Text;
 
 import static org.mongodb.morphia.utils.IndexType.TEXT;
 
+@SuppressWarnings("unused")
 public class TestTextIndexing extends TestBase {
     @Override
     @Before
@@ -37,22 +37,6 @@ public class TestTextIndexing extends TestBase {
     }
 
     @Test
-    public void testIndexAll() {
-        getMorphia().map(TextIndexAll.class);
-        getDatastore().ensureIndexes();
-
-        ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(TextIndexAll.class).listIndexes();
-        Assert.assertEquals(2, count(indexInfo.iterator()));
-        for (Document document : indexInfo) {
-            if (!document.get("name").equals("_id_")) {
-                Assert.assertEquals(1, ((DBObject) document.get("weights")).get("$**"));
-                Assert.assertEquals("english", document.get("default_language"));
-                Assert.assertEquals("language", document.get("language_override"));
-            }
-        }
-    }
-
-    @Test
     public void testSingleAnnotation() {
         getMorphia().map(CompoundTextIndex.class);
         getDatastore().getCollection(CompoundTextIndex.class).drop();
@@ -66,9 +50,9 @@ public class TestTextIndexing extends TestBase {
                 found = true;
                 Assert.assertEquals(document.toString(), "russian", document.get("default_language"));
                 Assert.assertEquals(document.toString(), "nativeTongue", document.get("language_override"));
-                Assert.assertEquals(document.toString(), 1, ((DBObject) document.get("weights")).get("name"));
-                Assert.assertEquals(document.toString(), 10, ((DBObject) document.get("weights")).get("nick"));
-                Assert.assertEquals(document.toString(), 1, ((DBObject) document.get("key")).get("age"));
+                Assert.assertEquals(document.toString(), 1, ((Document) document.get("weights")).get("name"));
+                Assert.assertEquals(document.toString(), 10, ((Document) document.get("weights")).get("nick"));
+                Assert.assertEquals(document.toString(), 1, ((Document) document.get("key")).get("age"));
             }
         }
         Assert.assertTrue(found);
@@ -90,7 +74,7 @@ public class TestTextIndexing extends TestBase {
                 found = true;
                 Assert.assertEquals(document.toString(), "english", document.get("default_language"));
                 Assert.assertEquals(document.toString(), "nativeTongue", document.get("language_override"));
-                Assert.assertEquals(document.toString(), 10, ((DBObject) document.get("weights")).get("nickName"));
+                Assert.assertEquals(document.toString(), 10, ((Document) document.get("weights")).get("nickName"));
             }
         }
         Assert.assertTrue(indexInfo.toString(), found);

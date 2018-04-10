@@ -9,9 +9,9 @@ import org.bson.Document;
  */
 public interface Criteria {
     /**
-     * Adds this Criteria's information to the DBObject
+     * Adds this Criteria's information to the Document
      *
-     * @param obj the DBObject to update
+     * @param obj the Document to update
      */
     void addTo(Document obj);
 

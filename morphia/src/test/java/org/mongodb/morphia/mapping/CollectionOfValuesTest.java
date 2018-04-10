@@ -1,8 +1,6 @@
 package org.mongodb.morphia.mapping;
 
 
-import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
@@ -15,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class CollectionOfValuesTest extends TestBase {
 

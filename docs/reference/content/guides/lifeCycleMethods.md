@@ -10,11 +10,11 @@ title = "Life Cycle Methods"
 There are various annotations which can be used to register callbacks on certain life cycle events. These include Pre/Post-Persist (Save)
 , and Pre/Post-Load.
 
-- `@PrePersist` - Called before save, it can return a `DBObject` in place of an empty one.
-- `@PreSave` - Called right before `DBCollection.save()` is called. Changes made to the entity will not be persisted; the `DBObject` can
+- `@PrePersist` - Called before save, it can return a `Document` in place of an empty one.
+- `@PreSave` - Called right before `DBCollection.save()` is called. Changes made to the entity will not be persisted; the `Document` can
  be passed as an argument (you can add/remove/change values)
 - `@PostPersist` - Called after the save call to the database
-- `@PreLoad` - Called before mapping the document from the database to the entity; the DBObject is passed as an argument (you can
+- `@PreLoad` - Called before mapping the document from the database to the entity; the Document is passed as an argument (you can
 add/remove/change values)
 - `@PostLoad` - Called after populating the entity with the values from the document
 
@@ -41,7 +41,7 @@ class BankAccount {
   }
 
   @PrePersist
-  public void prePersist(final DBObject dbObj) {
+  public void prePersist(final Document dbObj) {
     // perform operations on serialized form of the entity
   }
 }
@@ -61,8 +61,8 @@ public class BankAccount {
 
 class DigitalSigner {
   @PrePersist
-  void prePersist(final Object entity, final DBObject dbObject) {
-     dbObject.put("signature", sign(dbObject));
+  void prePersist(final Object entity, final Document Document) {
+     Document.put("signature", sign(Document));
   }
 
 }

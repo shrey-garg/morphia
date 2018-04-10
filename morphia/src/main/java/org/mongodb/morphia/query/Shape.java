@@ -66,17 +66,6 @@ public class Shape {
         return new Shape("$polygon", points);
     }
 
-/*
-    public DBObject toDBObject() {
-        final BasicDBList list = new BasicDBList();
-        for (final Point point : points) {
-            list.add(point.toDBObject());
-        }
-
-        return new BasicDBObject(geometry, list);
-    }
-*/
-
     private static class Center extends Shape {
         private final Point center;
         private final double radius;
@@ -86,15 +75,5 @@ public class Shape {
             this.center = center;
             this.radius = radius;
         }
-/*
-        @Override
-        public DBObject toDBObject() {
-            final BasicDBList list = new BasicDBList();
-            list.add(center.toDBObject());
-            list.add(radius);
-
-            return new BasicDBObject(this.getGeometry(), list);
-        }
-*/
     }
 }

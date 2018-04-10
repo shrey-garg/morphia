@@ -16,10 +16,10 @@
 
 package org.mongodb.morphia.query;
 
-import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.client.model.Collation;
 import com.mongodb.client.model.FindOptions;
+import org.bson.Document;
 import org.junit.Test;
 
 import java.util.concurrent.TimeUnit;
@@ -37,11 +37,11 @@ public class FindOptionsTest {
         FindOptions options = new FindOptions()
             .batchSize(42)
             .limit(18)
-            .projection(new BasicDBObject("field", "value"))
+            .projection(new Document("field", "value"))
             .maxTime(15, TimeUnit.MINUTES)
             .maxAwaitTime(45, TimeUnit.SECONDS)
             .skip(12)
-            .sort(new BasicDBObject("field", -1))
+            .sort(new Document("field", -1))
             .cursorType(CursorType.TailableAwait)
             .noCursorTimeout(true)
             .oplogReplay(true)
@@ -50,11 +50,11 @@ public class FindOptionsTest {
 
         assertEquals(42, options.getBatchSize());
         assertEquals(18, options.getLimit());
-        assertEquals(new BasicDBObject("field", "value"), options.getProjection());
+        assertEquals(new Document("field", "value"), options.getProjection());
         assertEquals(15, options.getMaxTime(TimeUnit.MINUTES));
         assertEquals(45, options.getMaxAwaitTime(TimeUnit.SECONDS));
         assertEquals(12, options.getSkip());
-        assertEquals(new BasicDBObject("field", -1), options.getSort());
+        assertEquals(new Document("field", -1), options.getSort());
         assertEquals(CursorType.TailableAwait, options.getCursorType());
         assertTrue(options.isNoCursorTimeout());
         assertTrue(options.isOplogReplay());

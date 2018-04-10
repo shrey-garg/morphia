@@ -1,7 +1,7 @@
 package org.mongodb.morphia.mapping;
 
 
-import com.mongodb.BasicDBObject;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
@@ -10,6 +10,8 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Id;
 
 import java.io.Serializable;
+
+import static org.junit.Assert.fail;
 
 public class MapWithDotInKeyTest extends TestBase {
 
@@ -25,7 +27,7 @@ public class MapWithDotInKeyTest extends TestBase {
             return;
         }
 
-        Assert.assertFalse("Should have got rejection for dot in field names", true);
+        fail("Should have got rejection for dot in field names");
         e = getDatastore().get(e);
         Assert.assertEquals("a", e.mymap.get("a.b"));
         Assert.assertEquals("b", e.mymap.get("c.e.g"));
@@ -51,6 +53,6 @@ public class MapWithDotInKeyTest extends TestBase {
         private ObjectId id;
     }
 
-    private static class MyMap extends BasicDBObject {
+    private static class MyMap extends Document {
     }
 }

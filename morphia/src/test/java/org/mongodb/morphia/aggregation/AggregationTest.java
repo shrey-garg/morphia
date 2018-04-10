@@ -17,8 +17,6 @@
 package org.mongodb.morphia.aggregation;
 
 import com.mongodb.AggregationOptions;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
 import com.mongodb.MongoCommandException;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
@@ -37,7 +35,6 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Validation;
 import org.mongodb.morphia.geo.City;
-import org.mongodb.morphia.geo.GeoJson;
 import org.mongodb.morphia.geo.PlaceWithLegacyCoords;
 import org.mongodb.morphia.query.Query;
 
@@ -127,8 +124,8 @@ public class AggregationTest extends TestBase {
                 grouping("count", accumulator("$sum", 1)));
         final Document group = ((AggregationPipelineImpl) pipeline).getStages().get(0);
         final Document id = getDocument(group, "$group", "_id");
-        assertEquals(new BasicDBObject("$month", "$date"), id.get("month"));
-        assertEquals(new BasicDBObject("$year", "$date"), id.get("year"));
+        assertEquals(new Document("$month", "$date"), id.get("month"));
+        assertEquals(new Document("$year", "$date"), id.get("year"));
 
         pipeline.aggregate(User.class);
     }
@@ -153,7 +150,7 @@ public class AggregationTest extends TestBase {
         AggregationPipeline pipeline = getDatastore()
             .createAggregation(User.class)
             .project(projection("string", expression("$dateToString",
-                                                     new BasicDBObject("format", "%Y-%m-%d")
+                                                     new Document("format", "%Y-%m-%d")
                                                          .append("date", "$joined"))));
 
         Iterator<StringDates> aggregate = pipeline.aggregate(StringDates.class,
@@ -503,17 +500,17 @@ public class AggregationTest extends TestBase {
                             accumulator("$sum", accumulator("$add", asList("$amountFromTBInDouble", "$amountFromParentPNLInDouble"))
                             )));
 
-        DBObject group = (DBObject) ((AggregationPipelineImpl) pipeline).getStages().get(0).get("$group");
-        DBObject summation = (DBObject) group.get("summation");
-        DBObject sum = (DBObject) summation.get("$sum");
+        Document group = (Document) ((AggregationPipelineImpl) pipeline).getStages().get(0).get("$group");
+        Document summation = (Document) group.get("summation");
+        Document sum = (Document) summation.get("$sum");
         List<?> add = (List<?>) sum.get("$add");
         Assert.assertTrue(add.get(0) instanceof String);
         assertEquals("$amountFromTBInDouble", add.get(0));
         pipeline.aggregate(User.class);
     }
 
-    private Document getDocument(final Document dbObject, final String... path) {
-        Document current = dbObject;
+    private Document getDocument(final Document Document, final String... path) {
+        Document current = Document;
         for (String step : path) {
             Object next = current.get(step);
             Assert.assertNotNull(format("Could not find %s in \n%s", step, current), next);

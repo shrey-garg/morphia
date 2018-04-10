@@ -373,7 +373,7 @@ public class TestQuery extends TestBase {
     }
 
     @Test
-    public void testDBObjectOrQuery() {
+    public void testDocumentOrQuery() {
         getDatastore().save(new PhotoWithKeywords("scott", "hernandez"));
 
         final List<Document> orList = new ArrayList<>();

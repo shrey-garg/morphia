@@ -1,6 +1,6 @@
 package org.mongodb.morphia.query;
 
-import com.mongodb.BasicDBObject;
+import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Rule;
 import org.junit.Test;
@@ -67,7 +67,7 @@ public class QueryValidatorTest extends TestBase {
         // expect
         MappedClass mappedClass = getMorphia().getMapper().getMappedClass(GeoEntity.class);
         MappedField mappedField = mappedClass.getMappedField("array");
-        assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, GEO_WITHIN, new BasicDBObject("$box", 1),
+        assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, GEO_WITHIN, new Document("$box", 1),
             new ArrayList<>()), is(true));
     }
 
@@ -249,12 +249,12 @@ public class QueryValidatorTest extends TestBase {
         MappedClass mappedClass = getMorphia().getMapper().getMappedClass(GeoEntity.class);
         MappedField mappedField = mappedClass.getMappedField("array");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, GEO_WITHIN,
-            new BasicDBObject("name", "value"), new ArrayList<>()),
+            new Document("name", "value"), new ArrayList<>()),
             is(false));
     }
 
     @Test
-    public void shouldNotAllowGeoOperatorIfValueIsNotDBObject() {
+    public void shouldNotAllowGeoOperatorIfValueIsNotDocument() {
         // expect
         MappedClass mappedClass = getMorphia().getMapper().getMappedClass(GeoEntity.class);
         MappedField mappedField = mappedClass.getMappedField("array");
@@ -268,7 +268,7 @@ public class QueryValidatorTest extends TestBase {
         MappedClass mappedClass = getMorphia().getMapper().getMappedClass(GeoEntity.class);
         MappedField mappedField = mappedClass.getMappedField("array");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, GEO_WITHIN,
-            new BasicDBObject("notValidKey", 1), new ArrayList<>()),
+            new Document("notValidKey", 1), new ArrayList<>()),
             is(false));
     }
 

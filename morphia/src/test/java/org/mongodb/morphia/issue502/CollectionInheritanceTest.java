@@ -1,6 +1,5 @@
 package org.mongodb.morphia.issue502;
 
-import com.mongodb.DBObject;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Test;
@@ -33,11 +32,11 @@ public class CollectionInheritanceTest extends TestBase {
         // Mapping...
         getMorphia().map(Book.class /* , Authors.class, Author.class */);
 
-        // Test mapping : author objects must be converted into DBObject (but wasn't)
+        // Test mapping : author objects must be converted into Document (but wasn't)
         final Document dbBook = getMorphia().getMapper().toDocument(newBook());
         final Object firstBook = ((List<?>) dbBook.get("authors")).iterator().next();
-        assertTrue("Author wasn't converted : expected instanceof <DBObject>, but was <" + firstBook.getClass() + ">",
-                   firstBook instanceof DBObject);
+        assertTrue("Author wasn't converted : expected instanceof <Document>, but was <" + firstBook.getClass() + ">",
+                   firstBook instanceof Document);
 
     }
 
