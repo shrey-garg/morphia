@@ -281,7 +281,6 @@ public class Mapper {
     public MappedClass addMappedClass(final Class c, final boolean validate) {
         MappedClass mappedClass = mappedClasses.get(c.getName());
         if (mappedClass == null) {
-//            providerBuilder.register(c);
             final PojoCodec codec = (PojoCodec) getPojoCodecProvider().get(c, codecRegistry);
             if(codec != null) {
                 return addMappedClass(new MappedClass(codec.getClassModel(), this), validate);
