@@ -15,19 +15,18 @@ import org.bson.BsonDocument;
 import org.bson.BsonDocumentWriter;
 import org.bson.Document;
 import org.bson.codecs.EncoderContext;
+import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.PojoCodec;
-import org.bson.codecs.pojo.PojoCodecProvider;
-import org.bson.codecs.pojo.PojoCodecProvider.Builder;
 import org.mongodb.morphia.EntityInterceptor;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.mapping.codec.MorphiaCodecProvider;
+import org.mongodb.morphia.mapping.codec.MorphiaTypesCodecProvider;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -76,10 +75,10 @@ public class Mapper {
 
     //A general cache of instances of classes; used by MappedClass for EntityListener(s)
     private final Map<Class, Object> instanceCache = new ConcurrentHashMap();
-    private final Builder providerBuilder = PojoCodecProvider.builder();
+    private final MorphiaCodecProvider.Builder providerBuilder = MorphiaCodecProvider.builder();
     private CodecRegistry codecRegistry;
     private MapperOptions opts;
-    private PojoCodecProvider pojoCodecProvider;
+    private CodecProvider pojoCodecProvider;
 
     public Mapper(final CodecRegistry codecRegistry) {
         this(codecRegistry, new MapperOptions());
@@ -95,11 +94,11 @@ public class Mapper {
         this.opts = opts;
         pojoCodecProvider = providerBuilder
                                 .conventions(singletonList(new MorphiaConvention(opts)))
-                                .automatic(true)
                                 .build();
 
         this.codecRegistry = fromRegistries(codecRegistry,
-            fromProviders(new MorphiaCodecProvider(this), pojoCodecProvider));
+            fromProviders(new MorphiaTypesCodecProvider(this),
+                pojoCodecProvider));
     }
 
     public CodecRegistry getCodecRegistry() {
@@ -289,7 +288,7 @@ public class Mapper {
         return mappedClass;
     }
 
-    public PojoCodecProvider getPojoCodecProvider() {
+    public CodecProvider getPojoCodecProvider() {
         return pojoCodecProvider;
     }
 

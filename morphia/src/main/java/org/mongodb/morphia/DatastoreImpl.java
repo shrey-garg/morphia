@@ -22,9 +22,9 @@ import com.mongodb.client.model.ValidationOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
+import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
-import org.bson.codecs.pojo.PojoCodecProvider;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.aggregation.AggregationPipeline;
 import org.mongodb.morphia.aggregation.AggregationPipelineImpl;
@@ -78,7 +78,7 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     private volatile QueryFactory queryFactory = new DefaultQueryFactory();
     private CodecRegistry codecRegistry;
-    private PojoCodecProvider pojoCodecProvider;
+    private CodecProvider pojoCodecProvider;
 
     /**
      * Create a new DatastoreImpl
@@ -196,11 +196,7 @@ public class DatastoreImpl implements AdvancedDatastore {
      */
     @Override
     public <T> DeleteResult deleteOne(final T entity, final DeleteOptions options, WriteConcern writeConcern) {
-        try {
-            return deleteOne(entity.getClass(), mapper.getId(entity), options, writeConcern);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return deleteOne(entity.getClass(), mapper.getId(entity), options, writeConcern);
     }
 
     @Override
@@ -247,24 +243,17 @@ public class DatastoreImpl implements AdvancedDatastore {
         if (validation != null) {
             String collectionName = mc.getCollectionName();
             try {
-                Document result = getDatabase().runCommand(new Document("collMod", collectionName)
-                                                               .append("validator", parse(validation.value()))
-                                                               .append("validationLevel", validation.level().getValue())
-                                                               .append("validationAction", validation.action().getValue())
-                                                          );
+                getDatabase().runCommand(new Document("collMod", collectionName)
+                                             .append("validator", parse(validation.value()))
+                                             .append("validationLevel", validation.level().getValue())
+                                             .append("validationAction", validation.action().getValue()));
 
-                //            if (!result.getBoolean("ok")) {
-                //                if (result.getInteger("code") == 26) {
             } catch (MongoCommandException mce) {
                 ValidationOptions options = new ValidationOptions()
                                                 .validator(parse(validation.value()))
                                                 .validationLevel(validation.level())
                                                 .validationAction(validation.action());
                 getDatabase().createCollection(collectionName, new CreateCollectionOptions().validationOptions(options));
-                //                } else {
-                //                                        result.throwOnError();
-                //                    throw new UnsupportedOperationException("need to be updated to extract error: " + result);
-                //                }
             }
         }
     }

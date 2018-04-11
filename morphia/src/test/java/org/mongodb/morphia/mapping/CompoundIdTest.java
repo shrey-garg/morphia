@@ -52,7 +52,7 @@ public class CompoundIdTest extends TestBase {
 
         getDatastore().save(entity);
         final String collectionName = getDatastore().getCollection(CompoundIdEntity.class).getNamespace().getCollectionName();
-        ((AdvancedDatastore) getDatastore()).delete(collectionName, CompoundIdEntity.class, entity.id);
+        ((AdvancedDatastore) getDatastore()).deleteOne(collectionName, CompoundIdEntity.class, entity.id);
     }
 
     @Test
