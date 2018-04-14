@@ -39,6 +39,12 @@ public class TestMapper extends TestBase {
 
     @Test
     public void singleLookup() {
+        getMorphia().map(A.class);
+
+        final MappedClass mappedClass = getMorphia().getMapper().getMappedClass(A.class);
+        Assert.assertNotNull(mappedClass.getIdField());
+        Assert.assertNotNull(mappedClass.getMappedIdField());
+
         A.loadCount = 0;
         final A a = new A();
         HoldsMultipleA holder = new HoldsMultipleA();
@@ -46,8 +52,8 @@ public class TestMapper extends TestBase {
         holder.a2 = a;
         getDatastore().saveMany(asList(a, holder));
         holder = getDatastore().get(HoldsMultipleA.class, holder.id);
+        Assert.assertEquals(holder.a1, holder.a2);
         Assert.assertEquals(1, A.loadCount);
-        Assert.assertTrue(holder.a1 == holder.a2);
     }
 
     @Test
@@ -77,6 +83,25 @@ public class TestMapper extends TestBase {
 
         String getId() {
             return id.toString();
+        }
+
+        @Override
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (!(o instanceof A)) {
+                return false;
+            }
+
+            final A a = (A) o;
+
+            return id != null ? id.equals(a.id) : a.id == null;
+        }
+
+        @Override
+        public int hashCode() {
+            return id != null ? id.hashCode() : 0;
         }
     }
 

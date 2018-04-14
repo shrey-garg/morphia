@@ -60,6 +60,7 @@ import java.util.stream.Collectors;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.groupingBy;
 import static org.bson.Document.parse;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
@@ -91,7 +92,7 @@ public class DatastoreImpl implements AdvancedDatastore {
         this.mapper = mapper;
         this.defaultWriteConcern = mongoClient.getWriteConcern();
 
-        pojoCodecProvider = mapper.getPojoCodecProvider();
+        pojoCodecProvider = mapper.getCodecProvider();
         codecRegistry = fromRegistries(mapper.getCodecRegistry(),
             fromProviders(pojoCodecProvider));
 
@@ -877,13 +878,17 @@ public class DatastoreImpl implements AdvancedDatastore {
         if (entities.isEmpty()) {
             return emptyList();
         }
-        final Class<T> first = (Class<T>) entities.get(0).getClass();
 
         entities.forEach(this::ensureId);
+        final Map<MongoCollection<T>, List<T>> map = entities.stream()
+                                                             .collect(groupingBy(entity -> {
+                                                                 final Class<T> aClass = (Class<T>) entity.getClass();
+                                                                 return getCollection(aClass);
+                                                             }));
 
-        getCollection(first)
-            .withWriteConcern(wc)
-            .insertMany(entities, options);
+        map.forEach((key, value) -> key
+                                        .withWriteConcern(wc)
+                                        .insertMany(value, options));
 
         return entities.stream().map(mapper::getKey)
                        .collect(Collectors.toList());

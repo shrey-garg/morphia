@@ -75,10 +75,9 @@ public class Mapper {
 
     //A general cache of instances of classes; used by MappedClass for EntityListener(s)
     private final Map<Class, Object> instanceCache = new ConcurrentHashMap();
-    private final MorphiaCodecProvider.Builder providerBuilder = MorphiaCodecProvider.builder();
     private CodecRegistry codecRegistry;
     private MapperOptions opts;
-    private CodecProvider pojoCodecProvider;
+    private MorphiaCodecProvider codecProvider;
 
     public Mapper(final CodecRegistry codecRegistry) {
         this(codecRegistry, new MapperOptions());
@@ -92,13 +91,11 @@ public class Mapper {
     public Mapper(final CodecRegistry codecRegistry, final MapperOptions opts) {
 
         this.opts = opts;
-        pojoCodecProvider = providerBuilder
-                                .conventions(singletonList(new MorphiaConvention(opts)))
-                                .build();
+        codecProvider = new MorphiaCodecProvider(singletonList(new MorphiaConvention(opts)));
 
         this.codecRegistry = fromRegistries(codecRegistry,
             fromProviders(new MorphiaTypesCodecProvider(this),
-                pojoCodecProvider));
+                codecProvider));
     }
 
     public CodecRegistry getCodecRegistry() {
@@ -201,7 +198,7 @@ public class Mapper {
     /**
      * @return the cache of instances
      */
-    public Map<Class, Object> getInstanceCache() {
+    Map<Class, Object> getInstanceCache() {
         return instanceCache;
     }
 
@@ -210,7 +207,7 @@ public class Mapper {
      *
      * @return the Interceptors
      */
-    public Collection<EntityInterceptor> getInterceptors() {
+    Collection<EntityInterceptor> getInterceptors() {
         return interceptors;
     }
 
@@ -280,7 +277,7 @@ public class Mapper {
     public MappedClass addMappedClass(final Class c, final boolean validate) {
         MappedClass mappedClass = mappedClasses.get(c.getName());
         if (mappedClass == null) {
-            final PojoCodec codec = (PojoCodec) getPojoCodecProvider().get(c, codecRegistry);
+            final PojoCodec codec = (PojoCodec) getCodecProvider().get(c, codecRegistry);
             if(codec != null) {
                 return addMappedClass(new MappedClass(codec.getClassModel(), this), validate);
             }
@@ -288,8 +285,8 @@ public class Mapper {
         return mappedClass;
     }
 
-    public CodecProvider getPojoCodecProvider() {
-        return pojoCodecProvider;
+    public CodecProvider getCodecProvider() {
+        return codecProvider;
     }
 
     private MappedClass addMappedClass(final MappedClass mc, final boolean validate) {
@@ -379,7 +376,7 @@ public class Mapper {
      * @param packageName the name of the package to process
      */
     public void mapPackage(final String packageName) {
-        providerBuilder.register(packageName);
+        codecProvider.addPackages(packageName);
     }
 
     public <T> Document toDocument(final T entity) {
