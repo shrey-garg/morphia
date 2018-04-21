@@ -41,7 +41,7 @@ class BankAccount {
   }
 
   @PrePersist
-  public void prePersist(final Document dbObj) {
+  public void prePersist(final Document document) {
     // perform operations on serialized form of the entity
   }
 }

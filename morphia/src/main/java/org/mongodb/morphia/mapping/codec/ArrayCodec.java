@@ -1,12 +1,10 @@
 package org.mongodb.morphia.mapping.codec;
 
-import org.bson.BsonArray;
 import org.bson.BsonBinarySubType;
 import org.bson.BsonReader;
 import org.bson.BsonType;
-import org.bson.BsonValue;
 import org.bson.BsonWriter;
-import org.bson.codecs.BsonValueCodecProvider;
+import org.bson.codecs.BsonTypeCodecMap;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
@@ -16,11 +14,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static org.bson.codecs.BsonValueCodecProvider.getBsonTypeClassMap;
+
 class ArrayCodec implements Codec<Object[]> {
 
     private Mapper mapper;
+    private BsonTypeCodecMap bsonTypeCodecMap;
 
-    public ArrayCodec(final Mapper mapper) {
+    ArrayCodec(final Mapper mapper) {
         this.mapper = mapper;
     }
 
@@ -29,11 +30,20 @@ class ArrayCodec implements Codec<Object[]> {
         return Object[].class;
     }
 
+    private BsonTypeCodecMap getBsonTypeCodecMap() {
+        if (bsonTypeCodecMap == null) {
+            this.bsonTypeCodecMap = new BsonTypeCodecMap(getBsonTypeClassMap(), mapper.getCodecRegistry());
+        }
+        return bsonTypeCodecMap;
+    }
+
     @Override
+    @SuppressWarnings("unchecked")
     public void encode(final BsonWriter writer, final Object[] value, final EncoderContext encoderContext) {
         writer.writeStartArray();
         for (final Object cur : value) {
-//            writeValue(writer, encoderContext, cur);
+            final Codec codec = mapper.getCodecRegistry().get(cur.getClass());
+            codec.encode(writer, cur, encoderContext);
         }
         writer.writeEndArray();
     }
@@ -42,7 +52,7 @@ class ArrayCodec implements Codec<Object[]> {
     public Object[] decode(final BsonReader reader, final DecoderContext decoderContext) {
         reader.readStartArray();
 
-        List<Object> list = new ArrayList<Object>();
+        List<Object> list = new ArrayList<>();
         while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
             list.add(readValue(reader, decoderContext));
         }
@@ -60,7 +70,7 @@ class ArrayCodec implements Codec<Object[]> {
         } else if (bsonType == BsonType.BINARY && BsonBinarySubType.isUuid(reader.peekBinarySubType()) && reader.peekBinarySize() == 16) {
             return mapper.getCodecRegistry().get(UUID.class).decode(reader, decoderContext);
         }
-        return null; //valueTransformer.transform(bsonTypeCodecMap.get(bsonType).decode(reader, decoderContext));
+        return getBsonTypeCodecMap().get(bsonType).decode(reader, decoderContext);
     }
 
 }

@@ -10,10 +10,8 @@ import java.lang.annotation.Target;
 
 
 /**
- * Called right before insert is called on MongoCollection is called. Changes made to the entity (java class) will not be
- * persisted. This event
- * will be
- * called on top level Entities.
+ * Called right before insert is called on MongoCollection is called. Changes made to the entity (java class) will not be persisted. This
+ * event will be called on top level Entities.
  */
 @Documented
 @Inherited

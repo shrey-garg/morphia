@@ -18,12 +18,12 @@ import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
-import org.bson.codecs.pojo.PojoCodec;
 import org.mongodb.morphia.EntityInterceptor;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
+import org.mongodb.morphia.mapping.codec.MorphiaCodec;
 import org.mongodb.morphia.mapping.codec.MorphiaCodecProvider;
 import org.mongodb.morphia.mapping.codec.MorphiaTypesCodecProvider;
 
@@ -91,7 +91,7 @@ public class Mapper {
     public Mapper(final CodecRegistry codecRegistry, final MapperOptions opts) {
 
         this.opts = opts;
-        codecProvider = new MorphiaCodecProvider(singletonList(new MorphiaConvention(opts)));
+        codecProvider = new MorphiaCodecProvider(this, singletonList(new MorphiaConvention(opts)));
 
         this.codecRegistry = fromRegistries(codecRegistry,
             fromProviders(new MorphiaTypesCodecProvider(this),
@@ -277,9 +277,9 @@ public class Mapper {
     public MappedClass addMappedClass(final Class c, final boolean validate) {
         MappedClass mappedClass = mappedClasses.get(c.getName());
         if (mappedClass == null) {
-            final PojoCodec codec = (PojoCodec) getCodecProvider().get(c, codecRegistry);
+            final MorphiaCodec codec = (MorphiaCodec) getCodecProvider().get(c, codecRegistry);
             if(codec != null) {
-                return addMappedClass(new MappedClass(codec.getClassModel(), this), validate);
+                return addMappedClass(codec.getMappedClass(), validate);
             }
         }
         return mappedClass;

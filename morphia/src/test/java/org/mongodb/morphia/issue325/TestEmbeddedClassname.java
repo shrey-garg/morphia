@@ -100,8 +100,8 @@ public class TestEmbeddedClassname extends TestBase {
         }
 
         @PreLoad
-        void preLoad(final Document dbObj) {
-            raw = dbObj;
+        void preLoad(final Document document) {
+            raw = document;
         }
     }
 

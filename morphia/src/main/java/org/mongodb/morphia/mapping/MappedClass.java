@@ -202,7 +202,7 @@ public class MappedClass {
             }
 
             callGlobalInterceptors(event, entity, document, mapper);
-        } catch (ReflectiveOperationException e) {
+        } catch (Throwable e) {
             throw new RuntimeException(e);
         }
 
@@ -214,9 +214,9 @@ public class MappedClass {
      * @param clazz the type to search for
      * @return the instance if it was found, if more than one was found, the last one added
      */
-    public Annotation getAnnotation(final Class<? extends Annotation> clazz) {
+    public <T> T getAnnotation(final Class<? extends Annotation> clazz) {
         final List<Annotation> found = annotations.get(clazz);
-        return found == null || found.isEmpty() ? null : found.get(found.size() - 1);
+        return found == null || found.isEmpty() ? null : (T) found.get(found.size() - 1);
     }
 
     /**
@@ -420,7 +420,7 @@ public class MappedClass {
         final List<Class<?>> lifecycleClasses = new ArrayList<>();
         lifecycleClasses.add(type);
 
-        final EntityListeners entityLisAnn = (EntityListeners) getAnnotation(EntityListeners.class);
+        final EntityListeners entityLisAnn = getAnnotation(EntityListeners.class);
         if (entityLisAnn != null && entityLisAnn.value().length != 0) {
             Collections.addAll(lifecycleClasses, entityLisAnn.value());
         }
@@ -438,6 +438,10 @@ public class MappedClass {
         discoverFields(this);
 
         update();
+    }
+
+    public boolean hasLifecycle(Class<? extends Annotation> klass) {
+        return lifecycleMethods.containsKey(klass);
     }
 
     private void discoverFields(final MappedClass mappedClass) {

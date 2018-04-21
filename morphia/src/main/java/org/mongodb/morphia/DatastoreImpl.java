@@ -629,7 +629,6 @@ public class DatastoreImpl implements AdvancedDatastore {
                 }
                 keys.add(key);
             }
-            mapper.getMappedClass(entity).callLifecycleMethods(PostPersist.class, entity, null, mapper);
         }
 
 /*
@@ -896,24 +895,27 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     @Override
     public <T> Key<T> save(final T entity) {
+        validateEntityOnSave(entity);
         return save(entity, new InsertOneOptions(), enforceWriteConcern(entity.getClass()));
     }
 
     @Override
     public <T> Key<T> save(final T entity, final InsertOneOptions options, final WriteConcern writeConcern) {
-        if (entity == null) {
-            throw new UpdateException("Can not persist a null entity");
-        }
+        validateEntityOnSave(entity);
 
         final MongoCollection<T> collection = (MongoCollection<T>) getCollection(entity.getClass());
         return save(collection, entity, options, writeConcern);
     }
 
-    private <T> Key<T> save(final MongoCollection<T> collection, final T entity, final InsertOneOptions options,
-                            WriteConcern writeConcern) {
+    private <T> void validateEntityOnSave(final T entity) {
         if (entity == null) {
             throw new UpdateException("Can not persist a null entity");
         }
+    }
+
+    private <T> Key<T> save(final MongoCollection<T> collection, final T entity, final InsertOneOptions options,
+                            WriteConcern writeConcern) {
+        validateEntityOnSave((T) entity);
 
         ensureId(entity);
 

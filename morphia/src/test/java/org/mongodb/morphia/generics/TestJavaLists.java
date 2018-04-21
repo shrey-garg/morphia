@@ -89,10 +89,3 @@ public class TestJavaLists extends TestBase {
         private List<Byte> byteList;
     }
 }
-
-class JsonList {
-    @Id
-    private ObjectId id;
-    private List<Object> jsonList;
-    private List<Object> jsonObject;
-}

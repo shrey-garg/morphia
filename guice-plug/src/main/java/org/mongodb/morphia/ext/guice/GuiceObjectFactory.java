@@ -3,7 +3,7 @@ package org.mongodb.morphia.ext.guice;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.mongodb.DBObject;
+import com.mongodb.Document;
 import org.mongodb.morphia.ObjectFactory;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.utils.Assert;
@@ -63,28 +63,28 @@ public class GuiceObjectFactory implements ObjectFactory {
     }
 
     @Override
-    public <T> T createInstance(final Class<T> clazz, final DBObject dbObj) {
+    public <T> T createInstance(final Class<T> clazz, final Document document) {
         if (injectOnConstructor(clazz)) {
             return injector.getInstance(clazz);
         }
 
-        return injectMembers(delegate.createInstance(clazz, dbObj));
+        return injectMembers(delegate.createInstance(clazz, document));
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Object createInstance(final Mapper mapper, final MappedField mf, final DBObject dbObj) {
+    public Object createInstance(final Mapper mapper, final MappedField mf, final Document document) {
         final Class clazz = mf.getType();
         if (clazz.isInterface() || Modifier.isAbstract(clazz.getModifiers())) {
             // there is no good way to find the clazz to use, yet, so delegate
-            return injectMembers(delegate.createInstance(mapper, mf, dbObj));
+            return injectMembers(delegate.createInstance(mapper, mf, document));
         }
 
         if (injectOnConstructor(clazz)) {
             return injector.getInstance(clazz);
         }
 
-        return injectMembers(delegate.createInstance(mapper, mf, dbObj));
+        return injectMembers(delegate.createInstance(mapper, mf, document));
     }
 
     @Override

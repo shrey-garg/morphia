@@ -644,7 +644,7 @@ public class TestDatastore extends TestBase {
         private boolean preLoadWithParam;
 
         @PrePersist
-        public Document prePersistWithParamAndReturn(final Document dbObj) {
+        public Document prePersistWithParamAndReturn(final Document document) {
             if (prePersistWithParamAndReturn) {
                 throw new RuntimeException("already called");
             }
@@ -653,7 +653,7 @@ public class TestDatastore extends TestBase {
         }
 
         @PrePersist
-        protected void prePersistWithParam(final Document dbObj) {
+        protected void prePersistWithParam(final Document document) {
             if (prePersistWithParam) {
                 throw new RuntimeException("already called");
             }
@@ -679,9 +679,9 @@ public class TestDatastore extends TestBase {
         }
 
         @PostPersist
-        void postPersistWithParam(final Document dbObj) {
+        void postPersistWithParam(final Document document) {
             postPersistWithParam = true;
-            if (!dbObj.containsValue(Mapper.ID_KEY)) {
+            if (!document.containsKey(Mapper.ID_KEY)) {
                 throw new RuntimeException("missing " + Mapper.ID_KEY);
             }
         }
@@ -696,14 +696,14 @@ public class TestDatastore extends TestBase {
         }
 
         @PreLoad
-        void preLoadWithParam(final Document dbObj) {
-            dbObj.put("preLoadWithParam", true);
+        void preLoadWithParam(final Document document) {
+            document.put("preLoadWithParam", true);
         }
 
         @PreLoad
-        Document preLoadWithParamAndReturn(final Document dbObj) {
+        Document preLoadWithParamAndReturn(final Document document) {
             final Document retObj = new Document();
-            retObj.putAll(dbObj);
+            retObj.putAll(document);
             retObj.put("preLoadWithParamAndReturn", true);
             return retObj;
         }
@@ -718,7 +718,7 @@ public class TestDatastore extends TestBase {
         }
 
         @PostLoad
-        void postLoadWithParam(final Document dbObj) {
+        void postLoadWithParam(final Document document) {
             if (postLoadWithParam) {
                 throw new RuntimeException("already called");
             }

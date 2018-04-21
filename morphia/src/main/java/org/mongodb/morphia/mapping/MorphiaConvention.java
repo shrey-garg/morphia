@@ -85,8 +85,8 @@ class MorphiaConvention implements Convention {
 
     private static boolean isTransient(final FieldModelBuilder<?> field) {
         return field.hasAnnotation(Transient.class)
-               && field.hasAnnotation(java.beans.Transient.class)
-               && Modifier.isTransient(field.getTypeData().getType().getModifiers());
+               || field.hasAnnotation(java.beans.Transient.class)
+               || Modifier.isTransient(field.getTypeData().getType().getModifiers());
     }
 
     private static String   getMappedFieldName(FieldModelBuilder<?> field) {

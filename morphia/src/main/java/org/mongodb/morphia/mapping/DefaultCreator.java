@@ -34,8 +34,8 @@ public class DefaultCreator implements ObjectFactory {
     }
 
     @Override
-    public <T> T createInstance(final Class<T> clazz, final Document dbObj) {
-        Class<T> c = getClass(dbObj);
+    public <T> T createInstance(final Class<T> clazz, final Document document) {
+        Class<T> c = getClass(document);
         if (c == null) {
             c = clazz;
         }
