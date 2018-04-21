@@ -12,6 +12,7 @@ import org.bson.codecs.pojo.DiscriminatorLookup;
 import org.bson.codecs.pojo.InstanceCreator;
 import org.bson.codecs.pojo.PojoCodecImpl;
 import org.bson.codecs.pojo.PropertyCodecProvider;
+import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.PrePersist;
@@ -49,8 +50,7 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
         if (mappedClass.hasLifecycle(PostPersist.class)) {
             final DocumentWriter documentWriter = new DocumentWriter();
             super.encode(documentWriter, value, encoderContext);
-            final Document document = documentWriter.getRoot();
-            mappedClass.callLifecycleMethods(PostPersist.class, value, document, mapper);
+            final Document document = mappedClass.callLifecycleMethods(PostPersist.class, value, documentWriter.getRoot(), mapper);
             registry.get(Document.class).encode(writer, document, encoderContext);
         } else {
             super.encode(writer, value, encoderContext);
@@ -61,15 +61,18 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
     public T decode(final BsonReader reader, final DecoderContext decoderContext) {
         T t;
         if (mappedClass.hasLifecycle(PreLoad.class)) {
-            final Document document = registry.get(Document.class).decode(reader, decoderContext);
             final InstanceCreator<T> instanceCreator = getClassModel().getInstanceCreator();
             t = instanceCreator.getInstance();
-            mappedClass.callLifecycleMethods(PreLoad.class, t, document, mapper);
+            Document document = registry.get(Document.class).decode(reader, decoderContext);
+            document = mappedClass.callLifecycleMethods(PreLoad.class, t, document, mapper);
 
             decodeProperties(new BsonDocumentReader(document.toBsonDocument(Document.class, mapper.getCodecRegistry())), decoderContext,
                 instanceCreator);
         } else {
             t = super.decode(reader, decoderContext);
+        }
+        if (mappedClass.hasLifecycle(PostLoad.class)) {
+            mappedClass.callLifecycleMethods(PostLoad.class, t, null, mapper);
         }
 
         return t;
