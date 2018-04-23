@@ -75,7 +75,7 @@ public class MappedField {
                                    map1.putAll(update);
                                    return map1;
                                });
-        discoverMultivalued();
+//        discoverMultivalued();
     }
 
     private <K, V> Map<K, V> map(final K key, final V value) {

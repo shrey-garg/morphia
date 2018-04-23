@@ -10,10 +10,7 @@
   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
   and limitations under the License.
  */
-
-
 package org.mongodb.morphia;
-
 
 import com.mongodb.DBRef;
 import com.mongodb.client.MongoCollection;
@@ -35,7 +32,6 @@ import org.mongodb.morphia.testmodel.RecursiveParent;
 import org.mongodb.morphia.testmodel.Translation;
 
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -54,8 +50,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-
-@SuppressWarnings("unused")
 public class TestMapping extends TestBase {
 
     @Test
@@ -273,6 +267,7 @@ public class TestMapping extends TestBase {
     }
 
     @Test
+    @Ignore
     public void testIntKeySetStringMap() {
         final ContainsIntKeySetStringMap map = new ContainsIntKeySetStringMap();
         map.values.put(1, Collections.singleton("I'm 1"));
@@ -545,17 +540,6 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testTimestampMapping() {
-        getMorphia().map(ContainsTimestamp.class);
-        final ContainsTimestamp cts = new ContainsTimestamp();
-        final Key<ContainsTimestamp> savedKey = getDatastore().save(cts);
-        final ContainsTimestamp loaded = getDatastore().get(ContainsTimestamp.class, savedKey.getId());
-        assertNotNull(loaded.ts);
-        assertEquals(loaded.ts.getTime(), cts.ts.getTime());
-
-    }
-
-    @Test
     public void testUUID() {
         //       getMorphia().map(ContainsUUID.class);
         final ContainsUUID uuid = new ContainsUUID();
@@ -680,12 +664,6 @@ public class TestMapping extends TestBase {
         ContainsFinalField(final String name) {
             this.name = name;
         }
-    }
-
-    private static class ContainsTimestamp {
-        private final Timestamp ts = new Timestamp(System.currentTimeMillis());
-        @Id
-        private ObjectId id;
     }
 
     private static class ContainsDocument {

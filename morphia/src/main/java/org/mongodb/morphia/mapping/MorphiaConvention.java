@@ -15,6 +15,7 @@ import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.annotations.Version;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -69,7 +70,9 @@ class MorphiaConvention implements Convention {
                 final String mappedName = getMappedFieldName(builder);
                 property.readName(mappedName)
                         .writeName(mappedName)
-                        .propertyAccessor(new FieldAccessor(field));
+                        .propertyAccessor(field.getType().isArray()
+                                          ? new ArrayFieldAccessor(field)
+                                          : new FieldAccessor(field));
 
                 if (classModelBuilder.hasAnnotation(Embedded.class)
                     || Collection.class.isAssignableFrom(property.getTypeData().getType())
@@ -145,6 +148,27 @@ class MorphiaConvention implements Convention {
             } catch (IllegalAccessException e) {
                 throw new MappingException(e.getMessage(), e);
             }
+        }
+    }
+
+    private static class ArrayFieldAccessor<T> extends FieldAccessor<T> {
+
+        private Class<?> componentType;
+
+        private ArrayFieldAccessor(final Field field) {
+            super(field);
+            componentType = field.getType().getComponentType();
+        }
+
+        @Override
+        public void set(final Object instance, final Object value) {
+            Object[] array = (Object[]) value;
+            if (value.getClass().getComponentType() != componentType) {
+                final Object[] newArray = (Object[]) Array.newInstance(componentType, array.length);
+                System.arraycopy(array, 0, newArray, 0, array.length);
+                array = newArray;
+            }
+            super.set(instance, array);
         }
     }
 }

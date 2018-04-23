@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-class DocumentWriter implements BsonWriter {
+public class DocumentWriter implements BsonWriter {
     private Stack<Object> state = new Stack<>();
     private Object root;
 

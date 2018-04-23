@@ -4,6 +4,7 @@ import org.bson.BsonBinarySubType;
 import org.bson.BsonReader;
 import org.bson.BsonType;
 import org.bson.BsonWriter;
+import org.bson.codecs.BsonTypeClassMap;
 import org.bson.codecs.BsonTypeCodecMap;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
@@ -32,7 +33,7 @@ class ArrayCodec implements Codec<Object[]> {
 
     private BsonTypeCodecMap getBsonTypeCodecMap() {
         if (bsonTypeCodecMap == null) {
-            this.bsonTypeCodecMap = new BsonTypeCodecMap(getBsonTypeClassMap(), mapper.getCodecRegistry());
+            this.bsonTypeCodecMap = new BsonTypeCodecMap(new BsonTypeClassMap(), mapper.getCodecRegistry());
         }
         return bsonTypeCodecMap;
     }

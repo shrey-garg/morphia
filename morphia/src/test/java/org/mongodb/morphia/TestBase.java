@@ -115,7 +115,7 @@ public abstract class TestBase {
     }
 
     protected Document toDocument(Object entity) {
-        return new Document();
+        return getMorphia().getMapper().toDocument(entity);
     }
 
     protected <T> T fromDocument(final Datastore datastore,

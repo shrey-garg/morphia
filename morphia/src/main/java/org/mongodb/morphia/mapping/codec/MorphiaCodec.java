@@ -77,5 +77,4 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
 
         return t;
     }
-
 }

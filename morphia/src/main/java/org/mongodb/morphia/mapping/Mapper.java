@@ -23,6 +23,7 @@ import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
+import org.mongodb.morphia.mapping.codec.DocumentWriter;
 import org.mongodb.morphia.mapping.codec.MorphiaCodec;
 import org.mongodb.morphia.mapping.codec.MorphiaCodecProvider;
 import org.mongodb.morphia.mapping.codec.MorphiaTypesCodecProvider;
@@ -38,6 +39,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import static com.mongodb.MongoClient.getDefaultCodecRegistry;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
@@ -92,10 +94,12 @@ public class Mapper {
 
         this.opts = opts;
         codecProvider = new MorphiaCodecProvider(this, singletonList(new MorphiaConvention(opts)));
+        final MorphiaTypesCodecProvider typesCodecProvider = new MorphiaTypesCodecProvider(this);
 
-        this.codecRegistry = fromRegistries(codecRegistry,
-            fromProviders(new MorphiaTypesCodecProvider(this),
-                codecProvider));
+        this.codecRegistry = fromRegistries(
+            codecRegistry,
+            getDefaultCodecRegistry(),
+            fromProviders(typesCodecProvider, codecProvider));
     }
 
     public CodecRegistry getCodecRegistry() {
@@ -380,14 +384,14 @@ public class Mapper {
     }
 
     public <T> Document toDocument(final T entity) {
-        final BsonDocument bsonDocument = new BsonDocument();
         final Class<T> aClass = (Class<T>) entity.getClass();
-        codecRegistry.get(aClass).encode(new BsonDocumentWriter(bsonDocument), entity,
+        final DocumentWriter writer = new DocumentWriter();
+        codecRegistry.get(aClass).encode(writer, entity,
             EncoderContext.builder()
                           .isEncodingCollectibleDocument(true)
                           .build());
 
-        return new Document(new LinkedHashMap<>(bsonDocument));
+        return writer.getRoot();
     }
 
 }
