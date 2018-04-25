@@ -30,9 +30,7 @@ import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.annotations.Version;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -50,23 +48,10 @@ public class MappedField {
     private final Map<Class<? extends Annotation>, Annotation> annotations;
     private MappedClass declaringClass;
     private FieldModel property; // the field :)
-    private Class realType; // the real type
-    private Class specializedType; // the type (T) for the Collection<T>/T[]/Map<?,T>
-    private Type mapKeyType; // the type (T) for the Map<T,?>
-    private boolean isSingleValue = true; // indicates the field is a single value
-    // indicated the type is a mongo compatible type (our version of value-type)
-    private boolean isMap; // indicated if it implements Map interface
-    private boolean isSet; // indicated if the collection is a set
-    //for debugging
-    private boolean isArray; // indicated if it is an Array
-    private boolean isCollection; // indicated if the collection is a list)
-    private TypeData<?> typeData;
 
     MappedField(final MappedClass declaringClass, final FieldModel f) {
         this.declaringClass = declaringClass;
         property = f;
-        typeData = property.getTypeData();
-        realType = typeData.getType();
 
         final List<Annotation> list = property.getAnnotations();
         this.annotations = list.stream()
@@ -75,40 +60,12 @@ public class MappedField {
                                    map1.putAll(update);
                                    return map1;
                                });
-        discoverMultivalued();
     }
 
     private <K, V> Map<K, V> map(final K key, final V value) {
         final HashMap<K, V> map = new HashMap<>();
         map.put(key, value);
         return map;
-    }
-
-    private void discoverMultivalued() {
-        if (realType.isArray()
-            || Collection.class.isAssignableFrom(realType)
-            || Map.class.isAssignableFrom(realType)
-            || GenericArrayType.class.isAssignableFrom(realType.getClass())) {
-
-            isSingleValue = false;
-
-            isMap = Map.class.isAssignableFrom(realType);
-            isSet = Set.class.isAssignableFrom(realType);
-            isCollection = Collection.class.isAssignableFrom(realType);
-            isArray = realType.isArray();
-
-            // get the specializedType T, T[]/List<T>/Map<?,T>; subtype of Long[], List<Long> is Long
-            if (realType.isArray()) {
-                specializedType = realType.getComponentType();
-            } else {
-                final List<TypeData<?>> typeParameters = typeData.getTypeParameters();
-                specializedType = !typeParameters.isEmpty() ? typeParameters.get(0).getType() : null;
-            }
-
-            if (isMap) {
-                mapKeyType = typeData.getTypeParameters().get(0).getType();
-            }
-        }
     }
 
     /**
@@ -145,6 +102,14 @@ public class MappedField {
      * @return the parameterized type of the field
      */
     public Class getSpecializedType() {
+        Class specializedType;
+        if (getType().isArray()) {
+            specializedType = getType().getComponentType();
+        } else {
+            final List<TypeData<?>> typeParameters = property.getTypeData().getTypeParameters();
+            specializedType = !typeParameters.isEmpty() ? typeParameters.get(0).getType() : null;
+        }
+
         return specializedType;
     }
 
@@ -162,7 +127,7 @@ public class MappedField {
      * @return the type of the underlying java field
      */
     public Class getType() {
-        return realType;
+        return property.getTypeData().getType();
     }
 
     /**
@@ -178,29 +143,32 @@ public class MappedField {
      * @return true if the MappedField is an array
      */
     public boolean isArray() {
-        return isArray;
+        return getType().isArray();
     }
 
     /**
      * @return true if the MappedField is a Map
      */
     public boolean isMap() {
-        return isMap;
+        return Map.class.isAssignableFrom(getTypeData().getType());
+    }
+
+    private boolean isCollection() {
+        return Collection.class.isAssignableFrom(getTypeData().getType());
     }
 
     /**
      * @return true if this field is a container type such as a List, Map, Set, or array
      */
     public boolean isMultipleValues() {
-        return !isSingleValue();
+        return !isScalarValue();
     }
 
     /**
      * @return true if this field is not a container type such as a List, Map, Set, or array
      */
-    public boolean isSingleValue() {
-        // TODO:  This is almost certainly broken.  revisit when things compile.
-        return true;
+    public boolean isScalarValue() {
+        return !isMap() && !isArray() && !isCollection();
     }
 
     /**
@@ -249,7 +217,7 @@ public class MappedField {
      * @return true if the MappedField is a Set
      */
     public boolean isSet() {
-        return isSet;
+        return Set.class.isAssignableFrom(getTypeData().getType());
     }
 
     /**
@@ -268,7 +236,7 @@ public class MappedField {
 
     @Override
     public String toString() {
-        return format("%s : %s", getNameToStore(), typeData.toString());
+        return format("%s : %s", getNameToStore(), property.getTypeData().toString());
     }
 
     /**
@@ -315,6 +283,14 @@ public class MappedField {
     }
 
     public TypeData<?> getTypeData() {
-        return typeData;
+        return property.getTypeData();
+    }
+
+    public boolean isParameterized() {
+        return !getTypeData().getTypeParameters().isEmpty();
+    }
+
+    public Class getNormalizedType() {
+        return !isParameterized() ? getTypeData().getType() : getTypeData().getTypeParameters().get(0).getType();
     }
 }

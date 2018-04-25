@@ -95,7 +95,7 @@ final class QueryValidator {
                         break;
                     }
                     //get the next MappedClass for the next field validation
-                    mc = mapper.getMappedClass((mf.isSingleValue()) ? mf.getType() : mf.getSpecializedType());
+                    mc = mapper.getMappedClass(mf.getNormalizedType());
                 }
             }
 
@@ -110,21 +110,18 @@ final class QueryValidator {
             }
 
             if (validateTypes && mf != null) {
-                List<ValidationFailure> typeValidationFailures = new ArrayList<>();
-                boolean compatibleForType = isCompatibleForOperator(mc, mf, mf.getType(), op, val, typeValidationFailures);
-                List<ValidationFailure> subclassValidationFailures = new ArrayList<>();
-                boolean compatibleForSubclass = isCompatibleForOperator(mc, mf, mf.getSpecializedType(), op, val, subclassValidationFailures);
+                List<ValidationFailure> failures = new ArrayList<>();
+                boolean compatibleForType = isCompatibleForOperator(mc, mf, mf.getType(), op, val, failures);
+                boolean compatibleForSubclass = isCompatibleForOperator(mc, mf, mf.getSpecializedType(), op, val, failures);
 
-                if ((mf.isSingleValue() && !compatibleForType)
+                if ((mf.isScalarValue() && !compatibleForType)
                     || mf.isMultipleValues() && !(compatibleForSubclass || compatibleForType)) {
 
                     if (LOG.isWarningEnabled()) {
                         LOG.warning(format("The type(s) for the query/update may be inconsistent; using an instance of type '%s' "
                                            + "for the field '%s.%s' which is declared as '%s'", val.getClass().getName(),
-                                           mf.getDeclaringClass().getName(), mf.getJavaFieldName(), mf.getType().getName()
-                                          ));
-                        typeValidationFailures.addAll(subclassValidationFailures);
-                        LOG.warning("Validation warnings: \n" + typeValidationFailures);
+                                           mf.getDeclaringClass().getName(), mf.getJavaFieldName(), mf.getType().getName()));
+                        LOG.warning("Validation warnings: \n" + failures);
                     }
                 }
             }
@@ -137,8 +134,7 @@ final class QueryValidator {
 
     /*package*/
     static boolean isCompatibleForOperator(final MappedClass mappedClass, final MappedField mappedField, final Class<?> type,
-                                           final FilterOperator op,
-                                           final Object value, final List<ValidationFailure> validationFailures) {
+                                           final FilterOperator op, final Object value, final List<ValidationFailure> validationFailures) {
         // TODO: it's really OK to have null values?  I think this is to prevent null pointers further down,
         // but I want to move the null check into the operations that care whether they allow nulls or not.
         if (value == null || type == null) {

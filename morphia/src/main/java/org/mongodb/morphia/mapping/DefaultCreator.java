@@ -47,7 +47,7 @@ public class DefaultCreator implements ObjectFactory {
     public Object createInstance(final Mapper mapper, final MappedField mf, final Document document) {
         Class c = getClass(document);
         if (c == null) {
-            c = mf.isSingleValue() ? mf.getConcreteType() : mf.getSpecializedType();
+            c = mf.getNormalizedType();
             if (c.equals(Object.class)) {
                 c = mf.getConcreteType();
             }

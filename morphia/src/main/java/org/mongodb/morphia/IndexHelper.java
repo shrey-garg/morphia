@@ -333,7 +333,7 @@ final class IndexHelper {
         }
         if (path.size() > 1) {
             try {
-                Class concreteType = !mf.isSingleValue() ? mf.getSpecializedType() : mf.getConcreteType();
+                Class concreteType = !mf.isScalarValue() ? mf.getSpecializedType() : mf.getConcreteType();
                 namePath += "." + findField(mapper.getMappedClass(concreteType), options, path.subList(1, path.size()));
             } catch (MappingException e) {
                 if (!options.disableValidation()) {
