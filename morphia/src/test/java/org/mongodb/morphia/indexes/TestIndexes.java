@@ -16,13 +16,11 @@
 
 package org.mongodb.morphia.indexes;
 
-import com.mongodb.client.ListIndexesIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.CollationCaseFirst;
 import com.mongodb.client.model.CollationMaxVariable;
 import com.mongodb.client.model.CollationStrength;
 import org.bson.Document;
-import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.TestBase;
@@ -34,9 +32,12 @@ import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.utils.IndexType;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.mongodb.client.model.CollationAlternate.SHIFTED;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class TestIndexes extends TestBase {
 
@@ -46,20 +47,23 @@ public class TestIndexes extends TestBase {
         final Datastore datastore = getDatastore();
         datastore.deleteMany(datastore.find(TestWithIndexOption.class));
 
-        final MongoCollection<TestWithIndexOption> indexOptionColl = getDatastore().getCollection(TestWithIndexOption.class);
-        indexOptionColl.drop();
-        assertFalse(indexOptionColl.listIndexes().iterator().hasNext());
+        getDatastore().getCollection(TestWithIndexOption.class)
+                      .drop();
 
-        final MongoCollection<TestWithHashedIndex> hashIndexColl = getDatastore().getCollection(TestWithHashedIndex.class);
-        hashIndexColl.drop();
-        assertFalse(hashIndexColl.listIndexes().iterator().hasNext());
+        getDatastore().getCollection(TestWithHashedIndex.class)
+                      .drop();
 
         if (serverIsAtLeastVersion(3.4)) {
-            datastore.ensureIndexes(TestWithIndexOption.class, true);
-            assertEquals(2, count(indexOptionColl.listIndexes().iterator()));
-            ListIndexesIterable<Document> indexInfo = indexOptionColl.listIndexes();
-            assertBackground(indexInfo);
-            for (Document document : indexInfo) {
+            datastore.ensureIndexes(TestWithIndexOption.class, false);
+            List<Document> indexes = getDatastore()
+                                         .getCollection(TestWithIndexOption.class)
+                                         .listIndexes()
+                                         .into(new ArrayList<>());
+
+
+            assertEquals(2, indexes.size());
+
+            for (Document document : indexes) {
                 if (document.get("name").equals("collated")) {
                     assertEquals(Document.parse("{ name : { $exists : true } }"),
                         document.get("partialFilterExpression"));
@@ -67,38 +71,33 @@ public class TestIndexes extends TestBase {
                     assertEquals("en_US", collation.get("locale"));
                     assertEquals("upper", collation.get("caseFirst"));
                     assertEquals("shifted", collation.get("alternate"));
-                    Assert.assertTrue(collation.getBoolean("backwards"));
+                    assertTrue(collation.getBoolean("backwards"));
                     assertEquals("upper", collation.get("caseFirst"));
-                    Assert.assertTrue(collation.getBoolean("caseLevel"));
+                    assertTrue(collation.getBoolean("caseLevel"));
                     assertEquals("space", collation.get("maxVariable"));
-                    Assert.assertTrue(collation.getBoolean("normalization"));
-                    Assert.assertTrue(collation.getBoolean("numericOrdering"));
+                    assertTrue(collation.getBoolean("normalization"));
+                    assertTrue(collation.getBoolean("numericOrdering"));
                     assertEquals(5, collation.get("strength"));
                 }
             }
         }
 
         datastore.ensureIndexes(TestWithHashedIndex.class);
+        final MongoCollection<TestWithHashedIndex> hashIndexColl = getDatastore().getCollection(
+            TestWithHashedIndex.class);
         assertEquals(2, count(hashIndexColl.listIndexes().iterator()));
-        assertHashed(hashIndexColl.listIndexes());
+        assertHashed(hashIndexColl.listIndexes().into(new ArrayList<>()));
     }
 
-    private void assertBackground(final ListIndexesIterable<Document> indexInfo) {
-        for (final Document Document : indexInfo) {
-            if (!Document.getString("name").equals("_id_")) {
-                Assert.assertTrue(Document.getBoolean("background"));
+    private void assertHashed(final List<Document> indexInfo) {
+        for (final Document document : indexInfo) {
+            if (!document.getString("name").equals("_id_")) {
+                assertEquals(((Document) document.get("key")).get("hashedValue"), "hashed");
             }
         }
     }
 
-    private void assertHashed(final ListIndexesIterable<Document> indexInfo) {
-        for (final Document Document : indexInfo) {
-            if (!Document.getString("name").equals("_id_")) {
-                assertEquals(((Document) Document.get("key")).get("hashedValue"), "hashed");
-            }
-        }
-    }
-
+    @SuppressWarnings("unused")
     @Entity(noClassnameStored = true)
     @Indexes({@Index(options = @IndexOptions(name = "collated",
         partialFilter = "{ name : { $exists : true } }",
@@ -111,6 +110,7 @@ public class TestIndexes extends TestBase {
 
     }
 
+    @SuppressWarnings("unused")
     @Entity(noClassnameStored = true)
     @Indexes({@Index(options = @IndexOptions(), fields = {@Field(value = "hashedValue", type = IndexType.HASHED)})})
     private static class TestWithHashedIndex {

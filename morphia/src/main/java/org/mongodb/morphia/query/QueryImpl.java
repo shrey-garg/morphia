@@ -357,7 +357,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public Document getSortDocument() {
-        return sort == null ? new Document() : new Document(sort);
+        return sort == null ? null : new Document(sort);
     }
 
     @Override
@@ -514,10 +514,14 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
             LOG.trace(String.format("Running query(%s) : %s, options: %s,", collection.getNamespace().getCollectionName(), query, findOptions));
         }
 
-        return apply(collection
-                   .withReadPreference(readPreference)
-                   .withReadConcern(readConcern)
-                   .find(query)
+        final MongoCollection<T> mongoCollection = collection
+                                                       .withReadPreference(readPreference)
+                                                       .withReadConcern(readConcern);
+
+        final FindIterable<T> iterable = query != null && !query.isEmpty()
+                                         ? mongoCollection.find(query)
+                                         : mongoCollection.find();
+        return apply(iterable
                          .projection(getFields())
                          .sort(getSortDocument()),
             findOptions);
@@ -526,7 +530,6 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     private FindIterable<T> apply(final FindIterable<T> iterable, final FindOptions options) {
         iterable.batchSize(options.getBatchSize());
         iterable.limit(options.getLimit());
-        iterable.modifiers(options.getModifiers());
         iterable.maxTime(options.getMaxTime(MILLISECONDS), MILLISECONDS);
         iterable.maxAwaitTime(options.getMaxAwaitTime(MILLISECONDS), MILLISECONDS);
         iterable.skip(options.getSkip());

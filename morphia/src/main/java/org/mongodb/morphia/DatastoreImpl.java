@@ -30,7 +30,6 @@ import org.mongodb.morphia.aggregation.AggregationPipeline;
 import org.mongodb.morphia.aggregation.AggregationPipelineImpl;
 import org.mongodb.morphia.annotations.CappedAt;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.Validation;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.logging.Logger;
@@ -62,8 +61,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.groupingBy;
 import static org.bson.Document.parse;
-import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
-import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 /**
  * Direct use of this class is likely to break in the future.  Do not use.
@@ -78,7 +75,6 @@ public class DatastoreImpl implements AdvancedDatastore {
     private WriteConcern defaultWriteConcern;
 
     private volatile QueryFactory queryFactory = new DefaultQueryFactory();
-    private CodecRegistry codecRegistry;
     private CodecProvider pojoCodecProvider;
 
     /**
@@ -93,8 +89,6 @@ public class DatastoreImpl implements AdvancedDatastore {
         this.defaultWriteConcern = mongoClient.getWriteConcern();
 
         pojoCodecProvider = mapper.getCodecProvider();
-        codecRegistry = fromRegistries(mapper.getCodecRegistry(),
-            fromProviders(pojoCodecProvider));
 
         this.database = mongoClient.getDatabase(dbName)
                                    .withCodecRegistry(mapper.getCodecRegistry());
@@ -103,7 +97,7 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     public CodecRegistry getCodecRegistry() {
-        return codecRegistry;
+        return mapper.getCodecRegistry();
     }
 
     @Override
@@ -236,7 +230,7 @@ public class DatastoreImpl implements AdvancedDatastore {
     @Override
     public void enableDocumentValidation() {
         for (final MappedClass mc : mapper.getMappedClasses()) {
-            process(mc, (Validation) mc.getAnnotation(Validation.class));
+            process(mc, mc.getAnnotation(Validation.class));
         }
     }
 
@@ -915,7 +909,7 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     private <T> Key<T> save(final MongoCollection<T> collection, final T entity, final InsertOneOptions options,
                             WriteConcern writeConcern) {
-        validateEntityOnSave((T) entity);
+        validateEntityOnSave(entity);
 
         ensureId(entity);
 

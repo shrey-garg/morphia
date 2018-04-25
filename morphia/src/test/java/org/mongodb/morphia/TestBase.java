@@ -14,7 +14,6 @@ public abstract class TestBase {
     protected static final String TEST_DB_NAME = "morphia_test";
     private final MongoClient mongoClient;
     private final Morphia morphia;
-    private final MongoDatabase database;
     private final Datastore ds;
 
     protected TestBase() {
@@ -24,8 +23,7 @@ public abstract class TestBase {
     protected TestBase(final MongoClient client) {
         mongoClient = client;
         morphia = new Morphia(getMongoClient());
-        database = getMongoClient().getDatabase(TEST_DB_NAME);
-        ds = getMorphia().createDatastore(getDatabase().getName());
+        ds = getMorphia().createDatastore(TEST_DB_NAME);
     }
 
     static String getMongoURI() {
@@ -37,7 +35,7 @@ public abstract class TestBase {
     }
 
     public MongoDatabase getDatabase() {
-        return database;
+        return ds.getDatabase();
     }
 
     public Datastore getDatastore() {

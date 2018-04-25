@@ -11,8 +11,6 @@
 package org.mongodb.morphia.mapping;
 
 
-import org.bson.BsonDocument;
-import org.bson.BsonDocumentWriter;
 import org.bson.Document;
 import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecProvider;
@@ -31,7 +29,6 @@ import org.mongodb.morphia.mapping.codec.MorphiaTypesCodecProvider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -39,7 +36,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-import static com.mongodb.MongoClient.getDefaultCodecRegistry;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
@@ -98,7 +94,6 @@ public class Mapper {
 
         this.codecRegistry = fromRegistries(
             codecRegistry,
-            getDefaultCodecRegistry(),
             fromProviders(typesCodecProvider, codecProvider));
     }
 
