@@ -60,6 +60,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 import static org.bson.Document.parse;
 
 /**
@@ -417,12 +418,14 @@ public class DatastoreImpl implements AdvancedDatastore {
             }
         }
         for (final Map.Entry<String, List<Key>> entry : collections.entrySet()) {
+            final List<Object> objIds = entry.getValue().stream()
+                 .map(Key::getId)
+                 .collect(toList());
 
-            final List<Object> objIds = new ArrayList<>();
-            for (final Key key : entry.getValue()) {
-                objIds.add(key.getId());
-            }
-            final List results = find(entry.getKey(), null).disableValidation().filter("_id in", objIds).asList();
+            final List results = find(entry.getKey(), entry.getValue().get(0).getType())
+                                     .disableValidation()
+                                     .filter("_id in", objIds)
+                                     .asList();
             entities.addAll(results);
         }
 

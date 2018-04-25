@@ -607,7 +607,8 @@ public class TestQuery extends TestBase {
 
     @Test
     public void testGetByKeysHetero() {
-        final List<Key<Object>> keys = getDatastore().saveMany(asList(new FacebookUser(1, "scott"), new Rectangle(1, 1)));
+        final List<Key<Object>> keys = getDatastore().saveMany(
+            asList(new FacebookUser(1, "scott"), new Rectangle(1, 1)));
         final List<Object> entities = getDatastore().getByKeys(keys);
         assertNotNull(entities);
         assertEquals(2, entities.size());
