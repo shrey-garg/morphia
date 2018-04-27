@@ -48,9 +48,11 @@ public class MorphiaCodecProvider implements CodecProvider {
         if (clazz.isEnum() || clazz.getPackage() == null) {
             return null;
         }
-        for (String restrictedPackage : restrictedPackages) {
-            if(clazz.getPackage().getName().startsWith(restrictedPackage + ".")) {
-                return null;
+        if (!clazz.isInterface()) {
+            for (String restrictedPackage : restrictedPackages) {
+                if(clazz.getPackage().getName().startsWith(restrictedPackage + ".")) {
+                    return null;
+                }
             }
         }
         if (clazz.getPackage() != null && (packages.isEmpty() || packages.contains(clazz.getPackage().getName()))) {
