@@ -6,6 +6,7 @@ import org.bson.codecs.pojo.FieldModelBuilder;
 import org.bson.codecs.pojo.PropertyAccessor;
 import org.bson.codecs.pojo.PropertyMetadata;
 import org.bson.codecs.pojo.PropertyModelBuilder;
+import org.bson.codecs.pojo.TypeData;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -25,7 +26,7 @@ import java.util.Map;
 import static org.bson.codecs.pojo.PojoBuilderHelper.createPropertyModelBuilder;
 
 @SuppressWarnings("unchecked")
-class MorphiaConvention implements Convention {
+public class MorphiaConvention implements Convention {
     private MapperOptions opts;
 
     public MorphiaConvention(final MapperOptions opts) {
@@ -66,6 +67,8 @@ class MorphiaConvention implements Convention {
                     property = createPropertyModelBuilder(propertyMetadata);
                     classModelBuilder.addProperty(property);
                 }
+                final TypeData typeData = builder.getTypeData();
+                property.typeData(typeData);
 
                 final String mappedName = getMappedFieldName(builder);
                 property.readName(mappedName)
