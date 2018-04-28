@@ -209,7 +209,7 @@ public class DatastoreImpl implements AdvancedDatastore {
                     if (dbResult.containsValue("capped")) {
                         LOG.debug("Collection already exists and is capped already; doing nothing. " + dbResult);
                     } else {
-                        LOG.warning(format("Collection already exists with same name(%s) and is not capped; not creating capped version!",
+                        LOG.warning(format("Collection already exists with same name (%s) and is not capped; not creating capped version!",
                             collName));
                     }
                 } else {
@@ -697,13 +697,8 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     @SuppressWarnings("unchecked")
     private Collection<ClassModel<?>> getClassModels() {
-        try {
-            final Field field = pojoCodecProvider.getClass().getDeclaredField("classModels");
-            final Map<Class<?>, ClassModel<?>> map = (Map<Class<?>, ClassModel<?>>) field.get(pojoCodecProvider);
-            return map.values();
-        } catch (Exception e) {
-            return emptyList();
-        }
+        return getMapper().getMappedClasses().stream().map(MappedClass::getClassModel)
+                          .collect(Collectors.toList());
     }
 
     @Override

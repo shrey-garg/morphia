@@ -111,7 +111,7 @@ public class PathTarget {
                 }
                 segment = next();
             }
-            field = resolveField(segment);
+            field = resolveField(context, segment);
 
             if (field != null) {
                 translate(field.getNameToStore());
@@ -133,16 +133,19 @@ public class PathTarget {
         segments.set(position - 1, nameToStore);
     }
 
-    private MappedField resolveField(final String segment) {
-        MappedField mf = context.getMappedField(segment);
+    private MappedField resolveField(final MappedClass currentContext, final String segment) {
+        if (context == null) {
+            return null;
+        }
+
+        MappedField mf = currentContext.getMappedField(segment);
         if (mf == null) {
-            mf = context.getMappedFieldByJavaField(segment);
+            mf = currentContext.getMappedFieldByJavaField(segment);
         }
         if (mf == null) {
-            Iterator<MappedClass> subTypes = mapper.getSubTypes(context).iterator();
+            Iterator<MappedClass> subTypes = mapper.getSubTypes(currentContext).iterator();
             while (mf == null && subTypes.hasNext()) {
-                context = subTypes.next();
-                mf = resolveField(segment);
+                mf = resolveField(subTypes.next(), segment);
             }
         }
 

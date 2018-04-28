@@ -25,6 +25,8 @@ import org.mongodb.morphia.mapping.codec.DocumentWriter;
 import org.mongodb.morphia.mapping.codec.MorphiaCodec;
 import org.mongodb.morphia.mapping.codec.MorphiaCodecProvider;
 import org.mongodb.morphia.mapping.codec.MorphiaTypesCodecProvider;
+import org.reflections.Reflections;
+import org.reflections.scanners.SubTypesScanner;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -40,6 +42,7 @@ import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
+import static org.reflections.util.ConfigurationBuilder.build;
 
 
 /**
@@ -261,7 +264,7 @@ public class Mapper {
 
         MappedClass mc = mappedClasses.get(type.getName());
         if (mc == null) {
-            mc = addMappedClass(type, false);
+            mc = addMappedClass(type);
         }
         return mc;
     }
@@ -270,15 +273,14 @@ public class Mapper {
      * Creates a MappedClass and validates it.
      *
      * @param c        the Class to map
-     * @param validate if true, validate the mapping
      * @return the MappedClass for the given Class
      */
-    public MappedClass addMappedClass(final Class c, final boolean validate) {
+    public MappedClass addMappedClass(final Class c) {
         MappedClass mappedClass = mappedClasses.get(c.getName());
         if (mappedClass == null) {
             final MorphiaCodec codec = (MorphiaCodec) getCodecProvider().get(c, codecRegistry);
             if(codec != null) {
-                return addMappedClass(codec.getMappedClass(), validate);
+                return addMappedClass(codec.getMappedClass());
             }
         }
         return mappedClass;
@@ -288,8 +290,8 @@ public class Mapper {
         return codecProvider;
     }
 
-    private MappedClass addMappedClass(final MappedClass mc, final boolean validate) {
-        if (validate && !mc.isInterface()) {
+    private MappedClass addMappedClass(final MappedClass mc) {
+        if (!mc.isInterface()) {
             mc.validate(this);
         }
 
@@ -348,14 +350,14 @@ public class Mapper {
      */
     public void map(final Class... entityClasses) {
         for (final Class entityClass : entityClasses) {
-            addMappedClass(entityClass, true);
+            getMappedClass(entityClass);
         }
     }
 
     public void map(final Set<Class> entityClasses) {
         if (entityClasses != null && !entityClasses.isEmpty()) {
             for (final Class entityClass : entityClasses) {
-                addMappedClass(entityClass, true);
+                getMappedClass(entityClass);
             }
         }
     }
@@ -366,6 +368,8 @@ public class Mapper {
      * @param clazz the class to use when trying to find others to map
      */
     public void mapPackageFromClass(final Class clazz) {
+        Reflections reflections = new Reflections(clazz.getPackage().getName());
+        final Set<String> allTypes = reflections.getAllTypes();
         mapPackage(clazz.getPackage().getName());
     }
 
@@ -375,6 +379,11 @@ public class Mapper {
      * @param packageName the name of the package to process
      */
     public void mapPackage(final String packageName) {
+        Reflections reflections = new Reflections(build()
+                                                      .forPackages(packageName)
+                                                      .addScanners(new SubTypesScanner(false)));
+
+        final Set<String> allTypes = reflections.getAllTypes();
         codecProvider.addPackages(packageName);
     }
 

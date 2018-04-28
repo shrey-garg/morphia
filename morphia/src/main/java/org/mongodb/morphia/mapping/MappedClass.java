@@ -524,7 +524,7 @@ public class MappedClass {
 
     }
 
-    ClassModel<?> getClassModel() {
+    public ClassModel<?> getClassModel() {
         return classModel;
     }
 

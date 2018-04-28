@@ -15,6 +15,7 @@ import com.mongodb.client.model.ValidationLevel;
 import com.mongodb.client.model.ValidationOptions;
 import org.bson.Document;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.aggregation.AggregationTest.Book;
 import org.mongodb.morphia.aggregation.AggregationTest.CountResult;
@@ -33,6 +34,7 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.fail;
 
 
+@Ignore("Consider dropping support for MapReduce from Morphia altogether")
 public class TestMapreduce extends TestBase {
 
     @Test(expected = MongoException.class)

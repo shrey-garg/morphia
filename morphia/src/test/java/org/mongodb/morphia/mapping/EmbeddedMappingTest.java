@@ -218,7 +218,6 @@ public class EmbeddedMappingTest extends TestBase {
 
     @Embedded
     public static class AnotherNested implements Nested {
-        @Id
         private Long value;
     }
 

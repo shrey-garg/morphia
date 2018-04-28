@@ -137,7 +137,7 @@ public class TestIndexed extends TestBase {
 
     @Test
     public void testEmbeddedIndex() {
-        final MappedClass mc = getMorphia().getMapper().addMappedClass(ContainsIndexedEmbed.class, true);
+        final MappedClass mc = getMorphia().getMapper().addMappedClass(ContainsIndexedEmbed.class);
 
         assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), doesNotHaveIndexNamed("e.name_-1"));
         getDatastore().ensureIndexes(ContainsIndexedEmbed.class);
@@ -163,7 +163,7 @@ public class TestIndexed extends TestBase {
 
     @Test
     public void testIndexes() {
-        final MappedClass mc = getMorphia().getMapper().addMappedClass(Ad2.class, true);
+        final MappedClass mc = getMorphia().getMapper().addMappedClass(Ad2.class);
 
         assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), doesNotHaveIndexNamed("active_1_lastMod_-1"));
         getDatastore().ensureIndexes(Ad2.class);

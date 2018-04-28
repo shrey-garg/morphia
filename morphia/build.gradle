@@ -6,8 +6,8 @@ sourceSets {
 
 dependencies {
     compile "org.mongodb:mongo-java-driver:${driverVersion}"
-    compile 'com.thoughtworks.proxytoys:proxytoys:1.0'
-    compile 'cglib:cglib-nodep:2.2.2', optional
+    compile 'org.reflections:reflections:0.9.11'
+
     testCompile "org.zeroturnaround:zt-exec:${ztExecVersion}"
     testCompile "com.jayway.awaitility:awaitility:${awaitilityVersion}"
     testCompile "org.skyscreamer:jsonassert:${jsonAssertVersion}"
