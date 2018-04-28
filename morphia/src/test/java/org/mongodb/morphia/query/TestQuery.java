@@ -532,9 +532,11 @@ public class TestQuery extends TestBase {
 
         MongoCursor<PhotoWithKeywords> keys = getDatastore().find(PhotoWithKeywords.class).fetchEmptyEntities();
         assertTrue(keys.hasNext());
-        assertEquals(pwk1.id, keys.next().id);
-        assertEquals(pwk2.id, keys.next().id);
-        assertEquals(pwk3.id, keys.next().id);
+        Set<ObjectId> set = new HashSet<>();
+        while (keys.hasNext()) {
+            set.add(keys.next().id);
+        }
+        assertEquals(set.toString(), new HashSet<>(asList(pwk1.id, pwk2.id, pwk3.id)), set);
     }
 
     @Test
@@ -546,11 +548,11 @@ public class TestQuery extends TestBase {
 
         MorphiaKeyIterator<PhotoWithKeywords> keys = getDatastore().find(PhotoWithKeywords.class).fetchKeys();
         assertTrue(keys.hasNext());
-        Set<ObjectId> list = new HashSet<>();
+        Set<ObjectId> set = new HashSet<>();
         while (keys.hasNext()) {
-            list.add((ObjectId) keys.next().getId());
+            set.add((ObjectId) ((MorphiaKeyIterator<?>) keys).next().getId());
         }
-        assertEquals(list.toString(), new HashSet<>(asList(pwk1.id, pwk2.id, pwk3.id)), list);
+        assertEquals(set.toString(), new HashSet<>(asList(pwk1.id, pwk2.id, pwk3.id)), set);
     }
 
     @Test

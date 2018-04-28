@@ -67,8 +67,7 @@ public class MorphiaConvention implements Convention {
                     property = createPropertyModelBuilder(propertyMetadata);
                     classModelBuilder.addProperty(property);
                 }
-                final TypeData typeData = builder.getTypeData();
-                property.typeData(typeData);
+                property.typeData((TypeData) builder.getTypeData());
 
                 final String mappedName = getMappedFieldName(builder);
                 property.readName(mappedName)
@@ -83,8 +82,12 @@ public class MorphiaConvention implements Convention {
                     /*property.getTypeData().getTypeParameters().size() != 0
                     && property.getTypeData().getTypeParameters().get(0).getAnnotationsByType(Embedded.class).length == 1*/) {
                     property.discriminatorEnabled(true);
+                } else if (classModelBuilder.hasAnnotation(Entity.class)) {
+                    final Entity entity = classModelBuilder.getAnnotation(Entity.class);
+                    if(entity.noClassnameStored()) {
+                        classModelBuilder.enableDiscriminator(false);
+                    }
                 }
-
             }
         }
     }
@@ -165,13 +168,14 @@ public class MorphiaConvention implements Convention {
 
         @Override
         public void set(final Object instance, final Object value) {
-            Object[] array = (Object[]) value;
+            Object newValue = value;
             if (value.getClass().getComponentType() != componentType) {
+                Object[] array = (Object[]) value;
                 final Object[] newArray = (Object[]) Array.newInstance(componentType, array.length);
                 System.arraycopy(array, 0, newArray, 0, array.length);
-                array = newArray;
+                newValue = newArray;
             }
-            super.set(instance, array);
+            super.set(instance, newValue);
         }
     }
 }
