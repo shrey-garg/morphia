@@ -441,7 +441,8 @@ public class DatastoreImpl implements AdvancedDatastore {
     @Override
     public <T> MongoCollection<T> getCollection(final Class<T> clazz) {
         final String collName = mapper.getCollectionName(clazz);
-        return getDatabase().getCollection(collName, clazz);
+        return getDatabase().getCollection(collName, clazz)
+            .withCodecRegistry(getCodecRegistry());
     }
 
     @Override

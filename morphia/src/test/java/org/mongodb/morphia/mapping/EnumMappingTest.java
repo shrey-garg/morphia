@@ -1,5 +1,6 @@
 package org.mongodb.morphia.mapping;
 
+import org.bson.codecs.Codec;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
@@ -102,7 +103,7 @@ public class EnumMappingTest extends TestBase {
                                              .count());
     }
 
-    enum Foo {
+    public enum Foo {
         BAR,
         BAZ
     }

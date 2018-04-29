@@ -22,11 +22,11 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.mapping.codec.DocumentWriter;
+import org.mongodb.morphia.mapping.codec.EnumCodecProvider;
 import org.mongodb.morphia.mapping.codec.MorphiaCodec;
 import org.mongodb.morphia.mapping.codec.MorphiaCodecProvider;
 import org.mongodb.morphia.mapping.codec.MorphiaTypesCodecProvider;
-import org.reflections.Reflections;
-import org.reflections.scanners.SubTypesScanner;
+import org.mongodb.morphia.utils.ReflectionUtils;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -42,7 +42,6 @@ import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static org.bson.codecs.configuration.CodecRegistries.fromProviders;
 import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
-import static org.reflections.util.ConfigurationBuilder.build;
 
 
 /**
@@ -97,7 +96,7 @@ public class Mapper {
 
         this.codecRegistry = fromRegistries(
             codecRegistry,
-            fromProviders(typesCodecProvider, codecProvider));
+            fromProviders(new EnumCodecProvider(), typesCodecProvider, codecProvider));
     }
 
     public CodecRegistry getCodecRegistry() {
@@ -368,8 +367,6 @@ public class Mapper {
      * @param clazz the class to use when trying to find others to map
      */
     public void mapPackageFromClass(final Class clazz) {
-        Reflections reflections = new Reflections(clazz.getPackage().getName());
-        final Set<String> allTypes = reflections.getAllTypes();
         mapPackage(clazz.getPackage().getName());
     }
 
@@ -379,12 +376,7 @@ public class Mapper {
      * @param packageName the name of the package to process
      */
     public void mapPackage(final String packageName) {
-        Reflections reflections = new Reflections(build()
-                                                      .forPackages(packageName)
-                                                      .addScanners(new SubTypesScanner(false)));
-
-        final Set<String> allTypes = reflections.getAllTypes();
-        codecProvider.addPackages(packageName);
+        map(ReflectionUtils.getClasses(packageName, opts.isMapSubPackages()));
     }
 
     public <T> Document toDocument(final T entity) {
