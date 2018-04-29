@@ -21,7 +21,9 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.bson.codecs.pojo.PojoBuilderHelper.createPropertyModelBuilder;
 
@@ -46,6 +48,13 @@ public class MorphiaConvention implements Convention {
         classModelBuilder.discriminator(classModelBuilder.getType().getName())
                          .discriminatorKey("className");
 
+
+        final List<String> names = classModelBuilder.getPropertyModelBuilders().stream()
+                                                    .map(PropertyModelBuilder::getName)
+                                                    .collect(Collectors.toList());
+        for (final String name : names) {
+            classModelBuilder.removeProperty(name);
+        }
 
         Iterator<FieldModelBuilder<?>> iterator = classModelBuilder.getFieldModelBuilders().iterator();
         while (iterator.hasNext()) {

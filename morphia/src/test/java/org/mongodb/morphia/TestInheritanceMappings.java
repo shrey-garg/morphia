@@ -115,7 +115,7 @@ public class TestInheritanceMappings extends TestBase {
 
     }
 
-    private enum VehicleClass {
+    public enum VehicleClass {
         Bicycle,
         Moped,
         MiniCar,
