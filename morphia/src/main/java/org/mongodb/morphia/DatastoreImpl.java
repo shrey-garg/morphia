@@ -46,7 +46,6 @@ import org.mongodb.morphia.query.UpdateException;
 import org.mongodb.morphia.query.UpdateOperations;
 import org.mongodb.morphia.query.UpdateOpsImpl;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -338,10 +337,8 @@ public class DatastoreImpl implements AdvancedDatastore {
 
         updateVersion(query, operations);
 
-        final Document queryDocument = query.getQueryDocument();
-        final Document ops = ((UpdateOpsImpl<T>) operations).getOperations();
         return collection.withWriteConcern(writeConcern)
-                         .findOneAndUpdate(queryDocument, ops,
+                         .findOneAndUpdate(query.getQueryDocument(), operations.getOperations(),
                              options.sort(query.getSortDocument())
                                     .projection(query.getFields()));
     }
@@ -436,13 +433,6 @@ public class DatastoreImpl implements AdvancedDatastore {
     @Override
     public <T> List<T> getByKeys(final List<Key<T>> keys) {
         return getByKeys(null, keys);
-    }
-
-    @Override
-    public <T> MongoCollection<T> getCollection(final Class<T> clazz) {
-        final String collName = mapper.getCollectionName(clazz);
-        return getDatabase().getCollection(collName, clazz)
-            .withCodecRegistry(getCodecRegistry());
     }
 
     @Override
@@ -931,6 +921,11 @@ public class DatastoreImpl implements AdvancedDatastore {
                 throw new MappingException("If the ID type is not ObjectID, ID values must be set manually");
             }
         }
+    }
+
+    @Override
+    public <T> MongoCollection<T> getCollection(final Class<T> clazz) {
+        return getDatabase().getCollection(mapper.getCollectionName(clazz), clazz);
     }
 
     private <T> MongoCollection<T> getCollection(final String collectionName, final Class<T> aClass) {

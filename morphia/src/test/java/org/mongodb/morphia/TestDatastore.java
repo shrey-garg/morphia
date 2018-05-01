@@ -267,6 +267,8 @@ public class TestDatastore extends TestBase {
     @Test
     public void testMultipleDatabasesSingleThreaded() {
         getMorphia().map(FacebookUser.class);
+        getMongoClient().dropDatabase("db1");
+        getMongoClient().dropDatabase("db2");
 
         final Datastore ds1 = getMorphia().createDatastore("db1");
         final Datastore ds2 = getMorphia().createDatastore("db2");
@@ -442,7 +444,9 @@ public class TestDatastore extends TestBase {
                                                   .field("username").equal("john doe");
         UpdateOperations<FacebookUser> updateOperations = getDatastore().createUpdateOperations(FacebookUser.class)
                                                                         .inc("loginCount");
-        FacebookUser results = getDatastore().findAndModify(query, updateOperations, new FindOneAndUpdateOptions(),
+        FacebookUser results = getDatastore().findAndModify(query, updateOperations,
+            new FindOneAndUpdateOptions()
+            .returnDocument(AFTER),
             getDatastore().getDefaultWriteConcern());
         assertEquals(0, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
         assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
@@ -476,6 +480,7 @@ public class TestDatastore extends TestBase {
                                                              .field("id").equal(4L)
                                                              .field("username").equal("Ron Swanson"),
             updateOperations, new FindOneAndUpdateOptions()
+                                  .returnDocument(AFTER)
                                   .upsert(true), getDatastore().getDefaultWriteConcern());
         assertNotNull(results);
         user = getDatastore().find(FacebookUser.class).filter("id", 4).get();

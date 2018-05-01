@@ -39,12 +39,8 @@ public class MorphiaCodecProvider implements CodecProvider {
     }
 
     @Override
-    public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
-        return getPojoCodec(clazz, registry);
-    }
-
     @SuppressWarnings("unchecked")
-    private <T> PojoCodec<T> getPojoCodec(final Class<T> clazz, final CodecRegistry registry) {
+    public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
         if (clazz.isEnum() || clazz.getPackage() == null) {
             return null;
         }
@@ -56,7 +52,7 @@ public class MorphiaCodecProvider implements CodecProvider {
             }
         }
         if (clazz.getPackage() != null && (packages.isEmpty() || packages.contains(clazz.getPackage().getName()))) {
-            MorphiaCodec<T> codec = (MorphiaCodec<T>) codecs.get(clazz);
+            MorphiaCodec<?> codec = codecs.get(clazz);
             if (codec == null) {
                 ClassModel<T> classModel = createClassModel(clazz, conventions);
                 discriminatorLookup.addClassModel(classModel);
@@ -64,7 +60,7 @@ public class MorphiaCodecProvider implements CodecProvider {
                     propertyCodecProviders, discriminatorLookup);
             }
 
-            return codec;
+            return (Codec<T>) codec;
         }
         return null;
     }

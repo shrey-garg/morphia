@@ -58,7 +58,7 @@ public class TestIdField extends TestBase {
         final Document document = getMorphia().getMapper().toDocument(r);
         assertFalse(document.containsKey("id"));
         assertTrue(document.containsKey(Mapper.ID_KEY));
-        assertEquals(4, document.size()); //_id, h, w, className
+        assertEquals(document.keySet().toString(), 3, document.size()); //_id, h, w, className
     }
 
     @Test

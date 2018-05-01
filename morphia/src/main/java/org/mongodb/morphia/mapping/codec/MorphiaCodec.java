@@ -10,6 +10,7 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.DiscriminatorLookup;
 import org.bson.codecs.pojo.InstanceCreator;
+import org.bson.codecs.pojo.PojoCodec;
 import org.bson.codecs.pojo.PojoCodecImpl;
 import org.bson.codecs.pojo.PropertyCodecProvider;
 import org.mongodb.morphia.annotations.PostLoad;
@@ -25,17 +26,17 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
     private final Mapper mapper;
     private final MappedClass mappedClass;
     private final CodecRegistry registry;
+    private final List<PropertyCodecProvider> propertyCodecProviders;
+    private final DiscriminatorLookup discriminatorLookup;
 
-    MorphiaCodec(final Mapper mapper,
-                 final MappedClass mappedClass,
-                 final ClassModel<T> classModel,
-                 final CodecRegistry registry,
-                 final List<PropertyCodecProvider> propertyCodecProviders,
-                 final DiscriminatorLookup discriminatorLookup) {
+    MorphiaCodec(final Mapper mapper, final MappedClass mappedClass, final ClassModel<T> classModel, final CodecRegistry registry,
+                 final List<PropertyCodecProvider> propertyCodecProviders, final DiscriminatorLookup discriminatorLookup) {
         super(classModel, registry, propertyCodecProviders, discriminatorLookup);
         this.mapper = mapper;
         this.mappedClass = mappedClass;
         this.registry = registry;
+        this.propertyCodecProviders = propertyCodecProviders;
+        this.discriminatorLookup = discriminatorLookup;
     }
 
     public MappedClass getMappedClass() {
@@ -78,4 +79,50 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
         return t;
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <S> PojoCodec<S> getSpecializedCodec(final ClassModel<S> specialized) {
+        return new SpecializedMorphiaCodec(this, specialized);
+    }
+
+    private static class SpecializedMorphiaCodec<T> extends PojoCodec<T> {
+
+        private final MorphiaCodec morphiaCodec;
+        private final ClassModel<T> classModel;
+        private MorphiaCodec<T> specialized;
+
+        public <S> SpecializedMorphiaCodec(final MorphiaCodec morphiaCodec, final ClassModel<T> classModel) {
+
+            this.morphiaCodec = morphiaCodec;
+            this.classModel = classModel;
+        }
+
+        @Override
+        public ClassModel<T> getClassModel() {
+            return classModel;
+        }
+
+        @Override
+        public T decode(final BsonReader reader, final DecoderContext decoderContext) {
+            return getSpecialized().decode(reader, decoderContext);
+        }
+
+        @Override
+        public void encode(final BsonWriter writer, final T value, final EncoderContext encoderContext) {
+            getSpecialized().encode(writer, value, encoderContext);
+        }
+
+        private MorphiaCodec<T> getSpecialized() {
+            if(specialized == null) {
+                specialized = new MorphiaCodec<T>(morphiaCodec.mapper, new MappedClass(classModel, morphiaCodec.mapper),
+                    classModel, morphiaCodec.registry, morphiaCodec.propertyCodecProviders, morphiaCodec.discriminatorLookup);
+            }
+            return specialized;
+        }
+
+        @Override
+        public Class<T> getEncoderClass() {
+            return classModel.getType();
+        }
+    }
 }

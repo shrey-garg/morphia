@@ -37,11 +37,10 @@ public class MorphiaConvention implements Convention {
 
     @Override
     public void apply(final ClassModelBuilder<?> classModelBuilder) {
-        if(classModelBuilder.hasAnnotation(Entity.class)) {
-            Entity entity = classModelBuilder.getAnnotation(Entity.class);
-            final boolean enableDiscriminator = entity.noClassnameStored();
-            if(enableDiscriminator) {
-                classModelBuilder.enableDiscriminator(true);
+        if (classModelBuilder.hasAnnotation(Entity.class)) {
+            final Entity entity = classModelBuilder.getAnnotation(Entity.class);
+            if (entity.noClassnameStored()) {
+                classModelBuilder.enableDiscriminator(false);
             }
         }
 
@@ -77,6 +76,9 @@ public class MorphiaConvention implements Convention {
                     classModelBuilder.addProperty(property);
                 }
                 property.typeData((TypeData) builder.getTypeData());
+                if (builder.hasAnnotation(Id.class)) {
+                    classModelBuilder.idPropertyName(property.getReadName());
+                }
 
                 final String mappedName = getMappedFieldName(builder);
                 property.readName(mappedName)
@@ -91,14 +93,15 @@ public class MorphiaConvention implements Convention {
                     /*property.getTypeData().getTypeParameters().size() != 0
                     && property.getTypeData().getTypeParameters().get(0).getAnnotationsByType(Embedded.class).length == 1*/) {
                     property.discriminatorEnabled(true);
-                } else if (classModelBuilder.hasAnnotation(Entity.class)) {
-                    final Entity entity = classModelBuilder.getAnnotation(Entity.class);
-                    if(entity.noClassnameStored()) {
-                        classModelBuilder.enableDiscriminator(false);
-                    }
+                }
+
+                if (property.getTypeData().getType().isInterface()
+                    || Modifier.isAbstract(property.getTypeData().getType().getModifiers()))  {
+                    property.discriminatorEnabled(true);
                 }
             }
         }
+
     }
 
     private static boolean isTransient(final FieldModelBuilder<?> field) {

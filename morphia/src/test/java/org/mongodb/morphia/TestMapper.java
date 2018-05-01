@@ -75,7 +75,7 @@ public class TestMapper extends TestBase {
         @PostLoad
         protected void postConstruct() {
             if (loadCount > 1) {
-                throw new RuntimeException();
+                throw new RuntimeException("PostLoad called more than once");
             }
 
             loadCount++;

@@ -2,6 +2,7 @@ package org.mongodb.morphia.query;
 
 
 import com.mongodb.client.model.PushOptions;
+import org.bson.Document;
 
 import java.util.List;
 
@@ -96,6 +97,8 @@ public interface UpdateOperations<T> {
      * @mongodb.driver.manual reference/operator/update/isolated/ $isolated
      */
     UpdateOperations<T> isolated();
+
+    Document getOperations();
 
     /**
      * @return true if this update is to be run in isolation

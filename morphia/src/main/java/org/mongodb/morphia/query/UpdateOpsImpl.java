@@ -203,6 +203,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
     /**
      * @return the operations listed
      */
+    @Override
     public Document getOperations() {
         return new Document(operations);
     }

@@ -37,4 +37,24 @@ public class Circle extends TestEntity implements Shape {
     public double getRadius() {
         return radius;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        final Circle circle = (Circle) o;
+
+        return Double.compare(circle.radius, radius) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        final long temp = Double.doubleToLongBits(radius);
+        return (int) (temp ^ (temp >>> 32));
+    }
 }
