@@ -1045,7 +1045,7 @@ public class DatastoreImpl implements AdvancedDatastore {
             operations.inc(fields.get(0).getNameToStore(), 1);
         }
 
-        final Document update = ((UpdateOpsImpl) operations).getOperations();
+        final Document update = operations.getOperations();
         if (LOG.isTraceEnabled()) {
             LOG.trace(format("Executing update(%s) for query: %s, ops: %s,upsert: %s",
                 collection.getNamespace().getCollectionName(), queryObject, update, options.isUpsert()));

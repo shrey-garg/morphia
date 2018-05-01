@@ -32,7 +32,6 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.TestQuery.ContainsPic;
 import org.mongodb.morphia.query.TestQuery.Pic;
 import org.mongodb.morphia.query.UpdateOperations;
-import org.mongodb.morphia.query.UpdateOpsImpl;
 import org.mongodb.morphia.query.ValidationException;
 import org.mongodb.morphia.testmodel.Article;
 import org.mongodb.morphia.testmodel.Circle;
@@ -112,7 +111,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     private void validateClassName(final String path, final UpdateOperations<Parent> ops, final boolean expected) {
-        Document ops1 = ((UpdateOpsImpl) ops).getOperations();
+        Document ops1 = ops.getOperations();
         Map pull = (Map) ops1.get("$pull");
         Map children = (Map) pull.get(path);
         assertEquals(expected, children.containsKey("className"));
@@ -138,9 +137,9 @@ public class TestUpdateOps extends TestBase {
 
         //add unique (4) -- noop
         assertUpdated(ds.updateOne(ds.createQuery(ContainsIntArray.class),
-                                     ds.createUpdateOperations(ContainsIntArray.class)
-                                            .addToSet("values", 4)),
-                      1);
+            ds.createUpdateOperations(ContainsIntArray.class)
+              .addToSet("values", 4)),
+            0);
         assertThat(ds.get(cIntArray).values, is(new Integer[]{1, 2, 3, 4}));
 
         //add dup 4
@@ -168,7 +167,7 @@ public class TestUpdateOps extends TestBase {
         assertUpdated(ds.updateOne(ds.createQuery(ContainsIntArray.class),
                                      ds.createUpdateOperations(ContainsIntArray.class)
                                             .addToSet("values", newValues)),
-                      1);
+                      0);
         assertThat(ds.get(cIntArray).values, is(new Integer[]{1, 2, 3, 4, 5}));
 
         //add dups [4,5]
@@ -244,7 +243,7 @@ public class TestUpdateOps extends TestBase {
         assertUpdated(getDatastore().updateOne(getDatastore().find(ContainsIntArray.class),
                                      getDatastore().createUpdateOperations(ContainsIntArray.class)
                                                    .addToSet("values", asList(4, 5))),
-                      1);
+                      0);
         assertThat(getDatastore().get(cIntArray).values, is(new Integer[]{1, 2, 3, 5, 4, 8, 9}));
     }
 
@@ -254,17 +253,20 @@ public class TestUpdateOps extends TestBase {
         ContainsIntArray cIntArray = new ContainsIntArray();
         ContainsIntArray control = new ContainsIntArray();
         Datastore ds = getDatastore();
+        getMongoClient().dropDatabase("ContainsIntArray");
         ds.saveMany(asList(cIntArray, control));
 
         assertThat(ds.get(cIntArray).values, is((new ContainsIntArray()).values));
-        Query<ContainsIntArray> query = ds.find(ContainsIntArray.class);
+        Query<ContainsIntArray> query = ds.find(ContainsIntArray.class)
+            .filter("_id = ", cIntArray.id);
 
-        doUpdates(cIntArray, control, query, ds.createUpdateOperations(ContainsIntArray.class)
+        doUpdates(cIntArray.id, control.id, query, ds.createUpdateOperations(ContainsIntArray.class)
                                                     .addToSet("values", 4),
-                  new Integer[]{1, 2, 3, 4});
+                  new Integer[]{1, 2, 3, 4}
+                 );
 
 
-        doUpdates(cIntArray, control, query, ds.createUpdateOperations(ContainsIntArray.class)
+        doUpdates(cIntArray.id, control.id, query, ds.createUpdateOperations(ContainsIntArray.class)
                                                     .addToSet("values", asList(4, 5)),
                   new Integer[]{1, 2, 3, 4, 5});
 
@@ -279,16 +281,16 @@ public class TestUpdateOps extends TestBase {
     }
 
     @SuppressWarnings("deprecation")
-    private void doUpdates(final ContainsIntArray updated, final ContainsIntArray control,
+    private void doUpdates(final ObjectId updated, final ObjectId control,
                            final Query<ContainsIntArray> query, final UpdateOperations<ContainsIntArray> operations,
                            final Integer[] target) {
         assertUpdated(getDatastore().updateOne(query, operations), 1);
-        assertThat(getDatastore().get(updated).values, is(target));
-        assertThat(getDatastore().get(control).values, is(new Integer[]{1, 2, 3}));
+        assertThat(getDatastore().get(ContainsIntArray.class, updated).values, is(target));
+        assertThat(getDatastore().get(ContainsIntArray.class, control).values, is(new Integer[]{1, 2, 3}));
 
-        assertUpdated(getDatastore().updateOne(query, operations, new UpdateOptions(), getDatastore().getDefaultWriteConcern()), 1);
-        assertThat(getDatastore().get(updated).values, is(target));
-        assertThat(getDatastore().get(control).values, is(new Integer[]{1, 2, 3}));
+        assertUpdated(getDatastore().updateOne(query, operations, new UpdateOptions(), getDatastore().getDefaultWriteConcern()), 0);
+        assertThat(getDatastore().get(ContainsIntArray.class, updated).values, is(target));
+        assertThat(getDatastore().get(ContainsIntArray.class, control).values, is(new Integer[]{1, 2, 3}));
     }
 
     @Test
@@ -436,14 +438,13 @@ public class TestUpdateOps extends TestBase {
                 .upsert(true),
             getDatastore().getDefaultWriteConcern()));
 
-        assertUpdated(ds.updateOne(ds.find(Circle.class)
-                                     .field("id").equal(id),
+        assertUpdated(ds.updateOne(ds.find(Circle.class).field("id").equal(id),
             ds.createUpdateOperations(Circle.class)
               .max("radius", 1D),
             new UpdateOptions()
                 .upsert(true),
             getDatastore().getDefaultWriteConcern()),
-            1);
+            0);
 
 
         assertThat(ds.get(Circle.class, id).getRadius(), is(originalValue));
@@ -461,9 +462,7 @@ public class TestUpdateOps extends TestBase {
             getDatastore().getDefaultWriteConcern()));
 
         assertUpdated(getDatastore().updateOne(getDatastore().find(Circle.class).field("id").equal(id),
-            getDatastore().createUpdateOperations(Circle.class).min("radius", 5D),
-            new UpdateOptions().upsert(true),
-            getDatastore().getDefaultWriteConcern()), 1);
+            getDatastore().createUpdateOperations(Circle.class).min("radius", 5D)), 0);
 
         final Circle updatedCircle = getDatastore().get(Circle.class, id);
         assertThat(updatedCircle, is(notNullValue()));
@@ -670,7 +669,7 @@ public class TestUpdateOps extends TestBase {
 
         assertInserted(getDatastore().updateOne(getDatastore().find(Circle.class).field("id").equal(id),
             getDatastore().createUpdateOperations(Circle.class).setOnInsert("radius", 2D),
-            new UpdateOptions(),
+            new UpdateOptions().upsert(true),
             getDatastore().getDefaultWriteConcern()));
 
         final Circle updatedCircle = getDatastore().get(Circle.class, id);
@@ -781,6 +780,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
+    @Ignore("references aren't implemented yet")
     public void testUpdateKeyRef() {
         final ContainsPicKey cpk = new ContainsPicKey();
         cpk.name = "cpk one";
@@ -797,7 +797,7 @@ public class TestUpdateOps extends TestBase {
         //test with Key<Pic>
 
         assertThat(ds.updateMany(ds.find(ContainsPicKey.class).filter("name", cpk.name),
-            ds.createUpdateOperations(ContainsPicKey.class).set("pic", pic)).getModifiedCount(), is(1));
+            ds.createUpdateOperations(ContainsPicKey.class).set("pic", pic)).getModifiedCount(), is(1L));
 
         //test reading the object.
         final ContainsPicKey cpk2 = ds.find(ContainsPicKey.class).get();
@@ -845,6 +845,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
+    @Ignore("references aren't implemented yet")
     public void testUpdateRef() {
         final ContainsPic cp = new ContainsPic();
         cp.setName("cp one");
@@ -927,7 +928,7 @@ public class TestUpdateOps extends TestBase {
 
     private void assertUpdated(final UpdateResult res, final long count) {
         assertNull(res.getUpsertedId());
-        assertEquals(res.getModifiedCount(), count);
+        assertEquals(count, res.getModifiedCount());
     }
 
     private EntityLogs createEntryLogs(final String value) {

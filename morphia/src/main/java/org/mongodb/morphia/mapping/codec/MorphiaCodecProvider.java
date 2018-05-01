@@ -26,7 +26,7 @@ public class MorphiaCodecProvider implements CodecProvider {
     private final Map<Class<?>, ClassModel<?>> classModels = new HashMap<>();
     private final Map<Class<?>, MorphiaCodec<?>> codecs = new HashMap<>();
     private final Set<String> packages = new HashSet<>();
-    private final Set<String> restrictedPackages = new HashSet<>(asList("java", "javax"));
+    private final Set<String> restrictedPackages = new HashSet<>(asList("java", "javax", "org.bson"));
     private final Mapper mapper;
     private final List<Convention> conventions;
     private final DiscriminatorLookup discriminatorLookup;

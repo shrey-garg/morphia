@@ -79,9 +79,19 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
             pathTarget.disableValidation();
         }
 
-        addOperation(UpdateOperator.PUSH, pathTarget.translatedPath(), new Document(UpdateOperator.EACH.val(), values));
+        final Document val = new Document(UpdateOperator.EACH.val(), values);
+        append(val, "$position", options.getPosition());
+        append(val, "$slice", options.getSlice());
+        append(val, "$sort", options.getSortDocument());
+        addOperation(UpdateOperator.PUSH, pathTarget.translatedPath(), val);
 
         return this;
+    }
+
+    private void append(final Document document, final String key, final Object value) {
+        if(value != null) {
+            document.put(key, value);
+        }
     }
 
     @Override
