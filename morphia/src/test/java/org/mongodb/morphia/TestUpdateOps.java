@@ -58,6 +58,7 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -296,7 +297,7 @@ public class TestUpdateOps extends TestBase {
         getDatastore().save(c);
         c = new Circle(12D);
         getDatastore().save(c);
-        assertUpdated(getDatastore().updateMany(getDatastore().find(Circle.class),
+        assertUpdated(getDatastore().updateOne(getDatastore().find(Circle.class),
             getDatastore().createUpdateOperations(Circle.class)
                           .inc("radius", 1D)),
             1);
@@ -475,15 +476,19 @@ public class TestUpdateOps extends TestBase {
         final ObjectId id = new ObjectId();
         final double newLowerValue = 2D;
 
-        assertInserted(getDatastore().updateOne(getDatastore().find(Circle.class).field("id").equal(id),
+        final UpdateOptions options = new UpdateOptions()
+                                          .upsert(true);
+        final Query<Circle> query = getDatastore().find(Circle.class).field("id").equal(id);
+        assertInserted(getDatastore().updateOne(
+            query,
             getDatastore().createUpdateOperations(Circle.class).setOnInsert("radius", 3D),
-            new UpdateOptions().upsert(true),
+            options,
             getDatastore().getDefaultWriteConcern()));
 
 
-        assertUpdated(getDatastore().updateOne(getDatastore().find(Circle.class).field("id").equal(id),
+        assertUpdated(getDatastore().updateOne(query,
             getDatastore().createUpdateOperations(Circle.class).min("radius", newLowerValue),
-            new UpdateOptions().upsert(true),
+            options,
             getDatastore().getDefaultWriteConcern()), 1);
 
         final Circle updatedCircle = getDatastore().get(Circle.class, id);
@@ -686,7 +691,8 @@ public class TestUpdateOps extends TestBase {
             getDatastore().getDefaultWriteConcern()));
 
         assertUpdated(getDatastore().updateOne(getDatastore().find(Circle.class).field("id").equal(id),
-            getDatastore().createUpdateOperations(Circle.class).setOnInsert("radius", 2D),
+            getDatastore().createUpdateOperations(Circle.class)
+                          .inc("radius", 30D),
             new UpdateOptions()
                 .upsert(true),
             getDatastore().getDefaultWriteConcern()),
@@ -695,7 +701,7 @@ public class TestUpdateOps extends TestBase {
         final Circle updatedCircle = getDatastore().get(Circle.class, id);
 
         assertThat(updatedCircle, is(notNullValue()));
-        assertThat(updatedCircle.getRadius(), is(1D));
+        assertThat(updatedCircle.getRadius(), is(31D));
     }
 
     @Test
@@ -916,12 +922,12 @@ public class TestUpdateOps extends TestBase {
 
     private void assertInserted(final UpdateResult res) {
         assertThat(res.getUpsertedId(), notNullValue());
-        assertThat(res.getModifiedCount(), is(0));
+        assertThat(res.getModifiedCount(), is(0L));
     }
 
-    private void assertUpdated(final UpdateResult res, final int count) {
-        assertThat(res.getUpsertedId(), nullValue());
-        assertThat(res.getModifiedCount(), is(count));
+    private void assertUpdated(final UpdateResult res, final long count) {
+        assertNull(res.getUpsertedId());
+        assertEquals(res.getModifiedCount(), count);
     }
 
     private EntityLogs createEntryLogs(final String value) {

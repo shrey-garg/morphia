@@ -979,7 +979,7 @@ public class DatastoreImpl implements AdvancedDatastore {
     @Override
     public <T> UpdateResult updateOne(final Query<T> query, final UpdateOperations<T> operations, final UpdateOptions options,
                                       final WriteConcern writeConcern) {
-        return updateOne(query, ((UpdateOpsImpl) operations).getOperations(), options, writeConcern);
+        return updateOne(query, operations.getOperations(), options, writeConcern);
     }
 
     private <T> UpdateResult updateOne(final Query<T> query, final Document update, final UpdateOptions options,
@@ -1016,7 +1016,7 @@ public class DatastoreImpl implements AdvancedDatastore {
         }
 
         return collection.withWriteConcern(writeConcern)
-                         .updateOne(queryObject, update);
+                         .updateOne(queryObject, update, options);
     }
 
     @Override
