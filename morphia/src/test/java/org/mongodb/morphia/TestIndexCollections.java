@@ -92,7 +92,6 @@ public class TestIndexCollections extends TestBase {
         private ObjectId id;
         @Indexed
         private String name;
-        @Embedded
         private EmbeddedIndex embeddedIndex;
     }
 

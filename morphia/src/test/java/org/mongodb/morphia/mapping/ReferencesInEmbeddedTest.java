@@ -51,10 +51,10 @@ public class ReferencesInEmbeddedTest extends TestBase {
     @Entity
     private static class Container extends TestEntity {
         private String name;
-        @Embedded
         private EmbedContainingReference embed;
     }
 
+    @Embedded
     private static class EmbedContainingReference {
         private String name;
         @Reference

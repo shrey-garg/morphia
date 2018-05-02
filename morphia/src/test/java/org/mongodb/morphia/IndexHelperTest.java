@@ -35,6 +35,7 @@ import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.annotations.Text;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
@@ -418,7 +419,7 @@ public class IndexHelperTest extends TestBase {
         @Text(value = 10, options = @IndexOptions(name = "searchme"))
         private String text;
         private double latitude;
-        @Embedded("nest")
+        @Property("nest")
         private NestedClass nested;
     }
 

@@ -114,7 +114,6 @@ public class TestArrayUpdates extends TestBase {
 
         @Id
         private ObjectId id;
-        @Embedded
         private List<Files> files = new ArrayList<>();
 
         @Override

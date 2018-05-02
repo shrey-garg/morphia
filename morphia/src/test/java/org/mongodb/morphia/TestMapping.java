@@ -569,6 +569,7 @@ public class TestMapping extends TestBase {
         B
     }
 
+    @Embedded
     private interface Foo {
     }
 
@@ -704,7 +705,6 @@ public class TestMapping extends TestBase {
     }
 
     private static class ContainsPrimitiveMap {
-        @Embedded
         private final Map<String, Long> embeddedValues = new HashMap<>();
         private final Map<String, Long> values = new HashMap<>();
         @Id
@@ -720,7 +720,6 @@ public class TestMapping extends TestBase {
     }
 
     private static class ContainsMapWithEmbeddedInterface {
-        @Embedded
         private final Map<String, Foo> embeddedValues = new HashMap<>();
         @Id
         private ObjectId id;
@@ -729,7 +728,6 @@ public class TestMapping extends TestBase {
     private static class ContainsEmbeddedEntity {
         @Id
         private final ObjectId id = new ObjectId();
-        @Embedded
         private ContainsIntegerList cil = new ContainsIntegerList();
     }
 
@@ -769,7 +767,6 @@ public class TestMapping extends TestBase {
 
     private static class ContainsEnum1KeyMap {
         private final Map<Enum1, String> values = new HashMap<>();
-        @Embedded
         private final Map<Enum1, String> embeddedValues = new HashMap<>();
         @Id
         private ObjectId id;
@@ -782,7 +779,6 @@ public class TestMapping extends TestBase {
     }
 
     private static class ContainsIntKeySetStringMap {
-        @Embedded
         private final Map<Integer, Set<String>> values = new HashMap<>();
         @Id
         private ObjectId id;

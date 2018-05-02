@@ -13,7 +13,6 @@ import java.util.Map;
 @Entity("articles")
 @SuppressWarnings("unchecked")
 public class Article extends TestEntity {
-    @Embedded
     private Map<String, Translation> translations;
     @Property
     private Map attributes;

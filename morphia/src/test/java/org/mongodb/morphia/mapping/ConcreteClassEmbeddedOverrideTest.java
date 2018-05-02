@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Property;
 
 public class ConcreteClassEmbeddedOverrideTest extends TestBase {
 
@@ -28,14 +29,14 @@ public class ConcreteClassEmbeddedOverrideTest extends TestBase {
     }
 
     public static class E {
-        @Embedded
         private final A a1 = new A();
-        @Embedded(concreteClass = B.class)
+        @Property(concreteClass = B.class)
         private final A a2 = new A();
         @Id
         private ObjectId id;
     }
 
+    @Embedded
     public static class A {
         private String s = "A";
 

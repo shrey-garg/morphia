@@ -44,6 +44,7 @@ public class TestMapping extends TestBase {
         }
     }
 
+    @Embedded
     private static class ClassLevelTwo extends ClassLevelOne<String> {
 
     }
@@ -54,7 +55,6 @@ public class TestMapping extends TestBase {
 
         private String name;
 
-        @Embedded
         private ClassLevelTwo value;
     }
 

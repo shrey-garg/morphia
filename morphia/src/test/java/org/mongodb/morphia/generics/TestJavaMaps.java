@@ -8,6 +8,7 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.testutil.TestEntity;
 
 import java.util.HashMap;
@@ -99,7 +100,7 @@ public class TestJavaMaps extends TestBase {
     @Entity
     static class LinkedHashMapTestEntity extends TestEntity {
 
-        @Embedded(concreteClass = java.util.LinkedHashMap.class)
+        @Property(concreteClass = java.util.LinkedHashMap.class)
         private final Map<Integer, String> linkedHashMap = new LinkedHashMap<>();
         private Map<Integer, String> getLinkedHashMap() {
             return linkedHashMap;

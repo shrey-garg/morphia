@@ -31,7 +31,6 @@ public class TestEmbedLoop extends TestBase {
 
     @Entity
     static class A extends TestEntity {
-        @Embedded
         private B b;
     }
 
@@ -42,7 +41,6 @@ public class TestEmbedLoop extends TestBase {
         // produces stack overflow, might be detectable?
         // @Reference this would be right way to do it.
 
-        @Embedded
         private A a;
     }
 }

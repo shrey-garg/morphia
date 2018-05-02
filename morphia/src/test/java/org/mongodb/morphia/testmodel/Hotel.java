@@ -17,6 +17,7 @@ package org.mongodb.morphia.testmodel;
 
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.testutil.TestEntity;
 
@@ -36,9 +37,8 @@ public class Hotel extends TestEntity {
     private Set<String> tags;
     @Transient
     private String temp;
-    @Embedded
     private Address address;
-    @Embedded(concreteClass = Vector.class)
+    @Property(concreteClass = Vector.class)
     private List<PhoneNumber> phoneNumbers;
 
     public Hotel() {

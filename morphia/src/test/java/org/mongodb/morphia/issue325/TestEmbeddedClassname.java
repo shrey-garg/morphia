@@ -66,13 +66,10 @@ public class TestEmbeddedClassname extends TestBase {
 
     @Entity(noClassnameStored = true)
     private static class Root {
-        @Embedded
         private final List<A> aList = new ArrayList<>();
-        @Embedded
         private final List<B> bList = new ArrayList<>();
         @Id
         private String id = "id";
-        @Embedded
         private A singleA;
     }
 

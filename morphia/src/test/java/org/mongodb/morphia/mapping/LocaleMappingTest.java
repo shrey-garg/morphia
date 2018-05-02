@@ -42,7 +42,6 @@ public class LocaleMappingTest extends TestBase {
         private ObjectId id;
         private Locale l1;
 
-        @Embedded
         private List<Locale> l2 = new ArrayList<>();
 
         private Locale[] l3;

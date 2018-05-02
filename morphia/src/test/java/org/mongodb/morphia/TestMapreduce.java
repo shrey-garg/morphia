@@ -208,7 +208,6 @@ public class TestMapreduce extends TestBase {
     public static class ResultBase<T, V> {
         @Id
         private T type;
-        @Embedded
         private V value;
 
         public T getType() {

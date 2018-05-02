@@ -129,7 +129,6 @@ public class MapImplTest extends TestBase {
     }
 
     private static class ContainsMapOfEmbeddedInterfaces {
-        @Embedded
         private final Map<String, Serializable> values = new HashMap<>();
         @Id
         private ObjectId id;
@@ -154,12 +153,12 @@ public class MapImplTest extends TestBase {
     }
 
     private static class E {
-        @Embedded
         private final MyMap mymap = new MyMap();
         @Id
         private ObjectId id;
     }
 
+    @Embedded
     private static class MyMap extends HashMap<String, String> {
     }
 }

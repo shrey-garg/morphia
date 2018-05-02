@@ -28,14 +28,8 @@ import java.lang.annotation.Target;
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.TYPE})
+@Target({ElementType.TYPE})
 public @interface Embedded {
-
-    /**
-     * @return the concrete class to instantiate.
-     */
-    Class<?> concreteClass() default Object.class;
-
     /**
      * @return The name of the Mongo value to store the field. Defaults to the name of the field being annotated.
      */

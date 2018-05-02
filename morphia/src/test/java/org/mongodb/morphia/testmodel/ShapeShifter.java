@@ -25,13 +25,11 @@ import java.util.Set;
 
 @Entity("shapeshifters")
 public class ShapeShifter extends TestEntity {
-    @Embedded
     private Shape mainShape;
 
     @Reference
     private Shape referencedShape;
 
-    @Embedded
     private Set<Shape> availableShapes;
 
     public ShapeShifter() {

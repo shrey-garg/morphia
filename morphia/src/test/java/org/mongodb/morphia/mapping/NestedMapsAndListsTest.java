@@ -230,7 +230,6 @@ public class NestedMapsAndListsTest extends TestBase {
     }
     @Entity
     private static class ListListPerson {
-        @Embedded
         private final List<List<Person>> list = new ArrayList<>();
 
         @Id
@@ -342,7 +341,6 @@ public class NestedMapsAndListsTest extends TestBase {
 
     }
     private static class HashMapOfMap {
-        @Embedded
         private final Map<String, Map<String, String>> mom = new HashMap<>();
         @Id
         private ObjectId id;
@@ -355,7 +353,6 @@ public class NestedMapsAndListsTest extends TestBase {
 
     }
     private static class HashMapOfListOfMapMap {
-        @Embedded
         private final Map<String, List<HashMapOfMap>> mol = new HashMap<>();
         @Id
         private ObjectId id;

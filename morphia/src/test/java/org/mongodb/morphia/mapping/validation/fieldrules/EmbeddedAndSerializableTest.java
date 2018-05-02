@@ -50,7 +50,6 @@ public class EmbeddedAndSerializableTest extends TestBase {
     }
 
     public static class E extends TestEntity {
-        @Embedded
         @Serialized
         private R r;
     }
@@ -62,10 +61,8 @@ public class EmbeddedAndSerializableTest extends TestBase {
     public static class Project {
         @Id
         private ObjectId id;
-        @Embedded
         private Period period;
 
-        @Embedded
         private List<Period> periods = new ArrayList<>();
     }
 

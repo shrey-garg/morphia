@@ -605,7 +605,6 @@ public class AggregationTest extends TestBase {
         private String item;
         private int price;
         private int quantity;
-        @Embedded()
         private List<Inventory> inventoryDocs;
 
         private Order() {

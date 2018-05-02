@@ -115,7 +115,6 @@ public class EmbeddedMappingTest extends TestBase {
         @Id
         private ObjectId id;
 
-        @Embedded
         private Delta<T> delta;
 
         @Override

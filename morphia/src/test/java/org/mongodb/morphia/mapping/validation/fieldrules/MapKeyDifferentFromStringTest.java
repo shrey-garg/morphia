@@ -43,7 +43,6 @@ public class MapKeyDifferentFromStringTest extends TestBase {
     }
 
     public static class MapWithWrongKeyType3 extends TestEntity {
-        @Embedded
         private Map<BigDecimal, Integer> shouldBeOk = new HashMap<>();
 
     }

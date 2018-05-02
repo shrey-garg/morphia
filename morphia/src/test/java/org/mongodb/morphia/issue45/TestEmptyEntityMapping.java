@@ -57,7 +57,6 @@ public class TestEmptyEntityMapping extends TestBase {
 
     @Entity
     static class A extends TestEntity {
-        @Embedded
         private B b;
     }
 
@@ -80,11 +79,8 @@ public class TestEmptyEntityMapping extends TestBase {
 
         private String userId = null;
         private String fullName = null;
-        @Embedded
         private UserType userType = null;
-        @Embedded
         private Set<Rights> rights = new HashSet<>();
-        @Embedded
         private Set<NotificationAddress> notificationAddresses = new HashSet<>();
 
         public String getFullName() {

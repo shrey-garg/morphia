@@ -43,7 +43,7 @@ public class DuplicatePropertyNameTest extends TestBase {
         @Id
         private String id;
 
-        @Embedded(value = "value")
+        @Property(value = "value")
         private Map<String, Integer> content1;
         @Property(value = "value")
         private String content2;

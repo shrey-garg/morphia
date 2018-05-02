@@ -185,14 +185,6 @@ public class MappedField {
      * @return the concrete type of the MappedField
      */
     public Class getConcreteType() {
-        final Embedded e = getAnnotation(Embedded.class);
-        if (e != null) {
-            final Class concrete = e.concreteClass();
-            if (concrete != Object.class) {
-                return concrete;
-            }
-        }
-
         final Property p = getAnnotation(Property.class);
         if (p != null) {
             final Class concrete = p.concreteClass();

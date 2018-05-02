@@ -1357,7 +1357,6 @@ public class TestQuery extends TestBase {
     public static class PhotoWithKeywords {
         @Id
         private ObjectId id;
-        @Embedded
         private List<Keyword> keywords = new ArrayList<>();
 
         PhotoWithKeywords() {
@@ -1375,7 +1374,7 @@ public class TestQuery extends TestBase {
         }
     }
 
-    @Embedded(concreteClass = Keyword.class)
+    @Embedded
     public static class Keyword {
         private String keyword;
         private Integer score;
@@ -1609,7 +1608,6 @@ public class TestQuery extends TestBase {
         @Indexed(unique = true)
         private List<Object> key;
 
-        @Embedded
         private T value;
     }
 

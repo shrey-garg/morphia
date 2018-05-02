@@ -112,7 +112,6 @@ public class CollectionOfValuesTest extends TestBase {
         @Id
         private ObjectId id;
         private String name;
-        @Embedded
         private byte[] array;
         private int[][] cells = new int[2][2];
     }

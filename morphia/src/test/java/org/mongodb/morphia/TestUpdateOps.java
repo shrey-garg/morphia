@@ -974,7 +974,6 @@ public class TestUpdateOps extends TestBase {
         private ObjectId id;
         @Indexed
         private String uuid;
-        @Embedded
         private List<EntityLog> logs = new ArrayList<>();
         private Document raw;
 
@@ -1029,12 +1028,12 @@ public class TestUpdateOps extends TestBase {
     }
 
     private static final class Parent {
-        @Embedded
         private final Set<Child> children = new HashSet<>();
         @Id
         private ObjectId id;
     }
 
+    @Embedded
     private static final class Child {
         private String first;
         private String last;
