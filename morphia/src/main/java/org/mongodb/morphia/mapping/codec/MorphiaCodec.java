@@ -9,25 +9,38 @@ import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.DiscriminatorLookup;
+import org.bson.codecs.pojo.FieldModel;
 import org.bson.codecs.pojo.InstanceCreator;
 import org.bson.codecs.pojo.PojoCodec;
 import org.bson.codecs.pojo.PojoCodecImpl;
 import org.bson.codecs.pojo.PropertyCodecProvider;
+import org.bson.codecs.pojo.PropertyModel;
+import org.mongodb.morphia.annotations.NotSaved;
 import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.PrePersist;
+import org.mongodb.morphia.logging.Logger;
+import org.mongodb.morphia.logging.MorphiaLoggerFactory;
+import org.mongodb.morphia.mapping.DefaultCreator;
 import org.mongodb.morphia.mapping.MappedClass;
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.List;
+import java.util.Map;
+
+import static java.lang.String.format;
 
 public class MorphiaCodec<T> extends PojoCodecImpl<T> {
+    private static final Logger LOG = MorphiaLoggerFactory.get(MorphiaCodec.class);
+
     private final Mapper mapper;
     private final MappedClass mappedClass;
     private final CodecRegistry registry;
     private final List<PropertyCodecProvider> propertyCodecProviders;
     private final DiscriminatorLookup discriminatorLookup;
+    private Map<String, FieldModel> fieldModelMap;
 
     MorphiaCodec(final Mapper mapper, final MappedClass mappedClass, final ClassModel<T> classModel, final CodecRegistry registry,
                  final List<PropertyCodecProvider> propertyCodecProviders, final DiscriminatorLookup discriminatorLookup) {
@@ -56,6 +69,23 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
         } else {
             super.encode(writer, value, encoderContext);
         }
+    }
+
+    @Override
+    protected <S> void encodeProperty(final BsonWriter writer,
+                                      final T instance,
+                                      final EncoderContext encoderContext,
+                                      final PropertyModel<S> propertyModel) {
+        if (!getMappedField(propertyModel.getWriteName()).hasAnnotation(NotSaved.class)) {
+            super.encodeProperty(writer, instance, encoderContext, propertyModel);
+        } else {
+            LOG.info(format("Not saving %s#%s becase it's marked with @NotSaved", getClassModel().getName(),
+                propertyModel.getName()));
+        }
+    }
+
+    private MappedField getMappedField(final String name) {
+        return getMappedClass().getMappedField(name);
     }
 
     @Override
