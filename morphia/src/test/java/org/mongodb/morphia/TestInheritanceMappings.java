@@ -131,9 +131,6 @@ public class TestInheritanceMappings extends TestBase {
         int getWheelCount();
     }
 
-    private interface MapPlusIterableStringString extends Iterable<Entry<String, String>>, Map<String, String> {
-    }
-
     @Entity("vehicles")
     private abstract static class AbstractVehicle implements Vehicle {
         @Id
@@ -218,7 +215,7 @@ public class TestInheritanceMappings extends TestBase {
     }
 
     @Entity(noClassnameStored = true)
-    public static class MapLike implements MapPlusIterableStringString {
+    public static class MapLike implements Iterable<Entry<String, String>>, Map<String, String> {
         private final HashMap<String, String> realMap = new HashMap<>();
         @Id
         private ObjectId id;

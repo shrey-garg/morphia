@@ -94,7 +94,7 @@ public class Mapper {
         codecProvider = new MorphiaCodecProvider(this, singletonList(new MorphiaConvention(opts)));
         final MorphiaTypesCodecProvider typesCodecProvider = new MorphiaTypesCodecProvider(this);
 
-        this.codecRegistry = fromRegistries(
+        this.codecRegistry = fromRegistries(fromProviders(new MorphiaShortCutProvider(codecProvider)),
             codecRegistry,
             fromProviders(new EnumCodecProvider(), typesCodecProvider, codecProvider));
     }

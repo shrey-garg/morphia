@@ -388,48 +388,6 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testMaps() {
-        final MongoCollection<Document> articles = getDatabase().getCollection("articles");
-        getMorphia().getMapper().map(Article.class, Translation.class, Circle.class);
-
-        final Article related = new Article();
-        final Document relatedDocument = toDocument(related);
-        articles.insertOne(relatedDocument);
-
-        final Article relatedLoaded = fromDocument(getDatastore(), Article.class,
-            articles.find(new Document(Mapper.ID_KEY,
-                relatedDocument.get(Mapper.ID_KEY)))
-                    .iterator().tryNext());
-
-        final Article article = new Article();
-        article.setTranslation("en", new Translation("Hello World", "Just a test"));
-        article.setTranslation("is", new Translation("Halló heimur", "Bara að prófa"));
-
-        article.setAttribute("myDate", new Date());
-        article.setAttribute("myString", "Test");
-        article.setAttribute("myInt", 123);
-
-        article.putRelated("test", relatedLoaded);
-
-        final Document articleDocument = toDocument(article);
-        articles.insertOne(articleDocument);
-
-        final Article articleLoaded = fromDocument(getDatastore(), Article.class,
-            articles.find(new Document(Mapper.ID_KEY, articleDocument.get(Mapper.ID_KEY)))
-                    .iterator().tryNext());
-
-        assertEquals(article.getTranslations().size(), articleLoaded.getTranslations().size());
-        assertEquals(article.getTranslation("en").getTitle(), articleLoaded.getTranslation("en").getTitle());
-        assertEquals(article.getTranslation("is").getBody(), articleLoaded.getTranslation("is").getBody());
-        assertEquals(article.getAttributes().size(), articleLoaded.getAttributes().size());
-        assertEquals(article.getAttribute("myDate"), articleLoaded.getAttribute("myDate"));
-        assertEquals(article.getAttribute("myString"), articleLoaded.getAttribute("myString"));
-        assertEquals(article.getAttribute("myInt"), articleLoaded.getAttribute("myInt"));
-        assertEquals(article.getRelated().size(), articleLoaded.getRelated().size());
-        assertEquals(article.getRelated("test").getId(), articleLoaded.getRelated("test").getId());
-    }
-
-    @Test
     public void testObjectIdKeyedMap() {
         getMorphia().map(ContainsObjectIdKeyMap.class);
         final ContainsObjectIdKeyMap map = new ContainsObjectIdKeyMap();
@@ -499,9 +457,9 @@ public class TestMapping extends TestBase {
         final Document childDocument = toDocument(child);
         stuff.insertOne(childDocument);
 
-        final RecursiveParent parentLoaded = fromDocument(getDatastore(), RecursiveParent.class,
+        final RecursiveParent parentLoaded = fromDocument(RecursiveParent.class,
             stuff.find(new Document(Mapper.ID_KEY, parentDocument.get(Mapper.ID_KEY))).iterator().tryNext());
-        final RecursiveChild childLoaded = fromDocument(getDatastore(), RecursiveChild.class,
+        final RecursiveChild childLoaded = fromDocument(RecursiveChild.class,
             stuff.find(new Document(Mapper.ID_KEY, childDocument.get(Mapper.ID_KEY))).iterator().tryNext());
 
         parentLoaded.setChild(childLoaded);
@@ -510,9 +468,9 @@ public class TestMapping extends TestBase {
         stuff.insertOne(toDocument(parentLoaded));
         stuff.insertOne(toDocument(childLoaded));
 
-        final RecursiveParent finalParentLoaded = fromDocument(getDatastore(), RecursiveParent.class,
+        final RecursiveParent finalParentLoaded = fromDocument(RecursiveParent.class,
             stuff.find(new Document(Mapper.ID_KEY, parentDocument.get(Mapper.ID_KEY))).iterator().tryNext());
-        final RecursiveChild finalChildLoaded = fromDocument(getDatastore(), RecursiveChild.class,
+        final RecursiveChild finalChildLoaded = fromDocument(RecursiveChild.class,
             stuff.find(new Document(Mapper.ID_KEY, childDocument.get(Mapper.ID_KEY))).iterator().tryNext());
 
         assertNotNull(finalParentLoaded.getChild());
@@ -520,6 +478,7 @@ public class TestMapping extends TestBase {
     }
 
     @Test(expected = MappingException.class)
+    @Ignore("until references are resolved")
     public void testReferenceWithoutIdValue() {
         final RecursiveParent parent = new RecursiveParent();
         final RecursiveChild child = new RecursiveChild();

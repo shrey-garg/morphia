@@ -518,9 +518,7 @@ public class TestQuery extends TestBase {
     public void testExplainPlan() {
         getDatastore().saveMany(asList(new Pic("pic1"), new Pic("pic2"), new Pic("pic3"), new Pic("pic4")));
         Map<String, Object> explainResult = getDatastore().find(Pic.class).explain();
-        assertEquals(explainResult.toString(), 4, serverIsAtMostVersion(2.7)
-                                                  ? explainResult.get("n")
-                                                  : ((Map) explainResult.get("executionStats")).get("nReturned"));
+        assertEquals(explainResult.toString(), 4, ((Map) explainResult.get("executionStats")).get("nReturned"));
     }
 
     @Test

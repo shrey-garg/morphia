@@ -3,7 +3,10 @@ package org.mongodb.morphia;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.MongoDatabase;
+import org.bson.BsonDocumentReader;
 import org.bson.Document;
+import org.bson.codecs.DecoderContext;
+import org.bson.codecs.configuration.CodecRegistry;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
@@ -69,7 +72,7 @@ public abstract class TestBase {
         Assume.assumeTrue(serverIsAtLeastVersion(version));
     }
 
-    protected void cleanup() {
+    private void cleanup() {
         MongoDatabase db = getDatabase();
         if (db != null) {
             db.drop();
@@ -93,14 +96,6 @@ public abstract class TestBase {
         return Double.parseDouble(getServerVersion().substring(0, 3)) >= version;
     }
 
-    /**
-     * @param version must be a major version, e.g. 1.8, 2,0, 2.2
-     * @return true if server is at least specified version
-     */
-    protected boolean serverIsAtMostVersion(final double version) {
-        return Double.parseDouble(getServerVersion().substring(0, 3)) <= version;
-    }
-
     private String getServerVersion() {
         return (String) getMongoClient().getDatabase("admin")
                                         .runCommand(new Document("serverStatus", 1))
@@ -112,13 +107,15 @@ public abstract class TestBase {
         return mongoClient.getDatabase("admin").runCommand(new Document("ismaster", 1));
     }
 
-    protected Document toDocument(Object entity) {
+    Document toDocument(Object entity) {
         return getMorphia().getMapper().toDocument(entity);
     }
 
-    protected <T> T fromDocument(final Datastore datastore,
-                                 final Class<T> clazz,
-                                 final Document document) {
-        return null;
+    <T> T fromDocument(final Class<T> clazz,
+                       final Document document) {
+        final CodecRegistry codecRegistry = getMorphia().getMapper().getCodecRegistry();
+        return codecRegistry.get(clazz)
+                     .decode(new BsonDocumentReader(document.toBsonDocument(Document.class, codecRegistry)),
+                         DecoderContext.builder().build());
     }
 }
