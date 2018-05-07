@@ -743,7 +743,7 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     @Override
     public long getCount(final String collection) {
-        return getCollection(collection, null).count();
+        return getCollection(collection, Document.class).count();
     }
 
     @Override
