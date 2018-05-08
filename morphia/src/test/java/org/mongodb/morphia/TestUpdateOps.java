@@ -47,6 +47,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.is;
@@ -835,13 +836,13 @@ public class TestUpdateOps extends TestBase {
         final UpdateResult res = ds.updateMany(ds.find(ContainsPicKey.class).filter("name", cpk.name),
                                             ds.createUpdateOperations(ContainsPicKey.class).set("keys", cpk.keys));
 
-        assertThat(res.getModifiedCount(), is(1));
+        assertEquals(res.getModifiedCount(), 1);
 
         //test reading the object.
         final ContainsPicKey cpk2 = ds.find(ContainsPicKey.class).get();
         assertThat(cpk2, is(notNullValue()));
         assertThat(cpk.name, is(cpk2.name));
-        assertThat(cpk2.keys, hasItem(picKey));
+        assertTrue(format("Should find %s in %s", picKey, cpk2.keys), cpk2.keys.contains(picKey));
     }
 
     @Test
@@ -1023,7 +1024,7 @@ public class TestUpdateOps extends TestBase {
 
         @Override
         public String toString() {
-            return String.format("EntityLog{receivedTs=%s, value='%s'}", receivedTs, value);
+            return format("EntityLog{receivedTs=%s, value='%s'}", receivedTs, value);
         }
     }
 
