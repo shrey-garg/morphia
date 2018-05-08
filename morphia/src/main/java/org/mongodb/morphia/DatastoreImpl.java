@@ -565,10 +565,6 @@ public class DatastoreImpl implements AdvancedDatastore {
             return null;
         }
 
-        final MongoCollection<Document> collection = getDatabase()
-                                                         .getCollection(origCollection.getNamespace().getCollectionName())
-                                                         .withWriteConcern(writeConcern);
-
         final MappedField version = mc.getMappedVersionField();
         final String versionKeyName = version.getNameToStore();
 
@@ -577,11 +573,12 @@ public class DatastoreImpl implements AdvancedDatastore {
         version.setFieldValue(entity, newVersion);
 
         final Document document = mapper.toDocument(entity);
-        document.put(versionKeyName, newVersion);
+        document.remove(versionKeyName);
+        // TODO:  Look into CollectibleCodec as a means to get the driver generated ID
         final Object idValue = document.remove(Mapper.ID_KEY);
 
         if (/*idValue != null || */newVersion != 1L) {
-            final Query<?> query = newQuery(Document.class, collection)
+            final Query<?> query = newQuery((Class<T>)entity.getClass(), origCollection)
                                        .disableValidation()
                                        .filter(Mapper.ID_KEY, idValue)
                                        .filter(versionKeyName, oldVersion);
