@@ -1,13 +1,3 @@
-/*
- * Copyright (C) 2010 Olafur Gauti Gudmundsson Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of the License at http://www.apache.org/licenses/LICENSE-2.0 Unless
- * required
- * by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES
- * OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations
- * under the License.
- */
-
-
 package org.mongodb.morphia.mapping;
 
 
@@ -29,6 +19,7 @@ import org.mongodb.morphia.mapping.codec.MorphiaCodecProvider;
 import org.mongodb.morphia.mapping.codec.MorphiaTypesCodecProvider;
 import org.mongodb.morphia.utils.ReflectionUtils;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -68,8 +59,8 @@ public class Mapper {
     /**
      * Set of classes that registered by this mapper
      */
-    private final Map<String, MappedClass> mappedClasses = new HashMap<>();
-    private final Map<String, Set<MappedClass>> mappedClassesByCollection = new HashMap<>();
+    private final Map<Class, MappedClass> mappedClasses = new HashMap<>();
+    private final Map<String, Set<MappedClass>> mappedClassesByCollection = new ConcurrentHashMap<>();
 
     //EntityInterceptors; these are called after EntityListeners and lifecycle methods on an Entity, for all Entities
     private final List<EntityInterceptor> interceptors = new LinkedList<>();
@@ -90,7 +81,6 @@ public class Mapper {
      * @param opts the options to use
      */
     public Mapper(final CodecRegistry codecRegistry, final MapperOptions opts) {
-
         this.opts = opts;
         codecProvider = new MorphiaCodecProvider(this, singletonList(new MorphiaConvention(opts)));
         final MorphiaTypesCodecProvider typesCodecProvider = new MorphiaTypesCodecProvider(this);
@@ -138,12 +128,6 @@ public class Mapper {
         return new ArrayList<>(mappedClasses.values());
     }
 
-    /**
-     * Looks up the class mapped to a named collection.
-     *
-     * @param collection the collection name
-     * @return the Class mapped to this collection name
-     */
     public <T> Class<T> getClassFromCollection(final String collection) {
         final Set<MappedClass> mcs = mappedClassesByCollection.get(collection);
         if (mcs == null || mcs.isEmpty()) {
@@ -154,7 +138,18 @@ public class Mapper {
                 LOG.info(format("Found more than one class mapped to collection '%s'%s", collection, mcs));
             }
         }
-        return (Class<T>) mcs.iterator().next().getClazz();
+        return mcs.stream()
+                  .findFirst()
+                  .map(mc -> (Class<T>)mc.getClazz())
+                  .orElse(null);
+    }
+
+    public <T> List<MappedClass> getClassesMappedToCollection(final String collection) {
+        final Set<MappedClass> mcs = mappedClassesByCollection.get(collection);
+        if (mcs == null || mcs.isEmpty()) {
+            throw new MappingException(format("The collection '%s' is not mapped to a java class.", collection));
+        }
+        return new ArrayList<>(mcs);
     }
 
     /**
@@ -172,13 +167,7 @@ public class Mapper {
     }
 
     public String getCollectionName(final Class type) {
-        final Entity entityAn = (Entity) type.getAnnotation(Entity.class);
-        if (entityAn == null || entityAn.value().equals(Mapper.IGNORED_FIELDNAME)) {
-            return getOptions().isUseLowerCaseCollectionNames()
-                   ? type.getSimpleName().toLowerCase()
-                   : type.getSimpleName();
-        }
-        return entityAn.value();
+        return getMappedClass(type).getCollectionName();
     }
 
     /**
@@ -262,7 +251,7 @@ public class Mapper {
 
         Class type = (obj instanceof Class) ? (Class) obj : obj.getClass();
 
-        MappedClass mc = mappedClasses.get(type.getName());
+        MappedClass mc = mappedClasses.get(type);
         if (mc == null) {
             mc = addMappedClass(type);
         }
@@ -276,7 +265,7 @@ public class Mapper {
      * @return the MappedClass for the given Class
      */
     public MappedClass addMappedClass(final Class c) {
-        MappedClass mappedClass = mappedClasses.get(c.getName());
+        MappedClass mappedClass = mappedClasses.get(c);
         if (mappedClass == null) {
             final Codec codec1 = codecRegistry.get(c);
             if(codec1 instanceof MorphiaCodec) {
@@ -295,18 +284,9 @@ public class Mapper {
             mc.validate(this);
         }
 
-        mappedClasses.put(mc.getClazz().getName(), mc);
-
-        Set<MappedClass> mcs = mappedClassesByCollection.get(mc.getCollectionName());
-        if (mcs == null) {
-            mcs = new CopyOnWriteArraySet<>();
-            final Set<MappedClass> temp = mappedClassesByCollection.putIfAbsent(mc.getCollectionName(), mcs);
-            if (temp != null) {
-                mcs = temp;
-            }
-        }
-
-        mcs.add(mc);
+        mappedClasses.put(mc.getClazz(), mc);
+        mappedClassesByCollection.computeIfAbsent(mc.getCollectionName(), s -> new CopyOnWriteArraySet<>())
+                                 .add(mc);
 
         return mc;
     }

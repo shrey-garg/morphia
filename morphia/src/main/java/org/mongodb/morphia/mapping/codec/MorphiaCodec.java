@@ -79,7 +79,7 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
         if (!getMappedField(propertyModel.getWriteName()).hasAnnotation(NotSaved.class)) {
             super.encodeProperty(writer, instance, encoderContext, propertyModel);
         } else {
-            LOG.info(format("Not saving %s#%s becase it's marked with @NotSaved", getClassModel().getName(),
+            LOG.info(format("Not saving %s#%s because it's marked with @NotSaved", getClassModel().getName(),
                 propertyModel.getName()));
         }
     }

@@ -1,14 +1,19 @@
 package org.mongodb.morphia.mapping.codec;
 
 import org.bson.BsonReader;
+import org.bson.BsonReaderMark;
 import org.bson.BsonWriter;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.mapping.MappedClass;
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.MappingException;
+
+import java.util.Iterator;
+import java.util.List;
 
 public class KeyCodec implements Codec<Key> {
 
@@ -29,7 +34,6 @@ public class KeyCodec implements Codec<Key> {
         writer.writeName("$id");
         Codec codec = mapper.getCodecRegistry().get(value.getId().getClass());
         codec.encode(writer, value.getId(), encoderContext);
-        writer.writeString("type", value.getType().getName());
         writer.writeEndDocument();
     }
 
@@ -43,15 +47,29 @@ public class KeyCodec implements Codec<Key> {
         reader.readStartDocument();
 
         final String ref = reader.readString("$ref");
-        final Class<?> classFromCollection = mapper.getClassFromCollection(ref);
-        final MappedClass mappedClass = mapper.getMappedClass(classFromCollection);
+        final List<MappedClass> classes = mapper.getClassesMappedToCollection(ref);
+        final String name = reader.readName();
+        final BsonReaderMark mark = reader.getMark();
+        final Iterator<MappedClass> iterator = classes.iterator();
+        Object idValue = null;
+        MappedClass mappedClass = null;
+        while(idValue == null && iterator.hasNext()) {
+            mappedClass = iterator.next();
+            try {
+                final MappedField idField = mappedClass.getIdField();
+                if (idField != null) {
+                    final Class<?> idType = idField.getTypeData().getType();
+                    idValue = mapper.getCodecRegistry().get(idType).decode(reader, decoderContext);
+                }
+            } catch(Exception e) {
+                mark.reset();
+            }
+        }
 
-        reader.readName();
-        final Class<?> idType = mappedClass.getIdField().getTypeData().getType();
-        final Object idValue = mapper.getCodecRegistry().get(idType).decode(reader, decoderContext);
-        final String type = reader.readString("type");
-
+        if(idValue == null) {
+            throw new MappingException("Could not map the Key to a type.");
+        }
         reader.readEndDocument();
-        return new Key<>(classFromCollection, ref, idValue);
+        return new Key<>(mappedClass.getClazz(), ref, idValue);
     }
 }
