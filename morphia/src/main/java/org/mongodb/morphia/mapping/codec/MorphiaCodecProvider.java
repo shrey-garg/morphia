@@ -1,6 +1,7 @@
 package org.mongodb.morphia.mapping.codec;
 
 import org.bson.codecs.Codec;
+import org.bson.codecs.configuration.CodecConfigurationException;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;

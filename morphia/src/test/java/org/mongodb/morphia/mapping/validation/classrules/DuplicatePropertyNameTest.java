@@ -1,28 +1,27 @@
 package org.mongodb.morphia.mapping.validation.classrules;
 
 
+import org.bson.codecs.configuration.CodecConfigurationException;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
-import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Property;
-import org.mongodb.morphia.mapping.validation.ConstraintViolationException;
 
 import java.util.Map;
 
 public class DuplicatePropertyNameTest extends TestBase {
-    @Test(expected = ConstraintViolationException.class)
+    @Test(expected = CodecConfigurationException.class)
     public void testDuplicatedPropertyNameDifferentType() {
         getMorphia().map(DuplicatedPropertyName2.class);
     }
 
-    @Test(expected = ConstraintViolationException.class)
+    @Test(expected = CodecConfigurationException.class)
     public void testDuplicatedPropertyNameSameType() {
         getMorphia().map(DuplicatedPropertyName.class);
     }
 
-    @Test(expected = ConstraintViolationException.class)
+    @Test(expected = CodecConfigurationException.class)
     public void testDuplicatedPropertyNameShadowedFields() {
         getMorphia().map(Extends.class);
     }
