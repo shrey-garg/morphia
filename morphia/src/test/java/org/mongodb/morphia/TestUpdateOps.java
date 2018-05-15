@@ -90,7 +90,7 @@ public class TestUpdateOps extends TestBase {
         UpdateResult UpdateResult = getDatastore().updateMany(query, updateOps);
 
         // then
-        assertThat(UpdateResult.getModifiedCount(), is(1));
+        assertThat(UpdateResult.getModifiedCount(), is(1L));
         assertThat(getDatastore().find(Parent.class).filter("id", parentId).get().children, hasItem(new Child(childName, updatedLastName)));
     }
 
