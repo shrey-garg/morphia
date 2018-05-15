@@ -14,6 +14,7 @@ import org.bson.codecs.pojo.InstanceCreator;
 import org.bson.codecs.pojo.PojoCodec;
 import org.bson.codecs.pojo.PojoCodecImpl;
 import org.bson.codecs.pojo.PropertyCodecProvider;
+import org.bson.codecs.pojo.PropertyCodecRegistry;
 import org.bson.codecs.pojo.PropertyModel;
 import org.mongodb.morphia.annotations.NotSaved;
 import org.mongodb.morphia.annotations.PostLoad;
@@ -22,13 +23,13 @@ import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.PrePersist;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
-import org.mongodb.morphia.mapping.DefaultCreator;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.String.format;
 
@@ -37,9 +38,6 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
 
     private final Mapper mapper;
     private final MappedClass mappedClass;
-    private final CodecRegistry registry;
-    private final List<PropertyCodecProvider> propertyCodecProviders;
-    private final DiscriminatorLookup discriminatorLookup;
     private Map<String, FieldModel> fieldModelMap;
 
     MorphiaCodec(final Mapper mapper, final MappedClass mappedClass, final ClassModel<T> classModel, final CodecRegistry registry,
@@ -47,9 +45,16 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
         super(classModel, registry, propertyCodecProviders, discriminatorLookup);
         this.mapper = mapper;
         this.mappedClass = mappedClass;
-        this.registry = registry;
-        this.propertyCodecProviders = propertyCodecProviders;
-        this.discriminatorLookup = discriminatorLookup;
+    }
+
+    public MorphiaCodec(final Mapper mapper,
+                        final MappedClass mappedClass,
+                        final ClassModel<T> classModel,
+                        final CodecRegistry registry,
+                        final PropertyCodecRegistry propertyCodecRegistry, final DiscriminatorLookup discriminatorLookup, final boolean specialized) {
+        super(classModel, registry, propertyCodecRegistry, discriminatorLookup, new ConcurrentHashMap<>(), specialized);
+        this.mapper = mapper;
+        this.mappedClass = mappedClass;
     }
 
     public MappedClass getMappedClass() {
@@ -65,7 +70,7 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
             final DocumentWriter documentWriter = new DocumentWriter();
             super.encode(documentWriter, value, encoderContext);
             final Document document = mappedClass.callLifecycleMethods(PostPersist.class, value, documentWriter.getRoot(), mapper);
-            registry.get(Document.class).encode(writer, document, encoderContext);
+            getRegistry().get(Document.class).encode(writer, document, encoderContext);
         } else {
             super.encode(writer, value, encoderContext);
         }
@@ -94,7 +99,7 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
         if (mappedClass.hasLifecycle(PreLoad.class)) {
             final InstanceCreator<T> instanceCreator = getClassModel().getInstanceCreator();
             t = instanceCreator.getInstance();
-            Document document = registry.get(Document.class).decode(reader, decoderContext);
+            Document document = getRegistry().get(Document.class).decode(reader, decoderContext);
             document = mappedClass.callLifecycleMethods(PreLoad.class, t, document, mapper);
 
             decodeProperties(new BsonDocumentReader(document.toBsonDocument(Document.class, mapper.getCodecRegistry())), decoderContext,
@@ -145,7 +150,8 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
         private MorphiaCodec<T> getSpecialized() {
             if(specialized == null) {
                 specialized = new MorphiaCodec<T>(morphiaCodec.mapper, new MappedClass(classModel, morphiaCodec.mapper),
-                    classModel, morphiaCodec.registry, morphiaCodec.propertyCodecProviders, morphiaCodec.discriminatorLookup);
+                    classModel, morphiaCodec.getRegistry(), morphiaCodec.getPropertyCodecRegistry(), morphiaCodec.getDiscriminatorLookup(),
+                    true);
             }
             return specialized;
         }
