@@ -29,6 +29,7 @@ import org.bson.types.CodeWScope;
 import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.TestBase;
@@ -1092,6 +1093,7 @@ public class TestQuery extends TestBase {
     }
 
     @Test(expected = ValidationException.class)
+    @Ignore("references are not currently supported")
     public void testReferenceQuery() {
         final Photo p = new Photo();
         final ContainsPhotoKey cpk = new ContainsPhotoKey();
