@@ -74,13 +74,14 @@ public class TestVersionAnnotation extends TestBase {
         getMorphia().getMapper().mapPackage("org.mongodb.morphia.entities.version");
 
         Collection<MappedClass> mappedClasses = getMorphia().getMapper().getMappedClasses();
-        assertThat(mappedClasses.size(), is(2));
+        assertThat(mappedClasses.size(), is(3));
         List<Class<?>> list = new ArrayList<>();
         for (MappedClass mappedClass : mappedClasses) {
             list.add(mappedClass.getClazz());
         }
         assertTrue(list.contains(VersionedChildEntity.class));
         assertTrue(list.contains(AbstractVersionedBase.class));
+        assertTrue(list.contains(Versioned.class));
     }
 
     @Test
