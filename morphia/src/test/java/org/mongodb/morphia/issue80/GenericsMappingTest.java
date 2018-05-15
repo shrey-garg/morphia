@@ -40,6 +40,7 @@ public class GenericsMappingTest extends TestBase {
         hai.setThing(7);
         final HoldsAString has = new HoldsAString();
         has.setThing("tr");
+        ct.id = ObjectId.get().toString();
         ct.stringThing = has;
         ct.integerThing = hai;
 
