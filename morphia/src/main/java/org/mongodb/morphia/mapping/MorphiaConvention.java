@@ -41,16 +41,12 @@ public class MorphiaConvention implements Convention {
 
     @Override
     public void apply(final ClassModelBuilder<?> classModelBuilder) {
-        classModelBuilder.enableDiscriminator(isNotConcrete(classModelBuilder.getType()))
-                         .discriminator(classModelBuilder.getType().getName())
+        classModelBuilder.discriminator(classModelBuilder.getType().getName())
                          .discriminatorKey("className");
 
-        if (classModelBuilder.hasAnnotation(Entity.class)) {
-            final Entity entity = classModelBuilder.getAnnotation(Entity.class);
-            if (entity.noClassnameStored()) {
-                classModelBuilder.enableDiscriminator(false);
-            }
-        }
+        classModelBuilder.enableDiscriminator(!classModelBuilder.hasAnnotation(Entity.class)
+                                              || !classModelBuilder.getAnnotation(Entity.class).noClassnameStored()
+                                              || isNotConcrete(classModelBuilder.getType()));
 
         final List<String> names = classModelBuilder.getPropertyModelBuilders().stream()
                                                     .map(PropertyModelBuilder::getName)
@@ -199,12 +195,10 @@ public class MorphiaConvention implements Convention {
 
     private static class MorphiaPropertySerialization implements PropertySerialization {
         private final List<Annotation> annotations;
-        private final String name;
         private MapperOptions options;
         private int modifiers;
 
         MorphiaPropertySerialization(final MapperOptions options, final FieldModelBuilder<?> field) {
-            name = field.getName();
             this.options = options;
             annotations = field.getAnnotations();
             modifiers = field.getField().getModifiers();
