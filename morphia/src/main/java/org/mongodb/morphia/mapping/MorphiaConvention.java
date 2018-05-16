@@ -6,16 +6,19 @@ import org.bson.codecs.pojo.FieldModelBuilder;
 import org.bson.codecs.pojo.PropertyAccessor;
 import org.bson.codecs.pojo.PropertyMetadata;
 import org.bson.codecs.pojo.PropertyModelBuilder;
+import org.bson.codecs.pojo.PropertySerialization;
 import org.bson.codecs.pojo.TypeData;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.NotSaved;
 import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.annotations.Version;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -30,10 +33,10 @@ import static org.bson.codecs.pojo.PojoBuilderHelper.createPropertyModelBuilder;
 
 @SuppressWarnings("unchecked")
 public class MorphiaConvention implements Convention {
-    private MapperOptions opts;
+    private MapperOptions options;
 
-    public MorphiaConvention(final MapperOptions opts) {
-        this.opts = opts;
+    MorphiaConvention(final MapperOptions options) {
+        this.options = options;
     }
 
     @Override
@@ -86,7 +89,8 @@ public class MorphiaConvention implements Convention {
                         .writeName(mappedName)
                         .propertyAccessor(field.getType().isArray()
                                           ? new ArrayFieldAccessor(field)
-                                          : new FieldAccessor(field));
+                                          : new FieldAccessor(field))
+                .propertySerialization(new MorphiaPropertySerialization(options, builder));
 
                 final Class<?> type = property.getTypeData().getType();
                 if (Collection.class.isAssignableFrom(type)
@@ -190,6 +194,45 @@ public class MorphiaConvention implements Convention {
                 newValue = newArray;
             }
             super.set(instance, newValue);
+        }
+    }
+
+    private static class MorphiaPropertySerialization implements PropertySerialization {
+        private final List<Annotation> annotations;
+        private final String name;
+        private MapperOptions options;
+        private int modifiers;
+
+        MorphiaPropertySerialization(final MapperOptions options, final FieldModelBuilder<?> field) {
+            name = field.getName();
+            this.options = options;
+            annotations = field.getAnnotations();
+            modifiers = field.getField().getModifiers();
+        }
+
+        @Override
+        public boolean shouldSerialize(final Object value) {
+            if (!options.isStoreNulls() && value == null) {
+                return false;
+            }
+            if (options.isIgnoreFinals() && Modifier.isFinal(modifiers)) {
+                return false;
+            }
+            if (!options.isStoreEmpties()) {
+                if (value instanceof Map && ((Map)value).isEmpty()
+                    || value instanceof Collection && ((Collection)value).isEmpty()) {
+                    return false;
+                }
+            }
+            if (hasAnnotation(NotSaved.class)) {
+                return false;
+            }
+
+            return true;
+        }
+
+        private boolean hasAnnotation(final Class<? extends Annotation> annotationClass) {
+            return annotations.stream().anyMatch(a -> a.annotationType().equals(annotationClass));
         }
     }
 }

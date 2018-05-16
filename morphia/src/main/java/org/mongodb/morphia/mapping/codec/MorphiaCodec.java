@@ -12,35 +12,25 @@ import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.DiscriminatorLookup;
-import org.bson.codecs.pojo.FieldModel;
 import org.bson.codecs.pojo.InstanceCreator;
 import org.bson.codecs.pojo.PojoCodec;
 import org.bson.codecs.pojo.PojoCodecImpl;
 import org.bson.codecs.pojo.PropertyCodecProvider;
 import org.bson.codecs.pojo.PropertyCodecRegistry;
-import org.bson.codecs.pojo.PropertyModel;
 import org.bson.types.ObjectId;
-import org.mongodb.morphia.annotations.NotSaved;
 import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.PrePersist;
-import org.mongodb.morphia.logging.Logger;
-import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static java.lang.String.format;
 
 @SuppressWarnings("unchecked")
 public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCodec<T> {
-    private static final Logger LOG = MorphiaLoggerFactory.get(MorphiaCodec.class);
-
     private final Mapper mapper;
     private final MappedClass mappedClass;
 
@@ -118,23 +108,6 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
         return t;
     }
 
-    @Override
-    protected <S> void encodeProperty(final BsonWriter writer,
-                                      final T instance,
-                                      final EncoderContext encoderContext,
-                                      final PropertyModel<S> propertyModel) {
-        if (!getMappedField(propertyModel.getWriteName()).hasAnnotation(NotSaved.class)) {
-            super.encodeProperty(writer, instance, encoderContext, propertyModel);
-        } else {
-            LOG.info(format("Not saving %s#%s because it's marked with @NotSaved", getClassModel().getName(),
-                propertyModel.getName()));
-        }
-    }
-
-    private MappedField getMappedField(final String name) {
-        return getMappedClass().getMappedField(name);
-    }
-
     public MappedClass getMappedClass() {
         return mappedClass;
     }
@@ -151,8 +124,7 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
         private final ClassModel<T> classModel;
         private MorphiaCodec<T> specialized;
 
-        public <S> SpecializedMorphiaCodec(final MorphiaCodec morphiaCodec, final ClassModel<T> classModel) {
-
+        SpecializedMorphiaCodec(final MorphiaCodec morphiaCodec, final ClassModel<T> classModel) {
             this.morphiaCodec = morphiaCodec;
             this.classModel = classModel;
         }
@@ -169,7 +141,7 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
 
         private MorphiaCodec<T> getSpecialized() {
             if (specialized == null) {
-                specialized = new MorphiaCodec<T>(morphiaCodec.mapper, new MappedClass(classModel, morphiaCodec.mapper),
+                specialized = new MorphiaCodec<>(morphiaCodec.mapper, new MappedClass(classModel, morphiaCodec.mapper),
                     classModel, morphiaCodec.getRegistry(), morphiaCodec.getPropertyCodecRegistry(), morphiaCodec.getDiscriminatorLookup(),
                     true);
             }

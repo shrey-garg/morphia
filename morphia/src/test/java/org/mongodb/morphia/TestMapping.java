@@ -226,7 +226,9 @@ public class TestMapping extends TestBase {
     public void testFinalFieldNotPersisted() {
         getMorphia().getMapper().getOptions().setIgnoreFinals(true);
         getMorphia().map(ContainsFinalField.class);
-        final Key<ContainsFinalField> savedKey = getDatastore().save(new ContainsFinalField("blah"));
+        final ContainsFinalField blah = new ContainsFinalField("blah");
+        blah.setColor(System.currentTimeMillis() + "");
+        final Key<ContainsFinalField> savedKey = getDatastore().save(blah);
         final ContainsFinalField loaded = getDatastore().get(ContainsFinalField.class, savedKey.getId());
         assertNotNull(loaded);
         assertNotNull(loaded.name);
@@ -623,9 +625,10 @@ public class TestMapping extends TestBase {
     }
 
     private static class ContainsFinalField {
-        private final String name;
         @Id
         private ObjectId id;
+        private String color;
+        private final String name;
 
         protected ContainsFinalField() {
             name = "foo";
@@ -633,6 +636,14 @@ public class TestMapping extends TestBase {
 
         ContainsFinalField(final String name) {
             this.name = name;
+        }
+
+        public String getColor() {
+            return color;
+        }
+
+        public void setColor(final String color) {
+            this.color = color;
         }
     }
 
