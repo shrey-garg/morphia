@@ -15,6 +15,7 @@ package org.mongodb.morphia;
 
 import com.mongodb.WriteConcern;
 import com.mongodb.client.model.UpdateOptions;
+import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.entities.version.AbstractVersionedBase;
@@ -159,13 +160,10 @@ public class TestVersionAnnotation extends TestBase {
 
     @Test(expected = ConcurrentModificationException.class)
     public void testThrowsExceptionWhenTryingToSaveAnOldVersion() {
-        // given
         final Versioned version1 = new Versioned();
         getDatastore().save(version1);
-        final Versioned version2 = getDatastore().get(Versioned.class, version1.getId());
-        getDatastore().save(version2);
+        getDatastore().save(getDatastore().get(Versioned.class, version1.getId()));
 
-        // when
         getDatastore().save(version1);
     }
 

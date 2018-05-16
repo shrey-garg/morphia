@@ -2,8 +2,11 @@ package org.mongodb.morphia.mapping.codec;
 
 import org.bson.BsonDocumentReader;
 import org.bson.BsonReader;
+import org.bson.BsonValue;
 import org.bson.BsonWriter;
 import org.bson.Document;
+import org.bson.codecs.Codec;
+import org.bson.codecs.CollectibleCodec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
@@ -16,6 +19,7 @@ import org.bson.codecs.pojo.PojoCodecImpl;
 import org.bson.codecs.pojo.PropertyCodecProvider;
 import org.bson.codecs.pojo.PropertyCodecRegistry;
 import org.bson.codecs.pojo.PropertyModel;
+import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.NotSaved;
 import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
@@ -33,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static java.lang.String.format;
 
-public class MorphiaCodec<T> extends PojoCodecImpl<T> {
+public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCodec<T> {
     private static final Logger LOG = MorphiaLoggerFactory.get(MorphiaCodec.class);
 
     private final Mapper mapper;
@@ -59,6 +63,29 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> {
 
     public MappedClass getMappedClass() {
         return mappedClass;
+    }
+
+    @Override
+    public T generateIdIfAbsentFromDocument(final T document) {
+        if (!documentHasId(document)) {
+            final MappedField mappedIdField = mappedClass.getMappedIdField();
+            mappedIdField.setFieldValue(document, new ObjectId());
+        }
+        return document;
+    }
+
+    @Override
+    public boolean documentHasId(final T document) {
+        return mappedClass.getMappedIdField().getFieldValue(document) != null;
+    }
+
+    @Override
+    public BsonValue getDocumentId(final T document) {
+        final Object id = mappedClass.getMappedIdField().getFieldValue(document);
+        final DocumentWriter writer = new DocumentWriter();
+        final Codec codec = getRegistry().get(id.getClass());
+        codec.encode(writer, id, EncoderContext.builder().build());
+        return writer.getRoot();
     }
 
     @Override

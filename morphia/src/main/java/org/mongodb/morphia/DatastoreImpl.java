@@ -16,6 +16,7 @@ import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.FindOptions;
 import com.mongodb.client.model.InsertManyOptions;
 import com.mongodb.client.model.InsertOneOptions;
+import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.ValidationOptions;
@@ -55,6 +56,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -577,16 +580,14 @@ public class DatastoreImpl implements AdvancedDatastore {
         // TODO:  Look into CollectibleCodec as a means to get the driver generated ID
         final Object idValue = document.remove(Mapper.ID_KEY);
 
-        if (/*idValue != null || */newVersion != 1L) {
+        if (idValue != null || newVersion != 1L) {
             final Query<?> query = newQuery((Class<T>)entity.getClass(), origCollection)
                                        .disableValidation()
                                        .filter(Mapper.ID_KEY, idValue)
                                        .filter(versionKeyName, oldVersion);
             result = updateOne(query, new Document("$set", document), new UpdateOptions()
                                                     .bypassDocumentValidation(options.getBypassDocumentValidation())
-                                                    .upsert(true),
-                writeConcern);
-
+                                                    .upsert(false), writeConcern);
 
             if (result.getModifiedCount() != 1) {
                 throw new ConcurrentModificationException(format("Entity of class %s (id='%s',version='%d') was concurrently updated.",
@@ -813,9 +814,20 @@ public class DatastoreImpl implements AdvancedDatastore {
 
         entities.forEach(this::ensureId);
 
-        collection
-            .withWriteConcern(wc)
-            .insertMany(entities, options);
+        final Map<Boolean, List<T>> grouped = entities.stream()
+                                                      .collect(groupingBy(
+                                                          entity -> mapper.getMappedClass(entity)
+                                                                          .getMappedVersionField() != null));
+        if(grouped.get(TRUE) != null) {
+            final InsertOneOptions insertOneOptions = new InsertOneOptions()
+                                                          .bypassDocumentValidation(options.getBypassDocumentValidation());
+            grouped.get(TRUE).forEach(e -> save(e,insertOneOptions, wc));
+        }
+        if(grouped.get(FALSE) != null) {
+            collection
+                .withWriteConcern(wc)
+                .insertMany(grouped.get(FALSE), options);
+        }
 
         return postSaveOperations(entities);
     }
@@ -900,15 +912,24 @@ public class DatastoreImpl implements AdvancedDatastore {
         ensureId(entity);
 
         if (tryVersionedUpdate(collection, entity, options, writeConcern) == null) {
-            collection
-                .withWriteConcern(writeConcern)
-                .insertOne(entity, options);
+            final MongoCollection<T> mongoCollection = collection
+                                                           .withWriteConcern(writeConcern);
+            final Object id = mapper.getMappedClass(entity).getMappedIdField().getFieldValue(entity);
+            if(id != null) {
+                mongoCollection.replaceOne(new Document("_id", id), entity, new ReplaceOptions()
+                                          .bypassDocumentValidation(options.getBypassDocumentValidation())
+                                          .upsert(true));
+            } else {
+                mongoCollection
+                    .insertOne(entity, options);
+            }
         }
 
         return postSaveOperations(singletonList(entity)).get(0);
     }
 
     private <T> void ensureId(final T entity) {
+/*
         final MappedClass mc = mapper.getMappedClass(entity);
         final MappedField idField = mc.getIdField();
         if(idField.getFieldValue(entity) == null) {
@@ -918,6 +939,7 @@ public class DatastoreImpl implements AdvancedDatastore {
                 throw new MappingException("If the ID type is not ObjectID, ID values must be set manually");
             }
         }
+*/
     }
 
     @Override
