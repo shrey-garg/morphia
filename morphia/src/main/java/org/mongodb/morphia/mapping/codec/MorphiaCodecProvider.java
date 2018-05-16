@@ -1,7 +1,6 @@
 package org.mongodb.morphia.mapping.codec;
 
 import org.bson.codecs.Codec;
-import org.bson.codecs.configuration.CodecConfigurationException;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
@@ -13,7 +12,6 @@ import org.bson.codecs.pojo.PropertyCodecProvider;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
 
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -21,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.bson.assertions.Assertions.notNull;
 
@@ -38,19 +37,18 @@ public class MorphiaCodecProvider implements CodecProvider {
         this.mapper = mapper;
         this.conventions = conventions;
         this.discriminatorLookup = new DiscriminatorLookup(this.classModels, this.packages);
+        propertyCodecProviders.add(new MorphiaMapPropertyCodecProvider());
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
-        if (clazz.isEnum() || clazz.getPackage() == null) {
+        if (/*clazz.isEnum() || */clazz.getPackage() == null) {
             return null;
         }
-        if (!clazz.isInterface()) {
-            for (String restrictedPackage : restrictedPackages) {
-                if(clazz.getPackage().getName().startsWith(restrictedPackage + ".")) {
-                    return null;
-                }
+        for (String restrictedPackage : restrictedPackages) {
+            if(clazz.getPackage().getName().startsWith(restrictedPackage + ".")) {
+                return null;
             }
         }
         if (clazz.getPackage() != null && (packages.isEmpty() || packages.contains(clazz.getPackage().getName()))) {

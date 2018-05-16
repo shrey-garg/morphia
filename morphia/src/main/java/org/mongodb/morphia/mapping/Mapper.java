@@ -4,6 +4,7 @@ package org.mongodb.morphia.mapping;
 import org.bson.Document;
 import org.bson.codecs.Codec;
 import org.bson.codecs.EncoderContext;
+import org.bson.codecs.configuration.CodecConfigurationException;
 import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
@@ -267,9 +268,13 @@ public class Mapper {
     public MappedClass addMappedClass(final Class c) {
         MappedClass mappedClass = mappedClasses.get(c);
         if (mappedClass == null) {
-            final Codec codec1 = codecRegistry.get(c);
-            if(codec1 instanceof MorphiaCodec) {
-                return addMappedClass(((MorphiaCodec) codec1).getMappedClass());
+            try {
+                final Codec codec1 = codecRegistry.get(c);
+                if(codec1 instanceof MorphiaCodec) {
+                    return addMappedClass(((MorphiaCodec) codec1).getMappedClass());
+                }
+            } catch (CodecConfigurationException e) {
+                return null;
             }
         }
         return mappedClass;

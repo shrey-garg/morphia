@@ -28,8 +28,10 @@ import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.annotations.Version;
+import org.mongodb.morphia.mapping.codec.Conversions;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.HashMap;
@@ -220,7 +222,8 @@ public class MappedField {
      */
     public void setFieldValue(final Object instance, final Object value) {
         try {
-            property.getField().set(instance, value);
+            final Field field = property.getField();
+            field.set(instance, Conversions.convert(value.getClass(), field.getType(), value));
         } catch (IllegalAccessException e) {
             throw new MappingException(e.getMessage(), e);
         }

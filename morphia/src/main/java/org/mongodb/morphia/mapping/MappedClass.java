@@ -414,7 +414,10 @@ public class MappedClass {
         }
 
         for (Class<?> aClass : type.getInterfaces()) {
-            interfaces.add(mapper.getMappedClass(aClass));
+            final MappedClass mappedClass = mapper.getMappedClass(aClass);
+            if(mappedClass != null) {
+                interfaces.add(mappedClass);
+            }
         }
 
         final List<Class<?>> lifecycleClasses = new ArrayList<>();
