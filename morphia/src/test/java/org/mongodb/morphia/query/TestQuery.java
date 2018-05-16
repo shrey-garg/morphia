@@ -1141,9 +1141,9 @@ public class TestQuery extends TestBase {
 
         Pic foundItem = getDatastore().find(Pic.class)
                                       .field("name").equal("pic2")
-                                      .fetchEmptyEntities(new FindOptions()
-                                                              .limit(1))
-                                      .tryNext();
+                                      .get(new FindOptions()
+                                               .returnKey(true)
+                                               .limit(1));
         assertNotNull(foundItem);
         assertThat("Name should be populated", foundItem.getName(), is("pic2"));
         assertNull("ID should not be populated", foundItem.getId());

@@ -138,6 +138,7 @@ public class QueryInTest extends TestBase {
 
     @Entity("data")
     private static final class Data {
+        @Id
         private ObjectId id;
         private Set<ObjectId> otherIds;
 

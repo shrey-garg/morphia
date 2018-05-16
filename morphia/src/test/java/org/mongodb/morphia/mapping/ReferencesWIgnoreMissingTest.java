@@ -3,6 +3,7 @@ package org.mongodb.morphia.mapping;
 
 import org.bson.types.ObjectId;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Entity;
@@ -11,6 +12,7 @@ import org.mongodb.morphia.annotations.Reference;
 
 import java.util.List;
 
+@Ignore("references are not currently supported")
 public class ReferencesWIgnoreMissingTest extends TestBase {
     @Test
     public void testMissingReference() {
