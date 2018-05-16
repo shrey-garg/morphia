@@ -156,6 +156,10 @@ public class MappedClass {
     @SuppressWarnings("unchecked")
     public Document callLifecycleMethods(final Class<? extends Annotation> event, final Object entity, final Document document,
                                          final Mapper mapper) {
+        if (!hasLifecycle(event)) {
+            return document;
+        }
+
         final List<ClassMethodPair> methodPairs = lifecycleMethods.get(event);
         Document retDbObj = document;
         try {

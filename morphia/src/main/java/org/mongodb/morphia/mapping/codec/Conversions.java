@@ -16,7 +16,6 @@ public final class Conversions {
     private static Map<Class<?>, Map<Class<?>, Function<?, ?>>> conversions  = new HashMap<>();
 
     static {
-//        register(ObjectId.class, String.class, ObjectId::toString);
         register(String.class, ObjectId.class, ObjectId::new);
         register(String.class, Boolean.class, Boolean::parseBoolean);
         register(String.class, Byte.class, Byte::parseByte);
@@ -47,7 +46,6 @@ public final class Conversions {
             if(toType.isEnum() && fromType.equals(String.class)) {
                 return Enum.valueOf((Class<? extends Enum>)toType, (String)value);
             }
-            LOG.warning(format("No conversion found for %s to %s", fromType.getName(), toType.getName()));
             return value;
         }
         return function.apply(value);

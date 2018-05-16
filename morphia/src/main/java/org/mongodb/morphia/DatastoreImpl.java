@@ -569,33 +569,31 @@ public class DatastoreImpl implements AdvancedDatastore {
         }
 
         final MappedField version = mc.getMappedVersionField();
-        final String versionKeyName = version.getNameToStore();
-
         Long oldVersion = (Long) version.getFieldValue(entity);
-        long newVersion = oldVersion == null ? 1L : oldVersion + 1L;
-        version.setFieldValue(entity, newVersion);
 
         final Document document = mapper.toDocument(entity);
-        document.remove(versionKeyName);
-        // TODO:  Look into CollectibleCodec as a means to get the driver generated ID
+        document.remove(version.getNameToStore());
         final Object idValue = document.remove(Mapper.ID_KEY);
 
-        if (idValue != null || newVersion != 1L) {
+        final long newVersion = oldVersion == null ? 1 : oldVersion + 1;
+        version.setFieldValue(entity, newVersion);
+        if (idValue != null) {
             final Query<?> query = newQuery((Class<T>)entity.getClass(), origCollection)
                                        .disableValidation()
                                        .filter(Mapper.ID_KEY, idValue)
-                                       .filter(versionKeyName, oldVersion);
-            result = updateOne(query, new Document("$set", document), new UpdateOptions()
-                                                    .bypassDocumentValidation(options.getBypassDocumentValidation())
-                                                    .upsert(false), writeConcern);
+                                       .filter(version.getNameToStore(), oldVersion);
+            final Document update = !document.isEmpty() ? new Document("$set", document) : new Document(document);
+            result = updateOne(query, update, new UpdateOptions()
+                                                  .bypassDocumentValidation(options.getBypassDocumentValidation())
+                                                  .upsert(false), writeConcern);
 
-            if (result.getModifiedCount() != 1) {
+            if (result.getModifiedCount() != 1 && newVersion != 1) {
                 throw new ConcurrentModificationException(format("Entity of class %s (id='%s',version='%d') was concurrently updated.",
                     entity.getClass().getName(), idValue, oldVersion));
             }
         }
 
-        return result;
+        return result != null && result.getModifiedCount() == 0 ? null : result;
     }
 
     private <T> List<Key<T>> postSaveOperations(final List<T> entities/*, final Map<Object, Document> involvedObjects*/) {

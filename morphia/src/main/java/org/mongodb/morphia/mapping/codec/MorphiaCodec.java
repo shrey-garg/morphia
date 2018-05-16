@@ -22,6 +22,7 @@ import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.PrePersist;
+import org.mongodb.morphia.annotations.PreSave;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
@@ -74,14 +75,20 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
 
     @Override
     public void encode(final BsonWriter writer, final T value, final EncoderContext encoderContext) {
-        if (mappedClass.hasLifecycle(PrePersist.class)) {
-            mappedClass.callLifecycleMethods(PrePersist.class, value, null, mapper);
-        }
-        if (mappedClass.hasLifecycle(PostPersist.class)) {
+        mappedClass.callLifecycleMethods(PrePersist.class, value, null, mapper);
+
+        if (mappedClass.hasLifecycle(PostPersist.class)
+            || mappedClass.hasLifecycle(PreSave.class)) {
             final DocumentWriter documentWriter = new DocumentWriter();
             super.encode(documentWriter, value, encoderContext);
-            final Document document = mappedClass.callLifecycleMethods(PostPersist.class, value, documentWriter.getRoot(), mapper);
+            Document document;
+
+            document = mappedClass.callLifecycleMethods(PreSave.class, value, documentWriter.getRoot(), mapper);
+
             getRegistry().get(Document.class).encode(writer, document, encoderContext);
+
+            mappedClass.callLifecycleMethods(PostPersist.class, value, document, mapper);
+
         } else {
             super.encode(writer, value, encoderContext);
         }
@@ -101,9 +108,8 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
         } else {
             t = super.decode(reader, decoderContext);
         }
-        if (mappedClass.hasLifecycle(PostLoad.class)) {
-            mappedClass.callLifecycleMethods(PostLoad.class, t, null, mapper);
-        }
+
+        mappedClass.callLifecycleMethods(PostLoad.class, t, null, mapper);
 
         return t;
     }
