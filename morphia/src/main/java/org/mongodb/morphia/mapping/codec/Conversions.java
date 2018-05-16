@@ -3,7 +3,10 @@ package org.mongodb.morphia.mapping.codec;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
+import org.mongodb.morphia.mapping.MappingException;
 
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -24,6 +27,15 @@ public final class Conversions {
         register(String.class, Long.class, Long::parseLong);
         register(String.class, Float.class, Float::parseFloat);
         register(String.class, Short.class, Short::parseShort);
+
+        register(URI.class, String.class, u -> {
+            try {
+                return u.toURL().toExternalForm().replace(".", "%46");
+            } catch (MalformedURLException e) {
+                throw new MappingException("Could not convert URI: " + u);
+            }
+        });
+        register(String.class, URI.class, str -> URI.create(str.replace("%46", ".")));
     }
 
     private static <F, T> void register(final Class<F> fromType, final Class<T> toType, final Function<F, T> function) {

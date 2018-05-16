@@ -274,6 +274,7 @@ public class Mapper {
                     return addMappedClass(((MorphiaCodec) codec1).getMappedClass());
                 }
             } catch (CodecConfigurationException e) {
+                LOG.error(e.getMessage(), e);
                 return null;
             }
         }
