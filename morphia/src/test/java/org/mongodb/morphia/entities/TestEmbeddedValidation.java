@@ -27,7 +27,6 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.UpdateOperations;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -36,32 +35,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class TestEmbeddedValidation extends TestBase {
-
-    @Test
-    @SuppressWarnings("unchecked")
-    public void testCreateEntityWithBasicDBList() {
-        getMorphia().map(TestEntity.class);
-        TestEntity entity = new TestEntity();
-
-        Map<String, Object> map = mapOf("type", "text");
-        map.put("data", mapOf("text", "sometext"));
-
-        Map<String, Object> map1 = mapOf("data", mapOf("id", "123"));
-        map1.put("type", "image");
-        List<Map<String, Object>> data = asList(map, map1);
-
-        entity.setData(data);
-        getDatastore().save(entity);
-
-        TestEntity testEntity = getDatastore().get(TestEntity.class, entity.getId());
-        assertEquals(entity, testEntity);
-
-        Query<TestEntity> query = getDatastore().createQuery(TestEntity.class);
-        query.disableValidation();
-        query.criteria("data.data.id").equal("123");
-
-        assertNotNull(query.get());
-    }
 
     @Test
     public void testDottedNames() {
@@ -111,12 +84,6 @@ public class TestEmbeddedValidation extends TestBase {
         Assert.assertEquals(1, list.size());
         Assert.assertEquals(fortyTwo, list.get(0).getListEmbeddedType().get(0));
 
-    }
-
-    private Map<String, Object> mapOf(final String key, final Object value) {
-        HashMap<String, Object> map = new HashMap<>();
-        map.put(key, value);
-        return map;
     }
 
     @Entity
