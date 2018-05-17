@@ -6,6 +6,9 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static java.lang.String.format;
 import static org.junit.Assert.fail;
 
@@ -64,6 +67,15 @@ public final class IndexMatcher extends TypeSafeMatcher<ListIndexesIterable<Docu
     protected void describeMismatchSafely(final ListIndexesIterable<Document> indexes, final Description mismatchDescription) {
         fail(format("Expected %s to find index with name '%s' in %s",
                     indexShouldBePresent ? "" : "not",
-                    indexName, indexes));
+                    indexName, unroll(indexes)));
+    }
+
+    private List<Document> unroll(final ListIndexesIterable<Document> iterable) {
+        final ArrayList<Document> indexes = new ArrayList<>();
+
+        for (final Document anIterable : iterable) {
+            indexes.add(anIterable);
+        }
+        return indexes;
     }
 }

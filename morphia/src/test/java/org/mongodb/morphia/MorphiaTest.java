@@ -10,6 +10,7 @@ import org.mongodb.morphia.testmappackage.testmapsubpackage.testmapsubsubpackage
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
@@ -27,8 +28,8 @@ public class MorphiaTest extends TestBase {
 
         // then
         Collection<MappedClass> mappedClasses = morphia.getMapper().getMappedClasses();
-        assertThat(mappedClasses.stream().map(c->c.getClassModel().getName()).collect(toList()).toString(), mappedClasses.size(),
-            is(5));
+        assertThat(mappedClasses.stream().map(c->c.getClassModel().getName()).collect(Collectors.toList()).toString(),
+            mappedClasses.size(), is(5));
         Collection<Class<?>> classes = new ArrayList<>();
         for (MappedClass mappedClass : mappedClasses) {
             classes.add(mappedClass.getClazz());

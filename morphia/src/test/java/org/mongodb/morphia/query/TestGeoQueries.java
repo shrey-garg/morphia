@@ -10,7 +10,7 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Indexed;
-import org.mongodb.morphia.utils.IndexDirection;
+import org.mongodb.morphia.utils.IndexType;
 
 import static org.mongodb.morphia.geo.GeoJson.point;
 
@@ -219,7 +219,7 @@ public class TestGeoQueries extends TestBase {
         @Id
         private ObjectId id;
         private String name;
-        @Indexed(IndexDirection.GEO2D)
+        @Indexed(IndexType.GEO2D)
         private double[] loc;
 
         private Place() {

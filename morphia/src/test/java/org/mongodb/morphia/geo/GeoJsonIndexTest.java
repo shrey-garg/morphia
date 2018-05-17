@@ -4,7 +4,7 @@ import com.mongodb.client.model.geojson.Point;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Indexed;
-import org.mongodb.morphia.utils.IndexDirection;
+import org.mongodb.morphia.utils.IndexType;
 
 import static org.mongodb.morphia.geo.GeoJson.point;
 
@@ -22,7 +22,7 @@ public class GeoJsonIndexTest extends TestBase {
 
     @SuppressWarnings("unused")
     private static final class Place {
-        @Indexed(IndexDirection.GEO2D)
+        @Indexed(IndexType.GEO2D)
         private Point location;
         private String name;
 

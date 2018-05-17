@@ -11,7 +11,7 @@ public class UniqueIndexOnValue {
     @Id
     private ObjectId id;
 
-    @Indexed(name = "l_ascending", unique = true)
+    @Indexed(options = @IndexOptions(name = "l_ascending", unique = true))
     private long value;
 
     @Indexed(options = @IndexOptions(unique = true))

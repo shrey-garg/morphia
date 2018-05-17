@@ -2,6 +2,7 @@ package org.mongodb.morphia;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
+import com.mongodb.client.ListIndexesIterable;
 import com.mongodb.client.MongoDatabase;
 import org.bson.BsonDocumentReader;
 import org.bson.Document;
@@ -11,7 +12,9 @@ import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 public abstract class TestBase {
     protected static final String TEST_DB_NAME = "morphia_test";

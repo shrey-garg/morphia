@@ -1,13 +1,13 @@
 package org.mongodb.morphia.geo;
 
-import org.mongodb.morphia.annotations.Indexed;
-import org.mongodb.morphia.utils.IndexDirection;
 import com.mongodb.client.model.geojson.GeometryCollection;
+import org.mongodb.morphia.annotations.Indexed;
+import org.mongodb.morphia.utils.IndexType;
 
 public final class AllTheThings {
     private String name;
 
-    @Indexed(IndexDirection.GEO2DSPHERE)
+    @Indexed(IndexType.GEO2DSPHERE)
     private GeometryCollection everything;
 
     @SuppressWarnings("UnusedDeclaration")

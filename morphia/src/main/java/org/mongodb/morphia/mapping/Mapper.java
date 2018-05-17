@@ -268,15 +268,15 @@ public class Mapper {
     public MappedClass addMappedClass(final Class c) {
         MappedClass mappedClass = mappedClasses.get(c);
         if (mappedClass == null) {
-            try {
+//            try {
                 final Codec codec1 = codecRegistry.get(c);
                 if(codec1 instanceof MorphiaCodec) {
                     return addMappedClass(((MorphiaCodec) codec1).getMappedClass());
                 }
-            } catch (CodecConfigurationException e) {
-                LOG.error(e.getMessage(), e);
-                return null;
-            }
+//            } catch (CodecConfigurationException e) {
+//                LOG.error(e.getMessage(), e);
+//                return null;
+//            }
         }
         return mappedClass;
     }

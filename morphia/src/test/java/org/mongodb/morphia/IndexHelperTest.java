@@ -40,7 +40,6 @@ import org.mongodb.morphia.annotations.Text;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.MappingException;
-import org.mongodb.morphia.utils.IndexDirection;
 import org.mongodb.morphia.utils.IndexType;
 
 import java.util.concurrent.TimeUnit;
@@ -277,7 +276,7 @@ public class IndexHelperTest extends TestBase {
     @SuppressWarnings("deprecation")
     public void normalizeIndexed() {
         Indexed indexed = new IndexedBuilder()
-            .value(IndexDirection.DESC)
+            .value(IndexType.DESC)
             .options(new IndexOptionsBuilder().name("index_name")
                                               .background(true)
                                               .expireAfterSeconds(42)

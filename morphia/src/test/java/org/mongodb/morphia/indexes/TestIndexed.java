@@ -13,7 +13,7 @@
 
 package org.mongodb.morphia.indexes;
 
-import com.mongodb.DuplicateKeyException;
+import com.mongodb.MongoWriteException;
 import com.mongodb.client.ListIndexesIterable;
 import org.bson.Document;
 import org.bson.types.ObjectId;
@@ -36,9 +36,9 @@ import org.mongodb.morphia.entities.IndexOnValue;
 import org.mongodb.morphia.entities.NamedIndexOnValue;
 import org.mongodb.morphia.entities.UniqueIndexOnValue;
 import org.mongodb.morphia.mapping.MappedClass;
-import org.mongodb.morphia.mapping.MappingException;
-import org.mongodb.morphia.utils.IndexDirection;
 import org.mongodb.morphia.utils.IndexType;
+
+import java.util.List;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
@@ -110,13 +110,10 @@ public class TestIndexed extends TestBase {
 
     @Test
     public void testCanCreate2dSphereIndexes() {
-        // given
         getMorphia().map(Place.class);
 
-        // when
         getDatastore().ensureIndexes();
 
-        // then
         ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(Place.class).listIndexes();
         assertThat(count(indexInfo.iterator()), is(2));
         assertThat(indexInfo, hasIndexNamed("location_2dsphere"));
@@ -124,24 +121,21 @@ public class TestIndexed extends TestBase {
 
     @Test
     public void testCanCreate2dSphereIndexesOnLegacyCoordinatePairs() {
-        // given
         getMorphia().map(LegacyPlace.class);
-
-        // when
         getDatastore().ensureIndexes();
-
-        // then
-        ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(LegacyPlace.class).listIndexes();
-        assertThat(indexInfo, hasIndexNamed("location_2dsphere"));
+        assertThat(getDatastore().getCollection(LegacyPlace.class).listIndexes(), hasIndexNamed("location_2dsphere"));
     }
 
     @Test
     public void testEmbeddedIndex() {
         final MappedClass mc = getMorphia().getMapper().addMappedClass(ContainsIndexedEmbed.class);
 
-        assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), doesNotHaveIndexNamed("e.name_-1"));
+        ListIndexesIterable<Document> actual = getDatabase().getCollection(mc.getCollectionName()).listIndexes();
+        assertThat(actual.toString(), actual, doesNotHaveIndexNamed("e.name_-1"));
+
         getDatastore().ensureIndexes(ContainsIndexedEmbed.class);
-        assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), hasIndexNamed("e.name_-1"));
+        actual = getDatabase().getCollection(mc.getCollectionName()).listIndexes();
+        assertThat("dude", actual, hasIndexNamed("e.name_-1"));
     }
 
     @Test
@@ -177,7 +171,7 @@ public class TestIndexed extends TestBase {
         assertThat(getDatastore().getCollection(NamedIndexOnValue.class).listIndexes(), hasIndexNamed("value_ascending"));
     }
 
-    @Test(expected = DuplicateKeyException.class)
+    @Test(expected = MongoWriteException.class)
     public void testUniqueIndexedEntity() {
         getDatastore().ensureIndexes();
         assertThat(getDatastore().getCollection(UniqueIndexOnValue.class).listIndexes(), hasIndexNamed("l_ascending"));
@@ -186,18 +180,13 @@ public class TestIndexed extends TestBase {
         // this should throw...
         getDatastore().save(new UniqueIndexOnValue("v"));
     }
-    @Test(expected = MappingException.class)
-    public void testMixedIndexDefinitions() {
-        getMorphia().map(MixedIndexDefinitions.class);
-        getDatastore().ensureIndexes(MixedIndexDefinitions.class);
-    }
 
     @SuppressWarnings("unused")
     private static class Place {
         @Id
         private long id;
 
-        @Indexed(IndexDirection.GEO2DSPHERE)
+        @Indexed(IndexType.GEO2DSPHERE)
         private Object location;
     }
 
@@ -206,7 +195,7 @@ public class TestIndexed extends TestBase {
         @Id
         private long id;
 
-        @Indexed(IndexDirection.GEO2DSPHERE)
+        @Indexed(IndexType.GEO2DSPHERE)
         private double[] location;
     }
 
@@ -238,7 +227,7 @@ public class TestIndexed extends TestBase {
 
     @Embedded
     private static class IndexedEmbed {
-        @Indexed(IndexDirection.DESC)
+        @Indexed(IndexType.DESC)
         private String name;
     }
 
@@ -270,7 +259,7 @@ public class TestIndexed extends TestBase {
     private static class MixedIndexDefinitions {
         @Id
         private ObjectId id;
-        @Indexed(unique = true)
+        @Indexed(options = @IndexOptions(unique = true))
         private String name;
     }
 }

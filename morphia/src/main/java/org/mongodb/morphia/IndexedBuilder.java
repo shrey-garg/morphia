@@ -18,9 +18,8 @@ package org.mongodb.morphia;
 
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexed;
-import org.mongodb.morphia.utils.IndexDirection;
+import org.mongodb.morphia.utils.IndexType;
 
-@SuppressWarnings("deprecation")
 class IndexedBuilder extends AnnotationBuilder<Indexed> implements Indexed {
     @Override
     public Class<Indexed> annotationType() {
@@ -33,32 +32,7 @@ class IndexedBuilder extends AnnotationBuilder<Indexed> implements Indexed {
     }
 
     @Override
-    public boolean background() {
-        return get("background");
-    }
-
-    @Override
-    public int expireAfterSeconds() {
-        return get("expireAfterSeconds");
-    }
-
-    @Override
-    public String name() {
-        return get("name");
-    }
-
-    @Override
-    public boolean sparse() {
-        return get("sparse");
-    }
-
-    @Override
-    public boolean unique() {
-        return get("unique");
-    }
-
-    @Override
-    public IndexDirection value() {
+    public IndexType value() {
         return get("value");
     }
 
@@ -67,32 +41,12 @@ class IndexedBuilder extends AnnotationBuilder<Indexed> implements Indexed {
         return this;
     }
 
-    IndexedBuilder background(final boolean background) {
-        put("background", background);
-        return this;
-    }
-
-    IndexedBuilder expireAfterSeconds(final int expireAfterSeconds) {
-        put("expireAfterSeconds", expireAfterSeconds);
-        return this;
-    }
-
     IndexedBuilder name(final String name) {
         put("name", name);
         return this;
     }
 
-    IndexedBuilder sparse(final boolean sparse) {
-        put("sparse", sparse);
-        return this;
-    }
-
-    IndexedBuilder unique(final boolean unique) {
-        put("unique", unique);
-        return this;
-    }
-
-    IndexedBuilder value(final IndexDirection value) {
+    IndexedBuilder value(final IndexType value) {
         put("value", value);
         return this;
     }

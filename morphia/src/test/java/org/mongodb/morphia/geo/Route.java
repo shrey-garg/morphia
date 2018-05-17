@@ -2,12 +2,12 @@ package org.mongodb.morphia.geo;
 
 import com.mongodb.client.model.geojson.LineString;
 import org.mongodb.morphia.annotations.Indexed;
-import org.mongodb.morphia.utils.IndexDirection;
+import org.mongodb.morphia.utils.IndexType;
 
 public final class Route {
     private String name;
 
-    @Indexed(IndexDirection.GEO2DSPHERE)
+    @Indexed(IndexType.GEO2DSPHERE)
     private LineString route;
 
     @SuppressWarnings("UnusedDeclaration")

@@ -29,6 +29,9 @@ import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
+import org.mongodb.morphia.annotations.NotSaved;
+import org.mongodb.morphia.annotations.Reference;
+import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.annotations.Text;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
@@ -141,38 +144,41 @@ final class IndexHelper {
 
         List<Index> indexes = collectTopLevelIndexes(mc);
         indexes.addAll(collectFieldIndexes(mc));
-//        indexes.addAll(collectNestedIndexes(mc, parentMCs));
+        indexes.addAll(collectNestedIndexes(mc, parentMCs));
 
         return indexes;
     }
 
-/*
     private List<Index> collectNestedIndexes(final MappedClass mc, final List<MappedClass> parentMCs) {
         List<Index> list = new ArrayList<>();
         for (final MappedField mf : mc.getPersistenceFields()) {
-            if (!mf.isTypeMongoCompatible() && !mf.hasAnnotation(Reference.class) && !mf.hasAnnotation(Serialized.class)
+            if (!mf.hasAnnotation(Reference.class) && !mf.hasAnnotation(Serialized.class)
                 && !mf.hasAnnotation(NotSaved.class) && !mf.isTransient()) {
 
                 final List<MappedClass> parents = new ArrayList<>(parentMCs);
                 parents.add(mc);
 
                 List<MappedClass> classes = new ArrayList<>();
-                MappedClass mappedClass = mapper.getMappedClass(mf.isSingleValue() ? mf.getType() : mf.getSubClass());
-                classes.add(mappedClass);
-                classes.addAll(mapper.getSubTypes(mappedClass));
-                for (MappedClass aClass : classes) {
-                    for (Index index : collectIndexes(aClass, parents)) {
-                        List<Field> fields = new ArrayList<>();
-                        for (Field field : index.fields()) {
-                            fields.add(new FieldBuilder()
-                                           .value(field.value().equals("$**")
-                                                  ? field.value()
-                                                  : mf.getNameToStore() + "." + field.value())
-                                           .type(field.type())
-                                           .weight(field.weight()));
+                MappedClass mappedClass = mapper.getMappedClass(mf.getSpecializedType() != null
+                                                                ? mf.getSpecializedType()
+                                                                : mf.getConcreteType());
+                if (mappedClass != null) {
+                    classes.add(mappedClass);
+                    classes.addAll(mapper.getSubTypes(mappedClass));
+                    for (MappedClass aClass : classes) {
+                        for (Index index : collectIndexes(aClass, parents)) {
+                            List<Field> fields = new ArrayList<>();
+                            for (Field field : index.fields()) {
+                                fields.add(new FieldBuilder()
+                                               .value(field.value().equals("$**")
+                                                      ? field.value()
+                                                      : mf.getNameToStore() + "." + field.value())
+                                               .type(field.type())
+                                               .weight(field.weight()));
+                            }
+                            list.add(new IndexBuilder(index)
+                                         .fields(fields));
                         }
-                        list.add(new IndexBuilder(index)
-                                     .fields(fields));
                     }
                 }
             }
@@ -180,7 +186,6 @@ final class IndexHelper {
 
         return list;
     }
-*/
 
     private List<Index> collectTopLevelIndexes(final MappedClass mc) {
         List<Index> list = new ArrayList<>();

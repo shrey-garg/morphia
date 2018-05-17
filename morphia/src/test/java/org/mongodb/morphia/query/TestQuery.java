@@ -41,6 +41,7 @@ import org.mongodb.morphia.annotations.CappedAt;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
+import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.PrePersist;
 import org.mongodb.morphia.annotations.Property;
@@ -1590,7 +1591,7 @@ public class TestQuery extends TestBase {
         /**
          * The list of keys for this value.
          */
-        @Indexed(unique = true)
+        @Indexed(options = @IndexOptions(unique = true))
         private List<Object> key;
         /**
          * The id of the value document
@@ -1605,7 +1606,7 @@ public class TestQuery extends TestBase {
         @Id
         private ObjectId id;
 
-        @Indexed(unique = true)
+        @Indexed(options = @IndexOptions(unique = true))
         private List<Object> key;
 
         private T value;
@@ -1618,8 +1619,8 @@ public class TestQuery extends TestBase {
         /**
          * The list of keys for this value.
          */
-        @Indexed(unique = true)
         @Reference
+        @Indexed(options = @IndexOptions(unique = true))
         private List<Pic> key;
         /**
          * The id of the value document

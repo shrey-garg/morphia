@@ -1,8 +1,6 @@
 package org.mongodb.morphia.geo;
 
 import com.mongodb.MongoException;
-import com.mongodb.client.ListIndexesIterable;
-import org.bson.Document;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
@@ -31,16 +29,10 @@ import static org.mongodb.morphia.testutil.JSONMatcher.jsonEqual;
 public class LegacyCoordsTest extends TestBase {
     @Test
     public void shouldCreateA2dIndexOnAnEntityWithArrayOfCoordinates() {
-        // given
         PlaceWithLegacyCoords pointA = new PlaceWithLegacyCoords(new double[]{3.1, 5.2}, "Point A");
         getDatastore().save(pointA);
-
-        // when
         getDatastore().ensureIndexes();
-
-        // then
-        ListIndexesIterable<Document> indexes = getDatastore().getCollection(PlaceWithLegacyCoords.class).listIndexes();
-        assertThat(indexes, hasIndexNamed("location_2d"));
+        assertThat(getDatastore().getCollection(PlaceWithLegacyCoords.class).listIndexes(), hasIndexNamed("location_2d"));
     }
 
     @Test
@@ -153,18 +145,13 @@ public class LegacyCoordsTest extends TestBase {
 
     @Test(expected = MongoException.class)
     public void shouldThrowAnExceptionIfQueryingWithoutA2dIndex() {
-        // given
         final PlaceWithLegacyCoords nearbyPlace = new PlaceWithLegacyCoords(new double[]{1.1, 2.3}, "Nearby Place");
         getDatastore().save(nearbyPlace);
-        ListIndexesIterable<Document> indexes = getDatastore().getCollection(PlaceWithLegacyCoords.class).listIndexes();
-        assertThat(indexes, doesNotHaveIndexNamed("location_2d"));
+        assertThat(getDatastore().getCollection(PlaceWithLegacyCoords.class).listIndexes(), doesNotHaveIndexNamed("location_2d"));
 
-        // when
         getDatastore().find(PlaceWithLegacyCoords.class)
                       .field("location")
                       .near(0, 0)
                       .get();
-
-        // then expect the Exception
     }
 }
