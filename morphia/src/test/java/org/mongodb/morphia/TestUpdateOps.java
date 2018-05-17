@@ -863,19 +863,6 @@ public class TestUpdateOps extends TestBase {
         assertThat(pic.getName(), is(cp3.getPic().getName()));
     }
 
-    @Test
-    public void testUpdateWithDifferentType() {
-        final ContainsInt cInt = new ContainsInt();
-        cInt.val = 21;
-        getDatastore().save(cInt);
-
-        final UpdateResult res = getDatastore().updateMany(getDatastore().find(ContainsInt.class),
-            getDatastore().createUpdateOperations(ContainsInt.class).inc("val", 1.1D));
-        assertUpdated(res, 1);
-
-        assertThat(getDatastore().find(ContainsInt.class).get().val, is(22));
-    }
-
     @Test(expected = ValidationException.class)
     public void testValidationBadFieldName() {
         getDatastore().updateMany(getDatastore().find(Circle.class).field("radius").equal(0),
