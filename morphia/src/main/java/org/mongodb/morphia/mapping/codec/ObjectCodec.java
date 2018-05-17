@@ -12,7 +12,6 @@ public class ObjectCodec implements Codec<Object> {
     private Mapper mapper;
 
     public ObjectCodec(final Mapper mapper) {
-
         this.mapper = mapper;
     }
 
@@ -23,9 +22,8 @@ public class ObjectCodec implements Codec<Object> {
 
     @Override
     public void encode(final BsonWriter writer, final Object value, final EncoderContext encoderContext) {
-        final Codec<?> codec = mapper.getCodecRegistry().get(value.getClass());
-//        codec.encode(writer);
-
+        final Codec codec = mapper.getCodecRegistry().get(value.getClass());
+        codec.encode(writer, value, encoderContext);
     }
 
     @Override

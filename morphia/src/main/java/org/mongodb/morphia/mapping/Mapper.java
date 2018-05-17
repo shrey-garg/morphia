@@ -18,6 +18,7 @@ import org.mongodb.morphia.mapping.codec.EnumCodecProvider;
 import org.mongodb.morphia.mapping.codec.MorphiaCodec;
 import org.mongodb.morphia.mapping.codec.MorphiaCodecProvider;
 import org.mongodb.morphia.mapping.codec.MorphiaTypesCodecProvider;
+import org.mongodb.morphia.mapping.codec.PrimitiveCodecProvider;
 import org.mongodb.morphia.utils.ReflectionUtils;
 
 import java.time.LocalTime;
@@ -87,6 +88,7 @@ public class Mapper {
         final MorphiaTypesCodecProvider typesCodecProvider = new MorphiaTypesCodecProvider(this);
 
         this.codecRegistry = fromRegistries(fromProviders(new MorphiaShortCutProvider(codecProvider)),
+            new PrimitiveCodecProvider(codecRegistry),
             codecRegistry,
             fromProviders(new EnumCodecProvider(), typesCodecProvider, codecProvider));
     }

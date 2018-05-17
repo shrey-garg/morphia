@@ -25,16 +25,16 @@ public class MorphiaTypesCodecProvider extends ValueCodecProvider {
         addCodec(new StringArrayCodec(mapper));
         addCodec(new HashMapCodec());
         addCodec(new URICodec());
-//        addCodec(new ObjectCodec(mapper));
+        addCodec(new ObjectCodec(mapper));
         arrayCodec = new ArrayCodec(mapper);
     }
 
     @Override
     public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
         final Codec<T> codec = super.get(clazz, registry);
-        if(codec != null) {
+        if (codec != null) {
             return codec;
-        } else if( clazz.isArray()) {
+        } else if (clazz.isArray()) {
             return (Codec<T>) arrayCodec;
         } else {
             return null;
