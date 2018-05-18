@@ -3,6 +3,7 @@ package org.mongodb.morphia.mapping.validation.fieldrules;
 
 import org.bson.types.ObjectId;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Embedded;
@@ -17,6 +18,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+@Ignore("@Serialized might be removed altogether")
 public class EmbeddedAndSerializableTest extends TestBase {
     @Test
     public void embedded() {

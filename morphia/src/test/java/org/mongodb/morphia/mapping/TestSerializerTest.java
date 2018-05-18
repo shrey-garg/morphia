@@ -3,6 +3,7 @@ package org.mongodb.morphia.mapping;
 
 import org.bson.types.ObjectId;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Id;
@@ -36,6 +37,7 @@ public class TestSerializerTest extends TestBase {
     }
 
     @Test
+    @Ignore("@Serialized might be removed altogether")
     public final void testSerializedAttribute() {
         final byte[] test = new byte[2048];
         final byte[] stringBytes = TEST_TEXT.getBytes();

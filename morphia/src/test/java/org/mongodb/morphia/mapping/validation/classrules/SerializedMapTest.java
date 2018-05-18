@@ -2,6 +2,7 @@ package org.mongodb.morphia.mapping.validation.classrules;
 
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Serialized;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @SuppressWarnings("unchecked")
+@Ignore("@Serialized might be removed altogether")
 public class SerializedMapTest extends TestBase {
 
     @Test

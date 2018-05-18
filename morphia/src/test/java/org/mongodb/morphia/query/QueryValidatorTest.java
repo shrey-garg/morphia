@@ -2,6 +2,7 @@ package org.mongodb.morphia.query;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -483,6 +484,7 @@ public class QueryValidatorTest extends TestBase {
     }
 
     @Test
+    @Ignore("@Serialized might be removed altogether")
     public void shouldReferToMappedClassInExceptionWhenQueryingPastSerializedField() {
         thrown.expect(ValidationException.class);
         thrown.expectMessage("Cannot use dot-notation past 'serialized' in "

@@ -52,7 +52,8 @@ public class TestEmbeddedValidation extends TestBase {
                                     .disableValidation()
                                     .field("embedded.flag").equal(true);
 
-        Assert.assertEquals(parentType, query.get());
+        final ParentType actual = query.get();
+        Assert.assertEquals(parentType, actual);
     }
 
     @Test

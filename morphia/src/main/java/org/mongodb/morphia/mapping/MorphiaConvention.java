@@ -42,9 +42,10 @@ public class MorphiaConvention implements Convention {
         classModelBuilder.discriminator(classModelBuilder.getType().getName())
                          .discriminatorKey("className");
 
-        classModelBuilder.enableDiscriminator(classModelBuilder.hasAnnotation(Entity.class)
-                                              && !classModelBuilder.getAnnotation(Entity.class).noClassnameStored()
-                                              || isNotConcrete(classModelBuilder.getType()));
+        classModelBuilder.enableDiscriminator(!classModelBuilder.hasAnnotation(Entity.class)
+                                              || isNotConcrete(classModelBuilder.getType())
+                                              || classModelBuilder.hasAnnotation(Entity.class)
+                                                 && !classModelBuilder.getAnnotation(Entity.class).noClassnameStored());
 
         final List<String> names = classModelBuilder.getPropertyModelBuilders().stream()
                                                     .map(PropertyModelBuilder::getName)

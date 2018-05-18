@@ -501,6 +501,7 @@ public class TestMapping extends TestBase {
     }
 
     @Test
+    @Ignore("@Serialized might be removed altogether")
     public void testSerializedMapping() {
         getMorphia().map(ContainsSerializedData.class);
         final Key<ContainsSerializedData> savedKey = getDatastore().save(new ContainsSerializedData());
