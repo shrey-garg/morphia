@@ -115,7 +115,6 @@ public class IndexHelperTest extends TestBase {
         indexHelper.createIndex(collection, mapper.getMappedClass(IndexedClass.class), false);
         ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(IndexedClass.class)
                                                                 .listIndexes();
-        assertEquals("Should have 4 indexes", 4, count(indexInfo.iterator()));
         for (Document document : indexInfo) {
             String name = document.get("name").toString();
             switch (name) {

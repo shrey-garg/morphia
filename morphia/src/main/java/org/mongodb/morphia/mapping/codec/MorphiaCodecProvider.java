@@ -14,20 +14,15 @@ import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static org.bson.assertions.Assertions.notNull;
 
 public class MorphiaCodecProvider implements CodecProvider {
     private final Map<Class<?>, ClassModel<?>> classModels = new HashMap<>();
     private final Map<Class<?>, MorphiaCodec<?>> codecs = new HashMap<>();
-    private final Set<String> packages = new HashSet<>();
-    private final Set<String> restrictedPackages = new HashSet<>(asList("java", "javax", "org.bson"));
     private final Mapper mapper;
     private final List<Convention> conventions;
     private final DiscriminatorLookup discriminatorLookup;
@@ -36,22 +31,14 @@ public class MorphiaCodecProvider implements CodecProvider {
     public MorphiaCodecProvider(final Mapper mapper, final List<Convention> conventions) {
         this.mapper = mapper;
         this.conventions = conventions;
-        this.discriminatorLookup = new DiscriminatorLookup(this.classModels, this.packages);
+        this.discriminatorLookup = new DiscriminatorLookup(this.classModels, mapper.getPackages());
         propertyCodecProviders.add(new MorphiaMapPropertyCodecProvider());
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
-        if (/*clazz.isEnum() || */clazz.getPackage() == null) {
-            return null;
-        }
-        for (String restrictedPackage : restrictedPackages) {
-            if(clazz.getPackage().getName().startsWith(restrictedPackage + ".")) {
-                return null;
-            }
-        }
-        if (clazz.getPackage() != null && (packages.isEmpty() || packages.contains(clazz.getPackage().getName()))) {
+        if (mapper.isMappable(clazz)) {
             MorphiaCodec<?> codec = codecs.get(clazz);
             if (codec == null) {
                 ClassModel<T> classModel = createClassModel(clazz, conventions);
@@ -73,16 +60,6 @@ public class MorphiaCodecProvider implements CodecProvider {
      */
     public void register(final PropertyCodecProvider... providers) {
         propertyCodecProviders.addAll(asList(notNull("providers", providers)));
-    }
-
-    /**
-     * Registers the packages of the given classes with the builder for inclusion in the Provider. This will allow classes in the
-     * given packages to mapped for use with MorphiaCodecProvider.
-     *
-     * @param packageNames the package names to register
-     */
-    public void addPackages(final String... packageNames) {
-        packages.addAll(asList(notNull("packageNames", packageNames)));
     }
 
     private static <T> ClassModel<T> createClassModel(final Class<T> clazz, final List<Convention> conventions) {

@@ -60,12 +60,10 @@ public class MappedClass {
      */
     @SuppressWarnings("unchecked")
     private static final List<Class<? extends Annotation>> LIFECYCLE_ANNOTATIONS = asList(PrePersist.class,
-                                                                                          PreSave.class,
-                                                                                          PreLoad.class,
-                                                                                          PostPersist.class,
-                                                                                          PostLoad.class);
-
-    private Map<Class<? extends Annotation>, List<Annotation>> annotations;
+        PreSave.class,
+        PreLoad.class,
+        PostPersist.class,
+        PostLoad.class);
     /**
      * Methods which are life-cycle events
      */
@@ -78,6 +76,8 @@ public class MappedClass {
      * the type we are mapping to/from
      */
     private final ClassModel<?> classModel;
+    private final Class<?> type;
+    private Map<Class<? extends Annotation>, List<Annotation>> annotations;
     /**
      * special fields representing the Key of the object
      */
@@ -90,13 +90,12 @@ public class MappedClass {
     private MapperOptions mapperOptions;
     private MappedClass superClass;
     private List<MappedClass> interfaces = new ArrayList<>();
-    private final Class<?> type;
 
     /**
      * Creates a MappedClass instance
      *
-     * @param classModel  the ClassModel
-     * @param mapper the Mapper to use
+     * @param classModel the ClassModel
+     * @param mapper     the Mapper to use
      */
     public MappedClass(final ClassModel classModel, final Mapper mapper) {
         this.classModel = classModel;
@@ -117,17 +116,30 @@ public class MappedClass {
         }
     }
 
+    private static List<Method> getDeclaredAndInheritedMethods(final Class type) {
+        if ((type == null) || (type == Object.class)) {
+            return new ArrayList<>();
+        }
+
+        final List<Method> list = getDeclaredAndInheritedMethods(type.getSuperclass());
+        for (final Method m : type.getDeclaredMethods()) {
+            if (!Modifier.isStatic(m.getModifiers())) {
+                list.add(m);
+            }
+        }
+
+        return list;
+    }
+
     /**
      * This is an internal method subject to change without notice.
      *
      * @return the parent class of this type if there is one null otherwise
-     *
      * @since 1.3
      */
     public MappedClass getSuperClass() {
         return superClass;
     }
-
 
     /**
      * @return true if the MappedClass is an interface
@@ -148,7 +160,8 @@ public class MappedClass {
 
     /**
      * Call the lifecycle methods
-     *  @param event    the lifecycle annotation
+     *
+     * @param event    the lifecycle annotation
      * @param entity   the entity to process
      * @param document the document to use
      * @param mapper   the Mapper to use
@@ -212,6 +225,48 @@ public class MappedClass {
         return retDbObj;
     }
 
+    public boolean hasLifecycle(Class<? extends Annotation> klass) {
+        return lifecycleMethods.containsKey(klass);
+    }
+
+    private Object getOrCreateInstance(final Class<?> clazz, final Mapper mapper) {
+        if (mapper.getInstanceCache().containsKey(clazz)) {
+            return mapper.getInstanceCache().get(clazz);
+        }
+
+        final Object o = mapper.getOptions().getObjectFactory().createInstance(clazz);
+        final Object nullO = mapper.getInstanceCache().put(clazz, o);
+        if (nullO != null) {
+            if (LOG.isErrorEnabled()) {
+                LOG.error("Race-condition, created duplicate class: " + clazz);
+            }
+        }
+
+        return o;
+
+    }
+
+    private void callGlobalInterceptors(final Class<? extends Annotation> event, final Object entity, final Document document,
+                                        final Mapper mapper) {
+        for (final EntityInterceptor ei : mapper.getInterceptors()) {
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Calling interceptor method " + event.getSimpleName() + " on " + ei);
+            }
+
+            if (event.equals(PreLoad.class)) {
+                ei.preLoad(entity, document, mapper);
+            } else if (event.equals(PostLoad.class)) {
+                ei.postLoad(entity, document, mapper);
+            } else if (event.equals(PrePersist.class)) {
+                ei.prePersist(entity, document, mapper);
+            } else if (event.equals(PreSave.class)) {
+                ei.preSave(entity, document, mapper);
+            } else if (event.equals(PostPersist.class)) {
+                ei.postPersist(entity, document, mapper);
+            }
+        }
+    }
+
     /**
      * Looks for an annotation of the type given
      *
@@ -264,22 +319,6 @@ public class MappedClass {
      */
     public Entity getEntityAnnotation() {
         return entityAn;
-    }
-
-    /**
-     * Returns fields annotated with the clazz
-     *
-     * @param clazz The Annotation to find.
-     * @return the list of fields
-     */
-    public List<MappedField> getFieldsAnnotatedWith(final Class<? extends Annotation> clazz) {
-        final List<MappedField> results = new ArrayList<>();
-        for (final MappedField mf : persistenceFields) {
-            if (mf.hasAnnotation(clazz)) {
-                results.add(mf);
-            }
-        }
-        return results;
     }
 
     /**
@@ -338,6 +377,22 @@ public class MappedClass {
     }
 
     /**
+     * Returns fields annotated with the clazz
+     *
+     * @param clazz The Annotation to find.
+     * @return the list of fields
+     */
+    public List<MappedField> getFieldsAnnotatedWith(final Class<? extends Annotation> clazz) {
+        final List<MappedField> results = new ArrayList<>();
+        for (final MappedField mf : persistenceFields) {
+            if (mf.hasAnnotation(clazz)) {
+                results.add(mf);
+            }
+        }
+        return results;
+    }
+
+    /**
      * @return the ID field for the class
      */
     public MappedField getMappedVersionField() {
@@ -372,13 +427,13 @@ public class MappedClass {
 
     }
 
-    boolean isSubType(final MappedClass mc) {
-        return mc.equals(superClass) || interfaces.contains(mc);
-    }
-
     @Override
     public String toString() {
         return format("%s[%s] : %s", getClazz().getSimpleName(), getCollectionName(), persistenceFields);
+    }
+
+    boolean isSubType(final MappedClass mc) {
+        return mc.equals(superClass) || interfaces.contains(mc);
     }
 
     /**
@@ -396,6 +451,7 @@ public class MappedClass {
 
     /**
      * Validates this MappedClass
+     *
      * @param mapper the Mapper to use for validation
      */
     @SuppressWarnings("deprecation")
@@ -418,10 +474,10 @@ public class MappedClass {
         }
 
         for (Class<?> aClass : type.getInterfaces()) {
-            final MappedClass mappedClass = mapper.getMappedClass(aClass);
-            if(mappedClass != null) {
-                interfaces.add(mappedClass);
-            }
+                final MappedClass mappedClass = mapper.getMappedClass(aClass);
+                if (mappedClass != null) {
+                    interfaces.add(mappedClass);
+                }
         }
 
         final List<Class<?>> lifecycleClasses = new ArrayList<>();
@@ -447,12 +503,8 @@ public class MappedClass {
         update();
     }
 
-    public boolean hasLifecycle(Class<? extends Annotation> klass) {
-        return lifecycleMethods.containsKey(klass);
-    }
-
     private void discoverFields(final MappedClass mappedClass) {
-        if( mappedClass == null ) {
+        if (mappedClass == null) {
             return;
         }
 
@@ -467,21 +519,6 @@ public class MappedClass {
         });
     }
 
-    private static List<Method> getDeclaredAndInheritedMethods(final Class type) {
-        if ((type == null) || (type == Object.class)) {
-            return new ArrayList<>();
-        }
-
-        final List<Method> list = getDeclaredAndInheritedMethods(type.getSuperclass());
-        for (final Method m : type.getDeclaredMethods()) {
-            if (!Modifier.isStatic(m.getModifiers())) {
-                list.add(m);
-            }
-        }
-
-        return list;
-    }
-
     private void addLifecycleEventMethod(final Class<? extends Annotation> lceClazz, final Method m, final Class<?> clazz) {
         final ClassMethodPair cm = new ClassMethodPair(clazz, m);
         if (lifecycleMethods.containsKey(lceClazz)) {
@@ -491,44 +528,6 @@ public class MappedClass {
             methods.add(cm);
             lifecycleMethods.put(lceClazz, methods);
         }
-    }
-
-    private void callGlobalInterceptors(final Class<? extends Annotation> event, final Object entity, final Document document,
-                                        final Mapper mapper) {
-        for (final EntityInterceptor ei : mapper.getInterceptors()) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Calling interceptor method " + event.getSimpleName() + " on " + ei);
-            }
-
-            if (event.equals(PreLoad.class)) {
-                ei.preLoad(entity, document, mapper);
-            } else if (event.equals(PostLoad.class)) {
-                ei.postLoad(entity, document, mapper);
-            } else if (event.equals(PrePersist.class)) {
-                ei.prePersist(entity, document, mapper);
-            } else if (event.equals(PreSave.class)) {
-                ei.preSave(entity, document, mapper);
-            } else if (event.equals(PostPersist.class)) {
-                ei.postPersist(entity, document, mapper);
-            }
-        }
-    }
-
-    private Object getOrCreateInstance(final Class<?> clazz, final Mapper mapper) {
-        if (mapper.getInstanceCache().containsKey(clazz)) {
-            return mapper.getInstanceCache().get(clazz);
-        }
-
-        final Object o = mapper.getOptions().getObjectFactory().createInstance(clazz);
-        final Object nullO = mapper.getInstanceCache().put(clazz, o);
-        if (nullO != null) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Race-condition, created duplicate class: " + clazz);
-            }
-        }
-
-        return o;
-
     }
 
     public ClassModel<?> getClassModel() {
