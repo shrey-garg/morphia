@@ -22,7 +22,6 @@ import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.PrePersist;
-import org.mongodb.morphia.annotations.PreSave;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
@@ -75,15 +74,15 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
 
     @Override
     public void encode(final BsonWriter writer, final T value, final EncoderContext encoderContext) {
-        mappedClass.callLifecycleMethods(PrePersist.class, value, null, mapper);
 
         if (mappedClass.hasLifecycle(PostPersist.class)
-            || mappedClass.hasLifecycle(PreSave.class)) {
+            || mappedClass.hasLifecycle(PrePersist.class)
+            || mapper.hasInterceptors()) {
             final DocumentWriter documentWriter = new DocumentWriter();
             super.encode(documentWriter, value, encoderContext);
             Document document;
 
-            document = mappedClass.callLifecycleMethods(PreSave.class, value, documentWriter.getRoot(), mapper);
+            document = mappedClass.callLifecycleMethods(PrePersist.class, value, documentWriter.getRoot(), mapper);
 
             getRegistry().get(Document.class).encode(writer, document, encoderContext);
 

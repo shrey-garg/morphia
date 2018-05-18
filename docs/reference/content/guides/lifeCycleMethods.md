@@ -11,8 +11,6 @@ There are various annotations which can be used to register callbacks on certain
 , and Pre/Post-Load.
 
 - `@PrePersist` - Called before save, it can return a `Document` in place of an empty one.
-- `@PreSave` - Called right before `DBCollection.save()` is called. Changes made to the entity will not be persisted; the `Document` can
- be passed as an argument (you can add/remove/change values)
 - `@PostPersist` - Called after the save call to the database
 - `@PreLoad` - Called before mapping the document from the database to the entity; the Document is passed as an argument (you can
 add/remove/change values)

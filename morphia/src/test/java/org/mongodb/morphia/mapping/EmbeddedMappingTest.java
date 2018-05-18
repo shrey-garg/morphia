@@ -96,7 +96,7 @@ public class EmbeddedMappingTest extends TestBase {
             getDatastore().ensureIndexes();
         } catch (MappingException e) {
             Assert.assertEquals("Could not resolve path 'nested.field.fail' against 'org.mongodb.morphia.mapping"
-                                    + ".EmbeddedMappingTest$WithNestedValidated'.", e.getMessage());
+                                + ".EmbeddedMappingTest$WithNestedValidated'.", e.getMessage());
         }
 
         final ListIndexesIterable<Document> indexInfo = getDatastore().getCollection(WithNestedValidated.class).listIndexes();

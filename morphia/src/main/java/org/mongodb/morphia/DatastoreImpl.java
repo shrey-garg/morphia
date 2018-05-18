@@ -23,10 +23,8 @@ import com.mongodb.client.model.ValidationOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
-import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
-import org.bson.types.ObjectId;
 import org.mongodb.morphia.aggregation.AggregationPipeline;
 import org.mongodb.morphia.aggregation.AggregationPipelineImpl;
 import org.mongodb.morphia.annotations.CappedAt;
@@ -78,7 +76,6 @@ public class DatastoreImpl implements AdvancedDatastore {
     private WriteConcern defaultWriteConcern;
 
     private volatile QueryFactory queryFactory = new DefaultQueryFactory();
-    private CodecProvider pojoCodecProvider;
 
     /**
      * Create a new DatastoreImpl
@@ -90,8 +87,6 @@ public class DatastoreImpl implements AdvancedDatastore {
     DatastoreImpl(final MongoClient mongoClient, final Mapper mapper, final String dbName) {
         this.mapper = mapper;
         this.defaultWriteConcern = mongoClient.getWriteConcern();
-
-        pojoCodecProvider = mapper.getCodecProvider();
 
         this.database = mongoClient.getDatabase(dbName)
                                    .withCodecRegistry(mapper.getCodecRegistry());
@@ -615,13 +610,6 @@ public class DatastoreImpl implements AdvancedDatastore {
             }
         }
 
-/*
-        for (Entry<Object, Document> entry : involvedObjects.entrySet()) {
-            final Object key = entry.getKey();
-            mapper.getMappedClass(key).callLifecycleMethods(PostPersist.class, key, entry.getValue(), mapper);
-
-        }
-*/
         return keys;
     }
 

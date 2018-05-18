@@ -12,7 +12,6 @@ import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.PrePersist;
-import org.mongodb.morphia.annotations.PreSave;
 import org.mongodb.morphia.annotations.Transient;
 
 import java.util.LinkedList;
@@ -153,7 +152,6 @@ public class TestCallbackEscalation extends TestBase {
             postLoad = true;
         }
 
-        @PreSave
         void preSave() {
             preSave = true;
         }

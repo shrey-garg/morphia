@@ -13,3 +13,4 @@ driver before Morphia gets a chance to do any validation.  Rather than engineeri
 I'm just updating tests to check for the new Exception type instead.  These are runtime exceptions that few, if any, will be explicitly 
 catching so this change should be source compatible for almost everyone. 
     * Some others validations may get caught up in this change as well.  If I've missed documenting them, please file an issue.
+1. `@PreSave` has been removed in favor of `@PrePersist`.

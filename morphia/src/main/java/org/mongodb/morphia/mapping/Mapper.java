@@ -112,6 +112,10 @@ public class Mapper {
         interceptors.add(ei);
     }
 
+    public boolean hasInterceptors() {
+        return !interceptors.isEmpty();
+    }
+
     /**
      * Finds any subtypes for the given MappedClass.
      *

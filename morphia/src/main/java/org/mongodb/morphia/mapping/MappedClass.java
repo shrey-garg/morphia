@@ -28,7 +28,6 @@ import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.PrePersist;
-import org.mongodb.morphia.annotations.PreSave;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
@@ -60,7 +59,7 @@ public class MappedClass {
      */
     @SuppressWarnings("unchecked")
     private static final List<Class<? extends Annotation>> LIFECYCLE_ANNOTATIONS = asList(PrePersist.class,
-        PreSave.class,
+        PrePersist.class,
         PreLoad.class,
         PostPersist.class,
         PostLoad.class);
@@ -169,58 +168,57 @@ public class MappedClass {
     @SuppressWarnings("unchecked")
     public Document callLifecycleMethods(final Class<? extends Annotation> event, final Object entity, final Document document,
                                          final Mapper mapper) {
-        if (!hasLifecycle(event)) {
-            return document;
-        }
-
-        final List<ClassMethodPair> methodPairs = lifecycleMethods.get(event);
         Document retDbObj = document;
-        try {
-            Object tempObj;
-            if (methodPairs != null) {
-                final HashMap<Class<?>, Object> toCall = new HashMap<>((int) (methodPairs.size() * 1.3));
-                for (final ClassMethodPair cm : methodPairs) {
-                    toCall.put(cm.clazz, null);
-                }
-                for (final Class<?> c : toCall.keySet()) {
-                    if (c != null) {
-                        toCall.put(c, getOrCreateInstance(c, mapper));
+        if (hasLifecycle(event)) {
+
+            final List<ClassMethodPair> methodPairs = lifecycleMethods.get(event);
+            try {
+                Object tempObj;
+                if (methodPairs != null) {
+                    final HashMap<Class<?>, Object> toCall = new HashMap<>((int) (methodPairs.size() * 1.3));
+                    for (final ClassMethodPair cm : methodPairs) {
+                        toCall.put(cm.clazz, null);
                     }
-                }
-
-                for (final ClassMethodPair cm : methodPairs) {
-                    final Method method = cm.method;
-                    final Object inst = toCall.get(cm.clazz);
-                    method.setAccessible(true);
-
-                    if (LOG.isDebugEnabled()) {
-                        LOG.debug(format("Calling lifecycle method(@%s %s) on %s", event.getSimpleName(), method, inst));
-                    }
-
-                    if (inst == null) {
-                        if (method.getParameterTypes().length == 0) {
-                            tempObj = method.invoke(entity);
-                        } else {
-                            tempObj = method.invoke(entity, retDbObj);
+                    for (final Class<?> c : toCall.keySet()) {
+                        if (c != null) {
+                            toCall.put(c, getOrCreateInstance(c, mapper));
                         }
-                    } else if (method.getParameterTypes().length == 0) {
-                        tempObj = method.invoke(inst);
-                    } else if (method.getParameterTypes().length == 1) {
-                        tempObj = method.invoke(inst, entity);
-                    } else {
-                        tempObj = method.invoke(inst, entity, retDbObj);
                     }
 
-                    if (tempObj != null) {
-                        retDbObj = (Document) tempObj;
+                    for (final ClassMethodPair cm : methodPairs) {
+                        final Method method = cm.method;
+                        final Object inst = toCall.get(cm.clazz);
+                        method.setAccessible(true);
+
+                        if (LOG.isDebugEnabled()) {
+                            LOG.debug(format("Calling lifecycle method(@%s %s) on %s", event.getSimpleName(), method, inst));
+                        }
+
+                        if (inst == null) {
+                            if (method.getParameterTypes().length == 0) {
+                                tempObj = method.invoke(entity);
+                            } else {
+                                tempObj = method.invoke(entity, retDbObj);
+                            }
+                        } else if (method.getParameterTypes().length == 0) {
+                            tempObj = method.invoke(inst);
+                        } else if (method.getParameterTypes().length == 1) {
+                            tempObj = method.invoke(inst, entity);
+                        } else {
+                            tempObj = method.invoke(inst, entity, retDbObj);
+                        }
+
+                        if (tempObj != null) {
+                            retDbObj = (Document) tempObj;
+                        }
                     }
                 }
-            }
 
-            callGlobalInterceptors(event, entity, document, mapper);
-        } catch (Throwable e) {
-            throw new RuntimeException(e);
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
+            }
         }
+        callGlobalInterceptors(event, entity, retDbObj, mapper);
 
         return retDbObj;
     }
@@ -259,8 +257,6 @@ public class MappedClass {
                 ei.postLoad(entity, document, mapper);
             } else if (event.equals(PrePersist.class)) {
                 ei.prePersist(entity, document, mapper);
-            } else if (event.equals(PreSave.class)) {
-                ei.preSave(entity, document, mapper);
             } else if (event.equals(PostPersist.class)) {
                 ei.postPersist(entity, document, mapper);
             }

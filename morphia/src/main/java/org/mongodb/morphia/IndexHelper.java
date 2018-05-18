@@ -308,6 +308,10 @@ final class IndexHelper {
     }
 
     String findField(final MappedClass mc, final IndexOptions options, final List<String> path) {
+        if ( mc == null ) {
+            throw new MappingException("The MappedClass can not be null.");
+        }
+
         String segment = path.get(0);
         if (segment.equals("$**")) {
             return segment;
@@ -330,21 +334,21 @@ final class IndexHelper {
         if (mf != null) {
             namePath = mf.getNameToStore();
         } else {
-            if (!options.disableValidation()) {
-                throw pathFail(mc, path);
-            } else {
+            if (options.disableValidation()) {
                 return join(path);
+            } else {
+                throw pathFail(mc, path);
             }
         }
         if (path.size() > 1) {
+            Class concreteType = !mf.isScalarValue() ? mf.getSpecializedType() : mf.getConcreteType();
             try {
-                Class concreteType = !mf.isScalarValue() ? mf.getSpecializedType() : mf.getConcreteType();
                 namePath += "." + findField(mapper.getMappedClass(concreteType), options, path.subList(1, path.size()));
             } catch (MappingException e) {
-                if (!options.disableValidation()) {
-                    throw pathFail(mc, path);
-                } else {
+                if (options.disableValidation()) {
                     return join(path);
+                } else {
+                    throw pathFail(mc, path);
                 }
             }
         }

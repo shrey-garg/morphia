@@ -27,6 +27,7 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Collation;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Field;
+import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Index;
 import org.mongodb.morphia.annotations.IndexOptions;
 import org.mongodb.morphia.annotations.Indexes;
@@ -106,6 +107,8 @@ public class TestIndexes extends TestBase {
             numericOrdering = true, strength = CollationStrength.IDENTICAL)),
         fields = {@Field(value = "name")})})
     private static class TestWithIndexOption {
+        @Id
+        private Object id;
         private String name;
 
     }
@@ -114,6 +117,8 @@ public class TestIndexes extends TestBase {
     @Entity(noClassnameStored = true)
     @Indexes({@Index(options = @IndexOptions(), fields = {@Field(value = "hashedValue", type = IndexType.HASHED)})})
     private static class TestWithHashedIndex {
+        @Id
+        private Object id;
         private String hashedValue;
     }
 

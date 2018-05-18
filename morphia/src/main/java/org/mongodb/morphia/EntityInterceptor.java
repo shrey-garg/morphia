@@ -5,7 +5,7 @@ import org.bson.Document;
 import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.PreLoad;
-import org.mongodb.morphia.annotations.PreSave;
+import org.mongodb.morphia.annotations.PrePersist;
 import org.mongodb.morphia.mapping.Mapper;
 
 
@@ -57,9 +57,11 @@ public interface EntityInterceptor {
      * @param ent      the entity being processed
      * @param document the Document form of the entity
      * @param mapper   the Mapper being used
-     * @see PreSave
+     * @see PrePersist
+     * @deprecated use {@link #prePersist(Object, Document, Mapper)} instead
      */
+    @Deprecated
     default void preSave(Object ent, Document document, Mapper mapper) {
-
+        prePersist(ent, document, mapper);
     }
 }

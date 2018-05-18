@@ -142,7 +142,6 @@ There are various annotations which can be used to register callbacks on certain
 - `@PreLoad` - Called before mapping the datastore object to the entity (POJO); the Document is passed as an argument (you can add/remove/change values)
 - `@PostLoad` - Called after mapping to the entity
 - `@PrePersist` - Called before save, it can return a Document in place of an empty one.
-- `@PreSave` - Called before the save call to the datastore
 - `@PostPersist` - Called after the save call to the datastore
 
 ### Examples

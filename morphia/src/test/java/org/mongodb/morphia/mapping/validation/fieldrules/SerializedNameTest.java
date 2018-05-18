@@ -5,7 +5,6 @@ import org.bson.Document;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
-import org.mongodb.morphia.annotations.PreSave;
 import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.testutil.TestEntity;
@@ -26,7 +25,6 @@ public class SerializedNameTest extends TestBase {
         @Transient
         private String document;
 
-        @PreSave
         public void preSave(final Document o) {
             document = o.toString();
         }

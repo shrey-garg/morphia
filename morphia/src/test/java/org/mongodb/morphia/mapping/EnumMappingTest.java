@@ -1,6 +1,5 @@
 package org.mongodb.morphia.mapping;
 
-import org.bson.codecs.Codec;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,7 +7,6 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.PreSave;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -140,7 +138,6 @@ public class EnumMappingTest extends TestBase {
         private ObjectId id;
         private Foo foo = Foo.BAR;
 
-        @PreSave
         void testMapping() {
 
         }
