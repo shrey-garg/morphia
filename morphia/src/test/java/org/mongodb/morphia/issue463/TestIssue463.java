@@ -1,7 +1,6 @@
 package org.mongodb.morphia.issue463;
 
 
-import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,9 +19,8 @@ public class TestIssue463 extends TestBase {
         class2.setText("hello world");
         getDatastore().save(class2);
 
-        final Document query = new Document("_id", class2.getId());
-        Assert.assertFalse(getDatastore().getCollection(Class1.class).find(query).iterator().hasNext());
-        Assert.assertTrue(getDatastore().getCollection(Class2.class).find(query).iterator().hasNext());
+        Assert.assertNull(getDatastore().find(Class1.class).filter("_id", class2.getId()).get());
+        Assert.assertNotNull(getDatastore().find(Class2.class).filter("_id", class2.getId()).get());
     }
 
     @Entity(value = "class1", noClassnameStored = true)

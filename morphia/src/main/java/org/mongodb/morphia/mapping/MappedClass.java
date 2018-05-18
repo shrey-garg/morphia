@@ -323,9 +323,9 @@ public class MappedClass {
      * @param clazz The Annotation to find.
      * @return First found Annotation or null of none found.
      */
-    private Annotation getFirstAnnotation(final Class<? extends Annotation> clazz) {
+    private Annotation getLastAnnotation(final Class<? extends Annotation> clazz) {
         final List<Annotation> found = annotations.get(clazz);
-        return found == null || found.isEmpty() ? null : found.get(0);
+        return found == null || found.isEmpty() ? null : found.get(found.size() - 1);
     }
 
     /**
@@ -437,8 +437,8 @@ public class MappedClass {
      */
     // TODO: Remove this and make these fields dynamic or auto-set some other way
     public void update() {
-        embeddedAn = (Embedded) getAnnotation(Embedded.class);
-        entityAn = (Entity) getFirstAnnotation(Entity.class);
+        embeddedAn = getAnnotation(Embedded.class);
+        entityAn = getAnnotation(Entity.class);
         final List<MappedField> fields = getFieldsAnnotatedWith(Id.class);
         if (fields != null && !fields.isEmpty()) {
             idField = fields.get(0);
