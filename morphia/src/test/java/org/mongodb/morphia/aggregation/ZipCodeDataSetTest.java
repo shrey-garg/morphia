@@ -104,7 +104,7 @@ public class ZipCodeDataSetTest extends TestBase {
     public void smallestAndLargestCities() throws InterruptedException, TimeoutException, IOException {
         Assume.assumeTrue(new File(MONGO_IMPORT).exists());
         installSampleData();
-        getMorphia().mapPackage(getClass().getPackage().getName());
+        getMorphia().map(City.class, State.class);
         AggregationPipeline pipeline = getDatastore().createAggregation(City.class)
 
                                                      .group(id(grouping("state"), grouping("city")), grouping("pop", sum("pop")))

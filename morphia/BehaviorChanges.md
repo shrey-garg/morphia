@@ -8,3 +8,8 @@ exceptions and almost certainly not caught by user code.
 1. Instances of `com.mongodb.DBObject` have been replaced `org.bson.Document`.  I'm exploring inserting a shim interface in the `org
 .mongodb.morphia.Datastore` hierarchy to ease this transition but I'll have to see how dramatic a change that is once everything is done.
 1. The geo API is going to be heavily reworked to use driver primitives rather than Morphia wrappers.
+1. Duplicate IDs result in a CodecConfigurationException rather than a ConstraintViolationException.  The checks are happening in the 
+driver before Morphia gets a chance to do any validation.  Rather than engineering complex solutions to maintain the current behavior, 
+I'm just updating tests to check for the new Exception type instead.  These are runtime exceptions that few, if any, will be explicitly 
+catching so this change should be source compatible for almost everyone. 
+    * Some others validations may get caught up in this change as well.  If I've missed documenting them, please file an issue.

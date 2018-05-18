@@ -19,7 +19,7 @@ package org.mongodb.morphia;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
-import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
@@ -41,7 +41,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertTrue;
 
-@SuppressWarnings("Since15")
+@Ignore("references are not currently supported")
 public class TestSerializedFormat extends TestBase {
     @Test
     public void testQueryFormat() {
