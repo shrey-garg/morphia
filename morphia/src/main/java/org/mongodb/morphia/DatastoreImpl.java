@@ -810,8 +810,6 @@ public class DatastoreImpl implements AdvancedDatastore {
     private <T> List<Key<T>> insertMany(final MongoCollection<T> collection, final List<T> entities, final InsertManyOptions options,
                                     WriteConcern wc) {
 
-        entities.forEach(this::ensureId);
-
         final Map<Boolean, List<T>> grouped = entities.stream()
                                                       .collect(groupingBy(
                                                           entity -> mapper.getMappedClass(entity)
@@ -831,7 +829,6 @@ public class DatastoreImpl implements AdvancedDatastore {
     }
 
     private <T> Key<T> insertOne(final MongoCollection<T> collection, final T entity, final InsertOneOptions options, WriteConcern wc) {
-        ensureId(entity);
         collection
             .withWriteConcern(wc)
             .insertOne(entity, options);
@@ -868,7 +865,6 @@ public class DatastoreImpl implements AdvancedDatastore {
             return emptyList();
         }
 
-        entities.forEach(this::ensureId);
         final Map<MongoCollection<T>, List<T>> map = entities.stream()
                                                              .collect(groupingBy(entity -> {
                                                                  final Class<T> aClass = (Class<T>) entity.getClass();
@@ -907,8 +903,6 @@ public class DatastoreImpl implements AdvancedDatastore {
                             WriteConcern writeConcern) {
         validateEntityOnSave(entity);
 
-        ensureId(entity);
-
         if (tryVersionedUpdate(collection, entity, options, writeConcern) == null) {
             final MongoCollection<T> mongoCollection = collection
                                                            .withWriteConcern(writeConcern);
@@ -924,20 +918,6 @@ public class DatastoreImpl implements AdvancedDatastore {
         }
 
         return postSaveOperations(singletonList(entity)).get(0);
-    }
-
-    private <T> void ensureId(final T entity) {
-/*
-        final MappedClass mc = mapper.getMappedClass(entity);
-        final MappedField idField = mc.getIdField();
-        if(idField.getFieldValue(entity) == null) {
-            if(idField.getType().equals(ObjectId.class)) {
-                idField.setFieldValue(entity, new ObjectId());
-            } else {
-                throw new MappingException("If the ID type is not ObjectID, ID values must be set manually");
-            }
-        }
-*/
     }
 
     @Override
