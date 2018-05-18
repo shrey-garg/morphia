@@ -57,9 +57,7 @@ public class MappedClass {
     /**
      * Annotations interesting for life-cycle events
      */
-    @SuppressWarnings("unchecked")
     private static final List<Class<? extends Annotation>> LIFECYCLE_ANNOTATIONS = asList(PrePersist.class,
-        PrePersist.class,
         PreLoad.class,
         PostPersist.class,
         PostLoad.class);
@@ -166,14 +164,11 @@ public class MappedClass {
      * @param mapper   the Mapper to use
      */
     @SuppressWarnings("unchecked")
-    public Document callLifecycleMethods(final Class<? extends Annotation> event, final Object entity, final Document document,
-                                         final Mapper mapper) {
-        Document retDbObj = document;
-        if (hasLifecycle(event)) {
-
+    public void callLifecycleMethods(final Class<? extends Annotation> event, final Object entity, final Document document,
+                                     final Mapper mapper) {
+        if (hasLifecycle(event) || mapper.hasInterceptors()) {
             final List<ClassMethodPair> methodPairs = lifecycleMethods.get(event);
             try {
-                Object tempObj;
                 if (methodPairs != null) {
                     final HashMap<Class<?>, Object> toCall = new HashMap<>((int) (methodPairs.size() * 1.3));
                     for (final ClassMethodPair cm : methodPairs) {
@@ -196,20 +191,16 @@ public class MappedClass {
 
                         if (inst == null) {
                             if (method.getParameterTypes().length == 0) {
-                                tempObj = method.invoke(entity);
+                                method.invoke(entity);
                             } else {
-                                tempObj = method.invoke(entity, retDbObj);
+                                method.invoke(entity, document);
                             }
                         } else if (method.getParameterTypes().length == 0) {
-                            tempObj = method.invoke(inst);
+                            method.invoke(inst);
                         } else if (method.getParameterTypes().length == 1) {
-                            tempObj = method.invoke(inst, entity);
+                            method.invoke(inst, entity);
                         } else {
-                            tempObj = method.invoke(inst, entity, retDbObj);
-                        }
-
-                        if (tempObj != null) {
-                            retDbObj = (Document) tempObj;
+                            method.invoke(inst, entity, document);
                         }
                     }
                 }
@@ -217,10 +208,8 @@ public class MappedClass {
             } catch (Throwable e) {
                 throw new RuntimeException(e);
             }
+            callGlobalInterceptors(event, entity, document, mapper);
         }
-        callGlobalInterceptors(event, entity, retDbObj, mapper);
-
-        return retDbObj;
     }
 
     public boolean hasLifecycle(Class<? extends Annotation> klass) {
@@ -315,17 +304,6 @@ public class MappedClass {
      */
     public Entity getEntityAnnotation() {
         return entityAn;
-    }
-
-    /**
-     * Returns the first found Annotation, or null.
-     *
-     * @param clazz The Annotation to find.
-     * @return First found Annotation or null of none found.
-     */
-    private Annotation getLastAnnotation(final Class<? extends Annotation> clazz) {
-        final List<Annotation> found = annotations.get(clazz);
-        return found == null || found.isEmpty() ? null : found.get(found.size() - 1);
     }
 
     /**
@@ -485,10 +463,11 @@ public class MappedClass {
         }
 
         for (final Class<?> cls : lifecycleClasses) {
-            for (final Method m : getDeclaredAndInheritedMethods(cls)) {
-                for (final Class<? extends Annotation> c : LIFECYCLE_ANNOTATIONS) {
-                    if (m.isAnnotationPresent(c)) {
-                        addLifecycleEventMethod(c, m, cls.equals(type) ? null : cls);
+            for (final Method method : getDeclaredAndInheritedMethods(cls)) {
+                for (final Class<? extends Annotation> annotationClass : LIFECYCLE_ANNOTATIONS) {
+                    if (method.isAnnotationPresent(annotationClass)) {
+                        lifecycleMethods.computeIfAbsent(annotationClass, c -> new ArrayList<>())
+                                        .add(new ClassMethodPair(cls.equals(type) ? null : cls, method));
                     }
                 }
             }
@@ -513,17 +492,6 @@ public class MappedClass {
                     field.getJavaFieldName(), field.getType().getName()));
             }
         });
-    }
-
-    private void addLifecycleEventMethod(final Class<? extends Annotation> lceClazz, final Method m, final Class<?> clazz) {
-        final ClassMethodPair cm = new ClassMethodPair(clazz, m);
-        if (lifecycleMethods.containsKey(lceClazz)) {
-            lifecycleMethods.get(lceClazz).add(cm);
-        } else {
-            final List<ClassMethodPair> methods = new ArrayList<>();
-            methods.add(cm);
-            lifecycleMethods.put(lceClazz, methods);
-        }
     }
 
     public ClassModel<?> getClassModel() {

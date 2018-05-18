@@ -80,9 +80,9 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
             || mapper.hasInterceptors()) {
             final DocumentWriter documentWriter = new DocumentWriter();
             super.encode(documentWriter, value, encoderContext);
-            Document document;
+            Document document = documentWriter.getRoot();
 
-            document = mappedClass.callLifecycleMethods(PrePersist.class, value, documentWriter.getRoot(), mapper);
+            mappedClass.callLifecycleMethods(PrePersist.class, value, document, mapper);
 
             getRegistry().get(Document.class).encode(writer, document, encoderContext);
 
@@ -95,22 +95,23 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
 
     @Override
     public T decode(final BsonReader reader, final DecoderContext decoderContext) {
-        T t;
-        if (mappedClass.hasLifecycle(PreLoad.class)) {
+        T entity;
+        if (mappedClass.hasLifecycle(PreLoad.class) || mapper.hasInterceptors()) {
             final InstanceCreator<T> instanceCreator = getClassModel().getInstanceCreator();
-            t = instanceCreator.getInstance();
+            entity = instanceCreator.getInstance();
+
             Document document = getRegistry().get(Document.class).decode(reader, decoderContext);
-            document = mappedClass.callLifecycleMethods(PreLoad.class, t, document, mapper);
+            mappedClass.callLifecycleMethods(PreLoad.class, entity, document, mapper);
 
             decodeProperties(new BsonDocumentReader(document.toBsonDocument(Document.class, mapper.getCodecRegistry())), decoderContext,
                 instanceCreator);
         } else {
-            t = super.decode(reader, decoderContext);
+            entity = super.decode(reader, decoderContext);
         }
 
-        mappedClass.callLifecycleMethods(PostLoad.class, t, null, mapper);
+        mappedClass.callLifecycleMethods(PostLoad.class, entity, null, mapper);
 
-        return t;
+        return entity;
     }
 
     public MappedClass getMappedClass() {

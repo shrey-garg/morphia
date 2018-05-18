@@ -1,16 +1,3 @@
-/*
-  Copyright (C) 2010 Olafur Gauti Gudmundsson
-  <p/>
-  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License. You may
-  obtain a copy of the License at
-  <p/>
-  http://www.apache.org/licenses/LICENSE-2.0
-  <p/>
-  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions
-  and limitations under the License.
- */
-
 package org.mongodb.morphia;
 
 import com.mongodb.WriteConcern;
@@ -108,14 +95,10 @@ public class TestDatastore extends TestBase {
 
     @Test
     public void testDoesNotExistAfterDelete() {
-        // given
-        long id = currentTimeMillis();
-        final Key<FacebookUser> key = getDatastore().save(new FacebookUser(id, "user 1"));
+        final Key<FacebookUser> key = getDatastore().save(new FacebookUser(currentTimeMillis(), "user 1"));
 
-        // when
         getDatastore().deleteMany(getDatastore().find(FacebookUser.class));
 
-        // then
         assertNull("Shouldn't exist after delete", getDatastore().exists(key));
     }
 
@@ -238,14 +221,12 @@ public class TestDatastore extends TestBase {
         getDatastore().save(life1);
         assertTrue(life1.prePersist);
         assertTrue(life1.prePersistWithParam);
-        assertTrue(life1.prePersistWithParamAndReturn);
         assertTrue(life1.postPersist);
         assertTrue(life1.postPersistWithParam);
 
         final LifecycleTestObj loaded = getDatastore().get(life1);
         assertTrue(loaded.preLoad);
         assertTrue(loaded.preLoadWithParam);
-        assertTrue(loaded.preLoadWithParamAndReturn);
         assertTrue(loaded.postLoad);
         assertTrue(loaded.postLoadWithParam);
     }
@@ -642,20 +623,9 @@ public class TestDatastore extends TestBase {
         private boolean postLoad;
         @Transient
         private boolean postLoadWithParam;
-        private boolean prePersistWithParamAndReturn;
         private boolean prePersistWithParam;
         private boolean postPersistWithParam;
-        private boolean preLoadWithParamAndReturn;
         private boolean preLoadWithParam;
-
-        @PrePersist
-        public Document prePersistWithParamAndReturn(final Document document) {
-            if (prePersistWithParamAndReturn) {
-                throw new RuntimeException("already called");
-            }
-            prePersistWithParamAndReturn = true;
-            return new Document();
-        }
 
         @PrePersist
         protected void prePersistWithParam(final Document document) {
@@ -703,14 +673,6 @@ public class TestDatastore extends TestBase {
         @PreLoad
         void preLoadWithParam(final Document document) {
             document.put("preLoadWithParam", true);
-        }
-
-        @PreLoad
-        Document preLoadWithParamAndReturn(final Document document) {
-            final Document retObj = new Document();
-            retObj.putAll(document);
-            retObj.put("preLoadWithParamAndReturn", true);
-            return retObj;
         }
 
         @PostLoad

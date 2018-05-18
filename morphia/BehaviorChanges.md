@@ -14,3 +14,4 @@ I'm just updating tests to check for the new Exception type instead.  These are 
 catching so this change should be source compatible for almost everyone. 
     * Some others validations may get caught up in this change as well.  If I've missed documenting them, please file an issue.
 1. `@PreSave` has been removed in favor of `@PrePersist`.
+1. Return values of lifecycle events are no longer considered.  Any evolutions of the `Document` should be done in place.
