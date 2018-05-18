@@ -34,7 +34,7 @@ public class MorphiaTypesCodecProvider extends ValueCodecProvider {
         final Codec<T> codec = super.get(clazz, registry);
         if (codec != null) {
             return codec;
-        } else if (clazz.isArray()) {
+        } else if (clazz.isArray() && !clazz.getComponentType().equals(byte.class)) {
             return (Codec<T>) arrayCodec;
         } else {
             return null;

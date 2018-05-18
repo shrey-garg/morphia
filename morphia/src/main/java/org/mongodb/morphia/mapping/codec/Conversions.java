@@ -1,5 +1,6 @@
 package org.mongodb.morphia.mapping.codec;
 
+import org.bson.types.Binary;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
@@ -36,6 +37,8 @@ public final class Conversions {
             }
         });
         register(String.class, URI.class, str -> URI.create(str.replace("%46", ".")));
+
+        register(Binary.class, byte[].class, Binary::getData);
     }
 
     private static <F, T> void register(final Class<F> fromType, final Class<T> toType, final Function<F, T> function) {

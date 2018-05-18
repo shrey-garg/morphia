@@ -5,7 +5,6 @@ import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
-import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
@@ -13,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+
+import static org.junit.Assert.assertArrayEquals;
 
 public class CollectionOfValuesTest extends TestBase {
 
@@ -23,8 +24,8 @@ public class CollectionOfValuesTest extends TestBase {
         City city = new City();
         city.name = "My city";
         city.array = new byte[]{4, 5};
-        for (byte i = 0; i < 2; i++) {
-            for (byte j = 0; j < 2; j++) {
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
                 city.cells[i][j] = (i * 100 + j);
             }
         }
@@ -32,9 +33,9 @@ public class CollectionOfValuesTest extends TestBase {
         getDatastore().save(city);
         City loaded = getDatastore().get(city);
         Assert.assertEquals(city.name, loaded.name);
-        compare(city.array, loaded.array);
+        assertArrayEquals(city.array, loaded.array);
         for (int i = 0; i < city.cells.length; i++) {
-            compare(city.cells[i], loaded.cells[i]);
+            assertArrayEquals(city.cells[i], loaded.cells[i]);
         }
     }
 
@@ -79,18 +80,10 @@ public class CollectionOfValuesTest extends TestBase {
         Assert.assertNotNull(loaded.oneDimArray);
         Assert.assertNotNull(loaded.twoDimArray);
 
-        compare(entity.oneDimArray, loaded.oneDimArray);
+        assertArrayEquals(entity.oneDimArray, loaded.oneDimArray);
 
-        compare(entity.twoDimArray[0], loaded.twoDimArray[0]);
-        compare(entity.twoDimArray[1], loaded.twoDimArray[1]);
-    }
-
-    private void compare(final byte[] left, final byte[] right) {
-        Assert.assertArrayEquals(left, right);
-    }
-
-    private void compare(final int[] left, final int[] right) {
-        Assert.assertArrayEquals(left, right);
+        assertArrayEquals(entity.twoDimArray[0], loaded.twoDimArray[0]);
+        assertArrayEquals(entity.twoDimArray[1], loaded.twoDimArray[1]);
     }
 
     private static class ContainsListOfList {

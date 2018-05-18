@@ -3,23 +3,21 @@ package org.mongodb.morphia.mapping;
 import org.bson.codecs.pojo.ClassModelBuilder;
 import org.bson.codecs.pojo.Convention;
 import org.bson.codecs.pojo.FieldModelBuilder;
-import org.bson.codecs.pojo.PropertyAccessor;
 import org.bson.codecs.pojo.PropertyMetadata;
 import org.bson.codecs.pojo.PropertyModelBuilder;
-import org.bson.codecs.pojo.PropertySerialization;
 import org.bson.codecs.pojo.TypeData;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.NotSaved;
 import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.annotations.Version;
+import org.mongodb.morphia.mapping.codec.ArrayFieldAccessor;
+import org.mongodb.morphia.mapping.codec.FieldAccessor;
+import org.mongodb.morphia.mapping.codec.MorphiaPropertySerialization;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
@@ -83,8 +81,8 @@ public class MorphiaConvention implements Convention {
                 final String mappedName = getMappedFieldName(builder);
                 property.readName(mappedName)
                         .writeName(mappedName)
-                        .propertyAccessor(field.getType().isArray()
-                                          ? new ArrayFieldAccessor(field)
+                        .propertyAccessor(field.getType().isArray() && !field.getType().getComponentType().equals(byte.class)
+                                          ? new ArrayFieldAccessor(property.getTypeData(), field)
                                           : new FieldAccessor(field))
                 .propertySerialization(new MorphiaPropertySerialization(options, builder));
 
@@ -145,88 +143,4 @@ public class MorphiaConvention implements Convention {
         return field.getName();
     }
 
-    private static class FieldAccessor<T> implements PropertyAccessor<T> {
-        private final Field field;
-
-        private FieldAccessor(final Field field) {
-            this.field = field;
-        }
-
-        @Override
-        public T get(final Object instance) {
-            try {
-                return (T) field.get(instance);
-            } catch (IllegalAccessException e) {
-                throw new MappingException(e.getMessage(), e);
-            }
-        }
-
-        @Override
-        public void set(final Object instance, final Object value) {
-            try {
-                field.set(instance, value);
-            } catch (IllegalAccessException e) {
-                throw new MappingException(e.getMessage(), e);
-            }
-        }
-    }
-
-    private static class ArrayFieldAccessor<T> extends FieldAccessor<T> {
-
-        private Class<?> componentType;
-
-        private ArrayFieldAccessor(final Field field) {
-            super(field);
-            componentType = field.getType().getComponentType();
-        }
-
-        @Override
-        public void set(final Object instance, final Object value) {
-            Object newValue = value;
-            if (value.getClass().getComponentType() != componentType) {
-                Object[] array = (Object[]) value;
-                final Object[] newArray = (Object[]) Array.newInstance(componentType, array.length);
-                System.arraycopy(array, 0, newArray, 0, array.length);
-                newValue = newArray;
-            }
-            super.set(instance, newValue);
-        }
-    }
-
-    private static class MorphiaPropertySerialization implements PropertySerialization {
-        private final List<Annotation> annotations;
-        private MapperOptions options;
-        private int modifiers;
-
-        MorphiaPropertySerialization(final MapperOptions options, final FieldModelBuilder<?> field) {
-            this.options = options;
-            annotations = field.getAnnotations();
-            modifiers = field.getField().getModifiers();
-        }
-
-        @Override
-        public boolean shouldSerialize(final Object value) {
-            if (!options.isStoreNulls() && value == null) {
-                return false;
-            }
-            if (options.isIgnoreFinals() && Modifier.isFinal(modifiers)) {
-                return false;
-            }
-            if (!options.isStoreEmpties()) {
-                if (value instanceof Map && ((Map)value).isEmpty()
-                    || value instanceof Collection && ((Collection)value).isEmpty()) {
-                    return false;
-                }
-            }
-            if (hasAnnotation(NotSaved.class)) {
-                return false;
-            }
-
-            return true;
-        }
-
-        private boolean hasAnnotation(final Class<? extends Annotation> annotationClass) {
-            return annotations.stream().anyMatch(a -> a.annotationType().equals(annotationClass));
-        }
-    }
 }
