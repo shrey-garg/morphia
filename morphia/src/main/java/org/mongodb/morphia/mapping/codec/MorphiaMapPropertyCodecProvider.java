@@ -36,6 +36,8 @@ class MorphiaMapPropertyCodecProvider implements PropertyCodecProvider {
                 }
                 throw e;
             }
+        } else if (Enum.class.isAssignableFrom(type.getType())) {
+            return new EnumCodec(type.getType());
         }
         return null;
     }
