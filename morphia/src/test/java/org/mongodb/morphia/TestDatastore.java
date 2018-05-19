@@ -344,10 +344,10 @@ public class TestDatastore extends TestBase {
         checkMinServerVersion(3.4);
         getDatastore().getCollection(FacebookUser.class).drop();
         getDatastore().saveMany(asList(new FacebookUser(1, "John Doe"),
-                            new FacebookUser(2, "john doe")));
+                            new FacebookUser(2, "Ron Swanson")));
 
         Query<FacebookUser> query = getDatastore().find(FacebookUser.class)
-                                                  .field("username").equal("john doe");
+                                                  .field("username").equal("Ron Swanson");
         UpdateOperations<FacebookUser> updateOperations = getDatastore().createUpdateOperations(FacebookUser.class)
                                                                         .inc("loginCount");
         UpdateResult results = getDatastore().updateMany(query, updateOperations);
@@ -369,10 +369,10 @@ public class TestDatastore extends TestBase {
     public void testFindAndModify() {
         getDatastore().getCollection(FacebookUser.class).drop();
         getDatastore().saveMany(asList(new FacebookUser(1, "John Doe"),
-                            new FacebookUser(2, "john doe")));
+                            new FacebookUser(2, "Ron Swanson")));
 
         Query<FacebookUser> query = getDatastore().find(FacebookUser.class)
-                                                  .field("username").equal("john doe");
+                                                  .field("username").equal("Ron Swanson");
         UpdateOperations<FacebookUser> updateOperations = getDatastore().createUpdateOperations(FacebookUser.class)
                                                                         .inc("loginCount");
         FacebookUser results = getDatastore().findAndModify(query, updateOperations);
@@ -418,11 +418,12 @@ public class TestDatastore extends TestBase {
     public void testFindAndModifyWithOptions() {
         checkMinServerVersion(3.4);
         getDatastore().getCollection(FacebookUser.class).drop();
-        getDatastore().saveMany(asList(new FacebookUser(1, "John Doe"),
-            new FacebookUser(2, "john doe")));
+        getDatastore().saveMany(asList(
+            new FacebookUser(1, "John Doe"),
+            new FacebookUser(2, "Ron Swanson")));
 
         Query<FacebookUser> query = getDatastore().find(FacebookUser.class)
-                                                  .field("username").equal("john doe");
+                                                  .field("username").equal("Ron Swanson");
         UpdateOperations<FacebookUser> updateOperations = getDatastore().createUpdateOperations(FacebookUser.class)
                                                                         .inc("loginCount");
         FacebookUser results = getDatastore().findAndModify(query, updateOperations,
@@ -441,9 +442,9 @@ public class TestDatastore extends TestBase {
                                     .collationStrength(SECONDARY)
                                     .build()),
             getDatastore().getDefaultWriteConcern());
-        assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
-        assertEquals(0, results.loginCount);
-        assertEquals(1, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
+        assertEquals(0, getDatastore().find(FacebookUser.class).filter("id", 1).get().loginCount);
+        assertEquals(1, results.loginCount);
+        assertEquals(2, getDatastore().find(FacebookUser.class).filter("id", 2).get().loginCount);
 
         results = getDatastore().findAndModify(getDatastore().find(FacebookUser.class)
                                                              .field("id").equal(3L)
@@ -476,10 +477,10 @@ public class TestDatastore extends TestBase {
         checkMinServerVersion(3.4);
         getDatastore().getCollection(FacebookUser.class).drop();
         getDatastore().saveMany(asList(new FacebookUser(1, "John Doe"),
-            new FacebookUser(2, "john doe")));
+            new FacebookUser(2, "Ron Swanson")));
 
         Query<FacebookUser> query = getDatastore().find(FacebookUser.class)
-                                                  .field("username").equal("john doe");
+                                                  .field("username").equal("Ron Swanson");
         assertEquals(1, getDatastore().deleteMany(query).getDeletedCount());
 
         assertEquals(1, getDatastore().deleteMany(query,
@@ -505,10 +506,10 @@ public class TestDatastore extends TestBase {
         checkMinServerVersion(3.4);
         getDatastore().getCollection(FacebookUser.class).drop();
         getDatastore().saveMany(asList(new FacebookUser(1, "John Doe"),
-                            new FacebookUser(2, "john doe")));
+                            new FacebookUser(2, "Ron Swanson")));
 
         Query<FacebookUser> query = getDatastore().find(FacebookUser.class)
-                                                  .field("username").equal("john doe");
+                                                  .field("username").equal("Ron Swanson");
         assertNotNull(getDatastore().findAndDelete(query));
         assertNull(getDatastore().findAndDelete(query));
 

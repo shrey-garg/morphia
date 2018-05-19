@@ -38,8 +38,7 @@ public class MapImplTest extends TestBase {
                                                         .iterator().next()
                                                         .get("values"))
                                             .get("first");
-        final boolean hasF = goo.containsKey(Mapper.CLASS_NAME_FIELDNAME);
-        assertTrue(!hasF);
+        assertTrue(goo.containsKey(Mapper.CLASS_NAME_FIELDNAME));
     }
 
     @Test //@Ignore("waiting on issue 184")
@@ -129,15 +128,15 @@ public class MapImplTest extends TestBase {
     }
 
     private static class ContainsMapOfEmbeddedInterfaces {
-        private final Map<String, Serializable> values = new HashMap<>();
         @Id
         private ObjectId id;
+        private final Map<String, Object> values = new HashMap<>();
     }
 
     private static class ContainsMapOfEmbeddedGoos {
-        private final Map<String, Goo> values = new HashMap<>();
         @Id
         private ObjectId id;
+        private final Map<String, Goo> values = new HashMap<>();
     }
 
     @Embedded
