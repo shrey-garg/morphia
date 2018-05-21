@@ -13,84 +13,87 @@ import org.mongodb.morphia.annotations.PrePersist;
 
 
 public class TestMultipleCallbackMethods extends TestBase {
-    private static int loading;
+    private static int load;
 
     @Test
     public void testMultipleCallbackAnnotation() {
         final SomeEntity entity = new SomeEntity();
         getDatastore().save(entity);
 
-        Assert.assertEquals(4, entity.getFoo());
-        Assert.assertEquals(0, loading);
+        Assert.assertEquals(4, entity.getPersist());
+        Assert.assertEquals(0, load);
 
-        final SomeEntity someEntity = getDatastore().find(SomeEntity.class).filter("_id", entity.getId()).get();
+        final SomeEntity someEntity = getDatastore()
+                                          .find(SomeEntity.class)
+                                          .filter("_id", entity.getId())
+                                          .get();
 
-        Assert.assertEquals(4, entity.getFoo());
+        Assert.assertEquals(4, entity.getPersist());
 
-        Assert.assertEquals(-1, someEntity.getFoo());
-        Assert.assertEquals(2, loading);
+        Assert.assertEquals(-3, someEntity.getPersist());
+        Assert.assertEquals(2, load);
     }
 
     abstract static class CallbackAbstractEntity {
         @Id
         private final ObjectId id = new ObjectId();
-        private int foo;
+        private int persist;
 
         public ObjectId getId() {
             return id;
         }
 
-        int getFoo() {
-            return foo;
+        int getPersist() {
+            return persist;
         }
 
-        void setFoo(final int foo) {
-            this.foo = foo;
+        void setPersist(final int persist) {
+            this.persist = persist;
         }
 
         @PrePersist
         void prePersist1() {
-            foo++;
+            persist++;
         }
 
         @PrePersist
         void prePersist2() {
-            foo++;
+            persist++;
         }
 
         @PostPersist
         void postPersist1() {
-            foo++;
+            persist++;
         }
 
         @PostPersist
         void postPersist2() {
-            foo++;
+            persist++;
         }
 
         @PreLoad
         void preLoad1() {
-            loading++;
+            load++;
         }
 
         @PreLoad
         void preLoad2() {
-            loading++;
+            load++;
         }
 
         @PostLoad
         void postLoad1() {
-            foo--;
+            persist--;
         }
 
         @PostLoad
         void postLoad2() {
-            foo--;
+            persist--;
         }
 
         @PostLoad
         void postLoad3() {
-            foo--;
+            persist--;
         }
     }
 

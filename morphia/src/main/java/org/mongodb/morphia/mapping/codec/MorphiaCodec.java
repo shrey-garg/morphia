@@ -96,7 +96,7 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
     @Override
     public T decode(final BsonReader reader, final DecoderContext decoderContext) {
         T entity;
-        if (mappedClass.hasLifecycle(PreLoad.class) || mapper.hasInterceptors()) {
+        if (mappedClass.hasLifecycle(PreLoad.class) || mappedClass.hasLifecycle(PostLoad.class) || mapper.hasInterceptors()) {
             final InstanceCreator<T> instanceCreator = getClassModel().getInstanceCreator();
             entity = instanceCreator.getInstance();
 
@@ -105,11 +105,12 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
 
             decodeProperties(new BsonDocumentReader(document.toBsonDocument(Document.class, mapper.getCodecRegistry())), decoderContext,
                 instanceCreator);
+
+            mappedClass.callLifecycleMethods(PostLoad.class, entity, document, mapper);
         } else {
             entity = super.decode(reader, decoderContext);
         }
 
-        mappedClass.callLifecycleMethods(PostLoad.class, entity, null, mapper);
 
         return entity;
     }
