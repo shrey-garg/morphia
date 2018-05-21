@@ -40,10 +40,10 @@ public class EmbeddedMappingTest extends TestBase {
     public void mapGenericEmbeds() {
         getMorphia().map(AuditEntry.class, Delta.class);
 
-        final AuditEntry<String> entry = new AuditEntry<>();
+        final AuditEntry entry = new AuditEntry();
 
-        final HashMap<String, Object> before = new HashMap<>();
-        final HashMap<String, Object> after = new HashMap<>();
+        final HashMap<String, Integer> before = new HashMap<>();
+        final HashMap<String, Integer> after = new HashMap<>();
         before.put("before", 42);
         after.put("after", 84);
 
@@ -111,11 +111,11 @@ public class EmbeddedMappingTest extends TestBase {
     }
 
     @Entity(value = "audit", noClassnameStored = true)
-    public static class AuditEntry<T> {
+    public static class AuditEntry {
         @Id
         private ObjectId id;
 
-        private Delta<T> delta;
+        private Delta<Integer> delta;
 
         @Override
         public int hashCode() {
@@ -133,7 +133,7 @@ public class EmbeddedMappingTest extends TestBase {
                 return false;
             }
 
-            final AuditEntry<?> that = (AuditEntry<?>) o;
+            final AuditEntry that = (AuditEntry) o;
 
             if (id != null ? !id.equals(that.id) : that.id != null) {
                 return false;
@@ -146,13 +146,13 @@ public class EmbeddedMappingTest extends TestBase {
 
     @Embedded
     public static class Delta<T> {
-        private Map<String, Object> before;
-        private Map<String, Object> after;
+        private Map<String, T> before;
+        private Map<String, T> after;
 
         private Delta() {
         }
 
-        public Delta(final Map<String, Object> before, final Map<String, Object> after) {
+        public Delta(final Map<String, T> before, final Map<String, T> after) {
             this.before = before;
             this.after = after;
         }

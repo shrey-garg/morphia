@@ -15,3 +15,7 @@ catching so this change should be source compatible for almost everyone.
     * Some others validations may get caught up in this change as well.  If I've missed documenting them, please file an issue.
 1. `@PreSave` has been removed in favor of `@PrePersist`.
 1. Return values of lifecycle events are no longer considered.  Any evolutions of the `Document` should be done in place.
+1. Locale support no longer native.  I'm not sure it makes sense to have all these one off conversions in Morphia itself given how simple
+ it is to write and register custom codecs.
+1. Top level generic types are no longer mappable.  This is a shortcoming with the driver mapping code and may or may not be addressed in
+ the future.
