@@ -385,10 +385,7 @@ public class Mapper {
     public <T> Document toDocument(final T entity) {
         final Class<T> aClass = (Class<T>) entity.getClass();
         final DocumentWriter writer = new DocumentWriter();
-        codecRegistry.get(aClass).encode(writer, entity,
-            EncoderContext.builder()
-                          .isEncodingCollectibleDocument(true)
-                          .build());
+        codecRegistry.get(aClass).encode(writer, entity, EncoderContext.builder().build());
 
         return writer.getRoot();
     }

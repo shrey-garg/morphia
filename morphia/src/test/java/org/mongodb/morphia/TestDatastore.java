@@ -344,10 +344,10 @@ public class TestDatastore extends TestBase {
         checkMinServerVersion(3.4);
         getDatastore().getCollection(FacebookUser.class).drop();
         getDatastore().saveMany(asList(new FacebookUser(1, "John Doe"),
-                            new FacebookUser(2, "Ron Swanson")));
+                            new FacebookUser(2, "john doe")));
 
         Query<FacebookUser> query = getDatastore().find(FacebookUser.class)
-                                                  .field("username").equal("Ron Swanson");
+                                                  .field("username").equal("john doe");
         UpdateOperations<FacebookUser> updateOperations = getDatastore().createUpdateOperations(FacebookUser.class)
                                                                         .inc("loginCount");
         UpdateResult results = getDatastore().updateMany(query, updateOperations);
@@ -477,10 +477,10 @@ public class TestDatastore extends TestBase {
         checkMinServerVersion(3.4);
         getDatastore().getCollection(FacebookUser.class).drop();
         getDatastore().saveMany(asList(new FacebookUser(1, "John Doe"),
-            new FacebookUser(2, "Ron Swanson")));
+            new FacebookUser(2, "john doe")));
 
         Query<FacebookUser> query = getDatastore().find(FacebookUser.class)
-                                                  .field("username").equal("Ron Swanson");
+                                                  .field("username").equal("john doe");
         assertEquals(1, getDatastore().deleteMany(query).getDeletedCount());
 
         assertEquals(1, getDatastore().deleteMany(query,
@@ -506,10 +506,10 @@ public class TestDatastore extends TestBase {
         checkMinServerVersion(3.4);
         getDatastore().getCollection(FacebookUser.class).drop();
         getDatastore().saveMany(asList(new FacebookUser(1, "John Doe"),
-                            new FacebookUser(2, "Ron Swanson")));
+                            new FacebookUser(2, "john doe")));
 
         Query<FacebookUser> query = getDatastore().find(FacebookUser.class)
-                                                  .field("username").equal("Ron Swanson");
+                                           .field("username").equal("john doe");
         assertNotNull(getDatastore().findAndDelete(query));
         assertNull(getDatastore().findAndDelete(query));
 

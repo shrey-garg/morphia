@@ -20,10 +20,8 @@ import org.mongodb.morphia.mapping.codec.MorphiaPropertySerialization;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static java.lang.reflect.Modifier.isAbstract;
@@ -42,10 +40,14 @@ public class MorphiaConvention implements Convention {
         classModelBuilder.discriminator(classModelBuilder.getType().getName())
                          .discriminatorKey("className");
 
-        classModelBuilder.enableDiscriminator(!classModelBuilder.hasAnnotation(Entity.class)
-                                              || isNotConcrete(classModelBuilder.getType())
-                                              || classModelBuilder.hasAnnotation(Entity.class)
-                                                 && !classModelBuilder.getAnnotation(Entity.class).noClassnameStored());
+        final Entity entity = classModelBuilder.getAnnotation(Entity.class);
+        if(entity != null) {
+            classModelBuilder.enableDiscriminator(entity.useDiscriminator() || !entity.noClassnameStored());
+        } else if(classModelBuilder.hasAnnotation(Embedded.class)) {
+            classModelBuilder.enableDiscriminator(classModelBuilder.getAnnotation(Embedded.class).useDiscriminator());
+        }
+
+        classModelBuilder.enableDiscriminator(isNotConcrete(classModelBuilder.getType()));
 
         final List<String> names = classModelBuilder.getPropertyModelBuilders().stream()
                                                     .map(PropertyModelBuilder::getName)
@@ -87,13 +89,16 @@ public class MorphiaConvention implements Convention {
                                           : new FieldAccessor(field))
                 .propertySerialization(new MorphiaPropertySerialization(options, builder));
 
+                property.discriminatorEnabled(false);
+                if(field.getAnnotation(Embedded.class) != null) {
+                    property.discriminatorEnabled(field.getAnnotation(Embedded.class).useDiscriminator());
+                }
                 final Class<?> type = property.getTypeData().getType();
-                if (Collection.class.isAssignableFrom(type)
+                /*if (Collection.class.isAssignableFrom(type)
                     || Map.class.isAssignableFrom(type)) {
                     property.discriminatorEnabled(true);
-                }
-
-                if (isNotConcrete(type)) {
+                } else*/
+                if (isNotConcrete(property.getTypeData())) {
                     property.discriminatorEnabled(true);
                 }
             }
@@ -101,8 +106,23 @@ public class MorphiaConvention implements Convention {
 
     }
 
-    private boolean isNotConcrete(final Class<?> type) {
-        return type.isInterface() || isAbstract(type.getModifiers());
+    private boolean isNotConcrete(final TypeData<?> typeData) {
+        Class type;
+        if(!typeData.getTypeParameters().isEmpty()) {
+            type = typeData.getTypeParameters().get(typeData.getTypeParameters().size() - 1).getType();
+        } else {
+            type = typeData.getType();
+        }
+
+        return isNotConcrete(type);
+    }
+
+    private boolean isNotConcrete(final Class type) {
+        Class componentType = type;
+        if(type.isArray()) {
+            componentType = type.getComponentType();
+        }
+        return componentType.isInterface() || isAbstract(componentType.getModifiers());
     }
 
     private static boolean isTransient(final FieldModelBuilder<?> field) {

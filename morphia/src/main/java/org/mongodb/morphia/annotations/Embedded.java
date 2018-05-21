@@ -34,4 +34,9 @@ public @interface Embedded {
      * @return The name of the Mongo value to store the field. Defaults to the name of the field being annotated.
      */
     String value() default Mapper.IGNORED_FIELDNAME;
+
+    /**
+     * @return true if the discriminator for this type should be stored
+     */
+    boolean useDiscriminator() default false;
 }

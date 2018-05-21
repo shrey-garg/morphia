@@ -47,9 +47,15 @@ public @interface Entity {
 
     /**
      * @return When true, instructs Morphia to not include when serializing an entity to mongodb.
+     * @deprecated use {@link #useDiscriminator()} instead
      */
-    //@Deprecated //to be replaced. This is a temp hack until polymorphism and discriminators are implemented
+    @Deprecated
     boolean noClassnameStored() default false;
+
+    /**
+     * @return true if the discriminator for this type should be stored
+     */
+    boolean useDiscriminator() default false;
 
     /**
      * @return slaveOk for queries for this Entity.
