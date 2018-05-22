@@ -11,6 +11,7 @@ import org.bson.codecs.configuration.CodecRegistry;
 import org.junit.After;
 import org.junit.Assume;
 import org.junit.Before;
+import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -120,5 +121,13 @@ public abstract class TestBase {
         return codecRegistry.get(clazz)
                      .decode(new BsonDocumentReader(document.toBsonDocument(Document.class, codecRegistry)),
                          DecoderContext.builder().build());
+    }
+
+    protected CodecRegistry getCodecRegistry() {
+        return getMorphia().getMapper().getCodecRegistry();
+    }
+
+    protected Mapper getMapper() {
+        return getMorphia().getMapper();
     }
 }

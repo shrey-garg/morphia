@@ -55,7 +55,7 @@ public @interface Entity {
     /**
      * @return true if the discriminator for this type should be stored
      */
-    boolean useDiscriminator() default false;
+    boolean useDiscriminator() default true;
 
     /**
      * @return slaveOk for queries for this Entity.

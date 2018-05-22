@@ -54,10 +54,10 @@ public class TestIdField extends TestBase {
 
     @Test
     public void testIdFieldNameMapping() {
-        final Rectangle r = new Rectangle(1, 12);
-        final Document document = getMorphia().getMapper().toDocument(r);
+        final Document document = getMapper().toDocument(new Rectangle(1, 12));
         assertFalse(document.containsKey("id"));
         assertTrue(document.containsKey(Mapper.ID_KEY));
+        assertTrue(document.containsKey(Mapper.CLASS_NAME_FIELDNAME));
         assertEquals(document.keySet().toString(), 4, document.size()); //_id, h, w, className
     }
 

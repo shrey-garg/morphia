@@ -225,7 +225,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testFinalFieldNotPersisted() {
-        getMorphia().getMapper().getOptions().setIgnoreFinals(true);
+        getMapper().getOptions().setIgnoreFinals(true);
         getMorphia().map(ContainsFinalField.class);
         final ContainsFinalField blah = new ContainsFinalField("blah");
         blah.setColor(System.currentTimeMillis() + "");
@@ -379,8 +379,7 @@ public class TestMapping extends TestBase {
         aMap.embeddedValues.put("first", f1);
         aMap.embeddedValues.put("second", f2);
 
-        final CodecRegistry codecRegistry = getMorphia().getMapper()
-                                                        .getCodecRegistry();
+        final CodecRegistry codecRegistry = getCodecRegistry();
         final Codec<ContainsMapWithEmbeddedInterface> codec = codecRegistry
                                                                           .get(ContainsMapWithEmbeddedInterface.class);
         final DocumentWriter writer = new DocumentWriter();

@@ -36,7 +36,7 @@ public class NewAnnotationTest extends TestBase {
 
     @Test
     public void testIt() {
-        getMorphia().getMapper().addInterceptor(new ToLowercaseHelper());
+        getMapper().addInterceptor(new ToLowercaseHelper());
         getMorphia().map(User.class);
         final User u = new User();
         u.email = "ScottHernandez@gmail.com";

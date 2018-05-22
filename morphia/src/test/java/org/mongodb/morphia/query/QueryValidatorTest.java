@@ -66,7 +66,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldAllowGeoWithinOperatorWithAllAppropriateTrimmings() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(GeoEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(GeoEntity.class);
         MappedField mappedField = mappedClass.getMappedField("array");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, GEO_WITHIN, new Document("$box", 1),
             new ArrayList<>()), is(true));
@@ -115,7 +115,7 @@ public class QueryValidatorTest extends TestBase {
     //this used to fail
     public void shouldAllowSizeOperatorForArrayListTypesAndIntegerValues() {
         // given
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(EntityWithListsAndArrays.class);
+        MappedClass mappedClass = getMapper().getMappedClass(EntityWithListsAndArrays.class);
         MappedField mappedField = mappedClass.getMappedField("arrayListOfIntegers");
 
         // expect
@@ -131,7 +131,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldAllowSizeOperatorForArraysAndIntegerValues() {
         // given
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(EntityWithListsAndArrays.class);
+        MappedClass mappedClass = getMapper().getMappedClass(EntityWithListsAndArrays.class);
         MappedField mappedField = mappedClass.getMappedField("arrayOfInts");
 
         // expect
@@ -147,7 +147,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldAllowSizeOperatorForListTypesAndIntegerValues() {
         // given
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(EntityWithListsAndArrays.class);
+        MappedClass mappedClass = getMapper().getMappedClass(EntityWithListsAndArrays.class);
         MappedField mappedField = mappedClass.getMappedField("listOfIntegers");
 
         // expect
@@ -163,7 +163,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldAllowTypeThatMatchesKeyTypeValue() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(SimpleEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(SimpleEntity.class);
         MappedField mappedField = mappedClass.getMappedField("integer");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, Integer.class, EQUAL,
             new Key<Number>(Integer.class, "Integer", new ObjectId()),
@@ -214,7 +214,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldAllowValuesOfList() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(SimpleEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(SimpleEntity.class);
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, EQUAL, new ArrayList<String>(),
             new ArrayList<>()), is(true));
@@ -247,7 +247,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowGeoOperatorIfValueDoesNotContainCorrectField() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(GeoEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(GeoEntity.class);
         MappedField mappedField = mappedClass.getMappedField("array");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, GEO_WITHIN,
             new Document("name", "value"), new ArrayList<>()),
@@ -257,7 +257,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowGeoOperatorIfValueIsNotDocument() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(GeoEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(GeoEntity.class);
         MappedField mappedField = mappedClass.getMappedField("array");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, GEO_WITHIN, "value",
             new ArrayList<>()), is(false));
@@ -266,7 +266,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowGeoWithinWhenValueDoesNotContainKeyword() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(GeoEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(GeoEntity.class);
         MappedField mappedField = mappedClass.getMappedField("array");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, List.class, GEO_WITHIN,
             new Document("notValidKey", 1), new ArrayList<>()),
@@ -290,7 +290,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowNonBooleanValuesForExistsOperator() {
         // given
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(SimpleEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(SimpleEntity.class);
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, SimpleEntity.class, EXISTS, "value",
             new ArrayList<>()), is(false));
@@ -299,7 +299,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowNonIntegerTypeIfValueIsInt() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(SimpleEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(SimpleEntity.class);
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, SimpleEntity.class, EQUAL, 1,
             new ArrayList<>()), is(false));
@@ -315,7 +315,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowNonKeyTypeWithKeyValue() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(EntityWithListsAndArrays.class);
+        MappedClass mappedClass = getMapper().getMappedClass(EntityWithListsAndArrays.class);
         MappedField mappedField = mappedClass.getMappedField("listOfIntegers");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, SimpleEntity.class, EQUAL,
             new Key<>(String.class, "collection", new ObjectId()),
@@ -334,7 +334,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowOtherValuesForAllOperator() {
         // given
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(SimpleEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(SimpleEntity.class);
         MappedField mappedField = mappedClass.getMappedField("name");
 
         // expect
@@ -345,7 +345,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowOtherValuesForInOperator() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(SimpleEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(SimpleEntity.class);
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass,
             mappedField,
@@ -359,7 +359,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowOtherValuesForNotInOperator() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(SimpleEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(SimpleEntity.class);
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, SimpleEntity.class, NOT_IN, "value",
             new ArrayList<>()), is(false));
@@ -368,7 +368,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowSizeOperatorForNonIntegerValues() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(SimpleEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(SimpleEntity.class);
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass,
             mappedField,
@@ -382,7 +382,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowSizeOperatorForNonListTypes() {
         // given
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(EntityWithListsAndArrays.class);
+        MappedClass mappedClass = getMapper().getMappedClass(EntityWithListsAndArrays.class);
         MappedField mappedField = mappedClass.getMappedField("notAnArrayOrList");
 
         // expect
@@ -398,7 +398,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowStringValueWithTypeThatIsNotString() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(SimpleEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(SimpleEntity.class);
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, Integer.class, EQUAL, "value",
             new ArrayList<>()), is(false));
@@ -407,7 +407,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowTypeThatDoesNotMatchKeyTypeValue() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(SimpleEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(SimpleEntity.class);
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, String.class, EQUAL,
             new Key<Number>(Integer.class, "Integer", new ObjectId()),
@@ -417,7 +417,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldNotAllowValueWithoutEntityAnnotationAndTypeOfKey() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(SimpleEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(SimpleEntity.class);
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass,
             mappedField,
@@ -449,7 +449,7 @@ public class QueryValidatorTest extends TestBase {
         // this unit test is to drive fixing a null pointer in the logging code.  It's a bit stupid but it's an edge case that wasn't
         // caught.
         // when this is called, don't error
-        validateQuery(SimpleEntity.class, getMorphia().getMapper(), new StringBuilder("name"), EQUAL, null, true, true);
+        validateQuery(SimpleEntity.class, getMapper(), new StringBuilder("name"), EQUAL, null, true, true);
     }
 
     @Test
@@ -462,7 +462,7 @@ public class QueryValidatorTest extends TestBase {
     @Test
     public void shouldRejectTypesAndValuesThatDoNotMatch() {
         // expect
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(SimpleEntity.class);
+        MappedClass mappedClass = getMapper().getMappedClass(SimpleEntity.class);
         MappedField mappedField = mappedClass.getMappedField("name");
         assertThat(QueryValidator.isCompatibleForOperator(mappedClass, mappedField, String.class, EQUAL, 1,
             new ArrayList<>()), is(false));
@@ -472,14 +472,14 @@ public class QueryValidatorTest extends TestBase {
     public void shouldReferToMappedClassInExceptionWhenFieldNotFound() {
         thrown.expect(ValidationException.class);
         thrown.expectMessage("The field 'notAField' could not be found in 'org.bson.types.ObjectId'");
-        validateQuery(SimpleEntity.class, getMorphia().getMapper(), new StringBuilder("id.notAField"), FilterOperator.EQUAL, 1, true, true);
+        validateQuery(SimpleEntity.class, getMapper(), new StringBuilder("id.notAField"), FilterOperator.EQUAL, 1, true, true);
     }
 
     @Test
     public void shouldReferToMappedClassInExceptionWhenQueryingPastReferenceField() {
         thrown.expect(ValidationException.class);
         thrown.expectMessage("Cannot use dot-notation past 'reference' in 'org.mongodb.morphia.query.QueryValidatorTest$WithReference'");
-        validateQuery(WithReference.class, getMorphia().getMapper(), new StringBuilder("reference.name"), FilterOperator.EQUAL, "", true,
+        validateQuery(WithReference.class, getMapper(), new StringBuilder("reference.name"), FilterOperator.EQUAL, "", true,
             true);
     }
 
@@ -489,7 +489,7 @@ public class QueryValidatorTest extends TestBase {
         thrown.expect(ValidationException.class);
         thrown.expectMessage("Cannot use dot-notation past 'serialized' in "
                              + "'org.mongodb.morphia.query.QueryValidatorTest$WithSerializedField'");
-        validateQuery(WithSerializedField.class, getMorphia().getMapper(), new StringBuilder("serialized.name"), FilterOperator.EQUAL, "",
+        validateQuery(WithSerializedField.class, getMapper(), new StringBuilder("serialized.name"), FilterOperator.EQUAL, "",
             true,
             true);
     }

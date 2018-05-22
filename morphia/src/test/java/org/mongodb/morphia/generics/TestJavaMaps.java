@@ -25,8 +25,8 @@ public class TestJavaMaps extends TestBase {
 
         for (boolean nulls : new boolean[]{true, false}) {
             for (boolean empties : new boolean[]{true, false}) {
-                getMorphia().getMapper().getOptions().setStoreNulls(nulls);
-                getMorphia().getMapper().getOptions().setStoreEmpties(empties);
+                getMapper().getOptions().setStoreNulls(nulls);
+                getMapper().getOptions().setStoreEmpties(empties);
                 empties();
             }
         }
@@ -49,8 +49,8 @@ public class TestJavaMaps extends TestBase {
 
     @Test
     public void emptyModel() {
-        getMorphia().getMapper().getOptions().setStoreEmpties(true);
-        getMorphia().getMapper().getOptions().setStoreNulls(false);
+        getMapper().getOptions().setStoreEmpties(true);
+        getMapper().getOptions().setStoreNulls(false);
 
         TestEmptyModel model = new TestEmptyModel();
         model.text = "text";

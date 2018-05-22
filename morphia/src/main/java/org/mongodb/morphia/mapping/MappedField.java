@@ -223,7 +223,7 @@ public class MappedField {
     public void setFieldValue(final Object instance, final Object value) {
         try {
             final Field field = property.getField();
-            field.set(instance, Conversions.convert(value.getClass(), field.getType(), value));
+            field.set(instance, Conversions.convert(value, field.getType()));
         } catch (IllegalAccessException e) {
             throw new MappingException(e.getMessage(), e);
         }

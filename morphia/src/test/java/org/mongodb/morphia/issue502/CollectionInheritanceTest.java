@@ -33,7 +33,7 @@ public class CollectionInheritanceTest extends TestBase {
         getMorphia().map(Book.class /* , Authors.class, Author.class */);
 
         // Test mapping : author objects must be converted into Document (but wasn't)
-        final Document dbBook = getMorphia().getMapper().toDocument(newBook());
+        final Document dbBook = getMapper().toDocument(newBook());
         final Object firstBook = ((List<?>) dbBook.get("authors")).iterator().next();
         assertTrue("Author wasn't converted : expected instanceof <Document>, but was <" + firstBook.getClass() + ">",
                    firstBook instanceof Document);

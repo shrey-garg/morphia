@@ -517,7 +517,7 @@ public class DatastoreImpl implements AdvancedDatastore {
         final MongoCollection<T> collection = getCollection((Class<T>) entity.getClass())
                                                   .withWriteConcern(writeConcern);
 
-        UpdateResult result = tryVersionedUpdate(collection, entity, options, writeConcern);
+        UpdateResult result = tryVersionedUpdate(collection, entity, writeConcern);
 
         if (result == null) {
             final Query<T> query = (Query<T>) createQuery(entity.getClass()).filter(Mapper.ID_KEY, idValue);
@@ -555,40 +555,52 @@ public class DatastoreImpl implements AdvancedDatastore {
         return getQueryFactory().createQuery(this, collection, type, query);
     }
 
-    private <T> UpdateResult tryVersionedUpdate(final MongoCollection<T> origCollection, final T entity,
-                                                final InsertOneOptions options, final WriteConcern writeConcern) {
-        UpdateResult result = null;
+    private <T> UpdateResult tryVersionedUpdate(final MongoCollection<T> origCollection, final T entity, final WriteConcern writeConcern) {
         final MappedClass mc = mapper.getMappedClass(entity);
         if (mc.getFieldsAnnotatedWith(Version.class).isEmpty()) {
             return null;
         }
 
-        final MappedField version = mc.getMappedVersionField();
-        Long oldVersion = (Long) version.getFieldValue(entity);
+        final MappedField mappedIdField = mapper.getMappedClass(entity).getMappedIdField();
+        final Object id = mappedIdField.getFieldValue(entity);
 
-        final Document document = mapper.toDocument(entity);
-        document.remove(version.getNameToStore());
-        final Object idValue = document.remove(Mapper.ID_KEY);
+        if (id != null) {
+            final MappedField version = mc.getMappedVersionField();
+            Long oldVersion = (Long) version.getFieldValue(entity);
+            final long newVersion = oldVersion == null ? 1 : oldVersion + 1;
 
-        final long newVersion = oldVersion == null ? 1 : oldVersion + 1;
-        version.setFieldValue(entity, newVersion);
-        if (idValue != null) {
-            final Query<?> query = newQuery((Class<T>)entity.getClass(), origCollection)
-                                       .disableValidation()
-                                       .filter(Mapper.ID_KEY, idValue)
-                                       .filter(version.getNameToStore(), oldVersion);
-            final Document update = !document.isEmpty() ? new Document("$set", document) : new Document(document);
-            result = updateOne(query, update, new UpdateOptions()
-                                                  .bypassDocumentValidation(options.getBypassDocumentValidation())
-                                                  .upsert(false), writeConcern);
+            UpdateResult result;
+            try {
+                version.setFieldValue(entity, newVersion);
+
+                final MongoCollection<T> mongoCollection = origCollection
+                                                               .withWriteConcern(writeConcern);
+
+                version.setFieldValue(entity, newVersion);
+                final Document query = newQuery((Class<T>) entity.getClass(), origCollection)
+                                           .filter(Mapper.ID_KEY, id)
+                                           .filter(version.getNameToStore(), oldVersion).getQueryDocument();
+
+                result = replaceEntity(entity,mongoCollection, mappedIdField, id, query, new ReplaceOptions().upsert(true));
+/*
+                mappedIdField.setFieldValue(entity, null);
+                result = mongoCollection.replaceOne(
+                    query,
+                    entity, new ReplaceOptions().upsert(false));
+                mappedIdField.setFieldValue(entity, id);
+*/
+            } finally {
+                version.setFieldValue(entity, oldVersion);
+            }
 
             if (result.getModifiedCount() != 1 && newVersion != 1) {
                 throw new ConcurrentModificationException(format("Entity of class %s (id='%s',version='%d') was concurrently updated.",
-                    entity.getClass().getName(), idValue, oldVersion));
+                    entity.getClass().getName(), id, oldVersion));
             }
+            return result.getModifiedCount() == 0 ? null : result;
         }
 
-        return result != null && result.getModifiedCount() == 0 ? null : result;
+        return null;
     }
 
     private <T> List<Key<T>> postSaveOperations(final List<T> entities/*, final Map<Object, Document> involvedObjects*/) {
@@ -891,13 +903,15 @@ public class DatastoreImpl implements AdvancedDatastore {
                             WriteConcern writeConcern) {
         validateEntityOnSave(entity);
 
-        if (tryVersionedUpdate(collection, entity, options, writeConcern) == null) {
+        if (tryVersionedUpdate(collection, entity, writeConcern) == null) {
             final MongoCollection<T> mongoCollection = collection
                                                            .withWriteConcern(writeConcern);
-            final Object id = mapper.getMappedClass(entity).getMappedIdField().getFieldValue(entity);
+            final MappedField mappedIdField = mapper.getMappedClass(entity).getMappedIdField();
+            final Object id = mappedIdField.getFieldValue(entity);
             if(id != null) {
-                mongoCollection.replaceOne(new Document("_id", id), entity, new ReplaceOptions()
-                                          .bypassDocumentValidation(options.getBypassDocumentValidation())
+                final Document query = new Document("_id", id);
+
+                replaceEntity(entity, mongoCollection, mappedIdField, id, query, new ReplaceOptions()
                                           .upsert(true));
             } else {
                 mongoCollection
@@ -906,6 +920,23 @@ public class DatastoreImpl implements AdvancedDatastore {
         }
 
         return postSaveOperations(singletonList(entity)).get(0);
+    }
+
+    private <T> UpdateResult replaceEntity(final T entity,
+                                           final MongoCollection<T> mongoCollection,
+                                           final MappedField idField, final Object id, final Document query, final ReplaceOptions options) {
+
+        final boolean clearable = !id.getClass().isPrimitive() && !Number.class.isAssignableFrom(id.getClass());
+        if (clearable) {
+            idField.setFieldValue(entity, null);
+        }
+        try {
+            return mongoCollection.replaceOne(query, entity, options);
+        } finally {
+            if (clearable) {
+                idField.setFieldValue(entity, id);
+            }
+        }
     }
 
     @Override

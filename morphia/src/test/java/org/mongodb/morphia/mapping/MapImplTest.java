@@ -32,11 +32,13 @@ public class MapImplTest extends TestBase {
             ContainsMapOfEmbeddedGoos.class);
         final MongoCollection<Document> docCollection = getDatabase().getCollection(collection.getNamespace().getCollectionName());
 
-        final Document goo = (Document) ((Document) docCollection
-                                                        .find()
-                                                        .limit(1)
-                                                        .iterator().next()
-                                                        .get("values"))
+        final Document next = docCollection
+                                  .find()
+                                  .limit(1)
+                                  .iterator().next();
+        final Document values = (Document) next
+                                               .get("values");
+        final Document goo = (Document) values
                                             .get("first");
         assertTrue(goo.containsKey(Mapper.CLASS_NAME_FIELDNAME));
     }

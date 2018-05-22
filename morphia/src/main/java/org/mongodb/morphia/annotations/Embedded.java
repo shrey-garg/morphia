@@ -38,5 +38,5 @@ public @interface Embedded {
     /**
      * @return true if the discriminator for this type should be stored
      */
-    boolean useDiscriminator() default false;
+    boolean useDiscriminator() default true;
 }

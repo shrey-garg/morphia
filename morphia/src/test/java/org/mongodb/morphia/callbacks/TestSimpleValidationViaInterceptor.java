@@ -26,7 +26,7 @@ public class TestSimpleValidationViaInterceptor extends TestBase {
     @Test
     public void testGlobalEntityInterceptorWorksAfterEntityCallback() {
 
-        getMorphia().getMapper().addInterceptor(new NonNullValidation());
+        getMapper().addInterceptor(new NonNullValidation());
         getMorphia().map(E.class);
         getMorphia().map(E2.class);
 

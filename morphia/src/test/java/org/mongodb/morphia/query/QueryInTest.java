@@ -102,7 +102,7 @@ public class QueryInTest extends TestBase {
             final ReferencedEntity re = new ReferencedEntity("" + x);
             getDatastore().save(re);
             refs.add(new Key<>(ReferencedEntity.class,
-                getMorphia().getMapper().getCollectionName(ReferencedEntity.class),
+                getMapper().getCollectionName(ReferencedEntity.class),
                 re.getId()));
         }
         hr.ref = refs.get(0);

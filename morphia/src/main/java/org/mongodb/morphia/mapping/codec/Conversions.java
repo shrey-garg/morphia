@@ -12,11 +12,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import static java.lang.String.format;
+import static java.lang.Boolean.FALSE;
 
 public final class Conversions {
-
-    private static final Logger LOG = MorphiaLoggerFactory.get(Conversions.class);
     private static Map<Class<?>, Map<Class<?>, Function<?, ?>>> conversions  = new HashMap<>();
 
     static {
@@ -47,7 +45,17 @@ public final class Conversions {
     }
 
     @SuppressWarnings("unchecked")
-    public static Object convert(Class<?> fromType, Class<?> toType, Object value) {
+    public static Object convert(Object value, Class<?> toType) {
+        if(value == null) {
+            if(isNumber(toType)) {
+                return 0;
+            } else if(isBoolean(toType)) {
+                return FALSE;
+            }
+            return null;
+        }
+
+        final Class<?> fromType = value.getClass();
         if(fromType.equals(toType)) {
             return value;
         }
@@ -64,5 +72,13 @@ public final class Conversions {
             return value;
         }
         return function.apply(value);
+    }
+
+    private static boolean isNumber(final Class<?> type) {
+        return type.isPrimitive() && !type.equals(boolean.class);
+    }
+
+    private static boolean isBoolean(final Class<?> type) {
+        return type.equals(boolean.class);
     }
 }

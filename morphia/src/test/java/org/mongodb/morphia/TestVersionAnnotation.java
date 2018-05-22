@@ -72,9 +72,9 @@ public class TestVersionAnnotation extends TestBase {
 
     @Test
     public void testCanMapAPackageContainingAVersionedAbstractBaseClass() {
-        getMorphia().getMapper().mapPackage("org.mongodb.morphia.entities.version");
+        getMapper().mapPackage("org.mongodb.morphia.entities.version");
 
-        Collection<MappedClass> mappedClasses = getMorphia().getMapper().getMappedClasses();
+        Collection<MappedClass> mappedClasses = getMapper().getMappedClasses();
         assertThat(mappedClasses.size(), is(3));
         List<Class<?>> list = new ArrayList<>();
         for (MappedClass mappedClass : mappedClasses) {
@@ -89,7 +89,7 @@ public class TestVersionAnnotation extends TestBase {
     public void testCanMapAnEntityWithAnAbstractVersionedParent() {
         getMorphia().map(VersionedChildEntity.class);
 
-        Collection<MappedClass> mappedClasses = getMorphia().getMapper().getMappedClasses();
+        Collection<MappedClass> mappedClasses = getMapper().getMappedClasses();
         assertThat(mappedClasses.size(), is(2));
         List<Class<?>> list = new ArrayList<>();
         for (MappedClass mappedClass : mappedClasses) {

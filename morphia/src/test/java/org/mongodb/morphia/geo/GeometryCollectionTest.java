@@ -33,7 +33,7 @@ public class GeometryCollectionTest extends TestBase {
         GeometryCollection geometryCollection = geometryCollection(lineString);
 
         // when
-        Document document = getMorphia().getMapper().toDocument(geometryCollection);
+        Document document = getMapper().toDocument(geometryCollection);
 
         assertThat(document, is(notNullValue()));
         assertThat(document.toString(), JSONMatcher.jsonEqual("  {"
@@ -58,7 +58,7 @@ public class GeometryCollectionTest extends TestBase {
         GeometryCollection geometryCollection = geometryCollection(multiPoint);
 
         // when
-        Document document = getMorphia().getMapper().toDocument(geometryCollection);
+        Document document = getMapper().toDocument(geometryCollection);
 
         assertThat(document, is(notNullValue()));
         assertThat(document.toString(), JSONMatcher.jsonEqual("  {"
@@ -88,7 +88,7 @@ public class GeometryCollectionTest extends TestBase {
         GeometryCollection geometryCollection = geometryCollection(multiPolygon);
 
         // when
-        Document document = getMorphia().getMapper().toDocument(geometryCollection);
+        Document document = getMapper().toDocument(geometryCollection);
 
         assertThat(document, is(notNullValue()));
         assertThat(document.toString(), JSONMatcher.jsonEqual("  {"
@@ -127,7 +127,7 @@ public class GeometryCollectionTest extends TestBase {
         GeometryCollection geometryCollection = geometryCollection(point);
 
         // when
-        Document document = getMorphia().getMapper().toDocument(geometryCollection);
+        Document document = getMapper().toDocument(geometryCollection);
 
         // then use the underlying driver to ensure it was persisted correctly to the database
         assertThat(document, is(notNullValue()));
@@ -156,7 +156,7 @@ public class GeometryCollectionTest extends TestBase {
         GeometryCollection geometryCollection = geometryCollection(polygonWithHoles);
 
         // when
-        Document document = getMorphia().getMapper().toDocument(geometryCollection);
+        Document document = getMapper().toDocument(geometryCollection);
 
         assertThat(document, is(notNullValue()));
         assertThat(document.toString(), JSONMatcher.jsonEqual("  {"

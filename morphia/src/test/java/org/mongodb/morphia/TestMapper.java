@@ -1,6 +1,9 @@
 package org.mongodb.morphia;
 
 
+import org.bson.codecs.Codec;
+import org.bson.codecs.EncoderContext;
+import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -15,6 +18,7 @@ import org.mongodb.morphia.mapping.EmbeddedMappingTest.Nested;
 import org.mongodb.morphia.mapping.EmbeddedMappingTest.NestedImpl;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
+import org.mongodb.morphia.mapping.codec.DocumentWriter;
 
 import java.io.Serializable;
 import java.util.List;
@@ -35,6 +39,11 @@ public class TestMapper extends TestBase {
         final UsesCustomIdObject object = new UsesCustomIdObject();
         object.id = cId;
         object.text = "hllo";
+
+        final Codec<UsesCustomIdObject> codec = getCodecRegistry().get(UsesCustomIdObject.class);
+        final DocumentWriter writer = new DocumentWriter();
+        codec.encode(writer, object, EncoderContext.builder().build());
+
         getDatastore().save(object);
     }
 
@@ -43,7 +52,7 @@ public class TestMapper extends TestBase {
     public void singleLookup() {
         getMorphia().map(A.class);
 
-        final MappedClass mappedClass = getMorphia().getMapper().getMappedClass(A.class);
+        final MappedClass mappedClass = getMapper().getMappedClass(A.class);
         Assert.assertNotNull(mappedClass.getIdField());
         Assert.assertNotNull(mappedClass.getMappedIdField());
 
@@ -62,7 +71,7 @@ public class TestMapper extends TestBase {
     public void subTypes() {
         getMorphia().map(NestedImpl.class, AnotherNested.class);
 
-        Mapper mapper = getMorphia().getMapper();
+        Mapper mapper = getMapper();
         List<MappedClass> subTypes = mapper.getSubTypes(mapper.getMappedClass(Nested.class));
         Assert.assertFalse(subTypes.isEmpty());
         Assert.assertTrue(subTypes.contains(mapper.getMappedClass(NestedImpl.class)));
@@ -117,7 +126,7 @@ public class TestMapper extends TestBase {
         private A a2;
     }
 
-    public static class CustomId implements Serializable {
+    public static class CustomId {
 
         @Property("v")
         private ObjectId id;

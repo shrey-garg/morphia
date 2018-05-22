@@ -90,7 +90,7 @@ public class TestDatastore extends TestBase {
 
     @Test
     public void testCollectionNames() {
-        assertEquals("facebook_users", getMorphia().getMapper().getCollectionName(FacebookUser.class));
+        assertEquals("facebook_users", getMapper().getCollectionName(FacebookUser.class));
     }
 
     @Test
@@ -217,7 +217,7 @@ public class TestDatastore extends TestBase {
     @Test
     public void testLifecycle() {
         final LifecycleTestObj life1 = new LifecycleTestObj();
-        getMorphia().getMapper().addMappedClass(LifecycleTestObj.class);
+        getMapper().addMappedClass(LifecycleTestObj.class);
         getDatastore().save(life1);
         assertTrue(life1.prePersist);
         assertTrue(life1.prePersistWithParam);
@@ -234,7 +234,7 @@ public class TestDatastore extends TestBase {
     @Test
     public void testLifecycleListeners() {
         final LifecycleTestObj life1 = new LifecycleTestObj();
-        getMorphia().getMapper().addMappedClass(LifecycleTestObj.class);
+        getMapper().addMappedClass(LifecycleTestObj.class);
         getDatastore().save(life1);
         assertTrue(LifecycleListener.prePersist);
         assertTrue(LifecycleListener.prePersistWithEntity);

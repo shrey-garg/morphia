@@ -33,7 +33,7 @@ public class TestIndexInheritance extends TestBase {
     @Test
     public void testClassIndexInherit() {
         getMorphia().map(Circle.class, Shape.class);
-        final MappedClass mc = getMorphia().getMapper()
+        final MappedClass mc = getMapper()
                                            .getMappedClass(Circle.class);
         assertNotNull(mc);
 
@@ -49,7 +49,7 @@ public class TestIndexInheritance extends TestBase {
     @Test
     public void testInheritedFieldIndex() {
         getMorphia().map(Circle.class, Shape.class);
-        getMorphia().getMapper()
+        getMapper()
                     .getMappedClass(Circle.class);
 
         getDatastore().ensureIndexes();

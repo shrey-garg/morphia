@@ -53,7 +53,7 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
     public T generateIdIfAbsentFromDocument(final T document) {
         if (!documentHasId(document)) {
             final MappedField mappedIdField = mappedClass.getMappedIdField();
-            mappedIdField.setFieldValue(document, Conversions.convert(ObjectId.class, mappedIdField.getType(), new ObjectId()));
+            mappedIdField.setFieldValue(document, Conversions.convert(new ObjectId(), mappedIdField.getType()));
         }
         return document;
     }

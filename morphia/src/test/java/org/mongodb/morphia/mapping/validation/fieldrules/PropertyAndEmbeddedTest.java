@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.PrePersist;
 import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.mapping.validation.ConstraintViolationException;
@@ -29,7 +30,8 @@ public class PropertyAndEmbeddedTest extends TestBase {
         @Transient
         private String document;
 
-        public void preSave(final Document o) {
+        @PrePersist
+        public void prePersist(final Document o) {
             document = o.toString();
         }
     }

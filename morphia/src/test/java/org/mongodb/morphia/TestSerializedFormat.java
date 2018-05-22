@@ -86,7 +86,7 @@ public class TestSerializedFormat extends TestBase {
     }
 
     private void verifyCoverage(final Document document) {
-        for (MappedField field : getMorphia().getMapper().getMappedClass(ReferenceType.class).getPersistenceFields()) {
+        for (MappedField field : getMapper().getMappedClass(ReferenceType.class).getPersistenceFields()) {
             String name = field.getNameToStore();
             boolean found = document.containsKey(name);
             if (!found) {
@@ -147,7 +147,7 @@ public class TestSerializedFormat extends TestBase {
 
         getDatastore().save(entity);
 
-        Document document = getMorphia().getMapper().toDocument(entity);
+        Document document = getMapper().toDocument(entity);
         Assert.assertEquals(Document.parse(readFully("/ReferenceType.json")), document);
         verifyCoverage(document);
     }

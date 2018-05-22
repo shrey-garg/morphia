@@ -45,7 +45,7 @@ public class ArrayFieldAccessor extends FieldAccessor {
 
             return newArray;
         }
-        final Object convert = Conversions.convert(o.getClass(), type, o);
+        final Object convert = Conversions.convert(o, type);
         return convert;
     }
 }

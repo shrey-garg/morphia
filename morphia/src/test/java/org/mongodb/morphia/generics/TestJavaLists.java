@@ -32,8 +32,8 @@ import static org.junit.Assert.assertNull;
 public class TestJavaLists extends TestBase {
     @Test
     public void emptyModel() {
-        getMorphia().getMapper().getOptions().setStoreEmpties(true);
-        getMorphia().getMapper().getOptions().setStoreNulls(false);
+        getMapper().getOptions().setStoreEmpties(true);
+        getMapper().getOptions().setStoreNulls(false);
 
         TestEmptyModel model = new TestEmptyModel();
         model.text = "text";
@@ -51,8 +51,8 @@ public class TestJavaLists extends TestBase {
 
         for (boolean nulls : new boolean[]{true, false}) {
             for (boolean empties : new boolean[]{true, false}) {
-                getMorphia().getMapper().getOptions().setStoreNulls(nulls);
-                getMorphia().getMapper().getOptions().setStoreEmpties(empties);
+                getMapper().getOptions().setStoreNulls(nulls);
+                getMapper().getOptions().setStoreEmpties(empties);
                 Datastore ds = getDatastore();
                 ds.deleteMany(ds.find(Employee.class));
                 Employee employee = new Employee();

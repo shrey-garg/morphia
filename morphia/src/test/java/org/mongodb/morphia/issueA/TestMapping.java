@@ -22,7 +22,7 @@ public class TestMapping extends TestBase {
         final ClassLevelThree sp = new ClassLevelThree();
 
         //Old way
-        final Document wrapObj = getMorphia().getMapper().toDocument(sp);  //the error points here from the user
+        final Document wrapObj = getMapper().toDocument(sp);  //the error points here from the user
         getDatastore().getDatabase().getCollection("testColl").insertOne(wrapObj);
 
 

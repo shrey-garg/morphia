@@ -49,8 +49,8 @@ public class TestInterfaces extends TestBase {
 //        shifter.getAvailableShapes().add(new Rectangle(3, 3));
 //        shifter.getAvailableShapes().add(new Circle(4.4));
 
-        getMorphia().getMapper().getCodecRegistry().get(ShapeShifter.class)
-                    .encode(new DocumentWriter(), shifter, EncoderContext.builder().build());
+        getCodecRegistry().get(ShapeShifter.class)
+                          .encode(new DocumentWriter(), shifter, EncoderContext.builder().build());
 
         getDatastore().save(shifter);
 

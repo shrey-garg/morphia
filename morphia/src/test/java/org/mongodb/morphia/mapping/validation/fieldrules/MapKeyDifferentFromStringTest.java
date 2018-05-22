@@ -1,6 +1,7 @@
 package org.mongodb.morphia.mapping.validation.fieldrules;
 
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Embedded;
@@ -25,6 +26,7 @@ public class MapKeyDifferentFromStringTest extends TestBase {
         getMorphia().map(MapWithWrongKeyType3.class);
     }
 
+    @Ignore("references are not currently supported")
     @Test(expected = ConstraintViolationException.class)
     public void testInvalidReferenceType() {
         getMorphia().map(MapWithWrongKeyType2.class);

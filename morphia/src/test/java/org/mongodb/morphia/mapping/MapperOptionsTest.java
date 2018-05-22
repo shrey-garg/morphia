@@ -25,28 +25,28 @@ public class MapperOptionsTest extends TestBase {
         hl.names = new ArrayList<>();
 
         //Test default behavior
-        getMorphia().getMapper().getOptions().setStoreEmpties(false);
+        getMapper().getOptions().setStoreEmpties(false);
         shouldNotFindField(hl);
 
         //Test default storing empty list/array with storeEmpties option
-        getMorphia().getMapper().getOptions().setStoreEmpties(true);
+        getMapper().getOptions().setStoreEmpties(true);
         shouldFindField(hl, new ArrayList<>());
 
         //Test opposite from above
-        getMorphia().getMapper().getOptions().setStoreEmpties(false);
+        getMapper().getOptions().setStoreEmpties(false);
         shouldNotFindField(hl);
 
         hl.names = null;
         //Test default behavior
-        getMorphia().getMapper().getOptions().setStoreEmpties(false);
+        getMapper().getOptions().setStoreEmpties(false);
         shouldNotFindField(hl);
 
         //Test default storing empty list/array with storeEmpties option
-        getMorphia().getMapper().getOptions().setStoreEmpties(true);
+        getMapper().getOptions().setStoreEmpties(true);
         shouldNotFindField(hl);
 
         //Test opposite from above
-        getMorphia().getMapper().getOptions().setStoreEmpties(false);
+        getMapper().getOptions().setStoreEmpties(false);
         shouldNotFindField(hl);
     }
 
@@ -56,16 +56,16 @@ public class MapperOptionsTest extends TestBase {
         hm.properties = new HashMap<>();
 
         //Test default behavior
-        getMorphia().getMapper().getOptions().setStoreEmpties(false);
+        getMapper().getOptions().setStoreEmpties(false);
         shouldNotFindField(hm);
 
         //Test default storing empty map with storeEmpties option
-        getMorphia().getMapper().getOptions().setStoreEmpties(true);
+        getMapper().getOptions().setStoreEmpties(true);
         shouldFindField(hm, new HashMap<>());
 
 
         //Test opposite from above
-        getMorphia().getMapper().getOptions().setStoreEmpties(false);
+        getMapper().getOptions().setStoreEmpties(false);
         shouldNotFindField(hm);
     }
 
@@ -75,15 +75,15 @@ public class MapperOptionsTest extends TestBase {
         hm.properties = new HashMap<>();
 
         //Test default behavior
-        getMorphia().getMapper().getOptions().setStoreEmpties(false);
+        getMapper().getOptions().setStoreEmpties(false);
         shouldNotFindField(hm);
 
         //Test default storing empty map with storeEmpties option
-        getMorphia().getMapper().getOptions().setStoreEmpties(true);
+        getMapper().getOptions().setStoreEmpties(true);
         shouldFindField(hm, new HashMap<>());
 
         //Test opposite from above
-        getMorphia().getMapper().getOptions().setStoreEmpties(false);
+        getMapper().getOptions().setStoreEmpties(false);
         shouldNotFindField(hm);
     }
 
@@ -93,15 +93,15 @@ public class MapperOptionsTest extends TestBase {
         hm.properties = new HashMap<>();
 
         //Test default behavior
-        getMorphia().getMapper().getOptions().setStoreEmpties(false);
+        getMapper().getOptions().setStoreEmpties(false);
         shouldNotFindField(hm);
 
         //Test default storing empty map with storeEmpties option
-        getMorphia().getMapper().getOptions().setStoreEmpties(true);
+        getMapper().getOptions().setStoreEmpties(true);
         shouldFindField(hm, new HashMap<>());
 
         //Test opposite from above
-        getMorphia().getMapper().getOptions().setStoreEmpties(false);
+        getMapper().getOptions().setStoreEmpties(false);
         shouldNotFindField(hm);
     }
 
@@ -109,12 +109,12 @@ public class MapperOptionsTest extends TestBase {
     public void lowercaseDefaultCollection() {
         DummyEntity entity = new DummyEntity();
 
-        String collectionName = getMorphia().getMapper().getCollectionName(entity.getClass());
+        String collectionName = getMapper().getCollectionName(entity.getClass());
         assertEquals("uppercase", "DummyEntity", collectionName);
 
-        getMorphia().getMapper().getOptions().setUseLowerCaseCollectionNames(true);
+        getMapper().getOptions().setUseLowerCaseCollectionNames(true);
 
-        collectionName = getMorphia().getMapper().getCollectionName(entity.getClass());
+        collectionName = getMapper().getCollectionName(entity.getClass());
         assertEquals("lowercase", "dummyentity", collectionName);
     }
 
@@ -124,15 +124,15 @@ public class MapperOptionsTest extends TestBase {
         hl.names = null;
 
         //Test default behavior
-        getMorphia().getMapper().getOptions().setStoreNulls(false);
+        getMapper().getOptions().setStoreNulls(false);
         shouldNotFindField(hl);
 
         //Test default storing null list/array with storeNulls option
-        getMorphia().getMapper().getOptions().setStoreNulls(true);
+        getMapper().getOptions().setStoreNulls(true);
         shouldFindField(hl, null);
 
         //Test opposite from above
-        getMorphia().getMapper().getOptions().setStoreNulls(false);
+        getMapper().getOptions().setStoreNulls(false);
         shouldNotFindField(hl);
     }
 
@@ -142,16 +142,16 @@ public class MapperOptionsTest extends TestBase {
         hm.properties = null;
 
         //Test default behavior
-        getMorphia().getMapper().getOptions().setStoreNulls(false);
+        getMapper().getOptions().setStoreNulls(false);
         shouldNotFindField(hm);
 
         //Test default storing empty map with storeEmpties option
-        getMorphia().getMapper().getOptions().setStoreNulls(true);
+        getMapper().getOptions().setStoreNulls(true);
         shouldFindField(hm, null);
 
 
         //Test opposite from above
-        getMorphia().getMapper().getOptions().setStoreNulls(false);
+        getMapper().getOptions().setStoreNulls(false);
         shouldNotFindField(hm);
     }
 

@@ -41,8 +41,8 @@ public class EnumMappingTest extends TestBase {
 
     @Test
     public void testCustomerWithArrayList() {
-        getMorphia().getMapper().getOptions().setStoreEmpties(true);
-        getMorphia().getMapper().getOptions().setStoreNulls(true);
+        getMapper().getOptions().setStoreEmpties(true);
+        getMapper().getOptions().setStoreNulls(true);
         getMorphia().map(CustomerWithArrayList.class);
 
         CustomerWithArrayList customer = new CustomerWithArrayList();
@@ -65,8 +65,8 @@ public class EnumMappingTest extends TestBase {
 
     @Test
     public void testCustomerWithList() {
-        getMorphia().getMapper().getOptions().setStoreEmpties(true);
-        getMorphia().getMapper().getOptions().setStoreNulls(true);
+        getMapper().getOptions().setStoreEmpties(true);
+        getMapper().getOptions().setStoreNulls(true);
         getMorphia().map(CustomerWithArrayList.class);
         CustomerWithList customer = new CustomerWithList();
 

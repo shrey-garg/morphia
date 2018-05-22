@@ -38,7 +38,7 @@ public class GeoEntitiesTest extends TestBase {
         City city = new City("New City", point(3.0, 7.0));
 
         // when
-        Document document = getMorphia().getMapper().toDocument(city);
+        Document document = getMapper().toDocument(city);
 
         assertThat(document, is(notNullValue()));
         assertThat(document.toString(), jsonEqual("  {"

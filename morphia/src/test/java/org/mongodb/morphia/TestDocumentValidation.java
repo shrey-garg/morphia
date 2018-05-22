@@ -120,7 +120,7 @@ public class TestDocumentValidation extends TestBase {
     public void validationDocuments() {
         Document validator = Document.parse("{ jelly : { $ne : 'rhubarb' } }");
         getMorphia().map(DocumentValidation.class);
-        MappedClass mappedClass = getMorphia().getMapper().getMappedClass(DocumentValidation.class);
+        MappedClass mappedClass = getMapper().getMappedClass(DocumentValidation.class);
 
         for (ValidationLevel level : EnumSet.allOf(ValidationLevel.class)) {
             for (ValidationAction action : EnumSet.allOf(ValidationAction.class)) {

@@ -128,7 +128,7 @@ public class TestIndexed extends TestBase {
 
     @Test
     public void testEmbeddedIndex() {
-        final MappedClass mc = getMorphia().getMapper().addMappedClass(ContainsIndexedEmbed.class);
+        final MappedClass mc = getMapper().addMappedClass(ContainsIndexedEmbed.class);
 
         ListIndexesIterable<Document> actual = getDatabase().getCollection(mc.getCollectionName()).listIndexes();
         assertThat(actual.toString(), actual, doesNotHaveIndexNamed("e.name_-1"));
@@ -150,14 +150,14 @@ public class TestIndexed extends TestBase {
 
     @Test
     public void testIndexedRecursiveEntity() {
-        final MappedClass mc = getMorphia().getMapper().getMappedClass(CircularEmbeddedEntity.class);
+        final MappedClass mc = getMapper().getMappedClass(CircularEmbeddedEntity.class);
         getDatastore().ensureIndexes();
         assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), hasIndexNamed("a_1"));
     }
 
     @Test
     public void testIndexes() {
-        final MappedClass mc = getMorphia().getMapper().addMappedClass(Ad2.class);
+        final MappedClass mc = getMapper().addMappedClass(Ad2.class);
 
         assertThat(getDatabase().getCollection(mc.getCollectionName()).listIndexes(), doesNotHaveIndexNamed("active_1_lastMod_-1"));
         getDatastore().ensureIndexes(Ad2.class);
