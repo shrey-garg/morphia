@@ -4,7 +4,6 @@ package org.mongodb.morphia.mapping;
 import org.bson.Document;
 import org.bson.codecs.Codec;
 import org.bson.codecs.EncoderContext;
-import org.bson.codecs.configuration.CodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.mongodb.morphia.EntityInterceptor;
@@ -72,7 +71,6 @@ public class Mapper {
     private final Map<Class, Object> instanceCache = new ConcurrentHashMap();
     private CodecRegistry codecRegistry;
     private MapperOptions opts;
-    private MorphiaCodecProvider codecProvider;
     private final Set<String> packages = new HashSet<>();
 
     public Mapper(final CodecRegistry codecRegistry) {
@@ -86,7 +84,7 @@ public class Mapper {
      */
     public Mapper(final CodecRegistry codecRegistry, final MapperOptions opts) {
         this.opts = opts;
-        codecProvider = new MorphiaCodecProvider(this, singletonList(new MorphiaConvention(opts)));
+        final MorphiaCodecProvider codecProvider = new MorphiaCodecProvider(this, singletonList(new MorphiaConvention(opts)));
         final MorphiaTypesCodecProvider typesCodecProvider = new MorphiaTypesCodecProvider(this);
 
         this.codecRegistry = fromRegistries(fromProviders(new MorphiaShortCutProvider(codecProvider)),
@@ -288,10 +286,6 @@ public class Mapper {
         final Object id = getId(entity);
         final Class<T> aClass = (Class<T>) entity.getClass();
         return id == null ? null : new Key<>(aClass, getCollectionName(aClass), id);
-    }
-
-    public CodecProvider getCodecProvider() {
-        return codecProvider;
     }
 
     /**

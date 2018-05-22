@@ -12,16 +12,19 @@ import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.DiscriminatorLookup;
+import org.bson.codecs.pojo.FieldModel;
 import org.bson.codecs.pojo.InstanceCreator;
 import org.bson.codecs.pojo.PojoCodec;
 import org.bson.codecs.pojo.PojoCodecImpl;
 import org.bson.codecs.pojo.PropertyCodecProvider;
 import org.bson.codecs.pojo.PropertyCodecRegistry;
+import org.bson.codecs.pojo.PropertyModel;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.PrePersist;
+import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
@@ -123,6 +126,17 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
     @SuppressWarnings("unchecked")
     protected <S> PojoCodec<S> getSpecializedCodec(final ClassModel<S> specialized) {
         return new SpecializedMorphiaCodec(this, specialized);
+    }
+
+    @Override
+    protected <S> Codec<S> specializePojoCodec(final PropertyModel<S> propertyModel, final Codec<S> defaultCodec) {
+        Codec codec = defaultCodec;
+        final Property annotation = getClassModel().getFieldModel(propertyModel.getName())
+                                                   .getAnnotation(Property.class);
+        if (annotation != null && !annotation.concreteClass().equals(Object.class)) {
+            codec = getRegistry().get(annotation.concreteClass());
+        }
+        return super.specializePojoCodec(propertyModel, codec);
     }
 
     private static class SpecializedMorphiaCodec<T> extends PojoCodec<T> {

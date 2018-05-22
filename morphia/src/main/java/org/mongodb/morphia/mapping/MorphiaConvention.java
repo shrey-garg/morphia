@@ -95,11 +95,6 @@ public class MorphiaConvention implements Convention {
                 if(field.getAnnotation(Embedded.class) != null) {
                     property.discriminatorEnabled(field.getAnnotation(Embedded.class).useDiscriminator());
                 }
-                final Class<?> type = property.getTypeData().getType();
-                /*if (Collection.class.isAssignableFrom(type)
-                    || Map.class.isAssignableFrom(type)) {
-                    property.discriminatorEnabled(true);
-                } else*/
                 if (isNotConcrete(property.getTypeData())) {
                     property.discriminatorEnabled(true);
                 }
