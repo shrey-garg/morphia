@@ -108,7 +108,7 @@ public class TestIdField extends TestBase {
         private final Map<String, String> id = new HashMap<>();
     }
 
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     public static class EmbeddedId {
 
         @Id

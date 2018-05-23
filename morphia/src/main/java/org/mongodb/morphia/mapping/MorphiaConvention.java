@@ -42,8 +42,7 @@ public class MorphiaConvention implements Convention {
 
         final Entity entity = classModelBuilder.getAnnotation(Entity.class);
         if(entity != null) {
-            classModelBuilder.enableDiscriminator(entity.useDiscriminator() || !entity.noClassnameStored()
-                                                  /*|| isNotConcrete(classModelBuilder.getType())*/);
+            classModelBuilder.enableDiscriminator(entity.useDiscriminator() /*|| isNotConcrete(classModelBuilder.getType())*/);
         } else if(classModelBuilder.hasAnnotation(Embedded.class)) {
             classModelBuilder.enableDiscriminator(classModelBuilder.getAnnotation(Embedded.class).useDiscriminator());
         } else {
@@ -92,8 +91,9 @@ public class MorphiaConvention implements Convention {
                 .propertySerialization(new MorphiaPropertySerialization(options, builder));
 
                 property.discriminatorEnabled(false);
-                if(field.getAnnotation(Embedded.class) != null) {
-                    property.discriminatorEnabled(field.getAnnotation(Embedded.class).useDiscriminator());
+                final Embedded embedded = field.getAnnotation(Embedded.class);
+                if(embedded != null) {
+                    property.discriminatorEnabled(embedded.useDiscriminator());
                 }
                 if (isNotConcrete(property.getTypeData())) {
                     property.discriminatorEnabled(true);

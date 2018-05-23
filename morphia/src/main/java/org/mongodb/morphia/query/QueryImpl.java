@@ -326,7 +326,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         Entity entityAnnotation = mc.getEntityAnnotation();
         final Document fieldsFilter = new Document(projection);
 
-        if (includeFields && entityAnnotation != null && !entityAnnotation.noClassnameStored()) {
+        if (includeFields && entityAnnotation != null && entityAnnotation.useDiscriminator()) {
             fieldsFilter.put(Mapper.CLASS_NAME_FIELDNAME, 1);
         }
 

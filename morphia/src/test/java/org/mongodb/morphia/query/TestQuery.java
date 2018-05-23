@@ -1323,7 +1323,7 @@ public class TestQuery extends TestBase {
         Assert.assertEquals("foo", retrievedValue.value1);
     }
 
-    @Entity(value = "user", noClassnameStored = true)
+    @Entity(value = "user", useDiscriminator = false)
     private static class Class1 {
         @Id
         private ObjectId id;
@@ -1566,7 +1566,7 @@ public class TestQuery extends TestBase {
         }
     }
 
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     public static class ContainsRenamedFields {
         @Id
         private ObjectId id;

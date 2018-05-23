@@ -31,7 +31,7 @@ public abstract class LongIdEntity {
     /**
      * Used to store counters for other entities.
      */
-    @Entity(value = "ids", noClassnameStored = true)
+    @Entity(value = "ids", useDiscriminator = false)
     public static class StoredId {
         @Id
         private final String className;

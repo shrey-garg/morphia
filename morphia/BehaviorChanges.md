@@ -19,3 +19,4 @@ catching so this change should be source compatible for almost everyone.
  it is to write and register custom codecs.
 1. Top level generic types are no longer mappable.  This is a shortcoming with the driver mapping code and may or may not be addressed in
  the future.
+1. Entity.noClassnameStored

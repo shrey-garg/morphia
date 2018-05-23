@@ -214,7 +214,7 @@ public class TestInheritanceMappings extends TestBase {
     private static class ParameterizedIdEntity extends GenericId<String> {
     }
 
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     public static class MapLike implements Iterable<Entry<String, String>>, Map<String, String> {
         private final HashMap<String, String> realMap = new HashMap<>();
         @Id

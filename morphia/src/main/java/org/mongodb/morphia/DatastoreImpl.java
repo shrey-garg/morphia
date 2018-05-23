@@ -564,35 +564,22 @@ public class DatastoreImpl implements AdvancedDatastore {
         final MappedField mappedIdField = mapper.getMappedClass(entity).getMappedIdField();
         final Object id = mappedIdField.getFieldValue(entity);
 
+        final MappedField version = mc.getMappedVersionField();
+        Long oldVersion = (Long) version.getFieldValue(entity);
+        final long newVersion = oldVersion == null ? 1 : oldVersion + 1;
+        version.setFieldValue(entity, newVersion);
+
         if (id != null) {
-            final MappedField version = mc.getMappedVersionField();
-            Long oldVersion = (Long) version.getFieldValue(entity);
-            final long newVersion = oldVersion == null ? 1 : oldVersion + 1;
 
-            UpdateResult result;
-            try {
-                version.setFieldValue(entity, newVersion);
+            final MongoCollection<T> mongoCollection = origCollection
+                                                           .withWriteConcern(writeConcern);
 
-                final MongoCollection<T> mongoCollection = origCollection
-                                                               .withWriteConcern(writeConcern);
+            version.setFieldValue(entity, newVersion);
+            final Document query = newQuery((Class<T>) entity.getClass(), origCollection)
+                                       .filter(Mapper.ID_KEY, id)
+                                       .filter(version.getNameToStore(), oldVersion).getQueryDocument();
 
-                version.setFieldValue(entity, newVersion);
-                final Document query = newQuery((Class<T>) entity.getClass(), origCollection)
-                                           .filter(Mapper.ID_KEY, id)
-                                           .filter(version.getNameToStore(), oldVersion).getQueryDocument();
-
-                result = replaceEntity(entity,mongoCollection, mappedIdField, id, query, new ReplaceOptions().upsert(true));
-/*
-                mappedIdField.setFieldValue(entity, null);
-                result = mongoCollection.replaceOne(
-                    query,
-                    entity, new ReplaceOptions().upsert(false));
-                mappedIdField.setFieldValue(entity, id);
-*/
-            } finally {
-                version.setFieldValue(entity, oldVersion);
-            }
-
+            UpdateResult result = replaceEntity(entity, mongoCollection, mappedIdField, id, query, new ReplaceOptions().upsert(false));
             if (result.getModifiedCount() != 1 && newVersion != 1) {
                 throw new ConcurrentModificationException(format("Entity of class %s (id='%s',version='%d') was concurrently updated.",
                     entity.getClass().getName(), id, oldVersion));

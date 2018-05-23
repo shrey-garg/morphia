@@ -46,21 +46,9 @@ public @interface Entity {
     String concern() default "";
 
     /**
-     * @return When true, instructs Morphia to not include when serializing an entity to mongodb.
-     * @deprecated use {@link #useDiscriminator()} instead
-     */
-    @Deprecated
-    boolean noClassnameStored() default false;
-
-    /**
      * @return true if the discriminator for this type should be stored
      */
     boolean useDiscriminator() default true;
-
-    /**
-     * @return slaveOk for queries for this Entity.
-     */
-    boolean queryNonPrimary() default false;
 
     /**
      * @return the collection name to for this entity.  Defaults to the class's simple name

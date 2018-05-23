@@ -64,7 +64,7 @@ public class TestEmbeddedClassname extends TestBase {
         Assert.assertTrue(bRaw2.containsKey(Mapper.CLASS_NAME_FIELDNAME));
     }
 
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     private static class Root {
         private final List<A> aList = new ArrayList<>();
         private final List<B> bList = new ArrayList<>();

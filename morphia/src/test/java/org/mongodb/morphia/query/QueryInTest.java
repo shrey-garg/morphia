@@ -175,7 +175,7 @@ public class QueryInTest extends TestBase {
         }
     }
 
-    @Entity(value = "as", noClassnameStored = true)
+    @Entity(value = "as", useDiscriminator = false)
     private static class HasIdOnly {
         @Id
         private ObjectId id;

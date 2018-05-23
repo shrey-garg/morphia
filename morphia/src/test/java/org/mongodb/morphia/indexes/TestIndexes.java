@@ -99,7 +99,7 @@ public class TestIndexes extends TestBase {
     }
 
     @SuppressWarnings("unused")
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     @Indexes({@Index(options = @IndexOptions(name = "collated",
         partialFilter = "{ name : { $exists : true } }",
         collation = @Collation(locale = "en_US", alternate = SHIFTED, backwards = true,
@@ -114,7 +114,7 @@ public class TestIndexes extends TestBase {
     }
 
     @SuppressWarnings("unused")
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     @Indexes({@Index(options = @IndexOptions(), fields = {@Field(value = "hashedValue", type = IndexType.HASHED)})})
     private static class TestWithHashedIndex {
         @Id

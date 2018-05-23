@@ -932,7 +932,7 @@ public class TestUpdateOps extends TestBase {
         private List<Key<Pic>> keys;
     }
 
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     public static class EntityLogs {
         @Id
         private ObjectId id;

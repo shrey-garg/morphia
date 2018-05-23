@@ -110,7 +110,7 @@ public class EmbeddedMappingTest extends TestBase {
     public interface Nested {
     }
 
-    @Entity(value = "audit", noClassnameStored = true)
+    @Entity(value = "audit", useDiscriminator = false)
     public static class AuditEntry {
         @Id
         private ObjectId id;

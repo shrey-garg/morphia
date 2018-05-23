@@ -100,7 +100,7 @@ public class CollectionOfValuesTest extends TestBase {
         private byte[][] twoDimArray;
     }
 
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     public static class City {
         @Id
         private ObjectId id;

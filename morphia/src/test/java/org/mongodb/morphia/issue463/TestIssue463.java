@@ -23,7 +23,7 @@ public class TestIssue463 extends TestBase {
         Assert.assertNotNull(getDatastore().find(Class2.class).filter("_id", class2.getId()).get());
     }
 
-    @Entity(value = "class1", noClassnameStored = true)
+    @Entity(value = "class1", useDiscriminator = false)
     public static class Class1 {
         @Id
         private ObjectId id;
@@ -46,7 +46,7 @@ public class TestIssue463 extends TestBase {
         }
     }
 
-    @Entity(value = "class2", noClassnameStored = true)
+    @Entity(value = "class2", useDiscriminator = false)
     public static class Class2 extends Class1 {
 
     }

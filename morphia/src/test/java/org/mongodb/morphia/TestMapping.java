@@ -578,7 +578,7 @@ public class TestMapping extends TestBase {
         private ObjectId id;
     }
 
-    @Embedded("no-id")
+    @Embedded(value = "no-id", useDiscriminator = false)
     private static class RenamedEmbedded {
         private String name;
     }
@@ -712,7 +712,7 @@ public class TestMapping extends TestBase {
         private ContainsIntegerList cil = new ContainsIntegerList();
     }
 
-    @Entity(value = "cil", noClassnameStored = true)
+    @Entity(value = "cil", useDiscriminator = false)
     private static class ContainsIntegerList {
         @Id
         private ObjectId id;
@@ -726,21 +726,21 @@ public class TestMapping extends TestBase {
         private List<Integer> integers = new ArrayList<>();
     }
 
-    @Entity(value = "cil", noClassnameStored = true)
+    @Entity(value = "cil", useDiscriminator = false)
     private static class ContainsIntegerListNew {
         @Id
         private ObjectId id;
         private final List<Integer> integers = new ArrayList<>();
     }
 
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     private static class ContainsUUID {
         private final UUID uuid = UUID.randomUUID();
         @Id
         private ObjectId id;
     }
 
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     private static class ContainsUuidId {
         @Id
         private final UUID id = UUID.randomUUID();

@@ -527,7 +527,7 @@ public class AggregationTest extends TestBase {
         private String string;
     }
 
-    @Entity(value = "books", noClassnameStored = true)
+    @Entity(value = "books", useDiscriminator = false)
     public static final class Book {
         @Id
         private ObjectId id;
@@ -697,7 +697,7 @@ public class AggregationTest extends TestBase {
 
     }
 
-    @Entity(value = "inventory", noClassnameStored = true)
+    @Entity(value = "inventory", useDiscriminator = false)
     public static class Inventory {
         @Id
         private int id;

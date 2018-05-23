@@ -25,7 +25,7 @@ public class TestTypeCriteria extends TestBase {
         Assert.assertTrue(query.asList().size() > 0);
     }
 
-    @Entity(value = "user", noClassnameStored = true)
+    @Entity(value = "user", useDiscriminator = false)
     public static class Class1 {
         @Id
         private ObjectId id;

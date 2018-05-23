@@ -185,7 +185,7 @@ public class CompoundIdTest extends TestBase {
         }
     }
 
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     public static class ConfigEntry {
         @Id
         private ConfigKey key;

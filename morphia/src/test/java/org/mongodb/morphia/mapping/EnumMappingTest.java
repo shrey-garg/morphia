@@ -190,7 +190,7 @@ public class EnumMappingTest extends TestBase {
         }
     }
 
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     public static class Customer {
         private final Map<WebTemplateType, WebTemplate> map = new HashMap<>();
         @Id
@@ -202,7 +202,7 @@ public class EnumMappingTest extends TestBase {
 
     }
 
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     public static class CustomerWithList {
         private final Map<WebTemplateType, List<WebTemplate>> mapWithList = new HashMap<>();
         @Id
@@ -213,7 +213,7 @@ public class EnumMappingTest extends TestBase {
         }
     }
 
-    @Entity(noClassnameStored = true)
+    @Entity(useDiscriminator = false)
     public static class CustomerWithArrayList {
         private final Map<WebTemplateType, List<WebTemplate>> mapWithArrayList
             = new HashMap<>();
