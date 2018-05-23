@@ -540,12 +540,8 @@ public class DatastoreImpl implements AdvancedDatastore {
         return queryByExample((MongoCollection<T>) getCollection(ex.getClass()), ex);
     }
 
-    @SuppressWarnings("unchecked")
     private <T> Query<T> queryByExample(final MongoCollection<T> coll, final T example) {
-        // TODO: think about remove className from baseQuery param below.
-        final Class<T> type = (Class<T>) example.getClass();
-        final Document query = mapper.toDocument(example);
-        return newQuery(type, coll, query);
+        return newQuery((Class<T>) example.getClass(), coll, mapper.toDocument(example));
     }
 
     /**

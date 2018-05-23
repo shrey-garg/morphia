@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.TestBase;
+import org.mongodb.morphia.entities.SimpleEntity;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -38,8 +39,8 @@ public class QueryFactoryTest extends TestBase {
 
         getDatastore().setQueryFactory(queryFactory);
 
-        final Query<String> query = getDatastore().find(String.class);
-        final Query<String> other = getDatastore().find(String.class);
+        final Query<SimpleEntity> query = getDatastore().find(SimpleEntity.class);
+        final Query<SimpleEntity> other = getDatastore().find(SimpleEntity.class);
 
         Assert.assertNotSame(other, query);
         Assert.assertEquals(2, counter.get());

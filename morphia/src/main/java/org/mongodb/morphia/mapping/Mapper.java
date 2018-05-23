@@ -178,7 +178,12 @@ public class Mapper {
     }
 
     public String getCollectionName(final Class type) {
-        return getMappedClass(type).getCollectionName();
+        final MappedClass mc = getMappedClass(type);
+        if (mc == null) {
+            throw new MappingException(format("%s is not a mapped type", type.getName()));
+        }
+
+        return mc.getCollectionName();
     }
 
     /**

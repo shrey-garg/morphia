@@ -19,4 +19,5 @@ catching so this change should be source compatible for almost everyone.
  it is to write and register custom codecs.
 1. Top level generic types are no longer mappable.  This is a shortcoming with the driver mapping code and may or may not be addressed in
  the future.
-1. Entity.noClassnameStored
+1. Entity.noClassnameStored has been removed noClassNameStored() because it was awkwardly named and I can't determine between a legacy use of that and a modern use of useDiscriminator
+1. throw an exception when getting the collection for an unmapped type
