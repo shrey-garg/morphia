@@ -10,19 +10,6 @@ import org.mongodb.morphia.annotations.Id;
 public class QueryImplCloneTest extends TestBase {
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testQueryCloneOld() {
-        final Query q = getDatastore().find(E1.class)
-                                      .field("i")
-                                      .equal(5)
-                                      .filter("a", "value_a")
-                                      .filter("b", "value_b")
-                                      .order("a");
-        q.disableValidation().filter("foo", "bar");
-        Assert.assertEquals(q, q.cloneQuery());
-    }
-
-    @Test
     public void testQueryClone() {
         final Query q = getDatastore().find(E1.class)
                                       .field("i")

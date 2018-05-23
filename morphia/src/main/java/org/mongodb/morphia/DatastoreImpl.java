@@ -16,13 +16,14 @@ import com.mongodb.client.model.FindOneAndUpdateOptions;
 import com.mongodb.client.model.FindOptions;
 import com.mongodb.client.model.InsertManyOptions;
 import com.mongodb.client.model.InsertOneOptions;
-import com.mongodb.client.model.ReplaceOptions;
 import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.ValidationOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
+import org.bson.codecs.Codec;
+import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.mongodb.morphia.aggregation.AggregationPipeline;
@@ -37,6 +38,7 @@ import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.MappingException;
+import org.mongodb.morphia.mapping.codec.DocumentWriter;
 import org.mongodb.morphia.query.DefaultQueryFactory;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryException;
@@ -579,7 +581,7 @@ public class DatastoreImpl implements AdvancedDatastore {
                                        .filter(Mapper.ID_KEY, id)
                                        .filter(version.getNameToStore(), oldVersion).getQueryDocument();
 
-            UpdateResult result = replaceEntity(entity, mongoCollection, mappedIdField, id, query, new ReplaceOptions().upsert(false));
+            UpdateResult result = updateEntity(mongoCollection, entity, query, new UpdateOptions().upsert(false));
             if (result.getModifiedCount() != 1 && newVersion != 1) {
                 throw new ConcurrentModificationException(format("Entity of class %s (id='%s',version='%d') was concurrently updated.",
                     entity.getClass().getName(), id, oldVersion));
@@ -898,7 +900,7 @@ public class DatastoreImpl implements AdvancedDatastore {
             if(id != null) {
                 final Document query = new Document("_id", id);
 
-                replaceEntity(entity, mongoCollection, mappedIdField, id, query, new ReplaceOptions()
+                updateEntity(mongoCollection, entity, query, new UpdateOptions()
                                           .upsert(true));
             } else {
                 mongoCollection
@@ -909,21 +911,25 @@ public class DatastoreImpl implements AdvancedDatastore {
         return postSaveOperations(singletonList(entity)).get(0);
     }
 
-    private <T> UpdateResult replaceEntity(final T entity,
-                                           final MongoCollection<T> mongoCollection,
-                                           final MappedField idField, final Object id, final Document query, final ReplaceOptions options) {
+    private <T> UpdateResult updateEntity(final MongoCollection<T> mongoCollection, final T entity,
+                                          final Document query, final UpdateOptions options) {
 
-        final boolean clearable = !id.getClass().isPrimitive() && !Number.class.isAssignableFrom(id.getClass());
-        if (clearable) {
-            idField.setFieldValue(entity, null);
-        }
-        try {
-            return mongoCollection.replaceOne(query, entity, options);
-        } finally {
-            if (clearable) {
-                idField.setFieldValue(entity, id);
-            }
-        }
+//        final boolean clearable = !id.getClass().isPrimitive() && !Number.class.isAssignableFrom(id.getClass());
+//        if (clearable) {
+//            idField.setFieldValue(entity, null);
+//        }
+//        try {
+        final Codec<T> codec = getCodecRegistry().get((Class<T>)entity.getClass());
+        final DocumentWriter writer = new DocumentWriter();
+        codec.encode(writer, entity, EncoderContext.builder().build());
+        final Document root = writer.getRoot();
+        root.remove(Mapper.ID_KEY);
+        return mongoCollection.updateOne(query, new Document("$set", root), options);
+//        } finally {
+//            if (clearable) {
+//                idField.setFieldValue(entity, id);
+//            }
+//        }
     }
 
     @Override
