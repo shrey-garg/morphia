@@ -947,7 +947,7 @@ public class TestUpdateOps extends TestBase {
         }
     }
 
-    @Embedded
+    @Embedded(useDiscriminator = false)
     public static class EntityLog {
         private Date receivedTs;
         private String value;

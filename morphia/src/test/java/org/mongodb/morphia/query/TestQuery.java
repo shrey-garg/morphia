@@ -68,6 +68,7 @@ import static com.mongodb.client.model.Collation.builder;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Collections.singletonList;
+import static org.bson.Document.parse;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -111,7 +112,7 @@ public class TestQuery extends TestBase {
         getDatastore().save(value);
 
         final Query<KeyValue> query = getDatastore().find(KeyValue.class).field("key").hasAnyOf(keys);
-        Assert.assertTrue(query.toString().replaceAll("\\s", "").contains("{\"$in\":[\"key1\",\"key2\"]"));
+        Assert.assertEquals(query.getQueryDocument(), parse("{\"key\": {\"$in\": [\"key1\", \"key2\"]}}"));
         assertEquals(query.get().id, value.id);
     }
 
@@ -435,29 +436,6 @@ public class TestQuery extends TestBase {
                                     .get());
         assertNull(getDatastore().find(PhotoWithKeywords.class)
                                  .field("keywords").elemMatch(getDatastore().find(Keyword.class).filter("keyword", "Randy"))
-                                 .get());
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void testElemMatchQueryOld() {
-        getDatastore().saveMany(asList(new PhotoWithKeywords(), new PhotoWithKeywords("Scott", "Joe", "Sarah")));
-        assertNotNull(getDatastore().find(PhotoWithKeywords.class)
-                                    .field("keywords")
-                                    .elemMatch(getDatastore().find(Keyword.class)
-                                        .filter("keyword = ", "Scott"))
-                                    .get());
-        // TODO add back when $and is done (> 1.5)  this needs multiple $elemMatch clauses
-        //        query = getDs().find(PhotoWithKeywords.class)
-        //                       .field("keywords")
-        //                       .hasThisElement(new Keyword[]{new Keyword("Scott"), new Keyword("Joe")});
-        //        System.out.println("************ query = " + query);
-        //        PhotoWithKeywords pwkScottSarah = query.get();
-        //        assertNotNull(pwkScottSarah);
-        assertNull(getDatastore().find(PhotoWithKeywords.class)
-                                 .field("keywords")
-                                 .elemMatch(getDatastore().find(Keyword.class)
-                                     .filter("keyword = ", "Randy"))
                                  .get());
     }
 
@@ -800,7 +778,10 @@ public class TestQuery extends TestBase {
     public void testNaturalSortAscending() {
         getDatastore().saveMany(asList(new Rectangle(6, 10), new Rectangle(3, 8), new Rectangle(10, 10), new Rectangle(10, 1)));
 
-        List<Rectangle> results = getDatastore().find(Rectangle.class).order(naturalAscending()).asList();
+        List<Rectangle> results = getDatastore()
+                                      .find(Rectangle.class)
+                                      .order(naturalAscending())
+                                      .asList();
 
         assertEquals(4, results.size());
 
@@ -1047,6 +1028,7 @@ public class TestQuery extends TestBase {
     }
 
     @Test
+    @Ignore("references are not currently supported")
     public void testQueryOverLazyReference() {
         final ContainsPic cpk = new ContainsPic();
         final Pic p = new Pic();
@@ -1062,6 +1044,7 @@ public class TestQuery extends TestBase {
     }
 
     @Test
+    @Ignore("references are not currently supported")
     public void testQueryOverReference() {
 
         final ContainsPic cpk = new ContainsPic();

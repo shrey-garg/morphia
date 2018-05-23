@@ -850,15 +850,17 @@ public class DatastoreImpl implements AdvancedDatastore {
             return emptyList();
         }
 
-        final Map<MongoCollection<T>, List<T>> map = entities.stream()
+        final Map<String, List<T>> map = entities.stream()
                                                              .collect(groupingBy(entity -> {
                                                                  final Class<T> aClass = (Class<T>) entity.getClass();
-                                                                 return getCollection(aClass);
+                                                                 return getCollection(aClass).getNamespace().getCollectionName();
                                                              }));
 
-        map.forEach((key, value) -> key
-                                        .withWriteConcern(wc)
-                                        .insertMany(value, options));
+        map.forEach((key, value) -> {
+            ((MongoCollection) getCollection(key, value.get(0).getClass()))
+                .withWriteConcern(wc)
+                .insertMany(value, options);
+        });
 
         return entities.stream().map(mapper::getKey)
                        .collect(Collectors.toList());
