@@ -21,8 +21,9 @@ import com.mongodb.client.model.UpdateOptions;
 import com.mongodb.client.model.ValidationOptions;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
+import org.bson.BsonDocument;
+import org.bson.BsonDocumentWriter;
 import org.bson.Document;
-import org.bson.codecs.Codec;
 import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
@@ -38,7 +39,6 @@ import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.MappingException;
-import org.mongodb.morphia.mapping.codec.DocumentWriter;
 import org.mongodb.morphia.query.DefaultQueryFactory;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryException;
@@ -578,11 +578,13 @@ public class DatastoreImpl implements AdvancedDatastore {
                                        .filter(version.getNameToStore(), oldVersion).getQueryDocument();
 
             UpdateResult result = updateEntity(mongoCollection, entity, query, new UpdateOptions().upsert(false));
-            if (result.getModifiedCount() != 1 && newVersion != 1) {
-                throw new ConcurrentModificationException(format("Entity of class %s (id='%s',version='%d') was concurrently updated.",
-                    entity.getClass().getName(), id, oldVersion));
+            if (result != null) {
+                if (result.getModifiedCount() != 1 && newVersion != 1) {
+                    throw new ConcurrentModificationException(format("Entity of class %s (id='%s',version='%d') was concurrently updated.",
+                        entity.getClass().getName(), id, oldVersion));
+                }
+                return result.getModifiedCount() == 0 ? null : result;
             }
-            return result.getModifiedCount() == 0 ? null : result;
         }
 
         return null;
@@ -893,14 +895,10 @@ public class DatastoreImpl implements AdvancedDatastore {
         if (tryVersionedUpdate(collection, entity, writeConcern) == null) {
             final MongoCollection<T> mongoCollection = collection
                                                            .withWriteConcern(writeConcern);
-            final MappedField mappedIdField = mapper.getMappedClass(entity).getMappedIdField();
-            final Object id = mappedIdField.getFieldValue(entity);
-            if(id != null) {
-                final Document query = new Document("_id", id);
-
-                updateEntity(mongoCollection, entity, query, new UpdateOptions()
-                                          .upsert(true));
-            } else {
+            final Object id = mapper.getMappedClass(entity).getMappedIdField()
+                                    .getFieldValue(entity);
+            if(id == null
+               || updateEntity(mongoCollection, entity, new Document("_id", id), new UpdateOptions().upsert(true)) == null) {
                 mongoCollection
                     .insertOne(entity, options);
             }
@@ -912,22 +910,15 @@ public class DatastoreImpl implements AdvancedDatastore {
     private <T> UpdateResult updateEntity(final MongoCollection<T> mongoCollection, final T entity,
                                           final Document query, final UpdateOptions options) {
 
-//        final boolean clearable = !id.getClass().isPrimitive() && !Number.class.isAssignableFrom(id.getClass());
-//        if (clearable) {
-//            idField.setFieldValue(entity, null);
-//        }
-//        try {
-        final Codec<T> codec = getCodecRegistry().get((Class<T>)entity.getClass());
-        final DocumentWriter writer = new DocumentWriter();
-        codec.encode(writer, entity, EncoderContext.builder().build());
-        final Document root = writer.getRoot();
-        root.remove(Mapper.ID_KEY);
-        return mongoCollection.updateOne(query, new Document("$set", root), options);
-//        } finally {
-//            if (clearable) {
-//                idField.setFieldValue(entity, id);
-//            }
-//        }
+        final BsonDocument document = new BsonDocument();
+        getCodecRegistry().get((Class<T>)entity.getClass())
+                          .encode(new BsonDocumentWriter(document), entity, EncoderContext.builder().build());
+        document.remove(Mapper.ID_KEY);
+        if(document.isEmpty()) {
+            return null;
+        } else {
+            return mongoCollection.updateOne(query, new Document("$set", document), options);
+        }
     }
 
     @Override

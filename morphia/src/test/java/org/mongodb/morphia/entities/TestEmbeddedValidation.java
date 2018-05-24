@@ -38,6 +38,7 @@ public class TestEmbeddedValidation extends TestBase {
 
     @Test
     public void testDottedNames() {
+        getMapper().map(ParentType.class, EmbeddedType.class, EmbeddedSubtype.class);
         ParentType parentType = new ParentType();
         EmbeddedSubtype embedded = new EmbeddedSubtype();
         embedded.setText("text");

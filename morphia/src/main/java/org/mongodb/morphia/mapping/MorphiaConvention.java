@@ -90,11 +90,6 @@ public class MorphiaConvention implements Convention {
                                           : new FieldAccessor(field))
                 .propertySerialization(new MorphiaPropertySerialization(options, builder));
 
-                property.discriminatorEnabled(false);
-                final Embedded embedded = field.getAnnotation(Embedded.class);
-                if(embedded != null) {
-                    property.discriminatorEnabled(embedded.useDiscriminator());
-                }
                 if (isNotConcrete(property.getTypeData())) {
                     property.discriminatorEnabled(true);
                 }
