@@ -49,7 +49,7 @@ public class DefaultCreator implements ObjectFactory {
         if (c == null) {
             c = mf.getNormalizedType();
             if (c.equals(Object.class)) {
-                c = mf.getConcreteType();
+                c = mf.getType();
             }
         }
         try {

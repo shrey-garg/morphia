@@ -36,7 +36,9 @@ public @interface Property {
 
     /**
      * @return the concrete class to instantiate.
+     * @deprecated this value is currently ignored
      */
+    @Deprecated
     Class<?> concreteClass() default Object.class;
 
     /**

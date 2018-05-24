@@ -161,7 +161,7 @@ final class IndexHelper {
                 List<MappedClass> classes = new ArrayList<>();
                 MappedClass mappedClass = mapper.getMappedClass(mf.getSpecializedType() != null
                                                                 ? mf.getSpecializedType()
-                                                                : mf.getConcreteType());
+                                                                : mf.getType());
                 if (mappedClass != null) {
                     classes.add(mappedClass);
                     classes.addAll(mapper.getSubTypes(mappedClass));
@@ -341,7 +341,7 @@ final class IndexHelper {
             }
         }
         if (path.size() > 1) {
-            Class concreteType = !mf.isScalarValue() ? mf.getSpecializedType() : mf.getConcreteType();
+            Class concreteType = !mf.isScalarValue() ? mf.getSpecializedType() : mf.getType();
             try {
                 namePath += "." + findField(mapper.getMappedClass(concreteType), options, path.subList(1, path.size()));
             } catch (MappingException e) {

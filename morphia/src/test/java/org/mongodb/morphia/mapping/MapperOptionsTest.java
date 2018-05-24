@@ -195,7 +195,7 @@ public class MapperOptionsTest extends TestBase {
         assertNull(getDatastore().find(HasComplexObjectValuedMap.class).get().properties);
     }
 
-    private static class HasList implements Serializable {
+    private static class HasList {
         @Id
         private ObjectId id = new ObjectId();
         private List<String> names;
@@ -204,7 +204,7 @@ public class MapperOptionsTest extends TestBase {
         }
     }
 
-    private static class HasMap implements Serializable {
+    private static class HasMap {
         @Id
         private ObjectId id = new ObjectId();
         private Map<String, String> properties;
@@ -213,7 +213,7 @@ public class MapperOptionsTest extends TestBase {
         }
     }
 
-    private static class HasCollectionValuedMap implements Serializable {
+    private static class HasCollectionValuedMap {
         @Id
         private ObjectId id = new ObjectId();
         private Map<String, Collection<String>> properties;
@@ -222,7 +222,7 @@ public class MapperOptionsTest extends TestBase {
         }
     }
 
-    private static class HasComplexObjectValuedMap implements Serializable {
+    private static class HasComplexObjectValuedMap {
         @Id
         private ObjectId id = new ObjectId();
         private Map<String, ComplexObject> properties;
@@ -233,6 +233,8 @@ public class MapperOptionsTest extends TestBase {
 
     @Entity
     private static class DummyEntity {
+        @Id
+        private ObjectId id = new ObjectId();
     }
 
     private static class ComplexObject {

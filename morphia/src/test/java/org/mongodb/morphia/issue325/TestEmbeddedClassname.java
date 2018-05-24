@@ -21,6 +21,7 @@ public class TestEmbeddedClassname extends TestBase {
 
     @Test
     public final void testEmbeddedClassname() {
+        getMapper().map(Root.class, A.class, B.class);
         Datastore ds = getDatastore();
 
         Root r = new Root();
@@ -46,7 +47,7 @@ public class TestEmbeddedClassname extends TestBase {
         Assert.assertFalse(aRaw.containsKey(Mapper.CLASS_NAME_FIELDNAME));
 
         Document bRaw = r.bList.get(0).getRaw();
-        Assert.assertFalse(bRaw.containsKey(Mapper.CLASS_NAME_FIELDNAME));
+        Assert.assertTrue(bRaw.containsKey(Mapper.CLASS_NAME_FIELDNAME));
 
         ds.deleteMany(ds.find(Root.class));
 
@@ -59,7 +60,8 @@ public class TestEmbeddedClassname extends TestBase {
 
         // test that singleA.raw *does* contain the classname because we stored a subclass there
         aRaw = r.singleA.raw;
-        Assert.assertTrue(aRaw.containsKey(Mapper.CLASS_NAME_FIELDNAME));
+        Assert.assertTrue("singleA.raw should contain the classname because we stored a subclass",
+            aRaw.containsKey(Mapper.CLASS_NAME_FIELDNAME));
         Document bRaw2 = r.aList.get(0).raw;
         Assert.assertTrue(bRaw2.containsKey(Mapper.CLASS_NAME_FIELDNAME));
     }
@@ -73,7 +75,7 @@ public class TestEmbeddedClassname extends TestBase {
         private A singleA;
     }
 
-    @Embedded
+    @Embedded(useDiscriminator = false)
     private static class A {
         private String name = "some name";
 
@@ -102,6 +104,7 @@ public class TestEmbeddedClassname extends TestBase {
         }
     }
 
+    @Embedded
     private static class B extends A {
         private String description = "<description here>";
     }

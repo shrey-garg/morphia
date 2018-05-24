@@ -43,7 +43,7 @@ public class AnonymousClassTest extends TestBase {
     }
 
     @Embedded
-    private static class CId implements Serializable {
+    private static class CId {
         private final ObjectId id = new ObjectId();
         private String name;
 

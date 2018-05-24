@@ -21,3 +21,6 @@ catching so this change should be source compatible for almost everyone.
  the future.
 1. Entity.noClassnameStored has been removed noClassNameStored() because it was awkwardly named and I can't determine between a legacy use of that and a modern use of useDiscriminator
 1. throw an exception when getting the collection for an unmapped type
+1. removed support for @Property.concreteClass().  It was meant to be able to specify the actual interface implementation backing a 
+property.  The current driver infrastructure makes that difficult to recreate.  I'm unsure how used this feature ever was so I'm removing
+ it for now.  We can examine how to resurrect should the need arise. 

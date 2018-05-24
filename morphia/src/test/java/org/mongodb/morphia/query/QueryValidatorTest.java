@@ -506,7 +506,7 @@ public class QueryValidatorTest extends TestBase {
         private SimpleEntity reference;
     }
 
-    private static class SerializableClass implements Serializable {
+    private static class SerializableClass {
         private String name;
     }
 

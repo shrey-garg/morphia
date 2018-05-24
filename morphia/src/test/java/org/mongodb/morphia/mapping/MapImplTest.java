@@ -40,7 +40,7 @@ public class MapImplTest extends TestBase {
                                                .get("values");
         final Document goo = (Document) values
                                             .get("first");
-        assertTrue(goo.containsKey(Mapper.CLASS_NAME_FIELDNAME));
+        assertFalse(goo.containsKey(Mapper.CLASS_NAME_FIELDNAME));
     }
 
     @Test //@Ignore("waiting on issue 184")
@@ -89,8 +89,7 @@ public class MapImplTest extends TestBase {
                                                         .iterator().next()
                                                         .get("values"))
                                             .get("second");
-        final boolean hasF = goo.containsKey(Mapper.CLASS_NAME_FIELDNAME);
-        assertTrue("className should be here.", hasF);
+        assertTrue("className should be here.", goo.containsKey(Mapper.CLASS_NAME_FIELDNAME));
     }
 
     @Test
@@ -141,8 +140,8 @@ public class MapImplTest extends TestBase {
         private final Map<String, Goo> values = new HashMap<>();
     }
 
-    @Embedded
-    private static class Goo implements Serializable {
+    @Embedded(useDiscriminator = false)
+    private static class Goo {
         private String name;
 
         Goo() {
@@ -154,9 +153,9 @@ public class MapImplTest extends TestBase {
     }
 
     private static class E {
-        private final MyMap mymap = new MyMap();
         @Id
         private ObjectId id;
+        private final MyMap mymap = new MyMap();
     }
 
     @Embedded

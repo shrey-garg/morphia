@@ -22,7 +22,7 @@ import org.mongodb.morphia.annotations.Transient;
 import java.io.Serializable;
 
 @Embedded
-public class Address implements Serializable {
+public class Address {
 
     @Property("address_street")
     private String street;

@@ -545,7 +545,7 @@ public class TestMapping extends TestBase {
     private interface Foo {
     }
 
-    public abstract static class BaseEntity implements Serializable {
+    public abstract static class BaseEntity {
         @Id
         private ObjectId id;
 
@@ -600,7 +600,7 @@ public class TestMapping extends TestBase {
         private String noImNot = "no, I'm not";
     }
 
-    private static class SerializableClass implements Serializable {
+    private static class SerializableClass {
         private final String someString = "hi, from the ether.";
     }
 

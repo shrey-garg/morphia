@@ -1,7 +1,6 @@
 package org.mongodb.morphia;
 
 
-import java.io.Serializable;
 import java.util.Arrays;
 
 /**
@@ -12,7 +11,7 @@ import java.util.Arrays;
  *
  * @param <T> The type of the entity
  */
-public class Key<T> implements Serializable, Comparable<Key<T>> {
+public class Key<T> implements Comparable<Key<T>> {
     private String collection;
     private Class<? extends T> type;
 

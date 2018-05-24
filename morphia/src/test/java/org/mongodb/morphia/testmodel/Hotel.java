@@ -37,7 +37,7 @@ public class Hotel extends TestEntity {
     @Transient
     private String temp;
     private Address address;
-    @Property(concreteClass = Vector.class)
+    @Property
     private List<PhoneNumber> phoneNumbers;
 
     public Hotel() {

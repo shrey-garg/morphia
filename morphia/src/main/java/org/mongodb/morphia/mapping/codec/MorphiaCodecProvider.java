@@ -32,7 +32,7 @@ public class MorphiaCodecProvider implements CodecProvider {
         this.mapper = mapper;
         this.conventions = conventions;
         this.discriminatorLookup = new DiscriminatorLookup(this.classModels, mapper.getPackages());
-        propertyCodecProviders.add(new MorphiaMapPropertyCodecProvider());
+        propertyCodecProviders.add(new MorphiaMapPropertyCodecProvider(mapper));
     }
 
     @Override

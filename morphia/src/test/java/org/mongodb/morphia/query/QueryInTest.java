@@ -150,7 +150,7 @@ public class QueryInTest extends TestBase {
     }
 
     @Entity
-    private static class HasRef implements Serializable {
+    private static class HasRef {
         @Id
         private ObjectId id = new ObjectId();
         @Reference
@@ -158,7 +158,7 @@ public class QueryInTest extends TestBase {
     }
 
     @Entity
-    private static class HasRefs implements Serializable {
+    private static class HasRefs {
         @Id
         private ObjectId id = new ObjectId();
         @Reference

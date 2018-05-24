@@ -100,8 +100,8 @@ public class TestJavaMaps extends TestBase {
     @Entity
     static class LinkedHashMapTestEntity extends TestEntity {
 
-        @Property(concreteClass = java.util.LinkedHashMap.class)
-        private final Map<Integer, String> linkedHashMap = new LinkedHashMap<>();
+        @Property
+        private final LinkedHashMap<Integer, String> linkedHashMap = new LinkedHashMap<>();
         private Map<Integer, String> getLinkedHashMap() {
             return linkedHashMap;
         }

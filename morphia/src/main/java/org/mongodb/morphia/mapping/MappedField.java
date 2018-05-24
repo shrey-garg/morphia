@@ -180,21 +180,7 @@ public class MappedField {
      * @see DBRef
      */
     public boolean isReference() {
-        return hasAnnotation(Reference.class) || Key.class == getConcreteType() || DBRef.class == getConcreteType();
-    }
-
-    /**
-     * @return the concrete type of the MappedField
-     */
-    public Class getConcreteType() {
-        final Property p = getAnnotation(Property.class);
-        if (p != null) {
-            final Class concrete = p.concreteClass();
-            if (concrete != Object.class) {
-                return concrete;
-            }
-        }
-        return getType();
+        return hasAnnotation(Reference.class) || Key.class == getType() || DBRef.class == getType();
     }
 
     /**

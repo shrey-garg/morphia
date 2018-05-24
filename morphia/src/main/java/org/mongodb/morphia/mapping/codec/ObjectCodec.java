@@ -3,6 +3,7 @@ package org.mongodb.morphia.mapping.codec;
 import org.bson.BsonReader;
 import org.bson.BsonType;
 import org.bson.BsonWriter;
+import org.bson.codecs.BsonTypeClassMap;
 import org.bson.codecs.BsonTypeCodecMap;
 import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
@@ -16,6 +17,7 @@ public class ObjectCodec implements Codec<Object> {
 
     private BsonTypeCodecMap bsonTypeCodecMap;
     private Mapper mapper;
+    private BsonTypeClassMap bsonTypeClassMap = new BsonTypeClassMap();
 
     public ObjectCodec(final Mapper mapper) {
         this.mapper = mapper;
@@ -23,16 +25,17 @@ public class ObjectCodec implements Codec<Object> {
 
     public BsonTypeCodecMap getBsonTypeCodecMap() {
         if (bsonTypeCodecMap == null) {
-            this.bsonTypeCodecMap = new BsonTypeCodecMap(getBsonTypeClassMap(), mapper.getCodecRegistry());
+            final BsonTypeClassMap bsonTypeClassMap = getBsonTypeClassMap();
+            this.bsonTypeCodecMap = new BsonTypeCodecMap(bsonTypeClassMap, mapper.getCodecRegistry());
         }
         return bsonTypeCodecMap;
     }
 
     @Override
     public Object decode(final BsonReader reader, final DecoderContext decoderContext) {
-        final BsonType currentBsonType = reader.getCurrentBsonType();
-        final Codec<?> codec = getBsonTypeCodecMap().get(currentBsonType);
-        return codec.decode(reader, decoderContext);
+        return mapper.getCodecRegistry()
+                     .get(bsonTypeClassMap.get(reader.getCurrentBsonType()))
+                     .decode(reader, decoderContext);
     }
 
     @Override

@@ -33,7 +33,7 @@ public class MapWithDotInKeyTest extends TestBase {
         Assert.assertEquals("b", e.mymap.get("c.e.g"));
     }
 
-    private static class Goo implements Serializable {
+    private static class Goo {
         @Id
         private ObjectId id = new ObjectId();
         private String name;

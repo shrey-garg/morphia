@@ -18,10 +18,12 @@ import org.mongodb.morphia.mapping.codec.ArrayFieldAccessor;
 import org.mongodb.morphia.mapping.codec.FieldAccessor;
 import org.mongodb.morphia.mapping.codec.MorphiaPropertySerialization;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.stream.Collectors;
 
 import static java.lang.reflect.Modifier.isAbstract;
@@ -40,11 +42,11 @@ public class MorphiaConvention implements Convention {
         classModelBuilder.discriminator(classModelBuilder.getType().getName())
                          .discriminatorKey("className");
 
-        final Entity entity = classModelBuilder.getAnnotation(Entity.class);
+        final Entity entity = getAnnotation(classModelBuilder, Entity.class);
         if(entity != null) {
-            classModelBuilder.enableDiscriminator(entity.useDiscriminator() /*|| isNotConcrete(classModelBuilder.getType())*/);
+            classModelBuilder.enableDiscriminator(entity.useDiscriminator());
         } else if(classModelBuilder.hasAnnotation(Embedded.class)) {
-            classModelBuilder.enableDiscriminator(classModelBuilder.getAnnotation(Embedded.class).useDiscriminator());
+            classModelBuilder.enableDiscriminator(getAnnotation(classModelBuilder, Embedded.class).useDiscriminator());
         } else {
             classModelBuilder.enableDiscriminator(true);
         }
@@ -96,6 +98,21 @@ public class MorphiaConvention implements Convention {
             }
         }
 
+    }
+
+    private <T extends Annotation> T getAnnotation(final ClassModelBuilder<?> classModelBuilder, final Class<T> klass) {
+        final List<Annotation> annotations = classModelBuilder.getAnnotations();
+        if (!annotations.isEmpty()) {
+            final ListIterator<Annotation> iterator = annotations.listIterator(annotations.size());
+            while (iterator.hasPrevious()) {
+                final Annotation annotation = iterator.previous();
+                if (klass.equals(annotation.annotationType())) {
+                    return klass.cast(annotation);
+                }
+            }
+        }
+
+        return null;
     }
 
     private boolean isNotConcrete(final TypeData<?> typeData) {

@@ -32,7 +32,7 @@ public class NameValuePairTest extends TestBase {
         private NameValuePair<SimpleEnum, Double> pair;
     }
 
-    private static class NameValuePair<T1 extends Enum<?>, T2> implements Serializable {
+    private static class NameValuePair<T1 extends Enum<?>, T2> {
         private final T2 value;
         private final T1 name;
 

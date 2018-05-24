@@ -11,23 +11,34 @@ import org.bson.codecs.pojo.PropertyCodecProvider;
 import org.bson.codecs.pojo.PropertyCodecRegistry;
 import org.bson.codecs.pojo.TypeData;
 import org.bson.codecs.pojo.TypeWithTypeParameters;
+import org.mongodb.morphia.mapping.Mapper;
 
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 @SuppressWarnings("unchecked")
 class MorphiaMapPropertyCodecProvider implements PropertyCodecProvider {
 
+    private Mapper mapper;
+
+    public MorphiaMapPropertyCodecProvider(final Mapper mapper) {
+        this.mapper = mapper;
+    }
+
     @Override
     public <T> Codec<T> get(final TypeWithTypeParameters<T> type, final PropertyCodecRegistry registry) {
-        if (Map.class.isAssignableFrom(type.getType()) && type.getTypeParameters().size() == 2) {
-            Class<?> keyType = type.getTypeParameters().get(0).getType();
+        if (Map.class.isAssignableFrom(type.getType())) {
+            final List<? extends TypeWithTypeParameters<?>> typeParameters = type.getTypeParameters();
+            TypeWithTypeParameters<?> keyType = getType(typeParameters, 0);
+            final TypeWithTypeParameters<?> valueType = getType(typeParameters, 1);
 
             try {
-                return new MapCodec(type.getType(), keyType, registry.get(type.getTypeParameters().get(1)));
+                return new MapCodec(type.getType(), keyType.getType(), registry.get(valueType));
             } catch (CodecConfigurationException e) {
-                if (type.getTypeParameters().get(1).getType() == Object.class) {
+                if (valueType.equals(Object.class)) {
                     try {
                         return (Codec<T>) registry.get(TypeData.builder(Map.class).build());
                     } catch (CodecConfigurationException e1) {
@@ -40,6 +51,12 @@ class MorphiaMapPropertyCodecProvider implements PropertyCodecProvider {
             return new EnumCodec(type.getType());
         }
         return null;
+    }
+
+    private TypeWithTypeParameters<?> getType(final List<? extends TypeWithTypeParameters<?>> typeParameters, final int position) {
+        return typeParameters.size() > position
+               ? typeParameters.get(position)
+               : TypeData.builder(Object.class).build();
     }
 
     private static class MapCodec<K, V> implements Codec<Map<K, V>> {
@@ -95,7 +112,9 @@ class MorphiaMapPropertyCodecProvider implements PropertyCodecProvider {
                 return new HashMap<>();
             }
             try {
-                return encoderClass.getDeclaredConstructor().newInstance();
+                final Constructor<Map<K, V>> constructor = encoderClass.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return constructor.newInstance();
             } catch (final Exception e) {
                 throw new CodecConfigurationException(e.getMessage(), e);
             }

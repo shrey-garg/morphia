@@ -150,7 +150,7 @@ public class PathTarget {
         }
 
         if (mf != null) {
-            context = mapper.getMappedClass(mf.getSpecializedType() != null ? mf.getSpecializedType() : mf.getConcreteType());
+            context = mapper.getMappedClass(mf.getSpecializedType() != null ? mf.getSpecializedType() : mf.getType());
         }
         return mf;
     }

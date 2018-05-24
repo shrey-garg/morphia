@@ -56,7 +56,7 @@ public class SerializedMapTest extends TestBase {
 
     }
 
-    static class Foo implements Serializable {
+    static class Foo {
 
         private final String id;
 

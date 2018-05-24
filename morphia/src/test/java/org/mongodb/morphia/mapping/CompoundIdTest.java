@@ -75,7 +75,7 @@ public class CompoundIdTest extends TestBase {
     }
 
     @Embedded
-    private static class CompoundId implements Serializable {
+    private static class CompoundId {
         private final ObjectId id = new ObjectId();
         private String name;
 
