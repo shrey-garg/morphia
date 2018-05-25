@@ -24,3 +24,4 @@ catching so this change should be source compatible for almost everyone.
 1. removed support for @Property.concreteClass().  It was meant to be able to specify the actual interface implementation backing a 
 property.  The current driver infrastructure makes that difficult to recreate.  I'm unsure how used this feature ever was so I'm removing
  it for now.  We can examine how to resurrect should the need arise. 
+1.  @ConstructorArgs has been removed since the driver code supports constructor based instantiation.
