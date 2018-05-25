@@ -253,10 +253,11 @@ public class TestQuery extends TestBase {
 
         MongoCollection<Document> profileCollection = getDatabase().getCollection("system.profile");
         assertNotEquals(0, profileCollection.count());
-        Document profileRecord = profileCollection.find(new Document("op", "query")
-                                                            .append("ns", getDatastore().getCollection(Pic.class).getNamespace()))
-                                                  .first();
-        assertEquals(profileRecord.toString(), expectedComment, getCommentFromProfileRecord(profileRecord));
+        final Document query = new Document("op", "query")
+                                    .append("ns", getDatastore().getCollection(Pic.class).getNamespace().getFullName());
+        List<Document> profileRecord = profileCollection.find(query)
+                                                             .into(new ArrayList<>());
+        assertEquals(profileRecord.toString(), expectedComment, getCommentFromProfileRecord(profileRecord.get(0)));
 
         turnOffProfilingAndDropProfileCollection();
     }

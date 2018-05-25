@@ -3,7 +3,6 @@ package org.mongodb.morphia.mapping;
 
 import org.bson.Document;
 import org.mongodb.morphia.ObjectFactory;
-import org.mongodb.morphia.annotations.ConstructorArgs;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 
@@ -52,31 +51,7 @@ public class DefaultCreator implements ObjectFactory {
                 c = mf.getType();
             }
         }
-        try {
-            return createInstance(c, document);
-        } catch (RuntimeException e) {
-            final ConstructorArgs argAnn = mf.getAnnotation(ConstructorArgs.class);
-            if (argAnn == null) {
-                throw e;
-            }
-            //TODO: now that we have a mapper, get the arg types that way by getting the fields by name. + Validate names
-            final Object[] args = new Object[argAnn.value().length];
-            final Class[] argTypes = new Class[argAnn.value().length];
-            for (int i = 0; i < argAnn.value().length; i++) {
-                // TODO: run converters and stuff against these. Kinda like the List of List stuff,
-                // using a fake MappedField to hold the value
-                final Object val = document.get(argAnn.value()[i]);
-                args[i] = val;
-                argTypes[i] = val.getClass();
-            }
-            try {
-                final Constructor constructor = c.getDeclaredConstructor(argTypes);
-                constructor.setAccessible(true);
-                return constructor.newInstance(args);
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
-        }
+        return createInstance(c, document);
     }
 
     private ClassLoader getClassLoaderForClass() {

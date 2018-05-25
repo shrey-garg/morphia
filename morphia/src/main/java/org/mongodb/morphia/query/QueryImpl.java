@@ -239,6 +239,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         n.validateName = validateName;
         n.validateType = validateType;
         n.baseQuery = copy(baseQuery);
+        n.sort = copy(sort);
 
         // fields from superclass
         n.setAttachedTo(getAttachedTo());

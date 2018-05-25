@@ -14,17 +14,6 @@ import java.util.Set;
 
 
 public class TestEmptyEntityMapping extends TestBase {
-    @Test
-    public void testEmptyEmbeddedNotNullAfterReload() {
-        A a = new A();
-        a.b = new B();
-
-        getDatastore().save(a);
-        Assert.assertNotNull(a.b);
-
-        a = getDatastore().find(A.class).filter("_id", a.getId()).get();
-        Assert.assertNull(a.b);
-    }
 
     @Test
     public void testSizeOnEmptyElements() {

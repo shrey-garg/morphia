@@ -7,7 +7,6 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -22,6 +21,12 @@ public class MapperOptionsTest extends TestBase {
     @Test
     public void emptyListStoredWithOptions() {
         final HasList hl = new HasList();
+
+        hl.names = null;
+        //Test default behavior
+        getMapper().getOptions().setStoreNulls(false);
+        shouldNotFindField(hl);
+
         hl.names = new ArrayList<>();
 
         //Test default behavior
@@ -31,23 +36,6 @@ public class MapperOptionsTest extends TestBase {
         //Test default storing empty list/array with storeEmpties option
         getMapper().getOptions().setStoreEmpties(true);
         shouldFindField(hl, new ArrayList<>());
-
-        //Test opposite from above
-        getMapper().getOptions().setStoreEmpties(false);
-        shouldNotFindField(hl);
-
-        hl.names = null;
-        //Test default behavior
-        getMapper().getOptions().setStoreEmpties(false);
-        shouldNotFindField(hl);
-
-        //Test default storing empty list/array with storeEmpties option
-        getMapper().getOptions().setStoreEmpties(true);
-        shouldNotFindField(hl);
-
-        //Test opposite from above
-        getMapper().getOptions().setStoreEmpties(false);
-        shouldNotFindField(hl);
     }
 
     @Test
@@ -62,11 +50,6 @@ public class MapperOptionsTest extends TestBase {
         //Test default storing empty map with storeEmpties option
         getMapper().getOptions().setStoreEmpties(true);
         shouldFindField(hm, new HashMap<>());
-
-
-        //Test opposite from above
-        getMapper().getOptions().setStoreEmpties(false);
-        shouldNotFindField(hm);
     }
 
     @Test
@@ -81,28 +64,6 @@ public class MapperOptionsTest extends TestBase {
         //Test default storing empty map with storeEmpties option
         getMapper().getOptions().setStoreEmpties(true);
         shouldFindField(hm, new HashMap<>());
-
-        //Test opposite from above
-        getMapper().getOptions().setStoreEmpties(false);
-        shouldNotFindField(hm);
-    }
-
-    @Test
-    public void emptyComplexObjectValuedMapStoredWithOptions() {
-        final HasComplexObjectValuedMap hm = new HasComplexObjectValuedMap();
-        hm.properties = new HashMap<>();
-
-        //Test default behavior
-        getMapper().getOptions().setStoreEmpties(false);
-        shouldNotFindField(hm);
-
-        //Test default storing empty map with storeEmpties option
-        getMapper().getOptions().setStoreEmpties(true);
-        shouldFindField(hm, new HashMap<>());
-
-        //Test opposite from above
-        getMapper().getOptions().setStoreEmpties(false);
-        shouldNotFindField(hm);
     }
 
     @Test
@@ -170,11 +131,6 @@ public class MapperOptionsTest extends TestBase {
         assertEquals(expected, getDatastore().find(HasCollectionValuedMap.class).get().properties);
     }
 
-    private void shouldFindField(final HasComplexObjectValuedMap hm, final Map<String, ComplexObject> expected) {
-        getDatastore().save(hm);
-        assertEquals(expected, getDatastore().find(HasComplexObjectValuedMap.class).get().properties);
-    }
-
     private void shouldNotFindField(final HasMap hl) {
         getDatastore().save(hl);
         assertNull(getDatastore().find(HasMap.class).get().properties);
@@ -188,11 +144,6 @@ public class MapperOptionsTest extends TestBase {
     private void shouldNotFindField(final HasCollectionValuedMap hm) {
         getDatastore().save(hm);
         assertNull(getDatastore().find(HasCollectionValuedMap.class).get().properties);
-    }
-
-    private void shouldNotFindField(final HasComplexObjectValuedMap hm) {
-        getDatastore().save(hm);
-        assertNull(getDatastore().find(HasComplexObjectValuedMap.class).get().properties);
     }
 
     private static class HasList {
