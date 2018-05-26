@@ -3,6 +3,7 @@ package org.mongodb.morphia.query;
 
 import org.bson.Document;
 import org.bson.types.CodeWScope;
+import org.bson.types.CodeWithScope;
 
 /**
  * Creates a Criteria for a $where clause.
@@ -25,7 +26,7 @@ public class WhereCriteria extends AbstractCriteria {
      *
      * @param js the javascript
      */
-    public WhereCriteria(final CodeWScope js) {
+    public WhereCriteria(final CodeWithScope js) {
         this.js = js;
     }
 

@@ -26,6 +26,7 @@ import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.FindOptions;
 import org.bson.Document;
 import org.bson.types.CodeWScope;
+import org.bson.types.CodeWithScope;
 import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.Assert;
@@ -89,6 +90,7 @@ import static org.mongodb.morphia.query.Sort.naturalDescending;
 public class TestQuery extends TestBase {
 
     @Test
+    @Ignore("The driver currently does not support generic types like this one.  Ignoring until that is fixed.")
     public void genericMultiKeyValueQueries() {
         getMorphia().map(GenericKeyValue.class);
         getDatastore().ensureIndexes(GenericKeyValue.class);
@@ -1265,7 +1267,7 @@ public class TestQuery extends TestBase {
         getDatastore().save(new PhotoWithKeywords(new Keyword("california"), new Keyword("nevada"), new Keyword("arizona")));
         //        CodeWScope hasKeyword = new CodeWScope("for (kw in this.keywords) { if(kw.keyword == kwd) return true; } return false;
         // ", new Document("kwd","california"));
-        final CodeWScope hasKeyword = new CodeWScope("this.keywords != null", new BasicDBObject());
+        final CodeWithScope hasKeyword = new CodeWithScope("this.keywords != null", new Document());
         assertNotNull(getDatastore().find(PhotoWithKeywords.class).where(hasKeyword).get());
     }
 

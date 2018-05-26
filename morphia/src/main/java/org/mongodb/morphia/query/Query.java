@@ -8,6 +8,7 @@ import com.mongodb.client.MongoCollection;
 import com.mongodb.client.model.FindOptions;
 import org.bson.Document;
 import org.bson.types.CodeWScope;
+import org.bson.types.CodeWithScope;
 
 import java.util.Map;
 
@@ -252,5 +253,13 @@ public interface Query<T> extends QueryResults<T>, Cloneable {
      * @param js the javascript block to apply
      * @return this
      */
-    Query<T> where(CodeWScope js);
+    Query<T> where(CodeWithScope js);
+
+    /**
+     * @see #where(CodeWithScope)
+     * @deprecated use #where(CodeWithScope) instead
+     */
+    default Query<T> where(CodeWScope js) {
+        return where(new CodeWithScope(js.getCode(), new Document(js.getScope().toMap())));
+    }
 }

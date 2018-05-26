@@ -6,10 +6,11 @@ import com.mongodb.ReadPreference;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.FindOptions;
 import org.bson.Document;
-import org.bson.types.CodeWScope;
+import org.bson.types.CodeWithScope;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.DatastoreImpl;
 import org.mongodb.morphia.Key;
@@ -282,8 +283,14 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> explain(final FindOptions options) {
-        return new LinkedHashMap<>(getDatastore().getDatabase()
-                                                 .runCommand(getQueryDocument()));
+        final MongoDatabase database = getDatastore().getDatabase();
+        final Document command = new Document("explain",
+            new Document("find", collection.getNamespace().getCollectionName())
+                .append("filter", getQueryDocument()));
+        final Document document = database
+                                      .runCommand(command);
+        final Object cursor = document.get("cursor");
+        return new LinkedHashMap<>(document);
     }
 
     @Override
@@ -472,7 +479,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     @Override
-    public Query<T> where(final CodeWScope js) {
+    public Query<T> where(final CodeWithScope js) {
         add(new WhereCriteria(js));
         return this;
     }
