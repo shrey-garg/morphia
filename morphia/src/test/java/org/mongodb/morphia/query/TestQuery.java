@@ -1502,6 +1502,7 @@ public class TestQuery extends TestBase {
     public static class Pic {
         @Id
         private ObjectId id;
+        @Indexed
         private String name;
         private boolean prePersist = false;
 
