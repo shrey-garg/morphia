@@ -129,7 +129,7 @@ public class FieldEndImpl<T extends CriteriaContainerImpl> implements FieldEnd<T
     @Override
     public T elemMatch(final Query query) {
         Assert.parametersNotNull("query", query);
-        return addCriteria(FilterOperator.ELEMENT_MATCH, query, not);
+        return addCriteria(FilterOperator.ELEMENT_MATCH, query.getQueryDocument(), not);
     }
 
     @Override

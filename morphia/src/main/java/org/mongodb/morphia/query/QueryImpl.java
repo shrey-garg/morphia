@@ -6,7 +6,6 @@ import com.mongodb.ReadPreference;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.FindOptions;
 import org.bson.Document;
@@ -283,14 +282,10 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     @Override
     @SuppressWarnings("unchecked")
     public Map<String, Object> explain(final FindOptions options) {
-        final MongoDatabase database = getDatastore().getDatabase();
-        final Document command = new Document("explain",
-            new Document("find", collection.getNamespace().getCollectionName())
-                .append("filter", getQueryDocument()));
-        final Document document = database
-                                      .runCommand(command);
-        final Object cursor = document.get("cursor");
-        return new LinkedHashMap<>(document);
+        return new LinkedHashMap<>(getDatastore().getDatabase()
+                                                 .runCommand(new Document("explain",
+                                                     new Document("find", collection.getNamespace().getCollectionName())
+                                                         .append("filter", getQueryDocument()))));
     }
 
     @Override
@@ -359,7 +354,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
      *
      * @param query the Document containing the query
      */
-    public void setQueryDocument(final Document query) {
+    void setQueryDocument(final Document query) {
         baseQuery = new Document(query);
     }
 
@@ -496,17 +491,11 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         return ds;
     }
 
-    /**
-     * @return true if field names are being validated
-     */
-    public boolean isValidatingNames() {
+    boolean isValidatingNames() {
         return validateName;
     }
 
-    /**
-     * @return true if query parameter value types are being validated against the field types
-     */
-    public boolean isValidatingTypes() {
+    boolean isValidatingTypes() {
         return validateType;
     }
 
@@ -559,7 +548,22 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public String toString() {
-        return String.format("{ query: %s %s }", getQueryDocument(), ", projection: " + getFields());
+        StringBuilder sb = new StringBuilder();
+        append(sb, "query", getQueryDocument());
+        append(sb, "projection", getFields());
+        sb.append(" }");
+        return "{ " + sb + " }";
+    }
+
+    private void append(final StringBuilder values, final String key, final Object value) {
+        if(value != null) {
+            if(values.length() != 0) {
+                values.append(", ");
+            }
+            values.append(key)
+                  .append("=")
+                  .append(value);
+        }
     }
 
     /**
