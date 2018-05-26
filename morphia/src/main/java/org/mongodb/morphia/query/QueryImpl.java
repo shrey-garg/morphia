@@ -43,8 +43,8 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     private boolean validateType = true;
     private Boolean includeFields;
     private Document baseQuery;
-    private Document projection = new Document();
-    private Document sort = new Document();
+    private Document projection = null;
+    private Document sort = null;
     private ReadConcern readConcern;
     private ReadPreference readPreference;
 
@@ -169,10 +169,10 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public MongoCursor<T> fetch(final FindOptions options) {
-        final FindIterable<T> cursor = prepareCursor(options);
         if (LOG.isTraceEnabled()) {
             LOG.trace("Getting cursor(" + collection.getNamespace().getCollectionName() + ")  for query:" + getQuery());
         }
+        final FindIterable<T> cursor = prepareCursor(options);
 
         return cursor.iterator();
     }
