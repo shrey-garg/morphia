@@ -906,17 +906,6 @@ public class TestQuery extends TestBase {
 
     @Test
     @SuppressWarnings("deprecation")
-    public void testNotGeneratesCorrectQueryForRegex() {
-        final Query<PhotoWithKeywords> query = getAds().find(PhotoWithKeywords.class);
-        query.criteria("keywords.keyword").not().startsWith("ralph");
-        Document queryObject = query.getQueryDocument();
-        Document expected = new Document("keywords.keyword",
-                                                   new Document("$not", new Document("$regex", "^ralph")));
-        assertEquals(expected.toString(), queryObject.toString());
-    }
-
-    @Test
-    @SuppressWarnings("deprecation")
     public void testProject() {
         getDatastore().save(new ContainsRenamedFields("Frank", "Zappa"));
 

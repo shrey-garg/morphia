@@ -541,6 +541,7 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     private FindIterable<T> apply(final FindIterable<T> iterable, final FindOptions options) {
         iterable.batchSize(options.getBatchSize());
+        iterable.collation(options.getCollation());
         iterable.limit(options.getLimit());
         iterable.maxTime(options.getMaxTime(MILLISECONDS), MILLISECONDS);
         iterable.maxAwaitTime(options.getMaxAwaitTime(MILLISECONDS), MILLISECONDS);
