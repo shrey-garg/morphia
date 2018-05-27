@@ -74,10 +74,10 @@ public class MapImplTest extends TestBase {
         final Goo g1 = new Goo("Scott");
         final Goo g2 = new Goo("Ralph");
 
-        final ContainsMapOfEmbeddedInterfaces cmoei = new ContainsMapOfEmbeddedInterfaces();
-        cmoei.values.put("first", g1);
-        getDatastore().save(cmoei);
-        getDatastore().update(cmoei, getDatastore().createUpdateOperations(ContainsMapOfEmbeddedInterfaces.class).set("values.second", g2));
+        final ContainsMapOfEmbeddedInterfaces entity = new ContainsMapOfEmbeddedInterfaces();
+        entity.values.put("first", g1);
+        getDatastore().save(entity);
+        getDatastore().update(entity, getDatastore().createUpdateOperations(ContainsMapOfEmbeddedInterfaces.class).set("values.second", g2));
         //check className in the map values.
         final MongoCollection<ContainsMapOfEmbeddedInterfaces> collection = getDatastore().getCollection(
             ContainsMapOfEmbeddedInterfaces.class);
@@ -89,7 +89,7 @@ public class MapImplTest extends TestBase {
                                                         .iterator().next()
                                                         .get("values"))
                                             .get("second");
-        assertTrue("className should be here.", goo.containsKey(Mapper.CLASS_NAME_FIELDNAME));
+        assertFalse("className should not be here.", goo.containsKey(Mapper.CLASS_NAME_FIELDNAME));
     }
 
     @Test
@@ -111,8 +111,7 @@ public class MapImplTest extends TestBase {
                                                         .iterator().next()
                                                         .get("values"))
                                             .get("first");
-        final boolean hasF = goo.containsKey(Mapper.CLASS_NAME_FIELDNAME);
-        assertTrue(hasF);
+        assertFalse(goo.containsKey(Mapper.CLASS_NAME_FIELDNAME));
     }
 
     @Test

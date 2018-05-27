@@ -57,16 +57,15 @@ final class QueryValidator {
                 final String part = parts[i];
                 boolean fieldIsArrayOperator = part.equals("$") || part.matches("[0-9]+");
 
-                mf = mc.getMappedField(part);
+                mf = mc != null ? mc.getMappedField(part) : null;
 
                 //translate from java field name to stored field name
                 if (mf == null && !fieldIsArrayOperator) {
-                    mf = mc.getMappedFieldByJavaField(part);
+                    mf = mc != null ? mc.getMappedFieldByJavaField(part) : null;
                     if (validateNames && mf == null) {
-                        throw new ValidationException(format("The field '%s' could not be found in '%s' while validating - %s; if "
-                                                             + "you wish to continue please disable validation.", part,
-                                                             mc.getClazz().getName(), prop
-                                                            ));
+                        throw new ValidationException(format("The path '%s' is not a valid path for %s; if "
+                                                             + "you wish to continue please disable validation.", origProp,
+                                                             clazz));
                     }
                     hasTranslations = true;
                     if (mf != null) {

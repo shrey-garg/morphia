@@ -365,6 +365,9 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public Query<T> order(final String order) {
+        if(sort == null) {
+            sort = new Document();
+        }
         sort.putAll(parseFieldsString(order, clazz, ds.getMapper(), validateName));
         return this;
     }
@@ -373,6 +376,9 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     public Query<T> order(final Meta meta) {
         validateQuery(clazz, ds.getMapper(), new StringBuilder(meta.getField()), FilterOperator.IN, "", false, false);
 
+        if(sort == null) {
+            sort = new Document();
+        }
         sort.putAll(meta.toDatabase());
 
         return this;
@@ -389,6 +395,9 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
                 s = sb.toString();
             }
             sortList.put(s, sort.getOrder());
+        }
+        if(sort == null) {
+            sort = new Document();
         }
         sort.putAll(sortList);
         return this;
@@ -413,10 +422,16 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     private void project(final String fieldName, final Object value) {
+        if(projection == null) {
+            projection = new Document();
+        }
         projection.put(fieldName, value);
     }
 
     private void project(final Document value) {
+        if(projection == null) {
+            projection = new Document();
+        }
         projection.putAll(value);
     }
 

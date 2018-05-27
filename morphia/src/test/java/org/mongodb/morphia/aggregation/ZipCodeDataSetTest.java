@@ -5,6 +5,7 @@ import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 import org.junit.Assert;
 import org.junit.Assume;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.aggregation.zipcode.City;
@@ -56,6 +57,7 @@ public class ZipCodeDataSetTest extends TestBase {
     }
 
     @Test
+    @Ignore("fix with the aggregation tests")
     public void averageCitySizeByState() throws InterruptedException, TimeoutException, IOException {
         Assume.assumeTrue(new File(MONGO_IMPORT).exists());
         installSampleData();
