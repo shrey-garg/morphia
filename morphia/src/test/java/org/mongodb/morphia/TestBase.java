@@ -58,7 +58,9 @@ public abstract class TestBase {
     }
 
     boolean isReplicaSet() {
-        return runIsMaster().get("setName") != null;
+        final Document document = runIsMaster();
+        final List<String> hosts = (List<String>) document.get("hosts");
+        return document.get("setName") != null && hosts != null && hosts.size() > 1;
     }
 
     @Before
