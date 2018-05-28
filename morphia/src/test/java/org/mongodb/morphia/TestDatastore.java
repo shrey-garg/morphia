@@ -138,16 +138,6 @@ public class TestDatastore extends TestBase {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testExistsWhenSecondaryPreferredOld() {
-        if (isReplicaSet()) {
-            final Key<FacebookUser> key = getDatastore().save(new FacebookUser(currentTimeMillis(), "user 1"),
-                new InsertOneOptions(), W2);
-            assertNotNull("Should exist when using secondaryPreferred", getAds().exists(key, secondaryPreferred()));
-        }
-    }
-
-    @Test
     public void testExistsWhenSecondaryPreferred() {
         if (isReplicaSet()) {
             final Datastore datastore = getDatastore();

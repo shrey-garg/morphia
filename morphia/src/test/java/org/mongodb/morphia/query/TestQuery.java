@@ -849,21 +849,6 @@ public class TestQuery extends TestBase {
     }
 
     @Test
-    @SuppressWarnings("deprecation")
-    public void testNegativeBatchSizeOld() {
-        getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
-        getDatastore().saveMany(asList(new PhotoWithKeywords("scott", "hernandez"),
-                            new PhotoWithKeywords("scott", "hernandez"),
-                            new PhotoWithKeywords("scott", "hernandez"),
-                            new PhotoWithKeywords("1", "2"),
-                            new PhotoWithKeywords("3", "4"),
-                            new PhotoWithKeywords("5", "6")));
-        assertEquals(2, getDatastore().find(PhotoWithKeywords.class)
-                                      .asList(new FindOptions().batchSize(-2))
-                                      .size());
-    }
-
-    @Test
     public void testNonSnapshottedQuery() {
         getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
         getDatastore().saveMany(asList(new PhotoWithKeywords("scott", "hernandez"),
