@@ -4,6 +4,7 @@ package org.mongodb.morphia.aggregation;
 import com.mongodb.AggregationOptions;
 import com.mongodb.ReadPreference;
 import com.mongodb.client.AggregateIterable;
+import com.mongodb.client.MongoIterable;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.Sort;
 
@@ -21,7 +22,7 @@ public interface AggregationPipeline {
      *
      * @param target The class to use when iterating over the results
      * @param <U>    type of the results
-     * @return an iterator of the computed results
+     * @return the computed results
      */
     <U> AggregateIterable<U> aggregate(Class<U> target);
 
@@ -31,7 +32,7 @@ public interface AggregationPipeline {
      * @param target  The class to use when iterating over the results
      * @param options The options to apply to this aggregation
      * @param <U>     type of the results
-     * @return an iterator of the computed results
+     * @return the computed results
      */
     default <U> AggregateIterable<U> aggregate(Class<U> target, AggregationOptions options) {
         return AggregationPipelineImpl.apply(aggregate(target), options);
@@ -43,7 +44,7 @@ public interface AggregationPipeline {
      * @param target         The class to use when iterating over the results
      * @param readPreference The read preference to apply to this pipeline
      * @param <U>            type of the results
-     * @return an iterator of the computed results
+     * @return the computed results
      */
     <U> AggregateIterable<U> aggregate(Class<U> target, ReadPreference readPreference);
 
@@ -54,7 +55,7 @@ public interface AggregationPipeline {
      * @param options        The options to apply to this aggregation
      * @param readPreference The read preference to apply to this pipeline
      * @param <U>            type of the results
-     * @return an iterator of the computed results
+     * @return the computed results
      */
     default <U> AggregateIterable<U> aggregate(Class<U> target, AggregationOptions options, ReadPreference readPreference) {
         return AggregationPipelineImpl.apply(aggregate(target, readPreference), options);
@@ -67,6 +68,7 @@ public interface AggregationPipeline {
      * @param target         The class to use when iterating over the results
      * @param readPreference The read preference to apply to this pipeline
      * @param <U>            type of the results
+     * @return the computed results
      * @deprecated use {@link #out(String, Class)} instead
      */
     @Deprecated
@@ -82,6 +84,7 @@ public interface AggregationPipeline {
      * @param options        The options to apply to this aggregation
      * @param readPreference The read preference to apply to this pipeline
      * @param <U>            type of the results
+     * @return the computed results
      * @deprecated use {@link #out(String, Class, AggregationOptions)} instead
      */
     @Deprecated
@@ -177,9 +180,10 @@ public interface AggregationPipeline {
      *
      * @param <U>    type of the results
      * @param target The class to use when iterating over the results
+     * @return the computed results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
-    <U> void out(Class<U> target);
+    <U> MongoIterable<U> out(Class<U> target);
 
     /**
      * Places the output of the aggregation in the collection mapped by the target type.
@@ -187,10 +191,11 @@ public interface AggregationPipeline {
      * @param <U>     type of the results
      * @param target  The class to use when iterating over the results
      * @param options The options to apply to this aggregation
+     * @return the computed results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
-    default <U> void out(Class<U> target, AggregationOptions options) {
-        out(target, options, ReadPreference.primary());
+    default <U> MongoIterable<U> out(Class<U> target, AggregationOptions options) {
+        return out(target, options, ReadPreference.primary());
     }
 
     /**
@@ -200,9 +205,10 @@ public interface AggregationPipeline {
      * @param target  The class to use when iterating over the results
      * @param options The options to apply to this aggregation
      * @param readPreference The read preference to apply to this pipeline
+     * @return the computed results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
-    <U> void out(Class<U> target, AggregationOptions options, ReadPreference readPreference);
+    <U> MongoIterable<U> out(Class<U> target, AggregationOptions options, ReadPreference readPreference);
 
     /**
      * Places the output of the aggregation in the collection mapped by the target type using the default options as defined in {@link
@@ -211,9 +217,10 @@ public interface AggregationPipeline {
      * @param <U>            type of the results
      * @param collectionName The collection in which to store the results of the aggregation overriding the mapped value in target
      * @param target         The class to use when iterating over the results
+     * @return the computed results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
-    <U> void out(String collectionName, Class<U> target);
+    <U> MongoIterable<U> out(String collectionName, Class<U> target);
 
     /**
      * Places the output of the aggregation in the collection mapped by the target type.
@@ -222,6 +229,7 @@ public interface AggregationPipeline {
      * @param collectionName The collection in which to store the results of the aggregation overriding the mapped value in target
      * @param target         The class to use when iterating over the results
      * @param options        The options to apply to this aggregation
+     * @return the computed results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
     default <U> void out(String collectionName, Class<U> target, AggregationOptions options) {
@@ -236,6 +244,7 @@ public interface AggregationPipeline {
      * @param target         The class to use when iterating over the results
      * @param options        The options to apply to this aggregation
      * @param readPreference The read preference to apply to this pipeline
+     * @return the computed results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
     <U> void out(String collectionName, Class<U> target, AggregationOptions options, ReadPreference readPreference);

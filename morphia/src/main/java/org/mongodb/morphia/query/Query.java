@@ -5,6 +5,7 @@ import com.mongodb.DBCollection;
 import com.mongodb.ReadConcern;
 import com.mongodb.ReadPreference;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.FindOptions;
 import org.bson.Document;
 import org.bson.types.CodeWScope;
@@ -16,7 +17,7 @@ import java.util.Map;
 /**
  * @param <T> The type to query against
  */
-public interface Query<T> extends QueryResults<T>, Cloneable {
+public interface Query<T> extends QueryResults<T>, Cloneable, MongoIterable<T> {
     /**
      * Creates a container to hold 'and' clauses
      *

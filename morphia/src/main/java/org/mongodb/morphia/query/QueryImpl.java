@@ -1,11 +1,13 @@
 package org.mongodb.morphia.query;
 
-
+import com.mongodb.Block;
+import com.mongodb.Function;
 import com.mongodb.ReadConcern;
 import com.mongodb.ReadPreference;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoIterable;
 import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.FindOptions;
 import org.bson.Document;
@@ -21,6 +23,7 @@ import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -172,9 +175,8 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Getting cursor(" + collection.getNamespace().getCollectionName() + ")  for query:" + getQuery());
         }
-        final FindIterable<T> cursor = prepareCursor(options);
 
-        return cursor.iterator();
+        return prepareCursor(options).iterator();
     }
 
     @Override
@@ -644,5 +646,31 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         result = 31 * result + (readConcern != null ? readConcern.hashCode() : 0);
         result = 31 * result + (readPreference != null ? readPreference.hashCode() : 0);
         return result;
+    }
+
+
+    @Override
+    public T first() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <U> MongoIterable<U> map(final Function<T, U> mapper) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void forEach(final Block<? super T> block) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <A extends Collection<? super T>> A into(final A target) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public MongoIterable<T> batchSize(final int batchSize) {
+        throw new UnsupportedOperationException();
     }
 }

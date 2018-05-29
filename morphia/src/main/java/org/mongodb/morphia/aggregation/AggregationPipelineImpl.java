@@ -4,6 +4,7 @@ import com.mongodb.AggregationOptions;
 import com.mongodb.ReadPreference;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoIterable;
 import org.bson.Document;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.DatastoreImpl;
@@ -64,20 +65,22 @@ public class AggregationPipelineImpl implements AggregationPipeline {
     }
 
     @Override
-    public <U> void out(final Class<U> target) {
-        out(datastore.getCollection(target).getNamespace().getCollectionName(), target);
+    public <U> MongoIterable<U> out(final Class<U> target) {
+        return out(datastore.getCollection(target).getNamespace().getCollectionName(), target);
     }
 
     @Override
-    public <U> void out(final String collectionName, final Class<U> target) {
+    public <U> MongoIterable<U> out(final String collectionName, final Class<U> target) {
         stages.add(new Document("$out", collectionName));
-        out(target, AggregationOptions.builder().build(), ReadPreference.primary());
+        return out(target, AggregationOptions.builder().build(), ReadPreference.primary());
     }
 
     @Override
-    public <U> void out(final Class<U> target, final AggregationOptions options, final ReadPreference readPreference) {
-        apply(aggregate(target, ReadPreference.primary()), options)
+    public <U> MongoIterable<U> out(final Class<U> target, final AggregationOptions options, final ReadPreference readPreference) {
+        apply(aggregate(target, readPreference), options)
             .toCollection();
+
+        return datastore.find(target);
     }
 
     @Override

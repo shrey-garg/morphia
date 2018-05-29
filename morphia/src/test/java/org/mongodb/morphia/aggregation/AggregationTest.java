@@ -62,7 +62,6 @@ import static org.mongodb.morphia.aggregation.Projection.projection;
 import static org.mongodb.morphia.geo.GeoJson.point;
 import static org.mongodb.morphia.query.Sort.ascending;
 
-//@Ignore("geo work needs to be done first")
 public class AggregationTest extends TestBase {
 
     @Test

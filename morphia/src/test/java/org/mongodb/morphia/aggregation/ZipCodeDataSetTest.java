@@ -42,7 +42,7 @@ import static org.mongodb.morphia.query.Sort.ascending;
  * @mongodb.driver.manual tutorial/aggregation-zip-code-data-set/ Aggregation with the Zip Code Data Set
  */
 public class ZipCodeDataSetTest extends TestBase {
-    public static final String MONGO_IMPORT;
+    private static final String MONGO_IMPORT;
     private static final Logger LOG = MorphiaLoggerFactory.get(ZipCodeDataSetTest.class);
 
     static {
@@ -67,7 +67,7 @@ public class ZipCodeDataSetTest extends TestBase {
         validate(pipeline.aggregate(Population.class), "MN", 5372);
     }
 
-    public void installSampleData() throws IOException, TimeoutException, InterruptedException {
+    private void installSampleData() throws IOException, TimeoutException, InterruptedException {
         File file = new File("zips.json");
         if (!file.exists()) {
             file = new File(System.getProperty("java.io.tmpdir"), "zips.json");
@@ -128,10 +128,11 @@ public class ZipCodeDataSetTest extends TestBase {
                                                                   projection("name", "smallestCity"),
                                                                   projection("pop", "smallestPop")));
 
-        AggregateIterable<State> iterator = pipeline.aggregate(State.class);
-        try {
+
+        try(MongoCursor<State> iterator = pipeline.aggregate(State.class).iterator()) {
             Map<String, State> states = new HashMap<>();
-            for (State state : iterator) {
+            while(iterator.hasNext()) {
+                final State state = iterator.next();
                 states.put(state.getState(), state);
             }
 
@@ -142,9 +143,6 @@ public class ZipCodeDataSetTest extends TestBase {
 
             Assert.assertEquals("ZEONA", state.getSmallest().getName());
             Assert.assertEquals(8, state.getSmallest().getPopulation().longValue());
-        } finally {
-
-            ((MongoCursor<?>) iterator).close();
         }
     }
 
