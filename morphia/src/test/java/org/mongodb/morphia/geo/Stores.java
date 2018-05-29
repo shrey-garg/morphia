@@ -20,6 +20,10 @@ public final class Stores {
         this.locations = locations;
     }
 
+    public ObjectId getId() {
+        return id;
+    }
+
     @Override
     public int hashCode() {
         int result = name.hashCode();
