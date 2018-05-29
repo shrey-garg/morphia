@@ -347,7 +347,10 @@ public class MappedClass {
      */
     public MappedField getMappedIdField() {
         List<MappedField> fields = getFieldsAnnotatedWith(Id.class);
-        return fields.isEmpty() ? null : fields.get(0);
+        if(fields.isEmpty()) {
+            throw new MappingException(format("%s does not have an annotated ID field", classModel.getName()));
+        }
+        return fields.get(0);
     }
 
     /**

@@ -8,6 +8,7 @@ import com.mongodb.client.model.geojson.MultiPolygon;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Polygon;
 import org.bson.Document;
+import org.bson.types.ObjectId;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
@@ -30,7 +31,7 @@ import static org.mongodb.morphia.testutil.JSONMatcher.jsonEqual;
 /**
  * Test driving features for Issue 643 - add support for saving entities with GeoJSON.
  */
-@Ignore("Defer fixing the geo tests until after the core is fixed")
+//@Ignore("Defer fixing the geo tests until after the core is fixed")
 public class GeoEntitiesTest extends TestBase {
     @Test
     public void shouldConvertPointCorrectlyToDocument() {
@@ -42,7 +43,7 @@ public class GeoEntitiesTest extends TestBase {
 
         assertThat(document, is(notNullValue()));
         assertThat(document.toString(), jsonEqual("  {"
-                                                  + " name: 'New City',"
+                                                  + " _id: 'New City',"
                                                   + " className: 'org.mongodb.morphia.geo.City',"
                                                   + " location:  "
                                                   + " {"
@@ -106,6 +107,7 @@ public class GeoEntitiesTest extends TestBase {
                 lineString(
                     position(3.5, 2.4),
                     position(1.7, 2.8),
+                    position(3.2, 1.4),
                     position(3.5, 2.4))));
 
         GeometryCollection geometryCollection = geometryCollection(point, lineString, polygonWithHoles, multiPoint,
@@ -335,6 +337,7 @@ public class GeoEntitiesTest extends TestBase {
                 position(1.2, 3.0)),
                 lineString(
                     position(3.5, 2.4),
+                    position(1.7, 2.8),
                     position(1.7, 2.8),
                     position(3.5, 2.4))));
 
@@ -816,6 +819,8 @@ public class GeoEntitiesTest extends TestBase {
 
     @SuppressWarnings("UnusedDeclaration")
     private static final class AllTheThings {
+        @Id
+        private ObjectId id;
         private GeometryCollection everything;
         private String name;
 

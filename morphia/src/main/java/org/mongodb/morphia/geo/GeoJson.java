@@ -11,10 +11,12 @@ import com.mongodb.client.model.geojson.Position;
 import com.mongodb.client.model.geojson.Geometry;
 import com.mongodb.client.model.geojson.GeometryCollection;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
-import static java.util.Arrays.*;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
@@ -138,8 +140,14 @@ public final class GeoJson {
         for (final LineString boundary : interiorBoundaries) {
             ensurePolygonIsClosed(boundary);
         }
-        throw new UnsupportedOperationException("");
-//        return new Polygon(Collections.emptyList());
+
+        final List<List<Position>> holes = new ArrayList<>();
+
+        for (final LineString boundary : interiorBoundaries) {
+            holes.add(new ArrayList<>(boundary.getCoordinates()));
+        }
+
+        return new Polygon(exteriorBoundary.getCoordinates(), holes.toArray(new ArrayList[0]));
     }
 
     /**
