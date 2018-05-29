@@ -85,6 +85,10 @@ public abstract class TestBase {
         }
     }
 
+    protected int count(final Iterable<?> iterable) {
+        return count(iterable.iterator());
+    }
+
     protected int count(final Iterator<?> iterator) {
         int count = 0;
         while (iterator.hasNext()) {

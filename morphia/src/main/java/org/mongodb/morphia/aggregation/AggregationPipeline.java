@@ -3,10 +3,10 @@ package org.mongodb.morphia.aggregation;
 
 import com.mongodb.AggregationOptions;
 import com.mongodb.ReadPreference;
+import com.mongodb.client.AggregateIterable;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.Sort;
 
-import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -23,7 +23,7 @@ public interface AggregationPipeline {
      * @param <U>    type of the results
      * @return an iterator of the computed results
      */
-    <U> Iterator<U> aggregate(Class<U> target);
+    <U> AggregateIterable<U> aggregate(Class<U> target);
 
     /**
      * Executes the pipeline and aggregates the output in to the type mapped by the target type.
@@ -33,7 +33,19 @@ public interface AggregationPipeline {
      * @param <U>     type of the results
      * @return an iterator of the computed results
      */
-    <U> Iterator<U> aggregate(Class<U> target, AggregationOptions options);
+    default <U> AggregateIterable<U> aggregate(Class<U> target, AggregationOptions options) {
+        return AggregationPipelineImpl.apply(aggregate(target), options);
+    }
+
+    /**
+     * Executes the pipeline and aggregates the output in to the type mapped by the target type.
+     *
+     * @param target         The class to use when iterating over the results
+     * @param readPreference The read preference to apply to this pipeline
+     * @param <U>            type of the results
+     * @return an iterator of the computed results
+     */
+    <U> AggregateIterable<U> aggregate(Class<U> target, ReadPreference readPreference);
 
     /**
      * Executes the pipeline and aggregates the output in to the type mapped by the target type.
@@ -44,7 +56,23 @@ public interface AggregationPipeline {
      * @param <U>            type of the results
      * @return an iterator of the computed results
      */
-    <U> Iterator<U> aggregate(Class<U> target, AggregationOptions options, ReadPreference readPreference);
+    default <U> AggregateIterable<U> aggregate(Class<U> target, AggregationOptions options, ReadPreference readPreference) {
+        return AggregationPipelineImpl.apply(aggregate(target, readPreference), options);
+    }
+
+    /**
+     * Executes the pipeline and aggregates the output in to the type mapped by the target type.
+     *
+     * @param collectionName The collection in which to store the results of the aggregation overriding the mapped value in target
+     * @param target         The class to use when iterating over the results
+     * @param readPreference The read preference to apply to this pipeline
+     * @param <U>            type of the results
+     * @deprecated use {@link #out(String, Class)} instead
+     */
+    @Deprecated
+    default <U> void aggregate(String collectionName, Class<U> target, ReadPreference readPreference) {
+        out(collectionName, target, AggregationOptions.builder().build(), readPreference);
+    }
 
     /**
      * Executes the pipeline and aggregates the output in to the type mapped by the target type.
@@ -54,9 +82,13 @@ public interface AggregationPipeline {
      * @param options        The options to apply to this aggregation
      * @param readPreference The read preference to apply to this pipeline
      * @param <U>            type of the results
-     * @return an iterator of the computed results
+     * @deprecated use {@link #out(String, Class, AggregationOptions)} instead
      */
-    <U> Iterator<U> aggregate(String collectionName, Class<U> target, AggregationOptions options, ReadPreference readPreference);
+    @Deprecated
+    default <U> void aggregate(String collectionName, Class<U> target, AggregationOptions options,
+                                               ReadPreference readPreference) {
+        out(collectionName, target, options, readPreference);
+    }
 
     /**
      * Returns an ordered stream of documents based on the proximity to a geospatial point. Incorporates the functionality of $match,
@@ -143,47 +175,70 @@ public interface AggregationPipeline {
      * Places the output of the aggregation in the collection mapped by the target type using the default options as defined in {@link
      * AggregationOptions}.
      *
-     * @param target The class to use when iterating over the results
      * @param <U>    type of the results
-     * @return an iterator of the computed results
+     * @param target The class to use when iterating over the results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
-    <U> Iterator<U> out(Class<U> target);
+    <U> void out(Class<U> target);
 
     /**
      * Places the output of the aggregation in the collection mapped by the target type.
      *
+     * @param <U>     type of the results
      * @param target  The class to use when iterating over the results
      * @param options The options to apply to this aggregation
-     * @param <U>     type of the results
-     * @return an iterator of the computed results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
-    <U> Iterator<U> out(Class<U> target, AggregationOptions options);
+    default <U> void out(Class<U> target, AggregationOptions options) {
+        out(target, options, ReadPreference.primary());
+    }
+
+    /**
+     * Places the output of the aggregation in the collection mapped by the target type.
+     *
+     * @param <U>     type of the results
+     * @param target  The class to use when iterating over the results
+     * @param options The options to apply to this aggregation
+     * @param readPreference The read preference to apply to this pipeline
+     * @mongodb.driver.manual reference/operator/aggregation/out $out
+     */
+    <U> void out(Class<U> target, AggregationOptions options, ReadPreference readPreference);
 
     /**
      * Places the output of the aggregation in the collection mapped by the target type using the default options as defined in {@link
      * AggregationOptions}.
      *
+     * @param <U>            type of the results
      * @param collectionName The collection in which to store the results of the aggregation overriding the mapped value in target
      * @param target         The class to use when iterating over the results
-     * @param <U>            type of the results
-     * @return an iterator of the computed results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
-    <U> Iterator<U> out(String collectionName, Class<U> target);
+    <U> void out(String collectionName, Class<U> target);
 
     /**
      * Places the output of the aggregation in the collection mapped by the target type.
      *
+     * @param <U>            type of the results
      * @param collectionName The collection in which to store the results of the aggregation overriding the mapped value in target
      * @param target         The class to use when iterating over the results
      * @param options        The options to apply to this aggregation
-     * @param <U>            type of the results
-     * @return an iterator of the computed results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
-    <U> Iterator<U> out(String collectionName, Class<U> target, AggregationOptions options);
+    default <U> void out(String collectionName, Class<U> target, AggregationOptions options) {
+        out(collectionName, target, options, ReadPreference.primary());
+    }
+
+    /**
+     * Places the output of the aggregation in the collection mapped by the target type.
+     *
+     * @param <U>            type of the results
+     * @param collectionName The collection in which to store the results of the aggregation overriding the mapped value in target
+     * @param target         The class to use when iterating over the results
+     * @param options        The options to apply to this aggregation
+     * @param readPreference The read preference to apply to this pipeline
+     * @mongodb.driver.manual reference/operator/aggregation/out $out
+     */
+    <U> void out(String collectionName, Class<U> target, AggregationOptions options, ReadPreference readPreference);
 
     /**
      * Reshapes each document in the stream, such as by adding new fields or removing existing fields. For each input document, outputs one

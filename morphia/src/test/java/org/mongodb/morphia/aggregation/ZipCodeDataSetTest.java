@@ -1,5 +1,6 @@
 package org.mongodb.morphia.aggregation;
 
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import org.bson.Document;
@@ -22,7 +23,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
@@ -128,11 +128,10 @@ public class ZipCodeDataSetTest extends TestBase {
                                                                   projection("name", "smallestCity"),
                                                                   projection("pop", "smallestPop")));
 
-        Iterator<State> iterator = pipeline.aggregate(State.class);
+        AggregateIterable<State> iterator = pipeline.aggregate(State.class);
         try {
             Map<String, State> states = new HashMap<>();
-            while (iterator.hasNext()) {
-                State state = iterator.next();
+            for (State state : iterator) {
                 states.put(state.getState(), state);
             }
 
@@ -160,22 +159,17 @@ public class ZipCodeDataSetTest extends TestBase {
         }
     }
 
-    private void validate(final Iterator<Population> iterator, final String state, final long value) {
+    private void validate(final AggregateIterable<Population> iterable, final String state, final long value) {
         boolean found = false;
-        try {
-            while (iterator.hasNext()) {
-                Population population = iterator.next();
 
-                if (population.getState().equals(state)) {
-                    found = true;
-                    Assert.assertEquals(new Long(value), population.getPopulation());
-                }
-                LOG.debug("population = " + population);
+        for (Population population : iterable) {
+            if (population.getState().equals(state)) {
+                found = true;
+                Assert.assertEquals(new Long(value), population.getPopulation());
             }
-            Assert.assertTrue("Should have found " + state, found);
-        } finally {
-            ((MongoCursor<?>) iterator).close();
+            LOG.debug("population = " + population);
         }
+        Assert.assertTrue("Should have found " + state, found);
     }
 
 }

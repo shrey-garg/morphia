@@ -16,8 +16,8 @@
 
 package org.mongodb.morphia.aggregation;
 
-import com.mongodb.AggregationOptions;
 import com.mongodb.MongoCommandException;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import com.mongodb.client.model.Collation;
@@ -31,7 +31,6 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
-import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Validation;
@@ -98,8 +97,7 @@ public class AggregationTest extends TestBase {
                                    .validator(parse("{ age : { gte : 13 } }"))));
 
         try {
-            getDatastore()
-                .createAggregation(User.class)
+            getDatastore().createAggregation(User.class)
                 .match(getDatastore().find(User.class).field("name").equal("john doe"))
                 .out("out_users", User.class);
             fail("Document validation should have complained.");
@@ -155,11 +153,7 @@ public class AggregationTest extends TestBase {
                                                      new Document("format", "%Y-%m-%d")
                                                          .append("date", "$joined"))));
 
-        Iterator<StringDates> aggregate = pipeline.aggregate(StringDates.class,
-                                                             builder()
-            .build());
-        while (aggregate.hasNext()) {
-            StringDates next = aggregate.next();
+        for (StringDates next : pipeline.aggregate(StringDates.class)) {
             assertEquals("2016-05-01", next.string);
         }
     }
@@ -175,7 +169,8 @@ public class AggregationTest extends TestBase {
         Iterator<CountResult> aggregation = getDatastore().createAggregation(Book.class)
                                                           .group("author", grouping("count", accumulator("$sum", 1)))
                                                           .sort(ascending("_id"))
-                                                          .aggregate(CountResult.class);
+                                                          .aggregate(CountResult.class)
+                                                          .iterator();
 
         CountResult result1 = aggregation.next();
         CountResult result2 = aggregation.next();
@@ -203,10 +198,11 @@ public class AggregationTest extends TestBase {
         // when
         Iterator<City> citiesOrderedByDistanceFromLondon = getDatastore().createAggregation(City.class)
                                                                          .geoNear(GeoNear.builder("distance")
-                                                                                  .setNear(londonPoint)
-                                                                                  .setSpherical(true)
-                                                                                  .build())
-                                                                         .aggregate(City.class);
+                                                                                         .setNear(londonPoint)
+                                                                                         .setSpherical(true)
+                                                                                         .build())
+                                                                         .aggregate(City.class)
+                                                                         .iterator();
 
         // then
         Assert.assertTrue(citiesOrderedByDistanceFromLondon.hasNext());
@@ -233,12 +229,13 @@ public class AggregationTest extends TestBase {
 
         // when
         Iterator<PlaceWithLegacyCoords> citiesOrderedByDistanceFromLondon = getDatastore()
-            .createAggregation(PlaceWithLegacyCoords.class)
-            .geoNear(GeoNear.builder("distance")
-                            .setNear(latitude, longitude)
-                            .setSpherical(false)
-                            .build())
-            .aggregate(PlaceWithLegacyCoords.class);
+                                                                                .createAggregation(PlaceWithLegacyCoords.class)
+                                                                                .geoNear(GeoNear.builder("distance")
+                                                                                                .setNear(latitude, longitude)
+                                                                                                .setSpherical(false)
+                                                                                                .build())
+                                                                                .aggregate(PlaceWithLegacyCoords.class)
+                                                                                .iterator();
 
         // then
         Assert.assertTrue(citiesOrderedByDistanceFromLondon.hasNext());
@@ -266,10 +263,11 @@ public class AggregationTest extends TestBase {
         // when
         Iterator<City> citiesOrderedByDistanceFromLondon = getDatastore().createAggregation(City.class)
                                                                          .geoNear(GeoNear.builder("distance")
-                                                                                  .setNear(latitude, longitude)
-                                                                                  .setSpherical(true)
-                                                                                  .build())
-                                                                         .aggregate(City.class);
+                                                                                         .setNear(latitude, longitude)
+                                                                                         .setSpherical(true)
+                                                                                         .build())
+                                                                         .aggregate(City.class)
+                                                                         .iterator();
 
         // then
         Assert.assertTrue(citiesOrderedByDistanceFromLondon.hasNext());
@@ -287,15 +285,10 @@ public class AggregationTest extends TestBase {
                             new Book("The Odyssey", "Homer", 10),
                             new Book("Iliad", "Homer", 10)));
 
-        Iterator<Book> aggregate = getDatastore().createAggregation(Book.class)
-                                                 .limit(2)
-                                                 .aggregate(Book.class);
-        int count = 0;
-        while (aggregate.hasNext()) {
-            aggregate.next();
-            count++;
-        }
-        assertEquals(2, count);
+        AggregateIterable<Book> aggregate = getDatastore().createAggregation(Book.class)
+                                                          .limit(2)
+                                                          .aggregate(Book.class);
+        assertEquals(2, count(aggregate));
     }
 
     /**
@@ -336,13 +329,11 @@ public class AggregationTest extends TestBase {
                             new Book("The Odyssey", "Homer", 10),
                             new Book("Iliad", "Homer", 10)));
 
-        AggregationOptions options = builder()
-            .build();
-        Iterator<Author> aggregate = getDatastore().createAggregation(Book.class)
+        getDatastore().createAggregation(Book.class)
                                                    .group("author", grouping("books", push("title")))
-                                                   .out(Author.class, options);
+                                                   .out(Author.class);
         assertEquals(2, getDatastore().getCollection(Author.class).count());
-        Author author = aggregate.next();
+        Author author = getDatastore().find(Author.class).get();
         assertEquals("Homer", author.name);
         assertEquals(asList("The Odyssey", "Iliad"), author.books);
 
@@ -390,7 +381,7 @@ public class AggregationTest extends TestBase {
                                                              projection("author", "_id"),
                                                              projection("copies", divide(projection("copies"), 5)))
                                                            .sort(ascending("author"));
-        Iterator<Book> aggregate = pipeline.aggregate(Book.class);
+        Iterator<Book> aggregate = pipeline.aggregate(Book.class).iterator();
         Book book = aggregate.next();
         assertEquals("Dante", book.author);
         assertEquals(1, book.copies.intValue());
@@ -411,7 +402,9 @@ public class AggregationTest extends TestBase {
 
         Book book = getDatastore().createAggregation(Book.class)
                                   .skip(2)
-                                  .aggregate(Book.class).next();
+                                  .aggregate(Book.class)
+                                  .iterator()
+                                  .next();
         assertEquals("Eclogues", book.title);
         assertEquals("Dante", book.author);
         assertEquals(2, book.copies.intValue());
@@ -423,14 +416,15 @@ public class AggregationTest extends TestBase {
         getDatastore().saveMany(asList(new User("jane", format.parse("2011-03-02"), "golf", "racquetball"),
                             new User("joe", format.parse("2012-07-02"), "tennis", "golf", "swimming")));
 
-        Iterator<User> aggregate = getDatastore().createAggregation(User.class)
-                                                 .project(projection("_id").suppress(), projection("name"), projection("joined"),
-                                                   projection("likes"))
-                                                 .unwind("likes")
-                                                 .aggregate(User.class);
+        AggregateIterable<User> aggregate = getDatastore().createAggregation(User.class)
+                                                          .project(projection("_id").suppress(),
+                                                              projection("name"),
+                                                              projection("joined"),
+                                                              projection("likes"))
+                                                          .unwind("likes")
+                                                          .aggregate(User.class);
         int count = 0;
-        while (aggregate.hasNext()) {
-            User user = aggregate.next();
+        for (User user : aggregate) {
             switch (count) {
                 case 0:
                     assertEquals("jane", user.name);

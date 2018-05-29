@@ -2,6 +2,7 @@ package org.mongodb.morphia.aggregation;
 
 import com.mongodb.AggregationOptions;
 import com.mongodb.ReadPreference;
+import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 import org.mongodb.morphia.Datastore;
@@ -12,8 +13,9 @@ import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.Sort;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * Implementation of an AggregationPipeline.
@@ -43,31 +45,56 @@ public class AggregationPipelineImpl implements AggregationPipeline {
      *
      * @return the list of stages
      */
-    public List<Document> getStages() {
+    List<Document> getStages() {
         return stages;
     }
 
     @Override
-    public <U> Iterator<U> aggregate(final Class<U> target) {
-        return aggregate(target, AggregationOptions.builder().build(), collection.getReadPreference());
+    public <U> AggregateIterable<U> aggregate(final Class<U> target) {
+        return aggregate(target, collection.getReadPreference());
     }
 
     @Override
-    public <U> Iterator<U> aggregate(final Class<U> target, final AggregationOptions options) {
-        return aggregate(target, options, collection.getReadPreference());
-    }
-
-    @Override
-    public <U> Iterator<U> aggregate(final Class<U> target, final AggregationOptions options, final ReadPreference readPreference) {
-        return aggregate(datastore.getCollection(target).getNamespace().getCollectionName(), target, options, readPreference);
-    }
-
-    @Override
-    public <U> Iterator<U> aggregate(final String collectionName, final Class<U> target, final AggregationOptions options,
-                                     final ReadPreference readPreference) {
+    public <U> AggregateIterable<U> aggregate(final Class<U> target, final ReadPreference readPreference) {
         LOG.debug("stages = " + stages);
 
-        return collection.aggregate(stages, target).iterator();
+        return collection
+                   .withReadPreference(readPreference)
+                  .aggregate(stages, target);
+    }
+
+    @Override
+    public <U> void out(final Class<U> target) {
+        out(datastore.getCollection(target).getNamespace().getCollectionName(), target);
+    }
+
+    @Override
+    public <U> void out(final String collectionName, final Class<U> target) {
+        stages.add(new Document("$out", collectionName));
+        out(target, AggregationOptions.builder().build(), ReadPreference.primary());
+    }
+
+    @Override
+    public <U> void out(final Class<U> target, final AggregationOptions options, final ReadPreference readPreference) {
+        apply(aggregate(target, ReadPreference.primary()), options)
+            .toCollection();
+    }
+
+    @Override
+    public <U> void out(final String collectionName,
+                        final Class<U> target,
+                        final AggregationOptions options,
+                        final ReadPreference readPreference) {
+        stages.add(new Document("$out", collectionName));
+        out(target, options, ReadPreference.primary());
+    }
+
+    static <U> AggregateIterable<U> apply(final AggregateIterable<U> aggregate, final AggregationOptions options) {
+        aggregate.bypassDocumentValidation(options.getBypassDocumentValidation());
+        aggregate.allowDiskUse(options.getAllowDiskUse());
+        aggregate.maxTime(options.getMaxTime(MILLISECONDS), MILLISECONDS);
+        aggregate.collation(options.getCollation());
+        return aggregate;
     }
 
     @Override
@@ -145,27 +172,6 @@ public class AggregationPipelineImpl implements AggregationPipeline {
     public AggregationPipeline match(final Query query) {
         stages.add(new Document("$match", query.getQueryDocument()));
         return this;
-    }
-
-    @Override
-    public <U> Iterator<U> out(final Class<U> target) {
-        return out(datastore.getCollection(target).getNamespace().getCollectionName(), target);
-    }
-
-    @Override
-    public <U> Iterator<U> out(final Class<U> target, final AggregationOptions options) {
-        return out(datastore.getCollection(target).getNamespace().getCollectionName(), target, options);
-    }
-
-    @Override
-    public <U> Iterator<U> out(final String collectionName, final Class<U> target) {
-        return out(collectionName, target, AggregationOptions.builder().build());
-    }
-
-    @Override
-    public <U> Iterator<U> out(final String collectionName, final Class<U> target, final AggregationOptions options) {
-        stages.add(new Document("$out", collectionName));
-        return aggregate(target, options);
     }
 
     @Override
