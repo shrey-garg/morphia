@@ -38,7 +38,7 @@ public final class EntityTypeAndIdValueValidator implements Validator {
      */
     public boolean apply(final MappedClass mappedClass, final MappedField mappedField, final Object value,
                          final List<ValidationFailure> validationFailures) {
-        if (appliesTo(mappedClass, mappedField)) {
+        if (mappedClass.getEntityAnnotation() != null && appliesTo(mappedClass, mappedField)) {
             Class classOfValue = value.getClass();
             Class classOfIdFieldForType = mappedClass.getMappedIdField().getType();
             if (!mappedField.getType().equals(classOfValue) && !classOfValue.equals(classOfIdFieldForType)) {
