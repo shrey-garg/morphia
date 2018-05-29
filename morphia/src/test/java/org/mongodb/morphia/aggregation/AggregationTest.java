@@ -63,7 +63,7 @@ import static org.mongodb.morphia.aggregation.Projection.projection;
 import static org.mongodb.morphia.geo.GeoJson.point;
 import static org.mongodb.morphia.query.Sort.ascending;
 
-@Ignore("geo work needs to be done first")
+//@Ignore("geo work needs to be done first")
 public class AggregationTest extends TestBase {
 
     @Test
@@ -187,6 +187,7 @@ public class AggregationTest extends TestBase {
     }
 
     @Test
+    @Ignore("geo work needs to be done first")
     public void testGeoNearWithGeoJson() {
         // given
         Point londonPoint = point(51.5286416, -0.1015987);
@@ -216,6 +217,7 @@ public class AggregationTest extends TestBase {
     }
 
     @Test
+    @Ignore("geo work needs to be done first")
     public void testGeoNearWithLegacyCoords() {
         // given
         double latitude = 51.5286416;
@@ -247,6 +249,7 @@ public class AggregationTest extends TestBase {
     }
 
     @Test
+    @Ignore("geo work needs to be done first")
     public void testGeoNearWithSphericalGeometry() {
         // given
         double latitude = 51.5286416;
@@ -393,8 +396,8 @@ public class AggregationTest extends TestBase {
         assertEquals(1, book.copies.intValue());
 
         final List<Document> stages = ((AggregationPipelineImpl) pipeline).getStages();
-        assertEquals(stages.get(0), parse("{ \"$group\": {_id: \"$author\", copies: { \"$sum\": \"$copies\"}}"));
-        assertEquals(stages.get(1), parse(("{ \"$project\": {_id: 0, author: \"$_id\", copies: { \"$divide\", [ \"$copies\", 5\" ] }}}")));
+        assertEquals(stages.get(0), parse("{ \"$group\": {_id: \"$author\", copies: { \"$sum\": \"$copies\"}}}"));
+        assertEquals(stages.get(1), parse(("{ \"$project\": {_id: 0, author: \"$_id\", copies: { \"$divide\" : [ \"$copies\", 5 ] }}}")));
 
     }
 

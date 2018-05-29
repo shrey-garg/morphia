@@ -7,11 +7,9 @@ import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecConfigurationException;
-import org.bson.codecs.pojo.PropertyCodecProvider;
 import org.bson.codecs.pojo.PropertyCodecRegistry;
 import org.bson.codecs.pojo.TypeData;
 import org.bson.codecs.pojo.TypeWithTypeParameters;
-import org.mongodb.morphia.mapping.Mapper;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -20,14 +18,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 @SuppressWarnings("unchecked")
-class MorphiaMapPropertyCodecProvider implements PropertyCodecProvider {
-
-    private Mapper mapper;
-
-    public MorphiaMapPropertyCodecProvider(final Mapper mapper) {
-        this.mapper = mapper;
-    }
-
+class MorphiaMapPropertyCodecProvider extends MorphiaPropertyCodecProvider {
     @Override
     public <T> Codec<T> get(final TypeWithTypeParameters<T> type, final PropertyCodecRegistry registry) {
         if (Map.class.isAssignableFrom(type.getType())) {
@@ -38,7 +29,7 @@ class MorphiaMapPropertyCodecProvider implements PropertyCodecProvider {
             try {
                 return new MapCodec(type.getType(), keyType.getType(), registry.get(valueType));
             } catch (CodecConfigurationException e) {
-                if (valueType.equals(Object.class)) {
+                if (valueType.getType().equals(Object.class)) {
                     try {
                         return (Codec<T>) registry.get(TypeData.builder(Map.class).build());
                     } catch (CodecConfigurationException e1) {
@@ -51,12 +42,6 @@ class MorphiaMapPropertyCodecProvider implements PropertyCodecProvider {
             return new EnumCodec(type.getType());
         }
         return null;
-    }
-
-    private TypeWithTypeParameters<?> getType(final List<? extends TypeWithTypeParameters<?>> typeParameters, final int position) {
-        return typeParameters.size() > position
-               ? typeParameters.get(position)
-               : TypeData.builder(Object.class).build();
     }
 
     private static class MapCodec<K, V> implements Codec<Map<K, V>> {
