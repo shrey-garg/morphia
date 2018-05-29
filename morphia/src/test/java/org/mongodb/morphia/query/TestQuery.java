@@ -983,7 +983,7 @@ public class TestQuery extends TestBase {
     }
 
     @Test
-    @Ignore("references are not currently supported")
+    @Ignore("References are not currently supported")
     public void testQueryOverLazyReference() {
         final ContainsPic cpk = new ContainsPic();
         final Pic p = new Pic();
@@ -999,7 +999,7 @@ public class TestQuery extends TestBase {
     }
 
     @Test
-    @Ignore("references are not currently supported")
+    @Ignore("References are not currently supported")
     public void testQueryOverReference() {
 
         final ContainsPic cpk = new ContainsPic();
@@ -1032,7 +1032,7 @@ public class TestQuery extends TestBase {
     }
 
     @Test(expected = ValidationException.class)
-    @Ignore("references are not currently supported")
+    @Ignore("References are not currently supported")
     public void testReferenceQuery() {
         final Photo p = new Photo();
         final ContainsPhotoKey cpk = new ContainsPhotoKey();

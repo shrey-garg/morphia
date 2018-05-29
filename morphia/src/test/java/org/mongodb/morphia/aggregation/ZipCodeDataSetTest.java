@@ -3,6 +3,7 @@ package org.mongodb.morphia.aggregation;
 import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoIterable;
 import org.bson.Document;
 import org.junit.Assert;
 import org.junit.Assume;
@@ -57,13 +58,18 @@ public class ZipCodeDataSetTest extends TestBase {
     }
 
     @Test
-    @Ignore("fix with the aggregation tests")
     public void averageCitySizeByState() throws InterruptedException, TimeoutException, IOException {
         Assume.assumeTrue(new File(MONGO_IMPORT).exists());
         installSampleData();
         AggregationPipeline pipeline = getDatastore().createAggregation(City.class)
-                                                     .group(id(grouping("state"), grouping("city")), grouping("pop", sum("pop")))
-                                                     .group("_id.state", grouping("avgCityPop", average("pop")));
+                                                     .group(
+                                                         id(grouping("state"), grouping("city")),
+                                                         grouping("pop", sum("pop")))
+
+                                                     .group(
+                                                         "_id.state",
+                                                         grouping("totalPop", average("pop")));
+
         validate(pipeline.aggregate(Population.class), "MN", 5372);
     }
 
@@ -109,27 +115,30 @@ public class ZipCodeDataSetTest extends TestBase {
         getMorphia().map(City.class, State.class);
         AggregationPipeline pipeline = getDatastore().createAggregation(City.class)
 
-                                                     .group(id(grouping("state"), grouping("city")), grouping("pop", sum("pop")))
+                                                     .group(
+                                                         id(grouping("state"),
+                                                         grouping("city")),
+                                                         grouping("pop", sum("pop")))
 
                                                      .sort(ascending("pop"))
 
                                                      .group("_id.state",
-                                                     grouping("biggestCity", last("_id.city")),
-                                                     grouping("biggestPop", last("pop")),
-                                                     grouping("smallestCity", first("_id.city")),
-                                                     grouping("smallestPop", first("pop")))
+                                                         grouping("biggestCity", last("_id.city")),
+                                                         grouping("biggestPop", last("pop")),
+                                                         grouping("smallestCity", first("_id.city")),
+                                                         grouping("smallestPop", first("pop")))
 
                                                      .project(projection("_id").suppress(),
-                                                       projection("state", "_id"),
-                                                       projection("biggestCity",
-                                                                  projection("name", "biggestCity"),
-                                                                  projection("pop", "biggestPop")),
-                                                       projection("smallestCity",
-                                                                  projection("name", "smallestCity"),
-                                                                  projection("pop", "smallestPop")));
+                                                         projection("state", "_id"),
+                                                         projection("biggestCity",
+                                                             projection("name", "biggestCity"),
+                                                             projection("pop", "biggestPop")),
+                                                         projection("smallestCity",
+                                                             projection("name", "smallestCity"),
+                                                             projection("pop", "smallestPop")));
 
 
-        try(MongoCursor<State> iterator = pipeline.aggregate(State.class).iterator()) {
+        try(MongoCursor<State> iterator = pipeline.out(State.class).iterator()) {
             Map<String, State> states = new HashMap<>();
             while(iterator.hasNext()) {
                 final State state = iterator.next();
@@ -157,7 +166,7 @@ public class ZipCodeDataSetTest extends TestBase {
         }
     }
 
-    private void validate(final AggregateIterable<Population> iterable, final String state, final long value) {
+    private void validate(final Iterable<Population> iterable, final String state, final long value) {
         boolean found = false;
 
         for (Population population : iterable) {

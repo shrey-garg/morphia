@@ -9,7 +9,6 @@ import org.bson.codecs.pojo.CollectionCodec;
 import org.bson.codecs.pojo.PropertyCodecRegistry;
 import org.bson.codecs.pojo.TypeData;
 import org.bson.codecs.pojo.TypeWithTypeParameters;
-import org.mongodb.morphia.mapping.Mapper;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;

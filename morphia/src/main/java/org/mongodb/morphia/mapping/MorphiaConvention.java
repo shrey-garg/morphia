@@ -79,7 +79,9 @@ public class MorphiaConvention implements Convention {
                     property = createPropertyModelBuilder(propertyMetadata);
                     classModelBuilder.addProperty(property);
                 }
+
                 property.typeData((TypeData) builder.getTypeData());
+
                 if (builder.hasAnnotation(Id.class)) {
                     classModelBuilder.idPropertyName(property.getReadName());
                 }
@@ -87,10 +89,10 @@ public class MorphiaConvention implements Convention {
                 final String mappedName = getMappedFieldName(builder);
                 property.readName(mappedName)
                         .writeName(mappedName)
+                        .propertySerialization(new MorphiaPropertySerialization(options, builder))
                         .propertyAccessor(field.getType().isArray() && !field.getType().getComponentType().equals(byte.class)
                                           ? new ArrayFieldAccessor(property.getTypeData(), field)
-                                          : new FieldAccessor(field))
-                .propertySerialization(new MorphiaPropertySerialization(options, builder));
+                                          : new FieldAccessor(field));
 
                 if (isNotConcrete(property.getTypeData())) {
                     property.discriminatorEnabled(true);

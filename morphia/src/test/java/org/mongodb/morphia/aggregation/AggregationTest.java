@@ -181,7 +181,7 @@ public class AggregationTest extends TestBase {
     }
 
     @Test
-    @Ignore("geo work needs to be done first")
+    @Ignore("Defer fixing the geo tests until after the core is fixed")
     public void testGeoNearWithGeoJson() {
         // given
         Point londonPoint = point(51.5286416, -0.1015987);
@@ -212,7 +212,7 @@ public class AggregationTest extends TestBase {
     }
 
     @Test
-    @Ignore("geo work needs to be done first")
+    @Ignore("Defer fixing the geo tests until after the core is fixed")
     public void testGeoNearWithLegacyCoords() {
         // given
         double latitude = 51.5286416;
@@ -245,7 +245,7 @@ public class AggregationTest extends TestBase {
     }
 
     @Test
-    @Ignore("geo work needs to be done first")
+    @Ignore("Defer fixing the geo tests until after the core is fixed")
     public void testGeoNearWithSphericalGeometry() {
         // given
         double latitude = 51.5286416;

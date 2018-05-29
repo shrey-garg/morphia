@@ -12,7 +12,7 @@ import org.mongodb.morphia.annotations.Reference;
 
 import java.util.List;
 
-@Ignore("references are not currently supported")
+@Ignore("References are not currently supported")
 public class ReferencesWIgnoreMissingTest extends TestBase {
     @Test
     public void testMissingReference() {

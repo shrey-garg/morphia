@@ -9,7 +9,7 @@ import org.mongodb.morphia.testutil.TestEntity;
 
 import static java.util.Arrays.asList;
 
-@Ignore("references are not currently supported")
+@Ignore("References are not currently supported")
 public class TestReferenceArray extends TestBase {
 
     @Test

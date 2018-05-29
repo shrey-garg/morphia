@@ -455,7 +455,7 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    @Ignore("references not currently supported")
+    @Ignore("References are not currently supported")
     public void testRecursiveReference() {
         final MongoCollection<Document> stuff = getDatabase().getCollection("stuff");
 
@@ -490,7 +490,7 @@ public class TestMapping extends TestBase {
     }
 
     @Test(expected = MappingException.class)
-    @Ignore("until references are resolved")
+    @Ignore("References are not currently supported")
     public void testReferenceWithoutIdValue() {
         final RecursiveParent parent = new RecursiveParent();
         final RecursiveChild child = new RecursiveChild();

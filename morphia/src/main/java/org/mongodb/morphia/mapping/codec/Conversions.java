@@ -37,6 +37,12 @@ public final class Conversions {
         register(String.class, URI.class, str -> URI.create(str.replace("%46", ".")));
 
         register(Binary.class, byte[].class, Binary::getData);
+
+        register(Double.class, Long.class, Double::longValue);
+        register(Long.class, Double.class, Long::doubleValue);
+
+        register(Float.class, Long.class, Float::longValue);
+        register(Long.class, Float.class, Long::floatValue);
     }
 
     private static <F, T> void register(final Class<F> fromType, final Class<T> toType, final Function<F, T> function) {

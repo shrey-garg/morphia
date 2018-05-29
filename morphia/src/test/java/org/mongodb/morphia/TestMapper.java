@@ -48,7 +48,7 @@ public class TestMapper extends TestBase {
     }
 
     @Test
-    @Ignore("until references are dealt with")
+    @Ignore("References are not currently supported")
     public void singleLookup() {
         getMorphia().map(A.class);
 

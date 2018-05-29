@@ -2,6 +2,7 @@ package org.mongodb.morphia.mapping.codec;
 
 import org.bson.BsonDocumentReader;
 import org.bson.BsonReader;
+import org.bson.BsonReaderMark;
 import org.bson.BsonValue;
 import org.bson.BsonWriter;
 import org.bson.Document;
@@ -9,6 +10,7 @@ import org.bson.codecs.Codec;
 import org.bson.codecs.CollectibleCodec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
+import org.bson.codecs.configuration.CodecConfigurationException;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.DiscriminatorLookup;
@@ -17,6 +19,7 @@ import org.bson.codecs.pojo.PojoCodec;
 import org.bson.codecs.pojo.PojoCodecImpl;
 import org.bson.codecs.pojo.PropertyCodecProvider;
 import org.bson.codecs.pojo.PropertyCodecRegistry;
+import org.bson.codecs.pojo.PropertyModel;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
@@ -28,6 +31,8 @@ import org.mongodb.morphia.mapping.Mapper;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static org.mongodb.morphia.mapping.codec.Conversions.convert;
 
 @SuppressWarnings("unchecked")
 public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCodec<T> {
@@ -53,7 +58,7 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
     public T generateIdIfAbsentFromDocument(final T document) {
         if (!documentHasId(document)) {
             final MappedField mappedIdField = mappedClass.getMappedIdField();
-            mappedIdField.setFieldValue(document, Conversions.convert(new ObjectId(), mappedIdField.getType()));
+            mappedIdField.setFieldValue(document, convert(new ObjectId(), mappedIdField.getType()));
         }
         return document;
     }
@@ -111,8 +116,23 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
             entity = super.decode(reader, decoderContext);
         }
 
-
         return entity;
+    }
+
+    @Override
+    protected <S> void decodePropertyModel(final BsonReader reader,
+                                           final DecoderContext decoderContext,
+                                           final InstanceCreator<T> instanceCreator,
+                                           final String name,
+                                           final PropertyModel<S> propertyModel) {
+        final BsonReaderMark mark = reader.getMark();
+        try {
+            super.decodePropertyModel(reader, decoderContext, instanceCreator, name, propertyModel);
+        } catch(CodecConfigurationException e) {
+            mark.reset();
+            final Object value = mapper.getCodecRegistry().get(Object.class).decode(reader, decoderContext);
+            instanceCreator.set((S) convert(value, propertyModel.getTypeData().getType()), propertyModel);
+        }
     }
 
     public MappedClass getMappedClass() {

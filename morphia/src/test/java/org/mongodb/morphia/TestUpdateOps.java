@@ -822,7 +822,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    @Ignore("references aren't implemented yet")
+    @Ignore("References are not currently supported")
     public void testUpdateRef() {
         final ContainsPic cp = new ContainsPic();
         cp.setName("cp one");

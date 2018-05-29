@@ -9,8 +9,6 @@ import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.entities.SimpleEnum;
 
-import java.io.Serializable;
-
 
 public class NameValuePairTest extends TestBase {
 
