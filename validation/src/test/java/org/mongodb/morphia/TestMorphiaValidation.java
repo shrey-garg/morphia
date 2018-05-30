@@ -17,9 +17,6 @@ public class TestMorphiaValidation extends TestBase {
         private String email;
     }
 
-    /**
-     * Test method for {@link ValidationExtension#prePersist(Object, com.mongodb.DBObject, org.mongodb.morphia.mapping.Mapper)}.
-     */
     @Test
     public final void testPrePersist() {
         final E e = new E();

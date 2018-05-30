@@ -57,7 +57,7 @@ public class QueryValidatorTest extends TestBase {
     }
 
     @Test
-    @Ignore("Defer fixing the geo tests until after the core is fixed")
+//    @Ignore("Defer fixing the geo tests until after the core is fixed")
     public void shouldAllowGeoWithinOperatorWithAllAppropriateTrimmings() {
         MappedClass mappedClass = getMapper().getMappedClass(GeoEntity.class);
         MappedField mappedField = mappedClass.getMappedField("array");
@@ -357,17 +357,6 @@ public class QueryValidatorTest extends TestBase {
         thrown.expect(ValidationException.class);
         thrown.expectMessage("Cannot use dot-notation past 'reference' in 'org.mongodb.morphia.query.QueryValidatorTest$WithReference'");
         validateQuery(WithReference.class, getMapper(), new StringBuilder("reference.name"), FilterOperator.EQUAL, "", true,
-            true);
-    }
-
-    @Test
-    @Ignore("@Serialized might be removed altogether")
-    public void shouldReferToMappedClassInExceptionWhenQueryingPastSerializedField() {
-        thrown.expect(ValidationException.class);
-        thrown.expectMessage("Cannot use dot-notation past 'serialized' in "
-                             + "'org.mongodb.morphia.query.QueryValidatorTest$WithSerializedField'");
-        validateQuery(WithSerializedField.class, getMapper(), new StringBuilder("serialized.name"), FilterOperator.EQUAL, "",
-            true,
             true);
     }
 

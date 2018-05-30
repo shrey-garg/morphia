@@ -105,7 +105,7 @@ public class AggregationPipelineImpl implements AggregationPipeline {
     public AggregationPipeline geoNear(final GeoNear geoNear) {
         Document geo = new Document();
 
-        putIfNull(geo, "near", geoNear);
+        putIfNull(geo, "near", geoNear.getLocation());
         putIfNull(geo, "distanceField", geoNear.getDistanceField());
         putIfNull(geo, "limit", geoNear.getLimit());
         putIfNull(geo, "num", geoNear.getMaxDocuments());

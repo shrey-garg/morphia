@@ -757,7 +757,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    @Ignore("references aren't implemented yet")
+    @Ignore("References are not currently supported")
     public void testUpdateKeyRef() {
         final ContainsPicKey cpk = new ContainsPicKey();
         cpk.name = "cpk one";

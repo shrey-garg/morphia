@@ -1,6 +1,6 @@
 package org.mongodb.morphia.query.validation;
 
-import com.mongodb.DBObject;
+import org.bson.Document;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.query.FilterOperator;
 
@@ -31,8 +31,8 @@ public final class GeoWithinOperationValidator extends OperationValidator {
 
     // this could be a lot more rigorous
     private static boolean isValueAValidGeoQuery(final Object value) {
-        if (value instanceof DBObject) {
-            String key = ((DBObject) value).keySet().iterator().next();
+        if (value instanceof Document) {
+            String key = ((Document) value).keySet().iterator().next();
             return key.equals("$box") || key.equals("$center") || key.equals("$centerSphere") || key.equals("$polygon");
         }
         return false;

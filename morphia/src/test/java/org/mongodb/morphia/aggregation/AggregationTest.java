@@ -181,7 +181,6 @@ public class AggregationTest extends TestBase {
     }
 
     @Test
-    @Ignore("Defer fixing the geo tests until after the core is fixed")
     public void testGeoNearWithGeoJson() {
         // given
         Point londonPoint = point(51.5286416, -0.1015987);
@@ -194,7 +193,6 @@ public class AggregationTest extends TestBase {
 
         getDatastore().ensureIndexes();
 
-        // when
         Iterator<City> citiesOrderedByDistanceFromLondon = getDatastore().createAggregation(City.class)
                                                                          .geoNear(GeoNear.builder("distance")
                                                                                          .setNear(londonPoint)
@@ -203,7 +201,6 @@ public class AggregationTest extends TestBase {
                                                                          .aggregate(City.class)
                                                                          .iterator();
 
-        // then
         Assert.assertTrue(citiesOrderedByDistanceFromLondon.hasNext());
         assertEquals(london, citiesOrderedByDistanceFromLondon.next());
         assertEquals(manchester, citiesOrderedByDistanceFromLondon.next());
@@ -212,40 +209,6 @@ public class AggregationTest extends TestBase {
     }
 
     @Test
-    @Ignore("Defer fixing the geo tests until after the core is fixed")
-    public void testGeoNearWithLegacyCoords() {
-        // given
-        double latitude = 51.5286416;
-        double longitude = -0.1015987;
-        PlaceWithLegacyCoords london = new PlaceWithLegacyCoords(new double[]{longitude, latitude}, "London");
-        getDatastore().save(london);
-        PlaceWithLegacyCoords manchester = new PlaceWithLegacyCoords(new double[]{-2.2235922, 53.4722454}, "Manchester");
-        getDatastore().save(manchester);
-        PlaceWithLegacyCoords sevilla = new PlaceWithLegacyCoords(new double[]{-5.9550582, 37.3753708}, "Sevilla");
-        getDatastore().save(sevilla);
-
-        getDatastore().ensureIndexes();
-
-        // when
-        Iterator<PlaceWithLegacyCoords> citiesOrderedByDistanceFromLondon = getDatastore()
-                                                                                .createAggregation(PlaceWithLegacyCoords.class)
-                                                                                .geoNear(GeoNear.builder("distance")
-                                                                                                .setNear(latitude, longitude)
-                                                                                                .setSpherical(false)
-                                                                                                .build())
-                                                                                .aggregate(PlaceWithLegacyCoords.class)
-                                                                                .iterator();
-
-        // then
-        Assert.assertTrue(citiesOrderedByDistanceFromLondon.hasNext());
-        assertEquals(london, citiesOrderedByDistanceFromLondon.next());
-        assertEquals(manchester, citiesOrderedByDistanceFromLondon.next());
-        assertEquals(sevilla, citiesOrderedByDistanceFromLondon.next());
-        Assert.assertFalse(citiesOrderedByDistanceFromLondon.hasNext());
-    }
-
-    @Test
-    @Ignore("Defer fixing the geo tests until after the core is fixed")
     public void testGeoNearWithSphericalGeometry() {
         // given
         double latitude = 51.5286416;

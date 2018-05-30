@@ -269,7 +269,6 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    @Ignore
     public void testIntKeySetStringMap() {
         final ContainsIntKeySetStringMap map = new ContainsIntKeySetStringMap();
         map.values.put(1, Collections.singleton("I'm 1"));

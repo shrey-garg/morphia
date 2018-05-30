@@ -16,7 +16,6 @@ package org.mongodb.morphia.query;
 
 
 import com.jayway.awaitility.Awaitility;
-import com.mongodb.BasicDBObject;
 import com.mongodb.CursorType;
 import com.mongodb.MongoException;
 import com.mongodb.client.MongoCollection;
@@ -25,7 +24,6 @@ import com.mongodb.client.model.CollationStrength;
 import com.mongodb.client.model.CountOptions;
 import com.mongodb.client.model.FindOptions;
 import org.bson.Document;
-import org.bson.types.CodeWScope;
 import org.bson.types.CodeWithScope;
 import org.bson.types.ObjectId;
 import org.junit.After;
@@ -66,7 +64,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 import static com.mongodb.client.model.Collation.builder;
-import static java.lang.Thread.sleep;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.copyOfRange;
 import static java.util.Collections.singletonList;
@@ -74,7 +71,6 @@ import static org.bson.Document.parse;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -1233,7 +1229,7 @@ public class TestQuery extends TestBase {
     @Test
     public void testWhereWithInvalidStringQuery() {
         getDatastore().save(new PhotoWithKeywords());
-        final CodeWScope hasKeyword = new CodeWScope("keywords != null", new BasicDBObject());
+        final CodeWithScope hasKeyword = new CodeWithScope("keywords != null", new Document());
         try {
             // must fail
             assertNotNull(getDatastore().find(PhotoWithKeywords.class).where(hasKeyword.getCode()).get());

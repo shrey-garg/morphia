@@ -17,6 +17,7 @@
 package org.mongodb.morphia.aggregation;
 
 import com.mongodb.client.model.geojson.Point;
+import com.mongodb.client.model.geojson.Position;
 import org.mongodb.morphia.query.Query;
 
 /**
@@ -34,6 +35,7 @@ public final class GeoNear {
     private final Double distanceMultiplier;
     private final String includeLocations;
     private final Boolean uniqueDocuments;
+    private Point location;
 
     private GeoNear(final GeoNearBuilder builder) {
         distanceField = builder.distanceField;
@@ -45,6 +47,7 @@ public final class GeoNear {
         distanceMultiplier = builder.distanceMultiplier;
         includeLocations = builder.includeLocations;
         uniqueDocuments = builder.uniqueDocuments;
+        location = builder.location;
     }
 
     /**
@@ -134,6 +137,10 @@ public final class GeoNear {
         return spherical;
     }
 
+    public Point getLocation() {
+        return location;
+    }
+
     /**
      * Provides a builder for GeoNear instances.
      */
@@ -147,6 +154,7 @@ public final class GeoNear {
         private Double distanceMultiplier;
         private String includeLocations;
         private Boolean uniqueDocuments;
+        private Point location;
 
         /**
          * @param distanceField The output field that contains the calculated distance. To specify a field within a subdocument, use dot
@@ -235,6 +243,7 @@ public final class GeoNear {
          * @return this
          */
         public GeoNearBuilder setNear(final double latitude, final double longitude) {
+            location = new Point(new Position(latitude, longitude));
             return this;
         }
 
@@ -245,6 +254,7 @@ public final class GeoNear {
          * @return this
          */
         public GeoNearBuilder setNear(final Point point) {
+            location = point;
             return this;
         }
 
