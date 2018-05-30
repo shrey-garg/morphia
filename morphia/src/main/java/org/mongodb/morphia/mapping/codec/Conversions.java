@@ -31,10 +31,10 @@ public final class Conversions {
 
         register(Binary.class, byte[].class, Binary::getData);
 
-        register(Double.class, Long.class, new DoubleToLongFunction());
+        register(Double.class, Long.class, Double::longValue, "Converting a double value to a long.  Possible loss of precision.");
         register(Long.class, Double.class, Long::doubleValue);
 
-        register(Float.class, Long.class, new FloatToLongFunction());
+        register(Float.class, Long.class, Float::longValue, "Converting a float value to a long.  Possible loss of precision.");
         register(Long.class, Float.class, Long::floatValue);
 
         register(String.class, URI.class, str -> URI.create(str.replace("%46", ".")));
@@ -48,8 +48,21 @@ public final class Conversions {
     }
 
     private static <F, T> void register(final Class<F> fromType, final Class<T> toType, final Function<F, T> function) {
+        register(fromType, toType, function, null);
+    }
+
+    private static <F, T> void register(final Class<F> fromType, final Class<T> toType, final Function<F, T> function, String warning) {
+        final Function<F, T> conversion =
+            warning == null
+            ? function
+            : f -> {
+                if (LOG.isWarningEnabled()) {
+                    LOG.warning(warning);
+                }
+                return function.apply(f);
+            };
         conversions.computeIfAbsent(fromType, (Class<?> c) -> new HashMap<>())
-                   .put(toType, function);
+                   .put(toType, conversion);
     }
 
     @SuppressWarnings("unchecked")
@@ -92,25 +105,5 @@ public final class Conversions {
 
     private static boolean isBoolean(final Class<?> type) {
         return type.equals(boolean.class);
-    }
-
-    private static class DoubleToLongFunction implements Function<Double, Long> {
-        @Override
-        public Long apply(final Double aDouble) {
-            if(LOG.isWarningEnabled()) {
-                LOG.warning("Converting a double value to a long.  Possible loss of precision.");
-            }
-            return aDouble.longValue();
-        }
-    }
-
-    private static class FloatToLongFunction implements Function<Float, Long> {
-        @Override
-        public Long apply(final Float aFloat) {
-            if(LOG.isWarningEnabled()) {
-                LOG.warning("Converting a float value to a long.  Possible loss of precision.");
-            }
-            return aFloat.longValue();
-        }
     }
 }
