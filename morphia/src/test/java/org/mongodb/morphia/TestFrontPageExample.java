@@ -35,7 +35,7 @@ public class TestFrontPageExample extends TestBase {
 
     @Test
     public void testIt() {
-        getMorphia().map(Employee.class);
+        getMapper().map(Employee.class);
 
         getDatastore().save(new Employee("Mister", "GOD", null, 0));
 

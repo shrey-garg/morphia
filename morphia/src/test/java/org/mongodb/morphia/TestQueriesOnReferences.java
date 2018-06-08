@@ -10,7 +10,6 @@ import org.mongodb.morphia.query.TestQuery.ContainsPic;
 import org.mongodb.morphia.query.TestQuery.Pic;
 import org.mongodb.morphia.query.TestQuery.PicWithObjectId;
 
-@Ignore
 public class TestQueriesOnReferences extends TestBase {
     @Test
     public void testKeyExists() {

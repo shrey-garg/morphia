@@ -18,7 +18,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testMapping() {
-        getMorphia().map(ClassLevelThree.class);
+        getMapper().map(ClassLevelThree.class);
         final ClassLevelThree sp = new ClassLevelThree();
 
         //Old way

@@ -20,7 +20,7 @@ public class EnumMappingTest extends TestBase {
         entity.getMap().put("key", Foo.BAR);
         getDatastore().save(entity);
 
-        getMorphia().map(Class1.class);
+        getMapper().map(Class1.class);
 
         entity = getDatastore().find(Class1.class).get();
         final Map<String, Foo> map = entity.getMap();
@@ -43,7 +43,7 @@ public class EnumMappingTest extends TestBase {
     public void testCustomerWithArrayList() {
         getMapper().getOptions().setStoreEmpties(true);
         getMapper().getOptions().setStoreNulls(true);
-        getMorphia().map(CustomerWithArrayList.class);
+        getMapper().map(CustomerWithArrayList.class);
 
         CustomerWithArrayList customer = new CustomerWithArrayList();
 
@@ -67,7 +67,7 @@ public class EnumMappingTest extends TestBase {
     public void testCustomerWithList() {
         getMapper().getOptions().setStoreEmpties(true);
         getMapper().getOptions().setStoreNulls(true);
-        getMorphia().map(CustomerWithArrayList.class);
+        getMapper().map(CustomerWithArrayList.class);
         CustomerWithList customer = new CustomerWithList();
 
         List<WebTemplate> templates1 = new ArrayList<>();
@@ -90,7 +90,7 @@ public class EnumMappingTest extends TestBase {
     public void testEnumMapping() {
         getDatastore().getDatabase().drop();
 
-        getMorphia().map(ContainsEnum.class);
+        getMapper().map(ContainsEnum.class);
 
         getDatastore().save(new ContainsEnum());
         Assert.assertEquals(1, getDatastore().find(ContainsEnum.class).field("foo").equal(Foo.BAR)

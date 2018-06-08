@@ -119,7 +119,7 @@ final class QueryValidator {
                     if (LOG.isWarningEnabled()) {
                         LOG.warning(format("The type(s) for the query/update may be inconsistent; using an instance of type '%s' "
                                            + "for the field '%s.%s' which is declared as '%s'", val.getClass().getName(),
-                                           mf.getDeclaringClass().getName(), mf.getJavaFieldName(), mf.getType().getName()));
+                                           mf.getDeclaringClass().getClazz().getName(), mf.getJavaFieldName(), mf.getType().getName()));
                         LOG.warning("Validation warnings: \n" + failures);
                     }
                 }

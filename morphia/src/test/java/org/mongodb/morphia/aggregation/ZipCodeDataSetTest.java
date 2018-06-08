@@ -1,13 +1,10 @@
 package org.mongodb.morphia.aggregation;
 
-import com.mongodb.client.AggregateIterable;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoIterable;
 import org.bson.Document;
 import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.aggregation.zipcode.City;
@@ -112,7 +109,7 @@ public class ZipCodeDataSetTest extends TestBase {
     public void smallestAndLargestCities() throws InterruptedException, TimeoutException, IOException {
         Assume.assumeTrue(new File(MONGO_IMPORT).exists());
         installSampleData();
-        getMorphia().map(City.class, State.class);
+        getMapper().map(City.class, State.class);
         AggregationPipeline pipeline = getDatastore().createAggregation(City.class)
 
                                                      .group(

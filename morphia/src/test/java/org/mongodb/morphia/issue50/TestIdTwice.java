@@ -4,14 +4,13 @@ import org.bson.codecs.configuration.CodecConfigurationException;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.mapping.validation.ConstraintViolationException;
 import org.mongodb.morphia.testutil.TestEntity;
 
 public class TestIdTwice extends TestBase {
 
     @Test(expected = CodecConfigurationException.class)
     public final void shouldThrowExceptionIfThereIsMoreThanOneId() {
-        getMorphia().map(A.class);
+        getMapper().map(A.class);
     }
 
     public static class A extends TestEntity {

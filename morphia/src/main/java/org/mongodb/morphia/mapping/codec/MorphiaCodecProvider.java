@@ -9,6 +9,7 @@ import org.bson.codecs.pojo.Convention;
 import org.bson.codecs.pojo.DiscriminatorLookup;
 import org.bson.codecs.pojo.PojoCodec;
 import org.bson.codecs.pojo.PropertyCodecProvider;
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
 
@@ -27,8 +28,10 @@ public class MorphiaCodecProvider implements CodecProvider {
     private final List<Convention> conventions;
     private final DiscriminatorLookup discriminatorLookup;
     private final List<PropertyCodecProvider> propertyCodecProviders = new ArrayList<>();
+    private Datastore datastore;
 
-    public MorphiaCodecProvider(final Mapper mapper, final List<Convention> conventions) {
+    public MorphiaCodecProvider(final Datastore datastore, final Mapper mapper, final List<Convention> conventions) {
+        this.datastore = datastore;
         this.mapper = mapper;
         this.conventions = conventions;
         this.discriminatorLookup = new DiscriminatorLookup(this.classModels, mapper.getPackages());
@@ -44,7 +47,7 @@ public class MorphiaCodecProvider implements CodecProvider {
             if (codec == null) {
                 ClassModel<T> classModel = createClassModel(clazz, conventions);
                 discriminatorLookup.addClassModel(classModel);
-                codec = new MorphiaCodec<>(mapper, new MappedClass(classModel, mapper), classModel, registry,
+                codec = new MorphiaCodec<>(datastore, mapper, new MappedClass(classModel, mapper), classModel, registry,
                     propertyCodecProviders, discriminatorLookup);
             }
 

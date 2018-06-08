@@ -83,11 +83,10 @@ public class DatastoreImpl implements AdvancedDatastore {
      * Create a new DatastoreImpl
      *
      * @param mongoClient the connection to the MongoDB instance
-     * @param mapper      the mapper to use for this Datastore
      * @param dbName      the name of the database for this data store.
      */
-    DatastoreImpl(final MongoClient mongoClient, final Mapper mapper, final String dbName) {
-        this.mapper = mapper;
+    DatastoreImpl(final MongoClient mongoClient, final String dbName) {
+        this.mapper = new Mapper(this, mongoClient.getMongoClientOptions().getCodecRegistry());
         this.defaultWriteConcern = mongoClient.getWriteConcern();
 
         this.database = mongoClient.getDatabase(dbName)
@@ -634,9 +633,7 @@ public class DatastoreImpl implements AdvancedDatastore {
         return wc;
     }
 
-    /**
-     * @return the Mapper used by this Datastore
-     */
+    @Override
     public Mapper getMapper() {
         return mapper;
     }

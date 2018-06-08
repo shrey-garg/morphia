@@ -13,7 +13,7 @@ import java.util.List;
 public class TestModOperator extends TestBase {
     @Test
     public void mod() {
-        getMorphia().map(Inventory.class);
+        getMapper().map(Inventory.class);
         getDatastore().save(new Inventory("Flowers", 8));
         getDatastore().save(new Inventory("Candy", 2));
         getDatastore().save(new Inventory("Basketballs", 12));

@@ -10,7 +10,6 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Id;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,7 +20,7 @@ public class MapImplTest extends TestBase {
 
     @Test
     public void testEmbeddedMap() {
-        getMorphia().map(ContainsMapOfEmbeddedGoos.class, ContainsMapOfEmbeddedInterfaces.class);
+        getMapper().map(ContainsMapOfEmbeddedGoos.class, ContainsMapOfEmbeddedInterfaces.class);
         final Goo g1 = new Goo("Scott");
         final ContainsMapOfEmbeddedGoos cmoeg = new ContainsMapOfEmbeddedGoos();
         cmoeg.values.put("first", g1);
@@ -45,7 +44,7 @@ public class MapImplTest extends TestBase {
 
     @Test //@Ignore("waiting on issue 184")
     public void testEmbeddedMapUpdateOperations() {
-        getMorphia().map(ContainsMapOfEmbeddedGoos.class, ContainsMapOfEmbeddedInterfaces.class);
+        getMapper().map(ContainsMapOfEmbeddedGoos.class, ContainsMapOfEmbeddedInterfaces.class);
         final Goo g1 = new Goo("Scott");
         final Goo g2 = new Goo("Ralph");
 
@@ -70,7 +69,7 @@ public class MapImplTest extends TestBase {
 
     @Test
     public void testEmbeddedMapUpdateOperationsOnInterfaceValue() {
-        getMorphia().map(ContainsMapOfEmbeddedGoos.class, ContainsMapOfEmbeddedInterfaces.class);
+        getMapper().map(ContainsMapOfEmbeddedGoos.class, ContainsMapOfEmbeddedInterfaces.class);
         final Goo g1 = new Goo("Scott");
         final Goo g2 = new Goo("Ralph");
 
@@ -94,7 +93,7 @@ public class MapImplTest extends TestBase {
 
     @Test
     public void testEmbeddedMapWithValueInterface() {
-        getMorphia().map(ContainsMapOfEmbeddedGoos.class, ContainsMapOfEmbeddedInterfaces.class);
+        getMapper().map(ContainsMapOfEmbeddedGoos.class, ContainsMapOfEmbeddedInterfaces.class);
         final Goo g1 = new Goo("Scott");
 
         final ContainsMapOfEmbeddedInterfaces cmoei = new ContainsMapOfEmbeddedInterfaces();

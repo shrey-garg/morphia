@@ -26,3 +26,5 @@ property.  The current driver infrastructure makes that difficult to recreate.  
  it for now.  We can examine how to resurrect should the need arise. 
 1. @ConstructorArgs has been removed since the driver code supports constructor based instantiation.
 1. Migrated uses of `CodeWScope` to `CodeWithScope`
+1. `Mapper` is no longer independent from `Datastore`.  To get started, one calls one of the factory methods on `Morphia` to create a new
+ `Datastore` and the `Mapper` is retrieved from that.

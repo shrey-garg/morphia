@@ -15,7 +15,6 @@ package org.mongodb.morphia;
 
 import com.mongodb.WriteConcern;
 import com.mongodb.client.model.UpdateOptions;
-import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.entities.version.AbstractVersionedBase;
@@ -87,7 +86,7 @@ public class TestVersionAnnotation extends TestBase {
 
     @Test
     public void testCanMapAnEntityWithAnAbstractVersionedParent() {
-        getMorphia().map(VersionedChildEntity.class);
+        getMapper().map(VersionedChildEntity.class);
 
         Collection<MappedClass> mappedClasses = getMapper().getMappedClasses();
         assertThat(mappedClasses.size(), is(2));

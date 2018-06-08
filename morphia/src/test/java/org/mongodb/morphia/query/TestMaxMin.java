@@ -23,7 +23,7 @@ public class TestMaxMin extends TestBase {
     @Before
     public void setUp() {
         super.setUp();
-        getMorphia().map(IndexedEntity.class);
+        getMapper().map(IndexedEntity.class);
         getDatastore().ensureIndexes();
     }
 

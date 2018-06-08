@@ -11,22 +11,22 @@ public class VersionMisuseTest extends TestBase {
 
     @Test(expected = ConstraintViolationException.class)
     public void testInitedPrimitive() {
-        getMorphia().map(Fail1.class);
+        getMapper().map(Fail1.class);
     }
 
     @Test(expected = ConstraintViolationException.class)
     public void testInitedWrapper() {
-        getMorphia().map(Fail2.class);
+        getMapper().map(Fail2.class);
     }
 
     @Test
     public void testPrimitive() {
-        getMorphia().map(OK1.class);
+        getMapper().map(OK1.class);
     }
 
     @Test
     public void testWrapper() {
-        getMorphia().map(OK2.class);
+        getMapper().map(OK2.class);
     }
 
     public static class Fail1 extends TestEntity {

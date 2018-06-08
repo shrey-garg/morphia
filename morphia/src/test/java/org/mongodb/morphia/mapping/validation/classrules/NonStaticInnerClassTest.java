@@ -11,12 +11,12 @@ public class NonStaticInnerClassTest extends TestBase {
 
     @Test(expected = MappingException.class)
     public void testInValidInnerClass() {
-        getMorphia().map(InValid.class);
+        getMapper().map(InValid.class);
     }
 
     @Test
     public void testValidInnerClass() {
-        getMorphia().map(Valid.class);
+        getMapper().map(Valid.class);
     }
 
     static class Valid {

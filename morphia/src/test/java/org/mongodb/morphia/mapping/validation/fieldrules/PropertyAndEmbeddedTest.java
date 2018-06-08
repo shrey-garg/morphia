@@ -21,7 +21,7 @@ public class PropertyAndEmbeddedTest extends TestBase {
 
         Assert.assertTrue(e.document.contains("myFunkyR"));
 
-        getMorphia().map(E2.class);
+        getMapper().map(E2.class);
     }
 
     public static class E extends TestEntity {

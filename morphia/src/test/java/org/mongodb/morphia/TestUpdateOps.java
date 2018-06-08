@@ -158,7 +158,7 @@ public class TestUpdateOps extends TestBase {
     @Test
     @SuppressWarnings("deprecation")
     public void testAddAll() {
-        getMorphia().map(EntityLogs.class, EntityLog.class);
+        getMapper().map(EntityLogs.class, EntityLog.class);
         String uuid = "4ec6ada9-081a-424f-bee0-934c0bc4fab7";
 
         EntityLogs logs = new EntityLogs();

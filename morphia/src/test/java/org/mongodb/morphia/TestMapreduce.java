@@ -19,7 +19,6 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.aggregation.AggregationTest.Book;
 import org.mongodb.morphia.aggregation.AggregationTest.CountResult;
-import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.query.Query;

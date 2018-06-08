@@ -31,7 +31,7 @@ public class QueryForSubtypeTest extends TestBase {
     @Override
     public void setUp() {
         super.setUp();
-        jobMappedClass = new Mapper(getMongoClient().getMongoClientOptions().getCodecRegistry()).getMappedClass(Job.class);
+        jobMappedClass = getMapper().getMappedClass(Job.class);
     }
 
     @Test

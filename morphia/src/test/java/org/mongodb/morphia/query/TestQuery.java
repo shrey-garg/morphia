@@ -89,7 +89,7 @@ public class TestQuery extends TestBase {
     @Test
     @Ignore("The driver currently does not support generic types like this one.  Ignoring until that is fixed.")
     public void genericMultiKeyValueQueries() {
-        getMorphia().map(GenericKeyValue.class);
+        getMapper().map(GenericKeyValue.class);
         getDatastore().ensureIndexes(GenericKeyValue.class);
         final GenericKeyValue<String> value = new GenericKeyValue<>();
         final List<Object> keys = Arrays.asList("key1", "key2");
@@ -103,7 +103,7 @@ public class TestQuery extends TestBase {
 
     @Test
     public void multiKeyValueQueries() {
-        getMorphia().map(KeyValue.class);
+        getMapper().map(KeyValue.class);
         getDatastore().ensureIndexes(KeyValue.class);
         final KeyValue value = new KeyValue();
         final List<Object> keys = Arrays.asList("key1", "key2");
@@ -201,7 +201,7 @@ public class TestQuery extends TestBase {
     public void testCollations() {
         checkMinServerVersion(3.4);
 
-        getMorphia().map(ContainsRenamedFields.class);
+        getMapper().map(ContainsRenamedFields.class);
         getDatastore().saveMany(asList(new ContainsRenamedFields("first", "last"),
                             new ContainsRenamedFields("First", "Last")));
 
@@ -761,7 +761,7 @@ public class TestQuery extends TestBase {
     @Test
     public void testMultipleConstraintsOnOneField() {
         checkMinServerVersion(3.0);
-        getMorphia().map(ContainsPic.class);
+        getMapper().map(ContainsPic.class);
         getDatastore().ensureIndexes();
         Query<ContainsPic> query = getDatastore().find(ContainsPic.class);
         query.field("size").greaterThanOrEq(10);
@@ -1145,7 +1145,7 @@ public class TestQuery extends TestBase {
     @Test
     @Ignore("not sure why this is failing but deferring it for more important things")
     public void testTailableCursors() {
-        getMorphia().map(CappedPic.class);
+        getMapper().map(CappedPic.class);
         getDatastore().ensureCaps();
         final Query<CappedPic> query = getDatastore().find(CappedPic.class);
         final List<CappedPic> found = new ArrayList<>();
@@ -1242,7 +1242,7 @@ public class TestQuery extends TestBase {
 
     @Test
     public void testQueryUnmappedData() {
-        getMorphia().map(Class1.class);
+        getMapper().map(Class1.class);
         getDatastore().ensureIndexes(true);
 
         getDatastore().getDatabase().getCollection("user")
@@ -1551,6 +1551,7 @@ public class TestQuery extends TestBase {
     @Entity
     private static class ReferenceKeyValue {
         @Id
+        @Reference
         private ReferenceKey id;
         /**
          * The list of keys for this value.

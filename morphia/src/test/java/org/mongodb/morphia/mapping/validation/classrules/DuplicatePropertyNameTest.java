@@ -15,17 +15,17 @@ import java.util.Map;
 public class DuplicatePropertyNameTest extends TestBase {
     @Test(expected = CodecConfigurationException.class)
     public void testDuplicatedPropertyNameDifferentType() {
-        getMorphia().map(DuplicatedPropertyName2.class);
+        getMapper().map(DuplicatedPropertyName2.class);
     }
 
     @Test(expected = CodecConfigurationException.class)
     public void testDuplicatedPropertyNameSameType() {
-        getMorphia().map(DuplicatedPropertyName.class);
+        getMapper().map(DuplicatedPropertyName.class);
     }
 
     @Test(expected = ConstraintViolationException.class)
     public void testDuplicatedPropertyNameShadowedFields() {
-        getMorphia().map(Extends.class);
+        getMapper().map(Extends.class);
     }
 
     @Entity

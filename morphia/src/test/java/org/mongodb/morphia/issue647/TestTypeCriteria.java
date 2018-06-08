@@ -18,7 +18,7 @@ public class TestTypeCriteria extends TestBase {
         entity.firstName = "first_name";
         getDatastore().save(entity);
 
-        getMorphia().map(Class1.class);
+        getMapper().map(Class1.class);
 
         Query<Class1> query = getDatastore().find(Class1.class);
         query.criteria("first_name").type(Type.STRING);

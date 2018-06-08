@@ -73,8 +73,8 @@ public class MappedField {
     /**
      * @return the declaring class of the java field
      */
-    public Class getDeclaringClass() {
-        return declaringClass.getClazz();
+    public MappedClass getDeclaringClass() {
+        return declaringClass;
     }
 
     /**

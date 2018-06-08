@@ -19,7 +19,6 @@ import org.bson.codecs.EncoderContext;
 import org.junit.Test;
 import org.mongodb.morphia.mapping.codec.DocumentWriter;
 import org.mongodb.morphia.testmodel.Circle;
-import org.mongodb.morphia.testmodel.Rectangle;
 import org.mongodb.morphia.testmodel.ShapeShifter;
 
 import static org.junit.Assert.assertEquals;
@@ -28,7 +27,7 @@ public class TestInterfaces extends TestBase {
 
     @Test
     public void testDynamicInstantiation() {
-        getMorphia().map(ShapeShifter.class/*, Circle.class, Rectangle.class*/);
+        getMapper().map(ShapeShifter.class/*, Circle.class, Rectangle.class*/);
 
 /*
         final Rectangle rectangle = new Rectangle(2, 5);

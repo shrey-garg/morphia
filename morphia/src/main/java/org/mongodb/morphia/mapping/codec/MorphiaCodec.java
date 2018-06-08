@@ -21,10 +21,12 @@ import org.bson.codecs.pojo.PropertyCodecProvider;
 import org.bson.codecs.pojo.PropertyCodecRegistry;
 import org.bson.codecs.pojo.PropertyModel;
 import org.bson.types.ObjectId;
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.PrePersist;
+import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
@@ -36,20 +38,24 @@ import static org.mongodb.morphia.mapping.codec.Conversions.convert;
 
 @SuppressWarnings("unchecked")
 public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCodec<T> {
+    private final Datastore datastore;
     private final Mapper mapper;
     private final MappedClass mappedClass;
 
-    MorphiaCodec(final Mapper mapper, final MappedClass mappedClass, final ClassModel<T> classModel, final CodecRegistry registry,
-                 final List<PropertyCodecProvider> propertyCodecProviders, final DiscriminatorLookup discriminatorLookup) {
+    MorphiaCodec(final Datastore datastore, final Mapper mapper, final MappedClass mappedClass, final ClassModel<T> classModel,
+                 final CodecRegistry registry, final List<PropertyCodecProvider> propertyCodecProviders,
+                 final DiscriminatorLookup discriminatorLookup) {
         super(classModel, registry, propertyCodecProviders, discriminatorLookup);
+        this.datastore = datastore;
         this.mapper = mapper;
         this.mappedClass = mappedClass;
     }
 
-    private MorphiaCodec(final Mapper mapper, final MappedClass mappedClass, final ClassModel<T> classModel, final CodecRegistry registry,
-                         final PropertyCodecRegistry propertyCodecRegistry, final DiscriminatorLookup discriminatorLookup,
-                         final boolean specialized) {
+    private MorphiaCodec(final Datastore datastore, final Mapper mapper, final MappedClass mappedClass, final ClassModel<T> classModel,
+                         final CodecRegistry registry, final PropertyCodecRegistry propertyCodecRegistry,
+                         final DiscriminatorLookup discriminatorLookup, final boolean specialized) {
         super(classModel, registry, propertyCodecRegistry, discriminatorLookup, new ConcurrentHashMap<>(), specialized);
+        this.datastore = datastore;
         this.mapper = mapper;
         this.mappedClass = mappedClass;
     }
@@ -79,7 +85,6 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
 
     @Override
     public void encode(final BsonWriter writer, final T value, final EncoderContext encoderContext) {
-
         if (mappedClass.hasLifecycle(PostPersist.class)
             || mappedClass.hasLifecycle(PrePersist.class)
             || mapper.hasInterceptors()) {
@@ -120,19 +125,47 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
     }
 
     @Override
+    protected <S> void encodeProperty(final BsonWriter writer,
+                                      final T instance,
+                                      final EncoderContext encoderContext,
+                                      final PropertyModel<S> propertyModel) {
+        MappedField field = getMappedField(propertyModel);
+        if (field.hasAnnotation(Reference.class)) {
+            S propertyValue = propertyModel.getPropertyAccessor().get(instance);
+            if (propertyModel.shouldSerialize(propertyValue)) {
+                final ReferenceCodec referenceCodec = new ReferenceCodec(mapper, propertyModel, field);
+                referenceCodec.encode(writer, propertyValue, encoderContext);
+            }
+        } else {
+            super.encodeProperty(writer, instance, encoderContext, propertyModel);
+        }
+    }
+
+    @Override
     protected <S> void decodePropertyModel(final BsonReader reader,
                                            final DecoderContext decoderContext,
                                            final InstanceCreator<T> instanceCreator,
                                            final String name,
                                            final PropertyModel<S> propertyModel) {
-        final BsonReaderMark mark = reader.getMark();
-        try {
-            super.decodePropertyModel(reader, decoderContext, instanceCreator, name, propertyModel);
-        } catch(CodecConfigurationException e) {
-            mark.reset();
-            final Object value = mapper.getCodecRegistry().get(Object.class).decode(reader, decoderContext);
-            instanceCreator.set((S) convert(value, propertyModel.getTypeData().getType()), propertyModel);
+        MappedField field = getMappedField(propertyModel);
+        if (field.hasAnnotation(Reference.class)) {
+            final ReferenceCodec referenceCodec = new ReferenceCodec(mapper, propertyModel, field);
+            instanceCreator.set(referenceCodec.decode(reader, decoderContext), propertyModel);
+        } else {
+            final BsonReaderMark mark = reader.getMark();
+            try {
+                super.decodePropertyModel(reader, decoderContext, instanceCreator, name, propertyModel);
+            } catch (CodecConfigurationException e) {
+                mark.reset();
+                final Object value = mapper.getCodecRegistry().get(Object.class).decode(reader, decoderContext);
+                instanceCreator.set((S) convert(value, propertyModel.getTypeData().getType()), propertyModel);
+            }
         }
+    }
+
+    private <S> MappedField getMappedField(final PropertyModel<S> propertyModel) {
+        final MappedField field = mappedClass.getMappedField(propertyModel.getName());
+        return field != null ?  field : mappedClass.getMappedFieldByJavaField(propertyModel.getName());
     }
 
     public MappedClass getMappedClass() {
@@ -167,7 +200,8 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
 
         private MorphiaCodec<T> getSpecialized() {
             if (specialized == null) {
-                specialized = new MorphiaCodec<>(morphiaCodec.mapper, new MappedClass(classModel, morphiaCodec.mapper),
+                specialized = new MorphiaCodec<>(morphiaCodec.datastore,  morphiaCodec.mapper, new MappedClass(classModel, morphiaCodec
+                                                                                                                            .mapper),
                     classModel, morphiaCodec.getRegistry(), morphiaCodec.getPropertyCodecRegistry(), morphiaCodec.getDiscriminatorLookup(),
                     true);
             }

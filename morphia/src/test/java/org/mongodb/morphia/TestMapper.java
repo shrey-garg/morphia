@@ -3,10 +3,8 @@ package org.mongodb.morphia;
 
 import org.bson.codecs.Codec;
 import org.bson.codecs.EncoderContext;
-import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
@@ -20,7 +18,6 @@ import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.codec.DocumentWriter;
 
-import java.io.Serializable;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -48,9 +45,8 @@ public class TestMapper extends TestBase {
     }
 
     @Test
-    @Ignore("References are not currently supported")
     public void singleLookup() {
-        getMorphia().map(A.class);
+        getMapper().map(A.class);
 
         final MappedClass mappedClass = getMapper().getMappedClass(A.class);
         Assert.assertNotNull(mappedClass.getIdField());
@@ -69,7 +65,7 @@ public class TestMapper extends TestBase {
 
     @Test
     public void subTypes() {
-        getMorphia().map(NestedImpl.class, AnotherNested.class);
+        getMapper().map(NestedImpl.class, AnotherNested.class);
 
         Mapper mapper = getMapper();
         List<MappedClass> subTypes = mapper.getSubTypes(mapper.getMappedClass(Nested.class));

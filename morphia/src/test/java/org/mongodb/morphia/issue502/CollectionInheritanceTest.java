@@ -30,7 +30,7 @@ public class CollectionInheritanceTest extends TestBase {
     @Test
     public void testMappingBook() {
         // Mapping...
-        getMorphia().map(Book.class /* , Authors.class, Author.class */);
+        getMapper().map(Book.class /* , Authors.class, Author.class */);
 
         // Test mapping : author objects must be converted into Document (but wasn't)
         final Document dbBook = getMapper().toDocument(newBook());

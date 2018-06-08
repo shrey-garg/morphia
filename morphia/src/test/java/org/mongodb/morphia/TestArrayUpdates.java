@@ -21,7 +21,7 @@ import static java.util.Collections.singletonMap;
 public class TestArrayUpdates extends TestBase {
     @Test
     public void testStudents() {
-        getMorphia().map(Student.class);
+        getMapper().map(Student.class);
         final Datastore datastore = getDatastore();
         datastore.ensureIndexes();
 
@@ -47,7 +47,7 @@ public class TestArrayUpdates extends TestBase {
 
     @Test
     public void testUpdatesWithArrayIndexPosition() {
-        getMorphia().map(Student.class);
+        getMapper().map(Student.class);
         final Datastore datastore = getDatastore();
         datastore.ensureIndexes();
 

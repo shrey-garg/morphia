@@ -13,7 +13,7 @@ public class TestCapped extends TestBase {
     @Test
     public void testCappedEntity() {
         // given
-        getMorphia().map(CurrentStatus.class);
+        getMapper().map(CurrentStatus.class);
         getDatastore().ensureCaps();
 
         // when-then

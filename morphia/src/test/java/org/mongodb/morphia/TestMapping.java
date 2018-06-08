@@ -31,17 +31,12 @@ import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.MappingException;
 import org.mongodb.morphia.mapping.codec.DocumentWriter;
-import org.mongodb.morphia.testmodel.Article;
-import org.mongodb.morphia.testmodel.Circle;
 import org.mongodb.morphia.testmodel.RecursiveChild;
 import org.mongodb.morphia.testmodel.RecursiveParent;
-import org.mongodb.morphia.testmodel.Translation;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -62,35 +57,35 @@ public class TestMapping extends TestBase {
     @Test
     public void testBadMappings() {
         try {
-            getMorphia().map(MissingId.class);
+            getMapper().map(MissingId.class);
             fail("Validation: Missing @Id field not caught");
         } catch (MappingException e) {
             // good
         }
 
         try {
-            getMorphia().map(IdOnEmbedded.class);
+            getMapper().map(IdOnEmbedded.class);
             fail("Validation: @Id field on @Embedded not caught");
         } catch (MappingException e) {
             // good
         }
 
         try {
-            getMorphia().map(RenamedEmbedded.class);
+            getMapper().map(RenamedEmbedded.class);
             fail("Validation: @Embedded(\"name\") not caught on Class");
         } catch (MappingException e) {
             // good
         }
 
         try {
-            getMorphia().map(MissingIdRenamed.class);
+            getMapper().map(MissingIdRenamed.class);
             fail("Validation: Missing @Id field not not caught");
         } catch (MappingException e) {
             // good
         }
 
         try {
-            getMorphia().map(NonStaticInnerClass.class);
+            getMapper().map(NonStaticInnerClass.class);
             fail("Validation: Non-static inner class allowed");
         } catch (MappingException e) {
             // good
@@ -99,12 +94,12 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testBaseEntityValidity() {
-        getMorphia().map(UsesBaseEntity.class);
+        getMapper().map(UsesBaseEntity.class);
     }
 
     @Test
     public void testByteArrayMapping() {
-        getMorphia().map(ContainsByteArray.class);
+        getMapper().map(ContainsByteArray.class);
         final Key<ContainsByteArray> savedKey = getDatastore().save(new ContainsByteArray());
         final ContainsByteArray loaded = getDatastore().get(ContainsByteArray.class, savedKey.getId());
         assertEquals(new String((new ContainsByteArray()).bytes), new String(loaded.bytes));
@@ -113,7 +108,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testCollectionMapping() {
-        getMorphia().map(ContainsCollection.class);
+        getMapper().map(ContainsCollection.class);
 
         final ContainsCollection entity = new ContainsCollection();
         final Key<ContainsCollection> savedKey = getDatastore().save(entity);
@@ -156,7 +151,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testEmbeddedArrayElementHasNoClassname() {
-        getMorphia().map(ContainsEmbeddedArray.class);
+        getMapper().map(ContainsEmbeddedArray.class);
         final ContainsEmbeddedArray cea = new ContainsEmbeddedArray();
         cea.res = new RenamedEmbedded[]{new RenamedEmbedded()};
 
@@ -166,14 +161,14 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testEmbeddedDocument() {
-        getMorphia().map(ContainsDocument.class);
+        getMapper().map(ContainsDocument.class);
         getDatastore().save(new ContainsDocument());
         assertNotNull(getDatastore().find(ContainsDocument.class).get());
     }
 
     @Test
     public void testEmbeddedEntity() {
-        getMorphia().map(ContainsEmbeddedEntity.class);
+        getMapper().map(ContainsEmbeddedEntity.class);
         getDatastore().save(new ContainsEmbeddedEntity());
         final ContainsEmbeddedEntity ceeLoaded = getDatastore().find(ContainsEmbeddedEntity.class).get();
         assertNotNull(ceeLoaded);
@@ -185,7 +180,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testEmbeddedEntityDocumentHasNoClassname() {
-        getMorphia().map(ContainsEmbeddedEntity.class);
+        getMapper().map(ContainsEmbeddedEntity.class);
         final ContainsEmbeddedEntity cee = new ContainsEmbeddedEntity();
         cee.cil = new ContainsIntegerList();
         cee.cil.intList = Collections.singletonList(1);
@@ -215,7 +210,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testFinalField() {
-        getMorphia().map(ContainsFinalField.class);
+        getMapper().map(ContainsFinalField.class);
         final Key<ContainsFinalField> savedKey = getDatastore().save(new ContainsFinalField("blah"));
         final ContainsFinalField loaded = getDatastore().get(ContainsFinalField.class, savedKey.getId());
         assertNotNull(loaded);
@@ -226,7 +221,7 @@ public class TestMapping extends TestBase {
     @Test
     public void testFinalFieldNotPersisted() {
         getMapper().getOptions().setIgnoreFinals(true);
-        getMorphia().map(ContainsFinalField.class);
+        getMapper().map(ContainsFinalField.class);
         final ContainsFinalField blah = new ContainsFinalField("blah");
         blah.setColor(System.currentTimeMillis() + "");
         final Key<ContainsFinalField> savedKey = getDatastore().save(blah);
@@ -238,7 +233,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testFinalIdField() {
-        getMorphia().map(HasFinalFieldId.class);
+        getMapper().map(HasFinalFieldId.class);
         final Key<HasFinalFieldId> savedKey = getDatastore().save(new HasFinalFieldId(12));
         final HasFinalFieldId loaded = getDatastore().get(HasFinalFieldId.class, savedKey.getId());
         assertNotNull(loaded);
@@ -265,7 +260,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testIdFieldWithUnderscore() {
-        getMorphia().map(StrangelyNamedIdField.class);
+        getMapper().map(StrangelyNamedIdField.class);
     }
 
     @Test
@@ -341,7 +336,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testLongArrayMapping() {
-        getMorphia().map(ContainsLongAndStringArray.class);
+        getMapper().map(ContainsLongAndStringArray.class);
         getDatastore().save(new ContainsLongAndStringArray());
         ContainsLongAndStringArray loaded = getDatastore().find(ContainsLongAndStringArray.class).get();
         assertArrayEquals(loaded.longs, (new ContainsLongAndStringArray()).longs);
@@ -399,7 +394,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testObjectIdKeyedMap() {
-        getMorphia().map(ContainsObjectIdKeyMap.class);
+        getMapper().map(ContainsObjectIdKeyMap.class);
         final ContainsObjectIdKeyMap map = new ContainsObjectIdKeyMap();
         final ObjectId o1 = new ObjectId("111111111111111111111111");
         final ObjectId o2 = new ObjectId("222222222222222222222222");
@@ -458,7 +453,7 @@ public class TestMapping extends TestBase {
     public void testRecursiveReference() {
         final MongoCollection<Document> stuff = getDatabase().getCollection("stuff");
 
-        getMorphia().map(RecursiveParent.class, RecursiveChild.class);
+        getMapper().map(RecursiveParent.class, RecursiveChild.class);
 
         final RecursiveParent parent = new RecursiveParent();
         final Document parentDocument = toDocument(parent);
@@ -502,7 +497,7 @@ public class TestMapping extends TestBase {
     @Test
     @Ignore("@Serialized might be removed altogether")
     public void testSerializedMapping() {
-        getMorphia().map(ContainsSerializedData.class);
+        getMapper().map(ContainsSerializedData.class);
         final Key<ContainsSerializedData> savedKey = getDatastore().save(new ContainsSerializedData());
         final ContainsSerializedData loaded = getDatastore().get(ContainsSerializedData.class, savedKey.getId());
         assertNotNull(loaded.data);
@@ -525,7 +520,7 @@ public class TestMapping extends TestBase {
 
     @Test
     public void testUuidId() {
-        getMorphia().map(ContainsUuidId.class);
+        getMapper().map(ContainsUuidId.class);
         final ContainsUuidId uuidId = new ContainsUuidId();
         final UUID before = uuidId.id;
         getDatastore().save(uuidId);

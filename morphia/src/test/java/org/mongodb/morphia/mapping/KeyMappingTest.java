@@ -15,7 +15,7 @@ import java.util.List;
 public class KeyMappingTest extends TestBase {
     @Test
     public void keyMapping() {
-        getMorphia().map(User.class, Channel.class);
+        getMapper().map(User.class, Channel.class);
         insertData();
 
         final Datastore datastore = getDatastore();

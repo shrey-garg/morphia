@@ -38,8 +38,6 @@ import org.mongodb.morphia.entities.UniqueIndexOnValue;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.utils.IndexType;
 
-import java.util.List;
-
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -51,13 +49,13 @@ public class TestIndexed extends TestBase {
     @Override
     public void setUp() {
         super.setUp();
-        getMorphia().map(UniqueIndexOnValue.class, IndexOnValue.class, NamedIndexOnValue.class);
+        getMapper().map(UniqueIndexOnValue.class, IndexOnValue.class, NamedIndexOnValue.class);
     }
 
     @Test
     public void shouldNotCreateAnIndexWhenAnIndexedEntityIsMarkedAsNotSaved() {
         // given
-        getMorphia().map(IndexOnValue.class, NoIndexes.class);
+        getMapper().map(IndexOnValue.class, NoIndexes.class);
         Datastore ds = getDatastore();
 
         // when
@@ -72,7 +70,7 @@ public class TestIndexed extends TestBase {
 
     @Test
     public void shouldThrowExceptionWhenAddingADuplicateValueForAUniqueIndex() {
-        getMorphia().map(UniqueIndexOnValue.class);
+        getMapper().map(UniqueIndexOnValue.class);
         getDatastore().ensureIndexes();
         long value = 7L;
 
@@ -110,7 +108,7 @@ public class TestIndexed extends TestBase {
 
     @Test
     public void testCanCreate2dSphereIndexes() {
-        getMorphia().map(Place.class);
+        getMapper().map(Place.class);
 
         getDatastore().ensureIndexes();
 
@@ -121,7 +119,7 @@ public class TestIndexed extends TestBase {
 
     @Test
     public void testCanCreate2dSphereIndexesOnLegacyCoordinatePairs() {
-        getMorphia().map(LegacyPlace.class);
+        getMapper().map(LegacyPlace.class);
         getDatastore().ensureIndexes();
         assertThat(getDatastore().getCollection(LegacyPlace.class).listIndexes(), hasIndexNamed("location_2dsphere"));
     }

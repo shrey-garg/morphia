@@ -25,7 +25,7 @@ public class TestTextSearching extends TestBase {
 
     @Test
     public void testTextSearch() {
-        getMorphia().map(Greeting.class);
+        getMapper().map(Greeting.class);
         getDatastore().ensureIndexes();
 
         getDatastore().save(new Greeting("good morning", "english"));
@@ -74,7 +74,7 @@ public class TestTextSearching extends TestBase {
 
     @Test
     public void testTextSearchSorting() {
-        getMorphia().map(Book.class);
+        getMapper().map(Book.class);
         getDatastore().ensureIndexes();
 
         getDatastore().saveMany(asList(new Book("The Banquet", "Dante"),
@@ -93,7 +93,7 @@ public class TestTextSearching extends TestBase {
 
     @Test
     public void testTextSearchValidationFailed() {
-        getMorphia().map(Book.class);
+        getMapper().map(Book.class);
         getDatastore().ensureIndexes();
 
         getDatastore().saveMany(asList(new Book("The Banquet", "Dante"),
@@ -112,7 +112,7 @@ public class TestTextSearching extends TestBase {
 
     @Test
     public void testTextSearchWithMeta() {
-        getMorphia().map(Book.class);
+        getMapper().map(Book.class);
         getDatastore().ensureIndexes();
 
         getDatastore().saveMany(asList(new Book("The Banquet", "Dante"),

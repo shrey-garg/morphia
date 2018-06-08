@@ -14,7 +14,6 @@ import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.testutil.TestEntity;
 import org.slf4j.Logger;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -122,8 +121,8 @@ public class QueryInTest extends TestBase {
 
     @Test
     public void testMapping() {
-        getMorphia().map(HasRefs.class);
-        getMorphia().map(ReferencedEntity.class);
+        getMapper().map(HasRefs.class);
+        getMapper().map(ReferencedEntity.class);
     }
 
     @Test

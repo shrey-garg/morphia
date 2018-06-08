@@ -6,6 +6,7 @@ import org.bson.codecs.Codec;
 import org.bson.codecs.EncoderContext;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.ClassModel;
+import org.mongodb.morphia.DatastoreImpl;
 import org.mongodb.morphia.EntityInterceptor;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.logging.Logger;
@@ -70,24 +71,27 @@ public class Mapper {
     //A general cache of instances of classes; used by MappedClass for EntityListener(s)
     private final Map<Class, Object> instanceCache = new ConcurrentHashMap();
     private CodecRegistry codecRegistry;
+    private DatastoreImpl datastore;
     private MapperOptions opts;
     private final Set<String> packages = new HashSet<>();
 
-    public Mapper(final CodecRegistry codecRegistry) {
-        this(codecRegistry, new MapperOptions());
+    public Mapper(final DatastoreImpl datastore, final CodecRegistry codecRegistry) {
+        this(datastore, codecRegistry, new MapperOptions());
     }
 
     /**
      * Creates a Mapper with the given options.
      *
+     * @param datastore
      * @param opts the options to use
      */
-    public Mapper(final CodecRegistry codecRegistry, final MapperOptions opts) {
+    Mapper(final DatastoreImpl datastore, final CodecRegistry codecRegistry, final MapperOptions opts) {
+        this.datastore = datastore;
         this.opts = opts;
-        final MorphiaCodecProvider codecProvider = new MorphiaCodecProvider(this, singletonList(new MorphiaConvention(opts)));
+        final MorphiaCodecProvider codecProvider = new MorphiaCodecProvider(datastore, this, singletonList(new MorphiaConvention(opts)));
         final MorphiaTypesCodecProvider typesCodecProvider = new MorphiaTypesCodecProvider(this);
 
-        this.codecRegistry = fromRegistries(fromProviders(new MorphiaShortCutProvider(codecProvider)),
+        this.codecRegistry = fromRegistries(fromProviders(new MorphiaShortCutProvider(this, codecProvider)),
             new PrimitiveCodecProvider(codecRegistry),
             codecRegistry,
             fromProviders(new EnumCodecProvider(), typesCodecProvider, codecProvider));
@@ -389,8 +393,12 @@ public class Mapper {
         return writer.getRoot();
     }
 
+    public <T> boolean isMapped(final Class<T> clazz) {
+        return mappedClasses.get(clazz) != null;
+    }
+
     public <T> boolean isMappable(final Class<T> clazz) {
-        if (/*clazz.isEnum() || */clazz.getPackage() == null) {
+        if (clazz.isEnum() || clazz.getPackage() == null) {
             return false;
         }
         for (String restrictedPackage : restrictedPackages) {

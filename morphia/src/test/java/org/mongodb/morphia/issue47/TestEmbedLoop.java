@@ -16,7 +16,7 @@ public class TestEmbedLoop extends TestBase {
     @Ignore
     public void testCircularRefs() {
 
-        getMorphia().map(A.class);
+        getMapper().map(A.class);
 
         A a = new A();
         a.b = new B();

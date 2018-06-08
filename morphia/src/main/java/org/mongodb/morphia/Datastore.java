@@ -21,6 +21,7 @@ import org.mongodb.morphia.annotations.Indexed;
 import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.annotations.Text;
 import org.mongodb.morphia.annotations.Validation;
+import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.QueryFactory;
 import org.mongodb.morphia.query.UpdateOperations;
@@ -477,6 +478,11 @@ public interface Datastore {
      * @return the query
      */
     <T> Query<T> queryByExample(T example);
+
+    /**
+     * @return the Mapper used by this Datastore
+     */
+    Mapper getMapper();
 
     /**
      * Saves the entities (Objects) and updates the @Id field

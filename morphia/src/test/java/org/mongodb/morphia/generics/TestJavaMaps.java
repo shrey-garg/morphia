@@ -5,7 +5,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.TestBase;
-import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Property;
@@ -21,7 +20,7 @@ import static org.junit.Assert.assertNull;
 public class TestJavaMaps extends TestBase {
     @Test
     public void mapperTest() {
-        getMorphia().map(Employee.class);
+        getMapper().map(Employee.class);
 
         for (boolean nulls : new boolean[]{true, false}) {
             for (boolean empties : new boolean[]{true, false}) {
@@ -64,7 +63,7 @@ public class TestJavaMaps extends TestBase {
 
     @Test
     public void testKeyOrdering() {
-        getMorphia().map(LinkedHashMapTestEntity.class);
+        getMapper().map(LinkedHashMapTestEntity.class);
         final LinkedHashMapTestEntity expectedEntity = new LinkedHashMapTestEntity();
         for (int i = 100; i >= 0; i--) {
             expectedEntity.getLinkedHashMap().put(i, "a" + i);

@@ -19,7 +19,7 @@ public class CollectionOfValuesTest extends TestBase {
 
     @Test
     public void testCity() {
-        getMorphia().map(City.class);
+        getMapper().map(City.class);
 
         City city = new City();
         city.name = "My city";
@@ -41,7 +41,7 @@ public class CollectionOfValuesTest extends TestBase {
 
     @Test
     public void testListOfListMapping() {
-        getMorphia().map(ContainsListOfList.class);
+        getMapper().map(ContainsListOfList.class);
         getDatastore().deleteMany(getDatastore().find(ContainsListOfList.class));
         final ContainsListOfList entity = new ContainsListOfList();
 
@@ -70,7 +70,7 @@ public class CollectionOfValuesTest extends TestBase {
 
     @Test
     public void testTwoDimensionalArrayMapping() {
-        getMorphia().map(ContainsTwoDimensionalArray.class);
+        getMapper().map(ContainsTwoDimensionalArray.class);
         final ContainsTwoDimensionalArray entity = new ContainsTwoDimensionalArray();
         entity.oneDimArray = "Joseph".getBytes();
         entity.twoDimArray = new byte[][]{"Joseph".getBytes(), "uwe".getBytes()};

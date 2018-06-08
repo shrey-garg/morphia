@@ -12,7 +12,7 @@ import org.mongodb.morphia.annotations.Id;
 public class TestIssue463 extends TestBase {
     @Test
     public void save() {
-        getMorphia().map(Class1.class, Class2.class);
+        getMapper().map(Class1.class, Class2.class);
 
         final Class2 class2 = new Class2();
         class2.setId(new ObjectId());

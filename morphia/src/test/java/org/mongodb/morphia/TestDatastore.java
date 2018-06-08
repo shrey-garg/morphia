@@ -168,7 +168,7 @@ public class TestDatastore extends TestBase {
 
     @Test
     public void testGet() {
-        getMorphia().map(FacebookUser.class);
+        getMapper().map(FacebookUser.class);
         List<FacebookUser> fbUsers = new ArrayList<>();
         fbUsers.add(new FacebookUser(1, "user 1"));
         fbUsers.add(new FacebookUser(2, "user 2"));
@@ -232,17 +232,17 @@ public class TestDatastore extends TestBase {
 
     @Test
     public void testMorphiaDS() {
-        new Morphia(getMongoClient()).createDatastore("test");
+        Morphia.createDatastore(getMongoClient(), "test");
     }
 
     @Test
     public void testMultipleDatabasesSingleThreaded() {
-        getMorphia().map(FacebookUser.class);
+        getMapper().map(FacebookUser.class);
         getMongoClient().dropDatabase("db1");
         getMongoClient().dropDatabase("db2");
 
-        final Datastore ds1 = getMorphia().createDatastore("db1");
-        final Datastore ds2 = getMorphia().createDatastore("db2");
+        final Datastore ds1 = Morphia.createDatastore("db1");
+        final Datastore ds2 = Morphia.createDatastore("db2");
 
         final FacebookUser db1Friend = new FacebookUser(3, "DB1 FaceBook Friend");
         ds1.save(db1Friend);

@@ -1,8 +1,6 @@
 package org.mongodb.morphia.optimisticlocks;
 
 
-import com.mongodb.client.model.FindOneAndUpdateOptions;
-import com.mongodb.client.model.ReturnDocument;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
@@ -25,7 +23,7 @@ public class VersionTest extends TestBase {
 
     @Test(expected = ConcurrentModificationException.class)
     public void testConcurrentModDetection() {
-        getMorphia().map(ALongPrimitive.class);
+        getMapper().map(ALongPrimitive.class);
 
         final ALongPrimitive a = new ALongPrimitive();
         Assert.assertEquals(0, a.version);
@@ -63,7 +61,7 @@ public class VersionTest extends TestBase {
 
     @Test(expected = ConstraintViolationException.class)
     public void testInvalidVersionUse() {
-        getMorphia().map(InvalidVersionUse.class);
+        getMapper().map(InvalidVersionUse.class);
     }
 
     @Test
@@ -74,7 +72,7 @@ public class VersionTest extends TestBase {
 
     @Test
     public void testVersionInHashcode() {
-        getMorphia().mapPackage("com.example");
+        getMapper().mapPackage("com.example");
 
         final VersionInHashcode model = new VersionInHashcode();
         model.data = "whatever";

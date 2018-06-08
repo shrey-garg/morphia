@@ -22,7 +22,7 @@ public class TestExpireAfterSeconds extends TestBase {
 
     @Test
     public void testClassAnnotation() {
-        getMorphia().map(ClassAnnotation.class);
+        getMapper().map(ClassAnnotation.class);
         getDatastore().ensureIndexes();
 
         getDatastore().save(new ClassAnnotation());
@@ -46,7 +46,7 @@ public class TestExpireAfterSeconds extends TestBase {
 
     @Test
     public void testIndexedField() {
-        getMorphia().map(HasExpiryField.class);
+        getMapper().map(HasExpiryField.class);
         getDatastore().ensureIndexes();
 
         getDatastore().save(new HasExpiryField());

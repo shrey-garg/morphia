@@ -28,7 +28,7 @@ public class TestIndexCollections extends TestBase {
     public void testEmbedded() {
         AdvancedDatastore ads = getAds();
         MongoDatabase db = getDatabase();
-        getMorphia().map(HasEmbeddedIndex.class);
+        getMapper().map(HasEmbeddedIndex.class);
         ads.ensureIndexes();
 
 //        ads.ensureIndexes("b_2", HasEmbeddedIndex.class);

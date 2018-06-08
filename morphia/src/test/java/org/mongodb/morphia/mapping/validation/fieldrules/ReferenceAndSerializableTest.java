@@ -11,7 +11,7 @@ import org.mongodb.morphia.testutil.TestEntity;
 public class ReferenceAndSerializableTest extends TestBase {
     @Test(expected = ConstraintViolationException.class)
     public void testCheck() {
-        getMorphia().map(E.class);
+        getMapper().map(E.class);
     }
 
     public static class R extends TestEntity {

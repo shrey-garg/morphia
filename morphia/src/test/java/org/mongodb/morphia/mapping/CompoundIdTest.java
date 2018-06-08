@@ -12,8 +12,6 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.annotations.Version;
 
-import java.io.Serializable;
-
 
 public class CompoundIdTest extends TestBase {
 
@@ -57,7 +55,7 @@ public class CompoundIdTest extends TestBase {
 
     @Test
     public void testReference() {
-        getMorphia().map(CompoundIdEntity.class, CompoundId.class);
+        getMapper().map(CompoundIdEntity.class, CompoundId.class);
         getDatastore().getCollection(CompoundIdEntity.class).drop();
 
         final CompoundIdEntity sibling = new CompoundIdEntity();

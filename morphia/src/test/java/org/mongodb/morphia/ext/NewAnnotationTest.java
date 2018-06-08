@@ -21,7 +21,6 @@ import org.junit.Test;
 import org.mongodb.morphia.EntityInterceptor;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Id;
-import org.mongodb.morphia.annotations.PrePersist;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
@@ -37,7 +36,7 @@ public class NewAnnotationTest extends TestBase {
     @Test
     public void testIt() {
         getMapper().addInterceptor(new ToLowercaseHelper());
-        getMorphia().map(User.class);
+        getMapper().map(User.class);
         final User u = new User();
         u.email = "ScottHernandez@gmail.com";
 

@@ -2,6 +2,7 @@ package org.mongodb.morphia;
 
 import org.junit.Test;
 import org.mongodb.morphia.mapping.MappedClass;
+import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.testmappackage.AbstractBaseClass;
 import org.mongodb.morphia.testmappackage.ClassWithoutEntityAnnotation;
 import org.mongodb.morphia.testmappackage.SimpleEntity;
@@ -12,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -22,12 +22,13 @@ public class MorphiaTest extends TestBase {
     @Test
     public void testSubPackagesMapping() {
         // when
-        final Morphia morphia = getMorphia();
-        morphia.getMapper().getOptions().setMapSubPackages(true);
-        morphia.mapPackage("org.mongodb.morphia.testmappackage");
+        final Datastore datastore = Morphia.createDatastore("subpackage");
+        final Mapper mapper = datastore.getMapper();
+        mapper.getOptions().setMapSubPackages(true);
+        mapper.mapPackage("org.mongodb.morphia.testmappackage");
 
         // then
-        Collection<MappedClass> mappedClasses = morphia.getMapper().getMappedClasses();
+        Collection<MappedClass> mappedClasses = mapper.getMappedClasses();
         assertThat(mappedClasses.stream().map(c->c.getClassModel().getName()).collect(Collectors.toList()).toString(),
             mappedClasses.size(), is(5));
         Collection<Class<?>> classes = new ArrayList<>();

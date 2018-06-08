@@ -56,7 +56,7 @@ public class TestDocumentValidation extends TestBase {
 
     @Test
     public void createValidation() {
-        getMorphia().map(DocumentValidation.class);
+        getMapper().map(DocumentValidation.class);
         getDatastore().enableDocumentValidation();
         assertEquals(Document.parse(DocumentValidation.class.getAnnotation(Validation.class).value()), getValidator());
 
@@ -87,7 +87,7 @@ public class TestDocumentValidation extends TestBase {
             assertTrue(e.getMessage().contains("Document failed validation"));
         }
 
-        getMorphia().map(DocumentValidation.class);
+        getMapper().map(DocumentValidation.class);
         getDatastore().enableDocumentValidation();
         assertEquals(Document.parse(DocumentValidation.class.getAnnotation(Validation.class).value()), getValidator());
 
@@ -119,7 +119,7 @@ public class TestDocumentValidation extends TestBase {
     @Test
     public void validationDocuments() {
         Document validator = Document.parse("{ jelly : { $ne : 'rhubarb' } }");
-        getMorphia().map(DocumentValidation.class);
+        getMapper().map(DocumentValidation.class);
         MappedClass mappedClass = getMapper().getMappedClass(DocumentValidation.class);
 
         for (ValidationLevel level : EnumSet.allOf(ValidationLevel.class)) {
@@ -131,7 +131,7 @@ public class TestDocumentValidation extends TestBase {
 
     @Test
     public void findAndModify() {
-        getMorphia().map(DocumentValidation.class);
+        getMapper().map(DocumentValidation.class);
         getDatastore().enableDocumentValidation();
 
         getDatastore().save(new DocumentValidation("Harold", 100, new Date()));
@@ -158,7 +158,7 @@ public class TestDocumentValidation extends TestBase {
 
     @Test
     public void update() {
-        getMorphia().map(DocumentValidation.class);
+        getMapper().map(DocumentValidation.class);
         getDatastore().enableDocumentValidation();
 
         getDatastore().save(new DocumentValidation("Harold", 100, new Date()));
@@ -185,7 +185,7 @@ public class TestDocumentValidation extends TestBase {
 
     @Test
     public void save() {
-        getMorphia().map(DocumentValidation.class);
+        getMapper().map(DocumentValidation.class);
         getDatastore().enableDocumentValidation();
 
         try {
@@ -224,7 +224,7 @@ public class TestDocumentValidation extends TestBase {
 
     @Test
     public void saveToNewCollection() {
-        getMorphia().map(DocumentValidation.class);
+        getMapper().map(DocumentValidation.class);
         final Document validator = Document.parse("{ number : { $gt : 10 } }");
         String collection = "newdocs";
         addValidation(validator, collection);
@@ -247,7 +247,7 @@ public class TestDocumentValidation extends TestBase {
 
     @Test
     public void insert() {
-        getMorphia().map(DocumentValidation.class);
+        getMapper().map(DocumentValidation.class);
         getDatastore().enableDocumentValidation();
 
         try {

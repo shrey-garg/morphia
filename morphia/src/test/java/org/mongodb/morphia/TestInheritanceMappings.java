@@ -40,12 +40,12 @@ public class TestInheritanceMappings extends TestBase {
     @Override
     public void setUp() {
         super.setUp();
-        getMorphia().map(Car.class, AbstractVehicle.class, FlyingCar.class);
+        getMapper().map(Car.class, AbstractVehicle.class, FlyingCar.class);
     }
 
     @Test(expected = ConstraintViolationException.class)
     public void testMapEntity() {
-        getMorphia().map(MapLike.class);
+        getMapper().map(MapLike.class);
         MapLike m = new MapLike();
         m.put("Name", "Scott");
         getDatastore().save(m);
@@ -61,7 +61,7 @@ public class TestInheritanceMappings extends TestBase {
 
     @Test
     public void testParamEntity() {
-        getMorphia().map(ParameterizedEntity.class);
+        getMapper().map(ParameterizedEntity.class);
         ParameterizedEntity c = new ParameterizedEntity();
         c.setId("foo");
         c.b = "eh";
@@ -80,7 +80,7 @@ public class TestInheritanceMappings extends TestBase {
 
     @Test
     public void testParamIdEntity() {
-        getMorphia().map(ParameterizedIdEntity.class);
+        getMapper().map(ParameterizedIdEntity.class);
         ParameterizedIdEntity c = new ParameterizedIdEntity();
         c.setId("foo");
         getDatastore().save(c);
@@ -93,7 +93,7 @@ public class TestInheritanceMappings extends TestBase {
 
     @Test
     public void testParamIdEntity2() {
-        getMorphia().map(ParameterizedIdEntity2.class);
+        getMapper().map(ParameterizedIdEntity2.class);
         ParameterizedIdEntity2 c = new ParameterizedIdEntity2();
         c.setId("foo");
         getDatastore().save(c);

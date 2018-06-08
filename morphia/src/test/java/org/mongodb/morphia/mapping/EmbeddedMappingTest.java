@@ -32,13 +32,12 @@ import org.mongodb.morphia.annotations.Indexes;
 import org.mongodb.morphia.query.ValidationException;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class EmbeddedMappingTest extends TestBase {
     @Test
     public void mapGenericEmbeds() {
-        getMorphia().map(AuditEntry.class, Delta.class);
+        getMapper().map(AuditEntry.class, Delta.class);
 
         final AuditEntry entry = new AuditEntry();
 
@@ -59,7 +58,7 @@ public class EmbeddedMappingTest extends TestBase {
 
     @Test
     public void testNestedInterfaces() {
-        getMorphia().map(WithNested.class, NestedImpl.class);
+        getMapper().map(WithNested.class, NestedImpl.class);
         getDatastore().ensureIndexes();
 
         WithNested nested = new WithNested();
@@ -91,7 +90,7 @@ public class EmbeddedMappingTest extends TestBase {
 
     @Test
     public void validateNestedInterfaces() {
-        getMorphia().map(WithNestedValidated.class, Nested.class, NestedImpl.class, AnotherNested.class);
+        getMapper().map(WithNestedValidated.class, Nested.class, NestedImpl.class, AnotherNested.class);
         try {
             getDatastore().ensureIndexes();
         } catch (MappingException e) {

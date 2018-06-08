@@ -47,7 +47,7 @@ public class TestJavaLists extends TestBase {
 
     @Test
     public void mapperTest() {
-        getMorphia().map(Employee.class);
+        getMapper().map(Employee.class);
 
         for (boolean nulls : new boolean[]{true, false}) {
             for (boolean empties : new boolean[]{true, false}) {

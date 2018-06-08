@@ -10,15 +10,17 @@ import org.mongodb.morphia.mapping.codec.MorphiaCodecProvider;
 import java.lang.annotation.Annotation;
 
 class MorphiaShortCutProvider implements CodecProvider {
+    private Mapper mapper;
     private MorphiaCodecProvider codecProvider;
 
-    MorphiaShortCutProvider(final MorphiaCodecProvider codecProvider) {
+    MorphiaShortCutProvider(final Mapper mapper, final MorphiaCodecProvider codecProvider) {
+        this.mapper = mapper;
         this.codecProvider = codecProvider;
     }
 
     @Override
     public <T> Codec<T> get(final Class<T> clazz, final CodecRegistry registry) {
-        return hasAnnotation(clazz, Entity.class) || hasAnnotation(clazz, Embedded.class)
+        return hasAnnotation(clazz, Entity.class) || hasAnnotation(clazz, Embedded.class) || mapper.isMapped(clazz)
                ? codecProvider.get(clazz, registry)
                : null;
     }

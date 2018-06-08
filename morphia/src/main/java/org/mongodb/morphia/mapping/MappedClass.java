@@ -416,7 +416,6 @@ public class MappedClass {
     /**
      * Update mappings based on fields/annotations.
      */
-    // TODO: Remove this and make these fields dynamic or auto-set some other way
     public void update() {
         embeddedAn = getAnnotation(Embedded.class);
         entityAn = getAnnotation(Entity.class);

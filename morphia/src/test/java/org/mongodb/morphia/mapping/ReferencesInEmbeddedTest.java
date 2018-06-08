@@ -28,8 +28,8 @@ public class ReferencesInEmbeddedTest extends TestBase {
 
     @Test
     public void testMapping() {
-        getMorphia().map(Container.class);
-        getMorphia().map(ReferencedEntity.class);
+        getMapper().map(Container.class);
+        getMapper().map(ReferencedEntity.class);
     }
 
     @Test

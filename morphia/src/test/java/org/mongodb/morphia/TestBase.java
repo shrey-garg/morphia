@@ -2,7 +2,6 @@ package org.mongodb.morphia;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
-import com.mongodb.client.ListIndexesIterable;
 import com.mongodb.client.MongoDatabase;
 import org.bson.BsonDocumentReader;
 import org.bson.Document;
@@ -13,14 +12,12 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.mongodb.morphia.mapping.Mapper;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public abstract class TestBase {
     protected static final String TEST_DB_NAME = "morphia_test";
     private final MongoClient mongoClient;
-    private final Morphia morphia;
     private final Datastore ds;
 
     protected TestBase() {
@@ -29,8 +26,7 @@ public abstract class TestBase {
 
     protected TestBase(final MongoClient client) {
         mongoClient = client;
-        morphia = new Morphia(getMongoClient());
-        ds = getMorphia().createDatastore(TEST_DB_NAME);
+        ds = Morphia.createDatastore(mongoClient, TEST_DB_NAME);
     }
 
     static String getMongoURI() {
@@ -51,10 +47,6 @@ public abstract class TestBase {
 
     protected MongoClient getMongoClient() {
         return mongoClient;
-    }
-
-    public Morphia getMorphia() {
-        return morphia;
     }
 
     boolean isReplicaSet() {
@@ -118,22 +110,22 @@ public abstract class TestBase {
     }
 
     Document toDocument(Object entity) {
-        return getMorphia().getMapper().toDocument(entity);
+        return getDatastore().getMapper().toDocument(entity);
     }
 
     <T> T fromDocument(final Class<T> clazz,
                        final Document document) {
-        final CodecRegistry codecRegistry = getMorphia().getMapper().getCodecRegistry();
+        final CodecRegistry codecRegistry = getDatastore().getMapper().getCodecRegistry();
         return codecRegistry.get(clazz)
                      .decode(new BsonDocumentReader(document.toBsonDocument(Document.class, codecRegistry)),
                          DecoderContext.builder().build());
     }
 
     protected CodecRegistry getCodecRegistry() {
-        return getMorphia().getMapper().getCodecRegistry();
+        return getDatastore().getMapper().getCodecRegistry();
     }
 
     protected Mapper getMapper() {
-        return getMorphia().getMapper();
+        return getDatastore().getMapper();
     }
 }
