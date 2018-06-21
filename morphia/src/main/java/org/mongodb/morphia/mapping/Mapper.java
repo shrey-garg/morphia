@@ -9,6 +9,7 @@ import org.bson.codecs.pojo.ClassModel;
 import org.mongodb.morphia.DatastoreImpl;
 import org.mongodb.morphia.EntityInterceptor;
 import org.mongodb.morphia.Key;
+import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.logging.Logger;
 import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 import org.mongodb.morphia.mapping.codec.DocumentWriter;
@@ -17,6 +18,7 @@ import org.mongodb.morphia.mapping.codec.MorphiaCodec;
 import org.mongodb.morphia.mapping.codec.MorphiaCodecProvider;
 import org.mongodb.morphia.mapping.codec.MorphiaTypesCodecProvider;
 import org.mongodb.morphia.mapping.codec.PrimitiveCodecProvider;
+import org.mongodb.morphia.mapping.codec.ReferenceHandler;
 import org.mongodb.morphia.utils.ReflectionUtils;
 
 import java.util.ArrayList;
@@ -87,8 +89,10 @@ public class Mapper {
      */
     Mapper(final DatastoreImpl datastore, final CodecRegistry codecRegistry, final MapperOptions opts) {
         this.datastore = datastore;
+
         this.opts = opts;
-        final MorphiaCodecProvider codecProvider = new MorphiaCodecProvider(datastore, this, singletonList(new MorphiaConvention(opts)));
+        final MorphiaCodecProvider codecProvider = new MorphiaCodecProvider(datastore, this,
+            singletonList(new MorphiaConvention(datastore, opts)));
         final MorphiaTypesCodecProvider typesCodecProvider = new MorphiaTypesCodecProvider(this);
 
         this.codecRegistry = fromRegistries(fromProviders(new MorphiaShortCutProvider(this, codecProvider)),

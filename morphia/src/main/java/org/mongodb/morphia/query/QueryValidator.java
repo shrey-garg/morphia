@@ -38,16 +38,16 @@ final class QueryValidator {
     /**
      * Validate the path, and value type, returning the mapped field for the field at the path
      */
-    static void validateQuery(final Class clazz, final Mapper mapper, final StringBuilder origProp, final FilterOperator op,
+    static MappedField validateQuery(final Class clazz, final Mapper mapper, final StringBuilder origProp, final FilterOperator op,
                               final Object val, final boolean validateNames, final boolean validateTypes) {
-        MappedField mf;
+        MappedField mf = null;
         final String prop = origProp.toString();
         boolean hasTranslations = false;
 
         if (!origProp.substring(0, 1).equals("$")) {
             final String[] parts = prop.split("\\.");
             if (clazz == null) {
-                return;
+                return null;
             }
 
             MappedClass mc = mapper.getMappedClass(clazz);
@@ -125,6 +125,8 @@ final class QueryValidator {
                 }
             }
         }
+
+        return mf;
     }
 
     private static boolean canQueryPast(final MappedField mf) {

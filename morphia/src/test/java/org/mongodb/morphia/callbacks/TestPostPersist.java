@@ -59,10 +59,13 @@ public class TestPostPersist extends TestBase {
     @Entity
     public static class TestObject {
 
-        private final String value;
         @Id
         private ObjectId id;
+        private String value;
         private String one;
+
+        public TestObject() {
+        }
 
         public TestObject(final String value) {
 

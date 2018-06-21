@@ -125,12 +125,12 @@ public class TestMapping extends TestBase {
         final DBCollection stuff = getDb().getCollection("stuff");
         final DBCollection rectangles = getDb().getCollection("rectangles");
 
-        assertTrue("'ne' field should not be persisted!", !getMorphia().getMapper().getMCMap().get(ContainsRef.class.getName())
+        assertTrue("'ne' field should not be persisted!", !getMorphia().getMapper().getMCMap().get(ContainsRef.class.getPropertyName())
                                                                        .containsJavaFieldName("ne"));
 
         final Rectangle r = new Rectangle(1, 1);
         final Document rDocument = toDocument(r);
-        rDocument.put("_ns", rectangles.getName());
+        rDocument.put("_ns", rectangles.getPropertyName());
         rectangles.save(rDocument);
 
         final ContainsRef cRef = new ContainsRef();

@@ -26,14 +26,16 @@ import org.mongodb.morphia.annotations.PostLoad;
 import org.mongodb.morphia.annotations.PostPersist;
 import org.mongodb.morphia.annotations.PreLoad;
 import org.mongodb.morphia.annotations.PrePersist;
-import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
+import org.mongodb.morphia.mapping.MorphiaInstanceCreator;
+import org.mongodb.morphia.mapping.PropertyHandler;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static java.lang.String.format;
 import static org.mongodb.morphia.mapping.codec.Conversions.convert;
 
 @SuppressWarnings("unchecked")
@@ -129,13 +131,9 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
                                       final T instance,
                                       final EncoderContext encoderContext,
                                       final PropertyModel<S> propertyModel) {
-        MappedField field = getMappedField(propertyModel);
-        if (field.hasAnnotation(Reference.class)) {
-            S propertyValue = propertyModel.getPropertyAccessor().get(instance);
-            if (propertyModel.shouldSerialize(propertyValue)) {
-                final ReferenceCodec referenceCodec = new ReferenceCodec(mapper, propertyModel, field);
-                referenceCodec.encode(writer, propertyValue, encoderContext);
-            }
+        final PropertyHandler handler = getPropertyHandler(getClassModel().getInstanceCreator(), propertyModel);
+        if (handler != null) {
+            handler.encodeProperty(writer, instance, encoderContext, propertyModel);
         } else {
             super.encodeProperty(writer, instance, encoderContext, propertyModel);
         }
@@ -147,20 +145,30 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
                                            final InstanceCreator<T> instanceCreator,
                                            final String name,
                                            final PropertyModel<S> propertyModel) {
-        MappedField field = getMappedField(propertyModel);
-        if (field.hasAnnotation(Reference.class)) {
-            final ReferenceCodec referenceCodec = new ReferenceCodec(mapper, propertyModel, field);
-            instanceCreator.set(referenceCodec.decode(reader, decoderContext), propertyModel);
-        } else {
-            final BsonReaderMark mark = reader.getMark();
-            try {
-                super.decodePropertyModel(reader, decoderContext, instanceCreator, name, propertyModel);
-            } catch (CodecConfigurationException e) {
-                mark.reset();
-                final Object value = mapper.getCodecRegistry().get(Object.class).decode(reader, decoderContext);
-                instanceCreator.set((S) convert(value, propertyModel.getTypeData().getType()), propertyModel);
+        if (propertyModel != null) {
+            final PropertyHandler handler = getPropertyHandler(instanceCreator, propertyModel);
+            if (handler != null) {
+                S value = handler.decodeProperty(reader, decoderContext, instanceCreator, name, propertyModel);
+                instanceCreator.set(value, propertyModel);
+            } else {
+                final BsonReaderMark mark = reader.getMark();
+                try {
+                    super.decodePropertyModel(reader, decoderContext, instanceCreator, name, propertyModel);
+                } catch (CodecConfigurationException e) {
+                    mark.reset();
+                    final Object value = mapper.getCodecRegistry().get(Object.class).decode(reader, decoderContext);
+                    instanceCreator.set((S) convert(value, propertyModel.getTypeData().getType()), propertyModel);
+                }
             }
+        } else {
+            reader.skipValue();
         }
+    }
+
+    private <S> PropertyHandler getPropertyHandler(final InstanceCreator<?> instanceCreator, final PropertyModel<S> propertyModel) {
+        return instanceCreator instanceof MorphiaInstanceCreator ? ((MorphiaInstanceCreator) instanceCreator).getHandler(propertyModel)
+                                                                 : null;
+
     }
 
     private <S> MappedField getMappedField(final PropertyModel<S> propertyModel) {

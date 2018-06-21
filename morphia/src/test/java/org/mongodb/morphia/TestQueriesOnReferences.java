@@ -41,29 +41,6 @@ public class TestQueriesOnReferences extends TestBase {
     }
 
     @Test
-    public void testQueryOverLazyReference() {
-
-        final ContainsPic cpk = new ContainsPic();
-        final Pic p = new Pic();
-        getDatastore().save(p);
-        final PicWithObjectId withObjectId = new PicWithObjectId();
-        getDatastore().save(withObjectId);
-        cpk.setLazyPic(p);
-        cpk.setLazyObjectIdPic(withObjectId);
-        getDatastore().save(cpk);
-
-        Query<ContainsPic> query = getDatastore().find(ContainsPic.class);
-        Assert.assertNotNull(query.field("lazyPic")
-                                  .equal(p)
-                                  .get());
-
-        query = getDatastore().find(ContainsPic.class);
-        Assert.assertNotNull(query.field("lazyObjectIdPic")
-                                  .equal(withObjectId)
-                                  .get());
-    }
-
-    @Test
     public void testQueryOverReference() {
 
         final ContainsPic cpk = new ContainsPic();

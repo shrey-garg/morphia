@@ -22,7 +22,7 @@ public class ReferenceCodec {
     private final MappedField idField;
     private final MappedClass mappedClass;
 
-    ReferenceCodec(final Mapper mapper, final PropertyModel propertyModel, final MappedField field) {
+    public ReferenceCodec(final Mapper mapper, final PropertyModel propertyModel, final MappedField field) {
         this.mapper = mapper;
         this.propertyModel = propertyModel;
         this.field = field;

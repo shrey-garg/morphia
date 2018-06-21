@@ -3,11 +3,14 @@ package org.mongodb.morphia.mapping;
 import org.bson.codecs.pojo.ClassModelBuilder;
 import org.bson.codecs.pojo.Convention;
 import org.bson.codecs.pojo.FieldModelBuilder;
+import org.bson.codecs.pojo.PropertyAccessor;
 import org.bson.codecs.pojo.PropertyMetadata;
 import org.bson.codecs.pojo.PropertyModelBuilder;
 import org.bson.codecs.pojo.TypeData;
+import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
+import org.mongodb.morphia.annotations.Handler;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.annotations.Reference;
@@ -17,28 +20,36 @@ import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.mapping.codec.ArrayFieldAccessor;
 import org.mongodb.morphia.mapping.codec.FieldAccessor;
 import org.mongodb.morphia.mapping.codec.MorphiaPropertySerialization;
+import org.mongodb.morphia.mapping.codec.ReferenceCodec;
+import org.mongodb.morphia.mapping.codec.ReferenceHandler;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.lang.reflect.Modifier.isAbstract;
+import static java.lang.reflect.Modifier.isStatic;
 import static org.bson.codecs.pojo.PojoBuilderHelper.createPropertyModelBuilder;
 
 @SuppressWarnings("unchecked")
 public class MorphiaConvention implements Convention {
+    private Datastore datastore;
     private MapperOptions options;
 
-    MorphiaConvention(final MapperOptions options) {
+    MorphiaConvention(final Datastore datastore, final MapperOptions options) {
+        this.datastore = datastore;
         this.options = options;
     }
 
     @Override
     public void apply(final ClassModelBuilder<?> classModelBuilder) {
+
         classModelBuilder.discriminator(classModelBuilder.getType().getName())
                          .discriminatorKey("className");
 
@@ -59,6 +70,7 @@ public class MorphiaConvention implements Convention {
             classModelBuilder.removeProperty(name);
         }
 
+        final InstanceCreatorFactoryImpl creatorFactory = new InstanceCreatorFactoryImpl(datastore, classModelBuilder);
         Iterator<FieldModelBuilder<?>> iterator = classModelBuilder.getFieldModelBuilders().iterator();
         while (iterator.hasNext()) {
             final FieldModelBuilder<?> builder = iterator.next();
@@ -66,7 +78,7 @@ public class MorphiaConvention implements Convention {
 
             PropertyModelBuilder<?> property = classModelBuilder.getProperty(builder.getName());
 
-            if (Modifier.isStatic(field.getModifiers()) || isTransient(builder)) {
+            if (isStatic(field.getModifiers()) || isTransient(builder)) {
                 iterator.remove();
                 if (property != null) {
                     classModelBuilder.removeProperty(property.getName());
@@ -90,9 +102,9 @@ public class MorphiaConvention implements Convention {
                 property.readName(mappedName)
                         .writeName(mappedName)
                         .propertySerialization(new MorphiaPropertySerialization(options, builder))
-                        .propertyAccessor(field.getType().isArray() && !field.getType().getComponentType().equals(byte.class)
-                                          ? new ArrayFieldAccessor(property.getTypeData(), field)
-                                          : new FieldAccessor(field));
+                        .readAnnotations(builder.getAnnotations())
+                        .writeAnnotations(builder.getAnnotations())
+                        .propertyAccessor(getPropertyAccessor(creatorFactory, field, property));
 
                 if (isNotConcrete(property.getTypeData())) {
                     property.discriminatorEnabled(true);
@@ -100,6 +112,48 @@ public class MorphiaConvention implements Convention {
             }
         }
 
+        classModelBuilder.instanceCreatorFactory(creatorFactory);
+    }
+
+    private boolean hasHandler(final PropertyModelBuilder builder) {
+        final List<Annotation> readAnnotations = builder.getReadAnnotations();
+        for (Annotation annotation : readAnnotations) {
+            if(annotation.annotationType().getAnnotation(Handler.class) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private PropertyHandler getHandler(final PropertyModelBuilder builder, final Field field) {
+        final List<Annotation> readAnnotations = builder.getReadAnnotations();
+        for (Annotation annotation : readAnnotations) {
+            final Handler handler = annotation.annotationType().getAnnotation(Handler.class);
+            if(handler != null) {
+                try {
+                    return handler.value()
+                                  .getDeclaredConstructor(Datastore.class, Field.class, String.class, TypeData.class)
+                                  .newInstance(datastore, field, builder.getName(), builder.getTypeData());
+                } catch (ReflectiveOperationException e) {
+                    throw new MappingException(e.getMessage(), e);
+                }
+            }
+        }
+        return null;
+    }
+
+
+    private PropertyAccessor getPropertyAccessor(final InstanceCreatorFactoryImpl creatorFactory,
+                                                 final Field field,
+                                                 final PropertyModelBuilder<?> property) {
+
+        if(hasHandler(property)) {
+            creatorFactory.register(getHandler(property, field));
+        }
+
+        return field.getType().isArray() && !field.getType().getComponentType().equals(byte.class)
+                          ? new ArrayFieldAccessor(property.getTypeData(), field)
+                          : new FieldAccessor(field);
     }
 
     private <T extends Annotation> T getAnnotation(final ClassModelBuilder<?> classModelBuilder, final Class<T> klass) {

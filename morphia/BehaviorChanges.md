@@ -28,3 +28,6 @@ property.  The current driver infrastructure makes that difficult to recreate.  
 1. Migrated uses of `CodeWScope` to `CodeWithScope`
 1. `Mapper` is no longer independent from `Datastore`.  To get started, one calls one of the factory methods on `Morphia` to create a new
  `Datastore` and the `Mapper` is retrieved from that.
+1. Lazy references are no longer supported.  However, multiple references on an entity are fetched in a batch if possible.
+1. References can not be used as ID values any more.  Serialization of ID values is handled special and sidesteps much of the Morphia 
+infrastructure.  This should not affect most users but *was* represented in an outdated test case.

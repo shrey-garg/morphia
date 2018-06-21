@@ -2,13 +2,17 @@ package org.mongodb.morphia.mapping;
 
 
 import org.mongodb.morphia.ObjectFactory;
-import org.mongodb.morphia.logging.Logger;
-import org.mongodb.morphia.logging.MorphiaLoggerFactory;
+import org.mongodb.morphia.annotations.Reference;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Options to control mapping behavior.
  */
 public class MapperOptions {
+    private List<Class<? extends Annotation>> propertyHandlers = new ArrayList<>();
     private boolean ignoreFinals; //ignore final fields.
     private boolean storeNulls;
     private boolean storeEmpties;
@@ -20,6 +24,7 @@ public class MapperOptions {
      * Creates a default options instance.
      */
     public MapperOptions() {
+        addPropertyHandler(Reference.class);
     }
 
     /**
@@ -33,6 +38,7 @@ public class MapperOptions {
         setStoreEmpties(options.isStoreEmpties());
         setUseLowerCaseCollectionNames(options.isUseLowerCaseCollectionNames());
         setObjectFactory(options.getObjectFactory());
+        propertyHandlers.addAll(options.getPropertyHandlers());
     }
 
     /**
@@ -136,5 +142,16 @@ public class MapperOptions {
      */
     public void setMapSubPackages(final boolean mapSubPackages) {
         this.mapSubPackages = mapSubPackages;
+    }
+
+    public void addPropertyHandler(Class<? extends Annotation> annotation) {
+        propertyHandlers.add(annotation);
+    }
+    public void removePropertyHandler(Class<? extends Annotation> annotation) {
+        propertyHandlers.remove(annotation);
+    }
+
+    public List<Class<? extends Annotation>> getPropertyHandlers() {
+        return propertyHandlers;
     }
 }

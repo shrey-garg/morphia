@@ -18,7 +18,10 @@ package org.mongodb.morphia.mapping;
 
 
 import com.mongodb.DBRef;
+import org.bson.codecs.pojo.ClassModel;
 import org.bson.codecs.pojo.FieldModel;
+import org.bson.codecs.pojo.InstanceCreator;
+import org.bson.codecs.pojo.PropertyModel;
 import org.bson.codecs.pojo.TypeData;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Embedded;
@@ -87,6 +90,8 @@ public class MappedField {
         try {
             return property.getField().get(instance);
         } catch (IllegalAccessException e) {
+            throw new MappingException(e.getMessage(), e);
+        } catch (Exception e) {
             throw new MappingException(e.getMessage(), e);
         }
     }
@@ -273,5 +278,19 @@ public class MappedField {
 
     public Class getNormalizedType() {
         return !isParameterized() ? getTypeData().getType() : getTypeData().getTypeParameters().get(0).getType();
+    }
+
+    public PropertyHandler getHandler() {
+        final ClassModel<?> model = getDeclaringClass().getClassModel();
+        final InstanceCreator<?> instanceCreator = model.getInstanceCreator();
+        PropertyHandler handler = null;
+        if (instanceCreator instanceof MorphiaInstanceCreator) {
+            MorphiaInstanceCreator creator = (MorphiaInstanceCreator) instanceCreator;
+            final PropertyModel<?> propertyModel = model.getPropertyModel(getMappedFieldName());
+            if (propertyModel != null) {
+                handler = creator.getHandler(propertyModel);
+            }
+        }
+        return handler;
     }
 }

@@ -16,6 +16,7 @@ package org.mongodb.morphia.annotations;
 
 
 import org.mongodb.morphia.mapping.Mapper;
+import org.mongodb.morphia.mapping.codec.ReferenceHandler;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -29,6 +30,7 @@ import java.lang.annotation.Target;
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
+@Handler(ReferenceHandler.class)
 public @interface Reference {
     /**
      * @return the concrete class to instantiate.

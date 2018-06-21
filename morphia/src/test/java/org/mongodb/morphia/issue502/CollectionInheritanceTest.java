@@ -54,6 +54,9 @@ public class CollectionInheritanceTest extends TestBase {
     private static class Author {
         private String name;
 
+        private Author() {
+        }
+
         Author(final String name) {
             this.name = name;
         }

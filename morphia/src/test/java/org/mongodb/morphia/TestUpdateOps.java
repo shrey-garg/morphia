@@ -377,15 +377,21 @@ public class TestUpdateOps extends TestBase {
         final Key<Pic> picKey = getDatastore().save(pic);
 
         assertInserted(getDatastore().updateOne(
-            getDatastore().find(ContainsPic.class).filter("name", "first").filter("pic", picKey),
-            getDatastore().createUpdateOperations(ContainsPic.class).set("name", "A"),
-            new UpdateOptions().upsert(true),
-            getDatastore().getDefaultWriteConcern()));
+            getDatastore().find(ContainsPic.class)
+                          .filter("name", "first")
+                          .filter("pic", picKey),
+            getDatastore().createUpdateOperations(ContainsPic.class)
+                          .set("name", "A"),
+            new UpdateOptions().upsert(true), getDatastore().getDefaultWriteConcern()));
+
         assertThat(getDatastore().find(ContainsPic.class).count(), is(1L));
         getDatastore().deleteMany(getDatastore().find(ContainsPic.class));
 
-        assertInserted(getDatastore().updateMany(getDatastore().find(ContainsPic.class).filter("name", "first").filter("pic", pic),
-                                           getDatastore().createUpdateOperations(ContainsPic.class).set("name", "second"),
+        assertInserted(getDatastore().updateMany(getDatastore().find(ContainsPic.class)
+                                                               .filter("name", "first")
+                                                               .filter("pic", pic),
+                                           getDatastore().createUpdateOperations(ContainsPic.class)
+                                                         .set("name", "second"),
                                       new UpdateOptions()
                                           .upsert(true),
             getDatastore().getDefaultWriteConcern()));

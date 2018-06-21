@@ -2,8 +2,9 @@ package org.mongodb.morphia.query;
 
 
 import org.bson.Document;
-import org.mongodb.morphia.DatastoreImpl;
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
+import org.mongodb.morphia.mapping.PropertyHandler;
 
 import java.util.Map;
 
@@ -26,31 +27,22 @@ class FieldCriteria extends AbstractCriteria {
     FieldCriteria(final QueryImpl<?> query, final String fieldName, final FilterOperator op, final Object value, final boolean not) {
         //validate might modify prop string to translate java field name to db field name
         final StringBuilder sb = new StringBuilder(fieldName);
-        final Mapper mapper = ((DatastoreImpl) query.getDatastore()).getMapper();
+        final Mapper mapper = query.getDatastore().getMapper();
 
-        validateQuery(query.getEntityClass(), mapper, sb, op, value, query.isValidatingNames(), query.isValidatingTypes());
+        final MappedField mappedField = validateQuery(query.getEntityClass(), mapper, sb, op, value, query.isValidatingNames(),
+            query.isValidatingTypes());
 
-/*
-
-        Object mappedValue = query.getDatastore().toDocument(value);
-
-        final Class<?> type = (mappedValue == null) ? null : mappedValue.getClass();
-
-        //convert single values into lists for $in/$nin
-        if (type != null && (op == FilterOperator.IN || op == FilterOperator.NOT_IN)
-            && !type.isArray() && !Iterable.class.isAssignableFrom(type)) {
-            mappedValue = Collections.singletonList(mappedValue);
+        Object mappedValue = value;
+        if (mappedField != null) {
+            PropertyHandler handler = mappedField.getHandler();
+            if(handler != null) {
+                mappedValue = handler.encodeValue(value);
+            }
         }
-
-        if (value != null && type == null && (op == FilterOperator.IN || op == FilterOperator.NOT_IN)
-            && Iterable.class.isAssignableFrom(value.getClass())) {
-            mappedValue = Collections.emptyList();
-        }
-*/
 
         this.field = sb.toString();
         this.operator = op;
-        this.value = value;
+        this.value = mappedValue;
         this.not = not;
     }
 
