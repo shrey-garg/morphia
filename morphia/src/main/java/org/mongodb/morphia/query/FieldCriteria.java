@@ -33,7 +33,7 @@ class FieldCriteria extends AbstractCriteria {
             query.isValidatingTypes());
 
         Object mappedValue = value;
-        if (mappedField != null) {
+        if (value != null && mapper.isMappable(value.getClass()) && mappedField != null) {
             PropertyHandler handler = mappedField.getHandler();
             if(handler != null) {
                 mappedValue = handler.encodeValue(value);

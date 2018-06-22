@@ -2,13 +2,15 @@ package org.mongodb.morphia;
 
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.mongodb.morphia.TestDatastore.FacebookUser;
 import org.mongodb.morphia.mapping.MappingException;
 import org.mongodb.morphia.query.Query;
 import org.mongodb.morphia.query.TestQuery.ContainsPic;
 import org.mongodb.morphia.query.TestQuery.Pic;
-import org.mongodb.morphia.query.TestQuery.PicWithObjectId;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestQueriesOnReferences extends TestBase {
     @Test
@@ -28,7 +30,7 @@ public class TestQueriesOnReferences extends TestBase {
     }
 
     @Test(expected = MappingException.class)
-    public void testMissingReferences() {
+    public void testMissingSingleReference() {
         final ContainsPic cpk = new ContainsPic();
         final Pic p = new Pic();
         cpk.setPic(p);
@@ -38,6 +40,45 @@ public class TestQueriesOnReferences extends TestBase {
         getDatastore().deleteOne(p);
 
         getDatastore().find(ContainsPic.class).asList();
+    }
+    
+    @Test(expected = MappingException.class)
+    public void testMissingReferencesInList() {
+        final FacebookUser user = new FacebookUser(100, "Big Guy");
+        List<FacebookUser> friends = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            final FacebookUser friend = new FacebookUser(i, "Friend " + i);
+            friends.add(friend);
+            if ( i % 2 == 0 ) {
+                getDatastore().save(friend);
+            }
+        }
+        user.getFriends().addAll(friends);
+        getDatastore().save(user);
+
+        getDatastore().find(FacebookUser.class).asList();
+    }
+
+    @Test
+    public void testDuplicateReferences() {
+        final FacebookUser user = new FacebookUser(100, "Big Guy");
+        List<FacebookUser> friends = new ArrayList<>();
+        for (int i = 0; i < 5; i++) {
+            final FacebookUser friend = new FacebookUser(i, "Friend " + i);
+            friends.add(friend);
+            friends.add(friend);
+            getDatastore().save(friend);
+        }
+        user.getFriends().addAll(friends);
+        getDatastore().save(user);
+
+        final FacebookUser facebookUser = getDatastore().find(FacebookUser.class)
+                                                        .filter("_id", 100)
+                                                        .get();
+        Assert.assertEquals(10, facebookUser.getFriends().size());
+        for (int i = 0; i < 5; i++) {
+            Assert.assertSame(facebookUser.getFriends().get(2 * i), facebookUser.getFriends().get(2 * i + 1));
+        }
     }
 
     @Test

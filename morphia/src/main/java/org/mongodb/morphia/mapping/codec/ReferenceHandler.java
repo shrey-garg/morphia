@@ -18,7 +18,9 @@ import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
+import org.mongodb.morphia.mapping.MappingException;
 import org.mongodb.morphia.mapping.PropertyHandler;
+import org.mongodb.morphia.query.QueryException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -66,30 +68,36 @@ public class ReferenceHandler extends PropertyHandler {
         S fetched = value;
         if(value instanceof List) {
             List<Object> ids = new ArrayList<>();
-            List list = (List) value;
-            for (Object o : list) {
+            for (Object o : (List) value) {
                 ids.add(extractId(o));
             }
             final MongoCollection<S> collection = datastore.getCollection((Class<S>) getFieldMappedClass().getClazz());
             final List<S> entities = collection.find(Filters.in("_id", ids)).into(new ArrayList<>());
-            for (int i = 0, idsSize = ids.size(); i < idsSize; i++) {
-                final int index = i;
-                list.set(index, entityCache
-                                    .computeIfAbsent(ids.get(index), (k) -> entities.get(index)));
+            for (final S entity : entities) {
+                entityCache.putIfAbsent(getIdField().getFieldValue(entity), entity);
             }
-            if(entities.size() < list.size()) {
-                MappedClass mc = getFieldMappedClass();
-            } else {
-                fetched = (S) entities;
+            List list = new ArrayList();
+            for (Object id : ids) {
+                final Object e = entityCache.get(id);
+                if(e != null) {
+                    list.add(e);
+                }
             }
+            if(list.size() < ids.size()) {
+                throw new MappingException("Referenced entities not found");
+            }
+            fetched = (S) list;
         } else {
             final Object id = extractId(fetched);
             fetched = (S) entityCache.computeIfAbsent(id,
                 (k) -> datastore.getCollection((Class<S>) getField().getType())
                                 .find(Filters.eq("_id", id))
                                 .first());
+            if (fetched == null && !annotation.ignoreMissing()) {
+                throw new MappingException("Referenced entity not found");
+            }
         }
-        propertyModel.getPropertyAccessor().set(instance, fetched);
+            propertyModel.getPropertyAccessor().set(instance, fetched);
     }
 
     @Override

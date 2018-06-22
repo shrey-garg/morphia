@@ -152,7 +152,6 @@ public class QueryInTest extends TestBase {
     private static class HasRef {
         @Id
         private ObjectId id = new ObjectId();
-        @Reference
         private Key<ReferencedEntity> ref;
     }
 

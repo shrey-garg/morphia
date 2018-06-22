@@ -577,6 +577,10 @@ public class TestDatastore extends TestBase {
         public int getLoginCount() {
             return loginCount;
         }
+
+        public List<FacebookUser> getFriends() {
+            return friends;
+        }
     }
 
     @SuppressWarnings("UnusedDeclaration")
