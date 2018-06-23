@@ -40,14 +40,6 @@ public class GeoWithinQueriesWithMultiPolygonTest extends TestBase {
         position(35.45, -10.24),
         position(43.40, -10.24));
 
-    @Override
-    @Before
-    public void setUp() {
-        // Multi-polygon is server 2.6 and onwards
-        checkMinServerVersion(2.6);
-        super.setUp();
-    }
-
     @Test
     public void shouldFindAreasCompletelyWithinRequiredEuropeanCountries() {
         // given

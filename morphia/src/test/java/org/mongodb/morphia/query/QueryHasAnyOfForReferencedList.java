@@ -10,8 +10,11 @@ import org.mongodb.morphia.annotations.Reference;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 
 public class QueryHasAnyOfForReferencedList extends TestBase {
@@ -39,21 +42,15 @@ public class QueryHasAnyOfForReferencedList extends TestBase {
         getDatastore().save(org1);
         getDatastore().save(org2);
 
-        long count = getDatastore().find(Org.class).field("name").equal("Test Org1").count();
-        assertEquals(1, count);
+        assertEquals(1, getDatastore().find(Org.class).field("name").equal("Test Org1").count());
 
-        List<Plan> plans = new ArrayList<>();
-        plans.add(plan1);
+        assertEquals(1, getDatastore().find(Org.class)
+                                      .field("plan").hasAnyOf(singletonList(plan1))
+                                      .count());
 
-        count = getDatastore().find(Org.class).field("plan").hasAnyOf(plans).count();
-        assertEquals(1, count);
-
-        plans = new ArrayList<>();
-        plans.add(plan1);
-        plans.add(plan2);
-
-        count = getDatastore().find(Org.class).field("plan").hasAnyOf(plans).count();
-        assertEquals(2, count);
+        assertEquals(2, getDatastore().find(Org.class)
+                                      .field("plan").hasAnyOf(asList(plan1,plan2))
+                                      .count());
     }
 
     @Entity(useDiscriminator = false)

@@ -284,7 +284,6 @@ public class AggregationTest extends TestBase {
 
     @Test
     public void testOut() {
-        checkMinServerVersion(2.6);
         getDatastore().saveMany(asList(new Book("The Banquet", "Dante", 2),
                             new Book("Divine Comedy", "Dante", 1),
                             new Book("Eclogues", "Dante", 2),
@@ -308,7 +307,6 @@ public class AggregationTest extends TestBase {
 
     @Test
     public void testOutNamedCollection() {
-        checkMinServerVersion(2.6);
         getDatastore().saveMany(asList(new Book("The Banquet", "Dante", 2, "Italian", "Sophomore Slump"),
                             new Book("Divine Comedy", "Dante", 1, "Not Very Funny", "I mean for a 'comedy'", "Ironic"),
                             new Book("Eclogues", "Dante", 2, "Italian", ""),

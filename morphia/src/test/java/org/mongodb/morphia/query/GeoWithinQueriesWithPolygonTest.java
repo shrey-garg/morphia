@@ -27,14 +27,6 @@ import static org.mongodb.morphia.geo.GeoJson.position;
 
 @Ignore("Defer fixing the geo tests until after the core is fixed")
 public class GeoWithinQueriesWithPolygonTest extends TestBase {
-    @Before
-    @Override
-    public void setUp() {
-        // this whole test class is designed for "modern" geo queries
-        checkMinServerVersion(2.4);
-        super.setUp();
-    }
-
     @Test
     public void shouldFindAreasWithinTheUK() {
         // given
@@ -123,8 +115,6 @@ public class GeoWithinQueriesWithPolygonTest extends TestBase {
 
     @Test
     public void shouldFindGeometryCollectionsWithinTheUK() {
-        checkMinServerVersion(2.6);
-        // given
         Polygon uk = polygon(position(49.78, -10.5),
             position(49.78, 1.78),
             position(59, 1.78),
@@ -190,8 +180,6 @@ public class GeoWithinQueriesWithPolygonTest extends TestBase {
 
     @Test
     public void shouldFindRegionsWithinTheUK() {
-        checkMinServerVersion(2.6);
-        // given
         Polygon uk = polygon(position(49.78, -10.5),
             position(49.78, 1.78),
             position(59, 1.78),

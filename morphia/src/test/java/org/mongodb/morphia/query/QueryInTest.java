@@ -80,7 +80,6 @@ public class QueryInTest extends TestBase {
 
     @Test
     public void testInQuery() {
-        checkMinServerVersion(2.5);
         final HasRefs hr = new HasRefs();
         for (int x = 0; x < 10; x++) {
             final ReferencedEntity re = new ReferencedEntity("" + x);
@@ -96,7 +95,6 @@ public class QueryInTest extends TestBase {
 
     @Test
     public void testInQueryByKey() {
-        checkMinServerVersion(2.5);
         final HasRef hr = new HasRef();
         List<Key<ReferencedEntity>> refs = new ArrayList<>();
         for (int x = 0; x < 10; x++) {

@@ -97,8 +97,6 @@ public class TestUpdateOps extends TestBase {
     @Test
     @SuppressWarnings("deprecation")
     public void testAdd() {
-        checkMinServerVersion(2.6);
-
         ContainsIntArray cIntArray = new ContainsIntArray();
         Datastore ds = getDatastore();
         ds.save(cIntArray);
@@ -408,7 +406,6 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     public void testMaxKeepsCurrentDocumentValueWhenThisIsLargerThanSuppliedValue() {
-        checkMinServerVersion(2.6);
         final ObjectId id = new ObjectId();
         final double originalValue = 2D;
 
@@ -435,7 +432,6 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     public void testMinKeepsCurrentDocumentValueWhenThisIsSmallerThanSuppliedValue() {
-        checkMinServerVersion(2.6);
         final ObjectId id = new ObjectId();
         final double originalValue = 3D;
 
@@ -454,7 +450,6 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     public void testMinUsesSuppliedValueWhenThisIsSmallerThanCurrentDocumentValue() {
-        checkMinServerVersion(2.6);
         final ObjectId id = new ObjectId();
         final double newLowerValue = 2D;
 
@@ -480,7 +475,6 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     public void testPush() {
-        checkMinServerVersion(2.6);
         ContainsIntArray cIntArray = new ContainsIntArray();
         getDatastore().save(cIntArray);
         assertThat(getDatastore().get(cIntArray).values, is((new ContainsIntArray()).values));
@@ -647,7 +641,6 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     public void testSetOnInsertWhenInserting() {
-        checkMinServerVersion(2.4);
         ObjectId id = new ObjectId();
 
         assertInserted(getDatastore().updateOne(getDatastore().find(Circle.class).field("id").equal(id),
@@ -663,7 +656,6 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     public void testSetOnInsertWhenUpdating() {
-        checkMinServerVersion(2.4);
         ObjectId id = new ObjectId();
 
         assertInserted(getDatastore().updateOne(getDatastore().find(Circle.class).field("id").equal(id),

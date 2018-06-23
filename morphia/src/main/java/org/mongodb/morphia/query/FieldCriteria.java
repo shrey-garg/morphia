@@ -6,6 +6,7 @@ import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.PropertyHandler;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import static org.mongodb.morphia.query.QueryValidator.validateQuery;
@@ -33,7 +34,7 @@ class FieldCriteria extends AbstractCriteria {
             query.isValidatingTypes());
 
         Object mappedValue = value;
-        if (value != null && mapper.isMappable(value.getClass()) && mappedField != null) {
+        if (value != null && isMappable(value, mapper) && mappedField != null) {
             PropertyHandler handler = mappedField.getHandler();
             if(handler != null) {
                 mappedValue = handler.encodeValue(value);
@@ -44,6 +45,17 @@ class FieldCriteria extends AbstractCriteria {
         this.operator = op;
         this.value = mappedValue;
         this.not = not;
+    }
+
+    private boolean isMappable(final Object value, final Mapper mapper) {
+        boolean mappable;
+        if(value instanceof Iterable) {
+            Iterator iterator = ((Iterable)value).iterator();
+            mappable = iterator.hasNext() && isMappable(iterator.next(), mapper);
+        } else {
+            mappable = mapper.isMappable(value.getClass());
+        }
+        return mappable;
     }
 
     @Override

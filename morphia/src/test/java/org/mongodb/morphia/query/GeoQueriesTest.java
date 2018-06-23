@@ -12,14 +12,6 @@ import static org.junit.Assert.assertThat;
 import static org.mongodb.morphia.geo.GeoJson.point;
 
 public class GeoQueriesTest extends TestBase {
-    @Override
-    @Before
-    public void setUp() {
-        // this whole test class is designed for "modern" geo queries
-        checkMinServerVersion(2.4);
-        super.setUp();
-    }
-
     @Test
     public void shouldFindCitiesOrderByDistanceFromAGivenPoint() {
         // given

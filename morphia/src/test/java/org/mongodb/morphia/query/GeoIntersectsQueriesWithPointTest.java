@@ -26,14 +26,6 @@ import static org.mongodb.morphia.geo.GeoJson.position;
 
 @Ignore("Defer fixing the geo tests until after the core is fixed")
 public class GeoIntersectsQueriesWithPointTest extends TestBase {
-    @Override
-    @Before
-    public void setUp() {
-        // this whole test class is designed for "modern" geo queries
-        checkMinServerVersion(2.4);
-        super.setUp();
-    }
-
     @Test
     public void shouldFindAPointThatExactlyMatchesTheQueryPoint() {
         // given
@@ -94,8 +86,6 @@ public class GeoIntersectsQueriesWithPointTest extends TestBase {
 
     @Test
     public void shouldFindGeometryCollectionsWhereTheGivenPointIntersectsWithOneOfTheEntities() {
-        checkMinServerVersion(2.6);
-        // given
         final MultiPoint multiPoint = multiPoint(position(37.40759155713022, -5.964911067858338),
             position(37.40341208875179, -5.9643941558897495),
             position(37.40297396667302, -5.970452763140202));
@@ -152,8 +142,6 @@ public class GeoIntersectsQueriesWithPointTest extends TestBase {
 
     @Test
     public void shouldFindRegionsWhereTheGivenPointIsOnABoundary() {
-        checkMinServerVersion(2.6);
-        // given
         Regions sevilla = new Regions("Spain", multiPolygon(
             polygon(
                 position(37.40759155713022, -5.964911067858338),

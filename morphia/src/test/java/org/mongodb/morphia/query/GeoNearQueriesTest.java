@@ -25,14 +25,6 @@ import static org.mongodb.morphia.geo.GeoJson.position;
 
 @Ignore("Defer fixing the geo tests until after the core is fixed")
 public class GeoNearQueriesTest extends TestBase {
-    @Override
-    @Before
-    public void setUp() {
-        // this whole test class is designed for "modern" geo queries
-        checkMinServerVersion(2.4);
-        super.setUp();
-    }
-
     @Test
     public void shouldFindAreasCloseToAGivenPointWithinARadiusOfMeters() {
         // given
@@ -161,8 +153,6 @@ public class GeoNearQueriesTest extends TestBase {
 
     @Test
     public void shouldFindGeometryCollectionsCloseToAGivenPointWithinARadiusOfMeters() {
-        checkMinServerVersion(2.6);
-        // given
         AllTheThings sevilla = new AllTheThings("Spain", geometryCollection(
             multiPoint(
                 position(37.40759155713022, -5.964911067858338),
@@ -222,8 +212,6 @@ public class GeoNearQueriesTest extends TestBase {
 
     @Test
     public void shouldFindGeometryCollectionsOrderedByDistanceFromAGivenPoint() {
-        checkMinServerVersion(2.6);
-        // given
         AllTheThings sevilla = new AllTheThings("Spain", geometryCollection(
             multiPoint(
                 position(37.40759155713022, -5.964911067858338),
@@ -284,8 +272,6 @@ public class GeoNearQueriesTest extends TestBase {
 
     @Test
     public void shouldFindRegionsCloseToAGivenPointWithinARadiusOfMeters() {
-        checkMinServerVersion(2.6);
-        // given
         Regions sevilla = new Regions("Spain", multiPolygon(
             polygon(
                 position(37.40759155713022, -5.964911067858338),
@@ -340,8 +326,6 @@ public class GeoNearQueriesTest extends TestBase {
 
     @Test
     public void shouldFindRegionsOrderedByDistanceFromAGivenPoint() {
-        checkMinServerVersion(2.6);
-        // given
         Regions sevilla = new Regions("Spain", multiPolygon(
             polygon(
                 position(37.40759155713022, -5.964911067858338),

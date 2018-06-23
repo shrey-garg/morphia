@@ -16,11 +16,9 @@ import org.bson.codecs.pojo.TypeData;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Reference;
-import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.MappingException;
 import org.mongodb.morphia.mapping.PropertyHandler;
-import org.mongodb.morphia.query.QueryException;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -55,11 +53,9 @@ public class ReferenceHandler extends PropertyHandler {
                                    final String name,
                                    final PropertyModel<S> propertyModel) {
 
-        final S value = (S) getDatastore().getMapper().getCodecRegistry()
-                                          .get(bsonTypeClassMap.get(reader.getCurrentBsonType()))
-                                          .decode(reader, decoderContext);
-
-        return value;
+        return (S) getDatastore().getMapper().getCodecRegistry()
+                                 .get(bsonTypeClassMap.get(reader.getCurrentBsonType()))
+                                 .decode(reader, decoderContext);
     }
 
     @Override
@@ -125,7 +121,7 @@ public class ReferenceHandler extends PropertyHandler {
         return collectIdValues(value);
     }
 
-    private <S> Object collectIdValues(final Object value) {
+    private Object collectIdValues(final Object value) {
         List ids;
         if(value instanceof Collection) {
             ids = new ArrayList(((Collection)value).size());

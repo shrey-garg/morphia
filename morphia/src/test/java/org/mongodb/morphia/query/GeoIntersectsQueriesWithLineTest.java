@@ -25,14 +25,6 @@ import static org.mongodb.morphia.geo.GeoJson.position;
 
 @Ignore("Defer fixing the geo tests until after the core is fixed")
 public class GeoIntersectsQueriesWithLineTest extends TestBase {
-    @Override
-    @Before
-    public void setUp() {
-        // this whole test class is designed for "modern" geo queries
-        checkMinServerVersion(2.4);
-        super.setUp();
-    }
-
     @Test
     public void shouldFindAPointThatLiesOnTheQueryLine() {
         // given
@@ -99,8 +91,6 @@ public class GeoIntersectsQueriesWithLineTest extends TestBase {
 
     @Test
     public void shouldFindGeometryCollectionsWhereTheGivenPointIntersectsWithOneOfTheEntities() {
-        checkMinServerVersion(2.6);
-        // given
         AllTheThings sevilla = new AllTheThings("Spain", geometryCollection(
             multiPoint(
                 position(37.40759155713022, -5.964911067858338),
@@ -161,8 +151,6 @@ public class GeoIntersectsQueriesWithLineTest extends TestBase {
 
     @Test
     public void shouldFindRegionsThatALineCrosses() {
-        checkMinServerVersion(2.6);
-        // given
         Regions sevilla = new Regions("Spain", multiPolygon(
             polygon(
                 position(37.40759155713022, -5.964911067858338),
