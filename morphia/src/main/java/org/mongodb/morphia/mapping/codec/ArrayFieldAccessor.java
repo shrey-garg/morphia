@@ -27,10 +27,9 @@ public class ArrayFieldAccessor extends FieldAccessor {
     }
 
     private Object convert(final Object[] value) {
-        Object[] array = value;
-        final Object newArray = Array.newInstance(componentType, array.length);
-        for (int i = 0; i < array.length; i++) {
-            Array.set(newArray, i, convert(array[i], componentType));
+        final Object newArray = Array.newInstance(componentType, value.length);
+        for (int i = 0; i < value.length; i++) {
+            Array.set(newArray, i, convert(value[i], componentType));
         }
         return newArray;
     }
