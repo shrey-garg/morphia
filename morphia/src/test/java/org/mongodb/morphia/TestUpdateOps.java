@@ -755,7 +755,6 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    @Ignore("References are not currently supported")
     public void testUpdateKeyRef() {
         final ContainsPicKey cpk = new ContainsPicKey();
         cpk.name = "cpk one";
@@ -772,7 +771,7 @@ public class TestUpdateOps extends TestBase {
         //test with Key<Pic>
 
         assertThat(ds.updateMany(ds.find(ContainsPicKey.class).filter("name", cpk.name),
-            ds.createUpdateOperations(ContainsPicKey.class).set("pic", pic)).getModifiedCount(), is(1L));
+            ds.createUpdateOperations(ContainsPicKey.class).set("pic", getMapper().getKey(pic))).getModifiedCount(), is(1L));
 
         //test reading the object.
         final ContainsPicKey cpk2 = ds.find(ContainsPicKey.class).get();
@@ -820,7 +819,6 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    @Ignore("References are not currently supported")
     public void testUpdateRef() {
         final ContainsPic cp = new ContainsPic();
         cp.setName("cp one");
@@ -831,14 +829,13 @@ public class TestUpdateOps extends TestBase {
         pic.setName("fist");
         final Key<Pic> picKey = getDatastore().save(pic);
 
+        final Query<ContainsPic> query = getDatastore().find(ContainsPic.class).filter("name", cp.getName());
 
-        //test with Key<Pic>
-
-        assertThat(getDatastore().updateMany(getDatastore().find(ContainsPic.class).filter("name", cp.getName()),
+        final long count = getDatastore().updateMany(query,
             getDatastore().createUpdateOperations(ContainsPic.class)
                           .set("pic", pic))
-                                 .getModifiedCount(),
-            is(1));
+                                         .getModifiedCount();
+        assertEquals(1, count);
 
         //test reading the object.
         final ContainsPic cp2 = getDatastore().find(ContainsPic.class).get();
@@ -848,7 +845,7 @@ public class TestUpdateOps extends TestBase {
         assertThat(cp2.getPic().getName(), is(notNullValue()));
         assertThat(pic.getName(), is(cp2.getPic().getName()));
 
-        getDatastore().updateMany(getDatastore().find(ContainsPic.class).filter("name", cp.getName()),
+        getDatastore().updateMany(query,
             getDatastore().createUpdateOperations(ContainsPic.class)
                           .set("pic", picKey));
 

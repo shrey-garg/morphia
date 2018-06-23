@@ -21,7 +21,7 @@ public class ArrayFieldAccessor extends FieldAccessor {
     public void set(final Object instance, final Object value) {
         Object newValue = value;
         if (value.getClass().getComponentType() != componentType) {
-            newValue = convert((Object[]) value);
+            newValue = value instanceof List ? convert((List) value) : convert((Object[]) value);
         }
         super.set(instance, newValue);
     }
@@ -35,6 +35,15 @@ public class ArrayFieldAccessor extends FieldAccessor {
         return newArray;
     }
 
+    private Object convert(final List value) {
+        final Object newArray = Array.newInstance(componentType, value.size());
+        for (int i = 0; i < value.size(); i++) {
+            Array.set(newArray, i, convert(value.get(i), componentType));
+        }
+        return newArray;
+    }
+
+
     private Object convert(final Object o, final Class type) {
         if(o instanceof List) {
             List list = (List) o;
@@ -45,7 +54,6 @@ public class ArrayFieldAccessor extends FieldAccessor {
 
             return newArray;
         }
-        final Object convert = Conversions.convert(o, type);
-        return convert;
+        return Conversions.convert(o, type);
     }
 }

@@ -87,21 +87,6 @@ import static org.mongodb.morphia.query.Sort.naturalDescending;
 public class TestQuery extends TestBase {
 
     @Test
-    @Ignore("The driver currently does not support generic types like this one.  Ignoring until that is fixed.")
-    public void genericMultiKeyValueQueries() {
-        getMapper().map(GenericKeyValue.class);
-        getDatastore().ensureIndexes(GenericKeyValue.class);
-        final GenericKeyValue<String> value = new GenericKeyValue<>();
-        final List<Object> keys = Arrays.asList("key1", "key2");
-        value.key = keys;
-        getDatastore().save(value);
-
-        final Query<GenericKeyValue> query = getDatastore().find(GenericKeyValue.class).field("key").hasAnyOf(keys);
-        Assert.assertTrue(query.toString().replaceAll("\\s", "").contains("{\"$in\":[\"key1\",\"key2\"]"));
-        assertEquals(query.get().id, value.id);
-    }
-
-    @Test
     public void multiKeyValueQueries() {
         getMapper().map(KeyValue.class);
         getDatastore().ensureIndexes(KeyValue.class);
@@ -964,7 +949,6 @@ public class TestQuery extends TestBase {
     }
 
     @Test
-    @Ignore("References are not currently supported")
     public void testQueryOverLazyReference() {
         final ContainsPic cpk = new ContainsPic();
         final Pic p = new Pic();
@@ -980,7 +964,6 @@ public class TestQuery extends TestBase {
     }
 
     @Test
-    @Ignore("References are not currently supported")
     public void testQueryOverReference() {
 
         final ContainsPic cpk = new ContainsPic();
@@ -1013,14 +996,13 @@ public class TestQuery extends TestBase {
     }
 
     @Test(expected = ValidationException.class)
-    @Ignore("References are not currently supported")
     public void testReferenceQuery() {
         final Photo p = new Photo();
         final ContainsPhotoKey cpk = new ContainsPhotoKey();
         cpk.photo = getDatastore().save(p);
         getDatastore().save(cpk);
 
-        assertNotNull(getDatastore().find(ContainsPhotoKey.class).filter("photo", p).get());
+        assertNotNull(getDatastore().find(ContainsPhotoKey.class).filter("photo", getMapper().getKey(p)).get());
         assertNotNull(getDatastore().find(ContainsPhotoKey.class).filter("photo", cpk.photo).get());
         assertNull(getDatastore().find(ContainsPhotoKey.class).filter("photo", 1).get());
 

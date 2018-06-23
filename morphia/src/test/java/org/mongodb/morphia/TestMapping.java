@@ -241,24 +241,6 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    @Ignore("need to add this feature")
-    @SuppressWarnings("unchecked")
-    public void testGenericKeyedMap() {
-        final ContainsXKeyMap<Integer> map = new ContainsXKeyMap<>();
-        map.values.put(1, "I'm 1");
-        map.values.put(2, "I'm 2");
-
-        final Key<ContainsXKeyMap<Integer>> mapKey = getDatastore().save(map);
-
-        final ContainsXKeyMap<Integer> mapLoaded = getDatastore().get(ContainsXKeyMap.class, mapKey.getId());
-
-        assertNotNull(mapLoaded);
-        assertEquals(2, mapLoaded.values.size());
-        assertNotNull(mapLoaded.values.get(1));
-        assertNotNull(mapLoaded.values.get(2));
-    }
-
-    @Test
     public void testIdFieldWithUnderscore() {
         getMapper().map(StrangelyNamedIdField.class);
     }
@@ -449,42 +431,32 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    @Ignore("References are not currently supported")
+    @Ignore("Recursive referencess are not currently supported")
     public void testRecursiveReference() {
         final MongoCollection<Document> stuff = getDatabase().getCollection("stuff");
 
         getMapper().map(RecursiveParent.class, RecursiveChild.class);
 
         final RecursiveParent parent = new RecursiveParent();
-        final Document parentDocument = toDocument(parent);
-        stuff.insertOne(parentDocument);
+        getDatastore().save(parent);
 
         final RecursiveChild child = new RecursiveChild();
-        final Document childDocument = toDocument(child);
-        stuff.insertOne(childDocument);
+        getDatastore().save(child);
 
-        final RecursiveParent parentLoaded = fromDocument(RecursiveParent.class,
-            stuff.find(new Document(Mapper.ID_KEY, parentDocument.get(Mapper.ID_KEY))).iterator().tryNext());
-        final RecursiveChild childLoaded = fromDocument(RecursiveChild.class,
-            stuff.find(new Document(Mapper.ID_KEY, childDocument.get(Mapper.ID_KEY))).iterator().tryNext());
+        parent.setChild(child);
+        child.setParent(parent);
 
-        parentLoaded.setChild(childLoaded);
-        childLoaded.setParent(parentLoaded);
+        getDatastore().save(parent);
+        getDatastore().save(child);
 
-        stuff.insertOne(toDocument(parentLoaded));
-        stuff.insertOne(toDocument(childLoaded));
+        final RecursiveParent parentLoaded = getDatastore().find(RecursiveParent.class).filter("_id", parent.getId()).get();
+        final RecursiveChild childLoaded = getDatastore().find(RecursiveChild.class).filter("_id", child.getId()).get();
 
-        final RecursiveParent finalParentLoaded = fromDocument(RecursiveParent.class,
-            stuff.find(new Document(Mapper.ID_KEY, parentDocument.get(Mapper.ID_KEY))).iterator().tryNext());
-        final RecursiveChild finalChildLoaded = fromDocument(RecursiveChild.class,
-            stuff.find(new Document(Mapper.ID_KEY, childDocument.get(Mapper.ID_KEY))).iterator().tryNext());
-
-        assertNotNull(finalParentLoaded.getChild());
-        assertNotNull(finalChildLoaded.getParent());
+        assertNotNull(parentLoaded.getChild());
+        assertNotNull(childLoaded.getParent());
     }
 
     @Test(expected = MappingException.class)
-    @Ignore("References are not currently supported")
     public void testReferenceWithoutIdValue() {
         final RecursiveParent parent = new RecursiveParent();
         final RecursiveChild child = new RecursiveChild();

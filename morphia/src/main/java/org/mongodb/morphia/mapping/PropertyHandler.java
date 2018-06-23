@@ -36,9 +36,12 @@ public abstract class PropertyHandler {
 
     protected MappedClass getFieldMappedClass() {
         if(mappedClass == null) {
-            final Class<?> type = typeData.getTypeParameters().size() == 0
+            Class<?> type = typeData.getTypeParameters().size() == 0
                 ? typeData.getType()
                 : ((TypeData) typeData.getTypeParameters().get(typeData.getTypeParameters().size() - 1)).getType();
+            if(type.isArray()) {
+                type = type.getComponentType();
+            }
             mappedClass = datastore.getMapper().getMappedClass(type);
         }
         return mappedClass;

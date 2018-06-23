@@ -79,7 +79,7 @@ public class ReferenceHandler extends PropertyHandler {
                     list.add(e);
                 }
             }
-            if(list.size() < ids.size()) {
+            if(list.size() < ids.size() && !annotation.ignoreMissing()) {
                 throw new MappingException("Referenced entities not found");
             }
             fetched = (S) list;
@@ -148,6 +148,9 @@ public class ReferenceHandler extends PropertyHandler {
             idValue = getIdField().getFieldValue(value);
         }
         if (!getField().getAnnotation(Reference.class).idOnly()) {
+            if(idValue == null) {
+                throw new MappingException("The ID value can not be null");
+            }
             idValue = new DBRef(getFieldMappedClass().getCollectionName(), idValue);
         }
         return idValue;

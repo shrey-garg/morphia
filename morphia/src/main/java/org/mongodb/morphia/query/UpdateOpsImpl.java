@@ -4,7 +4,9 @@ package org.mongodb.morphia.query;
 import com.mongodb.client.model.PushOptions;
 import org.bson.Document;
 import org.mongodb.morphia.internal.PathTarget;
+import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
+import org.mongodb.morphia.mapping.PropertyHandler;
 
 import java.util.List;
 
@@ -79,7 +81,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
             pathTarget.disableValidation();
         }
 
-        final Document val = new Document(UpdateOperator.EACH.val(), values);
+        final Document val = new Document(UpdateOperator.EACH.val(), mapValue(pathTarget, values));
         append(val, "$position", options.getPosition());
         append(val, "$slice", options.getSlice());
         append(val, "$sort", options.getSortDocument());
@@ -241,8 +243,9 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
             throw new QueryException("Val cannot be null");
         }
 
-        Object val = value;
         PathTarget pathTarget = new PathTarget(mapper, mapper.getMappedClass(clazz), f);
+        Object val = mapValue(pathTarget, value);
+
         if (!validateNames) {
             pathTarget.disableValidation();
         }
@@ -263,6 +266,18 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
             operations.put(opString, operation);
         }
         operation.put(fieldName, val);
+    }
+
+    private Object mapValue(final PathTarget pathTarget, final Object value) {
+        final MappedField mappedField = pathTarget.getTarget();
+        Object mappedValue = value;
+        if (value != null && mapper.isMappable(value) && mappedField != null) {
+            PropertyHandler handler = mappedField.getHandler();
+            if(handler != null) {
+                mappedValue = handler.encodeValue(value);
+            }
+        }
+        return mappedValue;
     }
 
     protected UpdateOperations<T> remove(final String fieldExpr, final boolean firstNotLast) {

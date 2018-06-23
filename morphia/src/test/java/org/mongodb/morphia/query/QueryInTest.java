@@ -41,7 +41,6 @@ public class QueryInTest extends TestBase {
     }
 
     @Test
-    @Ignore("References are not currently supported")
     public void testIdOnly() {
         ReferencedEntity b = new ReferencedEntity();
         b.setId(new ObjectId("111111111111111111111111"));

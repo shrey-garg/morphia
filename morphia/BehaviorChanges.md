@@ -31,3 +31,5 @@ property.  The current driver infrastructure makes that difficult to recreate.  
 1. Lazy references are no longer supported.  However, multiple references on an entity are fetched in a batch if possible.
 1. References can not be used as ID values any more.  Serialization of ID values is handled special and sidesteps much of the Morphia 
 infrastructure.  This should not affect most users but *was* represented in an outdated test case.
+1. Some magic around conversions between Keys and Entities has been removed at least for now.  Once the dust settles, this can be 
+readdressed.

@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -413,4 +414,18 @@ public class Mapper {
 
         return clazz.getPackage() != null && (packages.isEmpty() || packages.contains(clazz.getPackage().getName()));
     }
+
+    public boolean isMappable(final Object value) {
+        boolean mappable;
+        if (value == null) {
+            mappable = false;
+        } else if(value instanceof Iterable) {
+            Iterator iterator = ((Iterable)value).iterator();
+            mappable = iterator.hasNext() && isMappable(iterator.next());
+        } else {
+            mappable = isMappable(value.getClass());
+        }
+        return mappable;
+    }
+
 }

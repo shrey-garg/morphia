@@ -1,7 +1,6 @@
 package org.mongodb.morphia.issue49;
 
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Reference;
@@ -9,7 +8,6 @@ import org.mongodb.morphia.testutil.TestEntity;
 
 import static java.util.Arrays.asList;
 
-@Ignore("References are not currently supported")
 public class TestReferenceArray extends TestBase {
 
     @Test
