@@ -1,6 +1,5 @@
 package org.mongodb.morphia.query;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.geo.City;

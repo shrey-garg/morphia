@@ -7,18 +7,13 @@ import com.mongodb.client.model.geojson.MultiPoint;
 import com.mongodb.client.model.geojson.MultiPolygon;
 import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Polygon;
-import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Id;
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.mongodb.morphia.geo.GeoJson.geometryCollection;
 import static org.mongodb.morphia.geo.GeoJson.lineString;
 import static org.mongodb.morphia.geo.GeoJson.multiLineString;
@@ -27,7 +22,6 @@ import static org.mongodb.morphia.geo.GeoJson.multiPolygon;
 import static org.mongodb.morphia.geo.GeoJson.point;
 import static org.mongodb.morphia.geo.GeoJson.polygon;
 import static org.mongodb.morphia.geo.GeoJson.position;
-import static org.mongodb.morphia.testutil.JSONMatcher.jsonEqual;
 
 /**
  * Test driving features for Issue 643 - add support for saving entities with GeoJSON.

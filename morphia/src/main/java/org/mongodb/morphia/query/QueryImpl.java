@@ -54,9 +54,9 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     /**
      * Creates a Query for the given type and collection
      *
-     * @param clazz the type to return
-     * @param collection  the collection to query
-     * @param ds    the Datastore to use
+     * @param clazz      the type to return
+     * @param collection the collection to query
+     * @param ds         the Datastore to use
      */
     public QueryImpl(final Class<T> clazz, final MongoCollection<T> collection, final Datastore ds) {
         super(CriteriaJoin.AND);
@@ -69,6 +69,13 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         readConcern = getDatastore().getDatabase().getReadConcern();
     }
 
+    /**
+     * @return the Datastore
+     */
+    public Datastore getDatastore() {
+        return ds;
+    }
+
     @Override
     public Query<T> setReadConcern(final ReadConcern readConcern) {
         this.readConcern = readConcern;
@@ -79,158 +86,6 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     public Query<T> setReadPreference(final ReadPreference readPreference) {
         this.readPreference = readPreference;
         return this;
-    }
-
-    /**
-     * Parses the string and validates each part
-     *
-     * @param str      the String to parse
-     * @param clazz    the class to use when validating
-     * @param mapper   the Mapper to use
-     * @param validate true if the results should be validated
-     * @return the Document
-     */
-    private static Document parseFieldsString(final String str, final Class clazz, final Mapper mapper, final boolean validate) {
-        Document ret = new Document();
-        final String[] parts = str.split(",");
-        for (String s : parts) {
-            s = s.trim();
-            int dir = 1;
-
-            if (s.startsWith("-")) {
-                dir = -1;
-                s = s.substring(1).trim();
-            }
-
-            if (validate) {
-                final StringBuilder sb = new StringBuilder(s);
-                validateQuery(clazz, mapper, sb, FilterOperator.IN, "", true, false);
-                s = sb.toString();
-            }
-            ret.put(s, dir);
-        }
-        return ret;
-    }
-
-    @Override
-    public List<Key<T>> asKeyList() {
-        return asKeyList(new FindOptions());
-    }
-
-    @Override
-    public List<Key<T>> asKeyList(final FindOptions options) {
-        final List<Key<T>> results = new ArrayList<>();
-        try (MorphiaKeyIterator<T> keys = fetchKeys(options)) {
-            while (keys.hasNext()) {
-                results.add(keys.next());
-            }
-        }
-        return results;
-    }
-
-    @Override
-    public List<T> asList() {
-        return asList(new FindOptions());
-    }
-
-    @Override
-    public List<T> asList(final FindOptions options) {
-        final List<T> results = new ArrayList<>();
-        try (MongoCursor<T> entities = fetch(options)) {
-            while (entities.hasNext()) {
-                results.add(entities.next());
-            }
-        }
-
-        return results;
-    }
-
-    @Override
-    @Deprecated
-    public long countAll() {
-        final Document query = getQueryDocument();
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Executing count(" + collection.getNamespace().getCollectionName() + ") for query: " + query);
-        }
-        return collection.count(query);
-    }
-
-    @Override
-    public long count() {
-        return collection.count(getQueryDocument());
-    }
-
-    @Override
-    public long count(final CountOptions options) {
-        return collection.count(getQueryDocument(), options);
-    }
-
-    @Override
-    public MongoCursor<T> fetch() {
-        return fetch(new FindOptions());
-    }
-
-    @Override
-    public MongoCursor<T> fetch(final FindOptions options) {
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Getting cursor(" + collection.getNamespace().getCollectionName() + ")  for query:" + getQuery());
-        }
-
-        return prepareCursor(options).iterator();
-    }
-
-    @Override
-    public MongoCursor<T> fetchEmptyEntities() {
-        return fetchEmptyEntities(new FindOptions());
-    }
-
-    @Override
-    public MongoCursor<T> fetchEmptyEntities(final FindOptions options) {
-        QueryImpl<T> cloned = cloneQuery();
-        cloned.includeFields = true;
-        return cloned.fetch(new FindOptions(options)
-                                .projection(new Document(Mapper.ID_KEY, 1)));
-    }
-
-    @Override
-    public MorphiaKeyIterator<T> fetchKeys() {
-        return fetchKeys(new FindOptions());
-    }
-
-    @Override
-    public MorphiaKeyIterator<T> fetchKeys(final FindOptions options) {
-
-        final FindOptions projection = new FindOptions(options)
-                                           .projection(new Document(Mapper.ID_KEY, 1));
-        return new MorphiaKeyIterator<>(
-            prepareCursor(projection).iterator(), ds.getMapper());
-    }
-
-    @Override
-    public T get() {
-        return get(new FindOptions());
-    }
-
-    @Override
-    public T get(final FindOptions options) {
-        try (MongoCursor<T> it = fetch(new FindOptions(options)
-                                           .limit(1))) {
-            return (it.hasNext()) ? it.next() : null;
-        }
-    }
-
-    @Override
-    public Key<T> getKey() {
-        return getKey(new FindOptions());
-    }
-
-    @Override
-    public Key<T> getKey(final FindOptions options) {
-        final MorphiaKeyIterator<T> it = fetchKeys(new FindOptions(options)
-                                                            .limit(1));
-        Key<T> key = (it.hasNext()) ? it.next() : null;
-        it.close();
-        return key;
     }
 
     @Override
@@ -247,18 +102,6 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         n.setAttachedTo(getAttachedTo());
         n.setChildren(getChildren() == null ? null : new ArrayList<>(getChildren()));
         return n;
-    }
-
-    protected Document copy(final Document document) {
-        return document == null ? null : new Document(document);
-    }
-
-    @Override
-    public FieldEnd<? extends CriteriaContainerImpl> criteria(final String field) {
-        final CriteriaContainerImpl container = new CriteriaContainerImpl(this, CriteriaJoin.AND);
-        add(container);
-
-        return new FieldEndImpl<>(this, field, container);
     }
 
     @Override
@@ -367,18 +210,49 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public Query<T> order(final String order) {
-        if(sort == null) {
+        if (sort == null) {
             sort = new Document();
         }
         sort.putAll(parseFieldsString(order, clazz, ds.getMapper(), validateName));
         return this;
     }
 
+    /**
+     * Parses the string and validates each part
+     *
+     * @param str      the String to parse
+     * @param clazz    the class to use when validating
+     * @param mapper   the Mapper to use
+     * @param validate true if the results should be validated
+     * @return the Document
+     */
+    private static Document parseFieldsString(final String str, final Class clazz, final Mapper mapper, final boolean validate) {
+        Document ret = new Document();
+        final String[] parts = str.split(",");
+        for (String s : parts) {
+            s = s.trim();
+            int dir = 1;
+
+            if (s.startsWith("-")) {
+                dir = -1;
+                s = s.substring(1).trim();
+            }
+
+            if (validate) {
+                final StringBuilder sb = new StringBuilder(s);
+                validateQuery(clazz, mapper, sb, FilterOperator.IN, "", true, false);
+                s = sb.toString();
+            }
+            ret.put(s, dir);
+        }
+        return ret;
+    }
+
     @Override
     public Query<T> order(final Meta meta) {
         validateQuery(clazz, ds.getMapper(), new StringBuilder(meta.getField()), FilterOperator.IN, "", false, false);
 
-        if(sort == null) {
+        if (sort == null) {
             sort = new Document();
         }
         sort.putAll(meta.toDatabase());
@@ -398,18 +272,10 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
             }
             sortList.put(s, sort.getOrder());
         }
-        if(sort == null) {
+        if (sort == null) {
             sort = new Document();
         }
         sort.putAll(sortList);
-        return this;
-    }
-
-    @Override
-    public Query<T> retrieveKnownFields() {
-        for (final MappedField mf : ds.getMapper().getMappedClass(clazz).getPersistenceFields()) {
-            project(mf.getNameToStore(), true);
-        }
         return this;
     }
 
@@ -421,20 +287,6 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         validateProjections(fieldName, include);
         project(fieldName, include ? 1 : 0);
         return this;
-    }
-
-    private void project(final String fieldName, final Object value) {
-        if(projection == null) {
-            projection = new Document();
-        }
-        projection.put(fieldName, value);
-    }
-
-    private void project(final Document value) {
-        if(projection == null) {
-            projection = new Document();
-        }
-        projection.putAll(value);
     }
 
     @Override
@@ -458,6 +310,14 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     }
 
+    @Override
+    public Query<T> retrieveKnownFields() {
+        for (final MappedField mf : ds.getMapper().getMappedClass(clazz).getPersistenceFields()) {
+            project(mf.getNameToStore(), true);
+        }
+        return this;
+    }
+
     private void validateProjections(final String field, final boolean include) {
         if (includeFields != null && include != includeFields) {
             if (!includeFields || !"_id".equals(field)) {
@@ -469,6 +329,13 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         }
     }
 
+    private void project(final String fieldName, final Object value) {
+        if (projection == null) {
+            projection = new Document();
+        }
+        projection.put(fieldName, value);
+    }
+
     @Override
     public Query<T> search(final String search) {
         final Document op = new Document("$search", search);
@@ -477,9 +344,22 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     @Override
+    public FieldEnd<? extends CriteriaContainerImpl> criteria(final String field) {
+        final CriteriaContainerImpl container = new CriteriaContainerImpl(this, CriteriaJoin.AND);
+        add(container);
+
+        return new FieldEndImpl<>(this, field, container);
+    }
+
+    @Override
+    public String getFieldName() {
+        return null;
+    }
+
+    @Override
     public Query<T> search(final String search, final String language) {
         final Document op = new Document("$search", search)
-                                     .append("$language", language);
+                                .append("$language", language);
         this.criteria("$text").equal(op);
         return this;
     }
@@ -496,36 +376,152 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         return this;
     }
 
-    @Override
-    public String getFieldName() {
-        return null;
+    private void project(final Document value) {
+        if (projection == null) {
+            projection = new Document();
+        }
+        projection.putAll(value);
     }
 
     /**
-     * @return the Datastore
+     * Converts the textual operator (">", "<=", etc) into a FilterOperator. Forgiving about the syntax; != and <> are NOT_EQUAL, = and ==
+     * are EQUAL.
      */
-    public Datastore getDatastore() {
-        return ds;
-    }
-
-    boolean isValidatingNames() {
-        return validateName;
-    }
-
-    boolean isValidatingTypes() {
-        return validateType;
+    private FilterOperator translate(final String operator) {
+        return FilterOperator.fromString(operator);
     }
 
     @Override
-    public MongoCursor<T> iterator() {
-        return fetch();
+    public List<Key<T>> asKeyList() {
+        return asKeyList(new FindOptions());
+    }
+
+    @Override
+    public List<T> asList() {
+        return asList(new FindOptions());
+    }
+
+    @Override
+    public List<Key<T>> asKeyList(final FindOptions options) {
+        final List<Key<T>> results = new ArrayList<>();
+        try (MorphiaKeyIterator<T> keys = fetchKeys(options)) {
+            while (keys.hasNext()) {
+                results.add(keys.next());
+            }
+        }
+        return results;
+    }
+
+    @Override
+    public List<T> asList(final FindOptions options) {
+        final List<T> results = new ArrayList<>();
+        try (MongoCursor<T> entities = fetch(options)) {
+            while (entities.hasNext()) {
+                results.add(entities.next());
+            }
+        }
+
+        return results;
+    }
+
+    @Override
+    @Deprecated
+    public long countAll() {
+        final Document query = getQueryDocument();
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Executing count(" + collection.getNamespace().getCollectionName() + ") for query: " + query);
+        }
+        return collection.count(query);
+    }
+
+    @Override
+    public long count() {
+        return collection.count(getQueryDocument());
+    }
+
+    @Override
+    public long count(final CountOptions options) {
+        return collection.count(getQueryDocument(), options);
+    }
+
+    @Override
+    public MongoCursor<T> fetch() {
+        return fetch(new FindOptions());
+    }
+
+    @Override
+    public MongoCursor<T> fetch(final FindOptions options) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Getting cursor(" + collection.getNamespace().getCollectionName() + ")  for query:" + getQuery());
+        }
+
+        return prepareCursor(options).iterator();
+    }
+
+    @Override
+    public MongoCursor<T> fetchEmptyEntities() {
+        return fetchEmptyEntities(new FindOptions());
+    }
+
+    @Override
+    public MongoCursor<T> fetchEmptyEntities(final FindOptions options) {
+        QueryImpl<T> cloned = cloneQuery();
+        cloned.includeFields = true;
+        return cloned.fetch(new FindOptions(options)
+                                .projection(new Document(Mapper.ID_KEY, 1)));
+    }
+
+    @Override
+    public MorphiaKeyIterator<T> fetchKeys() {
+        return fetchKeys(new FindOptions());
+    }
+
+    @Override
+    public MorphiaKeyIterator<T> fetchKeys(final FindOptions options) {
+
+        final FindOptions projection = new FindOptions(options)
+                                           .projection(new Document(Mapper.ID_KEY, 1));
+        return new MorphiaKeyIterator<>(
+            prepareCursor(projection).iterator(), ds.getMapper());
+    }
+
+    @Override
+    public T get() {
+        return get(new FindOptions());
+    }
+
+    @Override
+    public T get(final FindOptions options) {
+        try (MongoCursor<T> it = fetch(new FindOptions(options)
+                                           .limit(1))) {
+            return (it.hasNext()) ? it.next() : null;
+        }
+    }
+
+    @Override
+    public Key<T> getKey() {
+        return getKey(new FindOptions());
+    }
+
+    @Override
+    public Key<T> getKey(final FindOptions options) {
+        final MorphiaKeyIterator<T> it = fetchKeys(new FindOptions(options)
+                                                       .limit(1));
+        Key<T> key = (it.hasNext()) ? it.next() : null;
+        it.close();
+        return key;
+    }
+
+    protected Document copy(final Document document) {
+        return document == null ? null : new Document(document);
     }
 
     private FindIterable<T> prepareCursor(final FindOptions findOptions) {
         final Document query = getQueryDocument();
 
         if (LOG.isTraceEnabled()) {
-            LOG.trace(String.format("Running query(%s) : %s, options: %s,", collection.getNamespace().getCollectionName(), query, findOptions));
+            LOG.trace(
+                String.format("Running query(%s) : %s, options: %s,", collection.getNamespace().getCollectionName(), query, findOptions));
         }
 
         final MongoCollection<T> mongoCollection = collection
@@ -564,32 +560,57 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
         return iterable;
     }
 
+    boolean isValidatingNames() {
+        return validateName;
+    }
+
+    boolean isValidatingTypes() {
+        return validateType;
+    }
+
     @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        append(sb, "query", getQueryDocument());
-        append(sb, "projection", getFields());
-        sb.append(" }");
-        return "{ " + sb + " }";
+    public MongoCursor<T> iterator() {
+        return fetch();
     }
 
-    private void append(final StringBuilder values, final String key, final Object value) {
-        if(value != null) {
-            if(values.length() != 0) {
-                values.append(", ");
-            }
-            values.append(key)
-                  .append("=")
-                  .append(value);
-        }
+    @Override
+    public T first() {
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * Converts the textual operator (">", "<=", etc) into a FilterOperator. Forgiving about the syntax; != and <> are NOT_EQUAL, = and ==
-     * are EQUAL.
-     */
-    private FilterOperator translate(final String operator) {
-        return FilterOperator.fromString(operator);
+    @Override
+    public <U> MongoIterable<U> map(final Function<T, U> mapper) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void forEach(final Block<? super T> block) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public <A extends Collection<? super T>> A into(final A target) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public MongoIterable<T> batchSize(final int batchSize) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int hashCode() {
+        int result = collection != null ? collection.hashCode() : 0;
+        result = 31 * result + (clazz != null ? clazz.hashCode() : 0);
+        result = 31 * result + (validateName ? 1 : 0);
+        result = 31 * result + (validateType ? 1 : 0);
+        result = 31 * result + (includeFields != null ? includeFields.hashCode() : 0);
+        result = 31 * result + (baseQuery != null ? baseQuery.hashCode() : 0);
+        result = 31 * result + (projection != null ? projection.hashCode() : 0);
+        result = 31 * result + (sort != null ? sort.hashCode() : 0);
+        result = 31 * result + (readConcern != null ? readConcern.hashCode() : 0);
+        result = 31 * result + (readPreference != null ? readPreference.hashCode() : 0);
+        return result;
     }
 
     @Override
@@ -634,43 +655,22 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     }
 
     @Override
-    public int hashCode() {
-        int result = collection != null ? collection.hashCode() : 0;
-        result = 31 * result + (clazz != null ? clazz.hashCode() : 0);
-        result = 31 * result + (validateName ? 1 : 0);
-        result = 31 * result + (validateType ? 1 : 0);
-        result = 31 * result + (includeFields != null ? includeFields.hashCode() : 0);
-        result = 31 * result + (baseQuery != null ? baseQuery.hashCode() : 0);
-        result = 31 * result + (projection != null ? projection.hashCode() : 0);
-        result = 31 * result + (sort != null ? sort.hashCode() : 0);
-        result = 31 * result + (readConcern != null ? readConcern.hashCode() : 0);
-        result = 31 * result + (readPreference != null ? readPreference.hashCode() : 0);
-        return result;
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        append(sb, "query", getQueryDocument());
+        append(sb, "projection", getFields());
+        sb.append(" }");
+        return "{ " + sb + " }";
     }
 
-
-    @Override
-    public T first() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <U> MongoIterable<U> map(final Function<T, U> mapper) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void forEach(final Block<? super T> block) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public <A extends Collection<? super T>> A into(final A target) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public MongoIterable<T> batchSize(final int batchSize) {
-        throw new UnsupportedOperationException();
+    private void append(final StringBuilder values, final String key, final Object value) {
+        if (value != null) {
+            if (values.length() != 0) {
+                values.append(", ");
+            }
+            values.append(key)
+                  .append("=")
+                  .append(value);
+        }
     }
 }

@@ -28,14 +28,12 @@ import com.mongodb.client.model.geojson.Point;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Entity;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Validation;
 import org.mongodb.morphia.geo.City;
-import org.mongodb.morphia.geo.PlaceWithLegacyCoords;
 import org.mongodb.morphia.query.Query;
 
 import java.text.ParseException;
@@ -468,8 +466,8 @@ public class AggregationTest extends TestBase {
         pipeline.aggregate(User.class);
     }
 
-    private Document getDocument(final Document Document, final String... path) {
-        Document current = Document;
+    private Document getDocument(final Document document, final String... path) {
+        Document current = document;
         for (String step : path) {
             Object next = current.get(step);
             Assert.assertNotNull(format("Could not find %s in \n%s", step, current), next);

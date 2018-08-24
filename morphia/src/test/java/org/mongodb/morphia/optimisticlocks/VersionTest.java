@@ -137,6 +137,26 @@ public class VersionTest extends TestBase {
         private String data;
 
         @Override
+        public boolean equals(final Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            final VersionInHashcode that = (VersionInHashcode) o;
+
+            if (id != null ? !id.equals(that.id) : that.id != null) {
+                return false;
+            }
+            if (version != null ? !version.equals(that.version) : that.version != null) {
+                return false;
+            }
+            return data != null ? data.equals(that.data) : that.data == null;
+        }
+
+        @Override
         public int hashCode() {
             final int dataHashCode = (data == null) ? 0 : data.hashCode();
             final int versionHashCode = (version == null) ? 0 : version.hashCode();

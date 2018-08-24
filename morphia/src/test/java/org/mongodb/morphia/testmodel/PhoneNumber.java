@@ -18,8 +18,6 @@ package org.mongodb.morphia.testmodel;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Property;
 
-import java.io.Serializable;
-
 @Embedded
 public class PhoneNumber {
 

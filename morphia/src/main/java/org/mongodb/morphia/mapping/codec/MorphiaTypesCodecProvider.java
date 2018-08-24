@@ -2,7 +2,6 @@ package org.mongodb.morphia.mapping.codec;
 
 import org.bson.codecs.Codec;
 import org.bson.codecs.MapCodec;
-import org.bson.codecs.PatternCodec;
 import org.bson.codecs.ValueCodecProvider;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.mongodb.morphia.mapping.Mapper;

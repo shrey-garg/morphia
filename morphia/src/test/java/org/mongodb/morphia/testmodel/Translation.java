@@ -3,8 +3,6 @@ package org.mongodb.morphia.testmodel;
 
 import org.mongodb.morphia.annotations.Embedded;
 
-import java.io.Serializable;
-
 @Embedded
 public class Translation {
     private String title;

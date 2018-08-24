@@ -68,7 +68,6 @@ public interface AggregationPipeline {
      * @param target         The class to use when iterating over the results
      * @param readPreference The read preference to apply to this pipeline
      * @param <U>            type of the results
-     * @return the computed results
      * @deprecated use {@link #out(String, Class)} instead
      */
     @Deprecated
@@ -84,7 +83,6 @@ public interface AggregationPipeline {
      * @param options        The options to apply to this aggregation
      * @param readPreference The read preference to apply to this pipeline
      * @param <U>            type of the results
-     * @return the computed results
      * @deprecated use {@link #out(String, Class, AggregationOptions)} instead
      */
     @Deprecated
@@ -229,7 +227,6 @@ public interface AggregationPipeline {
      * @param collectionName The collection in which to store the results of the aggregation overriding the mapped value in target
      * @param target         The class to use when iterating over the results
      * @param options        The options to apply to this aggregation
-     * @return the computed results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
     default <U> void out(String collectionName, Class<U> target, AggregationOptions options) {
@@ -244,7 +241,6 @@ public interface AggregationPipeline {
      * @param target         The class to use when iterating over the results
      * @param options        The options to apply to this aggregation
      * @param readPreference The read preference to apply to this pipeline
-     * @return the computed results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
     <U> void out(String collectionName, Class<U> target, AggregationOptions options, ReadPreference readPreference);

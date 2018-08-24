@@ -2,7 +2,6 @@ package org.mongodb.morphia.query;
 
 import com.mongodb.client.model.geojson.MultiPoint;
 import com.mongodb.client.model.geojson.Point;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;

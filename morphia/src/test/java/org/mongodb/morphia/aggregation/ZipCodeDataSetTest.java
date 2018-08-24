@@ -81,11 +81,35 @@ public class ZipCodeDataSetTest extends TestBase {
         MongoCollection<Document> zips = getDatabase().getCollection("zips");
         if (zips.count() == 0) {
             new ProcessExecutor().command(MONGO_IMPORT,
-                                          "--db", getDatabase().getName(),
-                                          "--collection", "zipcodes",
-                                          "--file", file.getAbsolutePath())
+                "--db", getDatabase().getName(),
+                "--collection", "zipcodes",
+                "--file", file.getAbsolutePath())
                                  .redirectError(System.err)
                                  .execute();
+        }
+    }
+
+    private void validate(final Iterable<Population> iterable, final String state, final long value) {
+        boolean found = false;
+
+        for (Population population : iterable) {
+            if (population.getState().equals(state)) {
+                found = true;
+                Assert.assertEquals(new Long(value), population.getPopulation());
+            }
+            LOG.debug("population = " + population);
+        }
+        Assert.assertTrue("Should have found " + state, found);
+    }
+
+    private void download(final URL url, final File file) throws IOException {
+        LOG.info("Downloading zip data set to " + file);
+        try (InputStream inputStream = url.openStream(); FileOutputStream outputStream = new FileOutputStream(file)) {
+            byte[] read = new byte[49152];
+            int count;
+            while ((count = inputStream.read(read)) != -1) {
+                outputStream.write(read, 0, count);
+            }
         }
     }
 
@@ -114,7 +138,7 @@ public class ZipCodeDataSetTest extends TestBase {
 
                                                      .group(
                                                          id(grouping("state"),
-                                                         grouping("city")),
+                                                             grouping("city")),
                                                          grouping("pop", sum("pop")))
 
                                                      .sort(ascending("pop"))
@@ -135,9 +159,9 @@ public class ZipCodeDataSetTest extends TestBase {
                                                              projection("pop", "smallestPop")));
 
 
-        try(MongoCursor<State> iterator = pipeline.out(State.class).iterator()) {
+        try (MongoCursor<State> iterator = pipeline.out(State.class).iterator()) {
             Map<String, State> states = new HashMap<>();
-            while(iterator.hasNext()) {
+            while (iterator.hasNext()) {
                 final State state = iterator.next();
                 states.put(state.getState(), state);
             }
@@ -150,30 +174,6 @@ public class ZipCodeDataSetTest extends TestBase {
             Assert.assertEquals("ZEONA", state.getSmallest().getName());
             Assert.assertEquals(8, state.getSmallest().getPopulation().longValue());
         }
-    }
-
-    private void download(final URL url, final File file) throws IOException {
-        LOG.info("Downloading zip data set to " + file);
-        try (InputStream inputStream = url.openStream(); FileOutputStream outputStream = new FileOutputStream(file)) {
-            byte[] read = new byte[49152];
-            int count;
-            while ((count = inputStream.read(read)) != -1) {
-                outputStream.write(read, 0, count);
-            }
-        }
-    }
-
-    private void validate(final Iterable<Population> iterable, final String state, final long value) {
-        boolean found = false;
-
-        for (Population population : iterable) {
-            if (population.getState().equals(state)) {
-                found = true;
-                Assert.assertEquals(new Long(value), population.getPopulation());
-            }
-            LOG.debug("population = " + population);
-        }
-        Assert.assertTrue("Should have found " + state, found);
     }
 
 }

@@ -70,7 +70,7 @@ public class TestModOperator extends TestBase {
     }
 
     @Entity
-    private static class Inventory {
+    private static final class Inventory {
         @Id
         private ObjectId id;
         private Integer quantity;

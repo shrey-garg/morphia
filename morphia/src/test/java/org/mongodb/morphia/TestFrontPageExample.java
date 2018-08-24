@@ -45,12 +45,12 @@ public class TestFrontPageExample extends TestBase {
         Assert.assertNotNull(key);
 
         final UpdateResult res = getDatastore().update(boss, getDatastore().createUpdateOperations(Employee.class)
-                                                                           .addToSet("underlings", key)); //add Scott as an employee of his manager
+                                                                           .addToSet("underlings", key));
         Assert.assertNotNull(res);
         Assert.assertTrue("Should update existing document", res.getModifiedCount() > 0);
         Assert.assertEquals("Should update one document", 1, res.getModifiedCount());
 
-        final Employee scottsBoss = getDatastore().find(Employee.class).filter("underlings", key).get(); // get Scott's boss
+        final Employee scottsBoss = getDatastore().find(Employee.class).filter("underlings", key).get();
         Assert.assertNotNull(scottsBoss);
         Assert.assertEquals(boss.id, scottsBoss.id);
     }

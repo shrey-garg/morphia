@@ -1,6 +1,5 @@
 package org.mongodb.morphia.example;
 
-import com.mongodb.MongoClient;
 import com.mongodb.client.result.UpdateResult;
 import org.bson.types.ObjectId;
 import org.junit.Assert;

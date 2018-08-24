@@ -8,11 +8,6 @@ import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.annotations.Reference;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
@@ -49,7 +44,7 @@ public class QueryHasAnyOfForReferencedList extends TestBase {
                                       .count());
 
         assertEquals(2, getDatastore().find(Org.class)
-                                      .field("plan").hasAnyOf(asList(plan1,plan2))
+                                      .field("plan").hasAnyOf(asList(plan1, plan2))
                                       .count());
     }
 

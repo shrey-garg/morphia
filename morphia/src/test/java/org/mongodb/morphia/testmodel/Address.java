@@ -19,8 +19,6 @@ import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.annotations.Transient;
 
-import java.io.Serializable;
-
 @Embedded
 public class Address {
 

@@ -20,17 +20,13 @@ import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.mapping.codec.ArrayFieldAccessor;
 import org.mongodb.morphia.mapping.codec.FieldAccessor;
 import org.mongodb.morphia.mapping.codec.MorphiaPropertySerialization;
-import org.mongodb.morphia.mapping.codec.ReferenceCodec;
-import org.mongodb.morphia.mapping.codec.ReferenceHandler;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.lang.reflect.Modifier.isAbstract;

@@ -9,8 +9,6 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Id;
 
-import java.io.Serializable;
-
 import static org.junit.Assert.fail;
 
 public class MapWithDotInKeyTest extends TestBase {

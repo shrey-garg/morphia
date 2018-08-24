@@ -18,8 +18,6 @@ package org.mongodb.morphia.testutil;
 import org.bson.types.ObjectId;
 import org.mongodb.morphia.annotations.Id;
 
-import java.io.Serializable;
-
 
 /**
  * Example for a base class to all entities.

@@ -15,11 +15,12 @@ import org.mongodb.morphia.mapping.MappingException;
 import java.util.Iterator;
 import java.util.List;
 
+@SuppressWarnings("unchecked")
 public class KeyCodec implements Codec<Key> {
 
     private Mapper mapper;
 
-    public KeyCodec(final Mapper mapper) {
+    KeyCodec(final Mapper mapper) {
         this.mapper = mapper;
     }
 

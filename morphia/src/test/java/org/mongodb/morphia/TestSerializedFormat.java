@@ -45,44 +45,116 @@ public class TestSerializedFormat extends TestBase {
     @Test
     @Ignore("This is test is likely invalid with the new codec functionaliy")
     public void testQueryFormat() {
-        Query<ReferenceType> query = getDatastore().find(ReferenceType.class)
-                                                   .field("id").equal(new ObjectId(0, 0, (short) 0, 0))
-                                                   .field("referenceType").equal(new ReferenceType(2, "far"))
-                                                   .field("embeddedType").equal(new EmbeddedReferenceType(3, "strikes"))
+        final Datastore ds = getDatastore();
+        Query<ReferenceType> query = ds.find(ReferenceType.class)
+                                       .field("id").equal(new ObjectId(0, 0, (short) 0, 0))
+                                       .field("referenceType").equal(new ReferenceType(2, "far"))
+                                       .field("embeddedType").equal(new EmbeddedReferenceType(3, "strikes"))
 
-                                                   .field("string").equal("some value")
+                                       .field("string").equal("some value")
 
-                                                   .field("embeddedArray").elemMatch(getDatastore().find(EmbeddedReferenceType.class)
-                                                                                                   .filter("number", 3).filter("text", "strikes"))
-                                                   .field("embeddedSet").elemMatch(getDatastore().find(EmbeddedReferenceType.class)
-                                                                                                 .filter("number", 3).filter("text", "strikes"))
-                                                   .field("embeddedList").elemMatch(getDatastore().find(EmbeddedReferenceType.class)
-                                                                                                  .filter("number", 3).filter("text", "strikes"))
+                                       .field("embeddedArray").elemMatch(ds.find(EmbeddedReferenceType.class)
+                                                                           .filter("number", 3)
+                                                                           .filter("text", "strikes"))
+                                       .field("embeddedSet").elemMatch(ds.find(EmbeddedReferenceType.class)
+                                                                         .filter("number", 3)
+                                                                         .filter("text", "strikes"))
+                                       .field("embeddedList").elemMatch(ds.find(EmbeddedReferenceType.class)
+                                                                          .filter("number", 3)
+                                                                          .filter("text", "strikes"))
 
-                                                   .field("map.bar").equal(new EmbeddedReferenceType(1, "chance"))
-                                                   .field("mapOfList.bar").in(singletonList(new EmbeddedReferenceType(1, "chance")))
-                                                   .field("mapOfList.foo").elemMatch(getDatastore().find(EmbeddedReferenceType.class)
-                                                                                                   .filter("number", 1)
-                                                                                                   .filter("text", "chance"))
+                                       .field("map.bar").equal(new EmbeddedReferenceType(1, "chance"))
+                                       .field("mapOfList.bar").in(singletonList(new EmbeddedReferenceType(1, "chance")))
+                                       .field("mapOfList.foo").elemMatch(ds.find(EmbeddedReferenceType.class)
+                                                                           .filter("number", 1)
+                                                                           .filter("text", "chance"))
 
-                                                   .field("selfReference").equal(new ReferenceType(1, "blah"))
+                                       .field("selfReference").equal(new ReferenceType(1, "blah"))
 
-                                                   .field("mixedTypeList").elemMatch(getDatastore().find(EmbeddedReferenceType.class)
-                                                                                                   .filter("number", 3).filter("text", "strikes"))
-                                                   .field("mixedTypeList").in(singletonList(new EmbeddedReferenceType(1, "chance")))
-                                                   .field("mixedTypeMap.foo").equal(new ReferenceType(3, "strikes"))
-                                                   .field("mixedTypeMap.bar").equal(new EmbeddedReferenceType(3, "strikes"))
-                                                   .field("mixedTypeMapOfList.bar").in(singletonList(new EmbeddedReferenceType(1, "chance")))
-                                                   .field("mixedTypeMapOfList.foo").elemMatch(
-                getDatastore().find(EmbeddedReferenceType.class)
-                              .filter("number", 3)
-                              .filter("text", "strikes"))
+                                       .field("mixedTypeList").elemMatch(ds.find(EmbeddedReferenceType.class)
+                                                                           .filter("number", 3)
+                                                                           .filter("text", "strikes"))
+                                       .field("mixedTypeList").in(singletonList(new EmbeddedReferenceType(1, "chance")))
+                                       .field("mixedTypeMap.foo").equal(new ReferenceType(3, "strikes"))
+                                       .field("mixedTypeMap.bar").equal(new EmbeddedReferenceType(3, "strikes"))
+                                       .field("mixedTypeMapOfList.bar")
+                                       .in(singletonList(new EmbeddedReferenceType(1, "chance")))
+                                       .field("mixedTypeMapOfList.foo").elemMatch(ds.find(EmbeddedReferenceType.class)
+                                                                                    .filter("number", 3)
+                                                                                    .filter("text", "strikes"))
 
-                                                   .field("referenceMap.foo").equal(new ReferenceType(1, "chance"))
-                                                   .field("referenceMap.bar").equal(new EmbeddedReferenceType(1, "chance"));
+                                       .field("referenceMap.foo").equal(new ReferenceType(1, "chance"))
+                                       .field("referenceMap.bar").equal(new EmbeddedReferenceType(1, "chance"));
 
         Document document = query.getQueryDocument();
         Assert.assertEquals(Document.parse(readFully("/QueryStructure.json")), document);
+    }
+
+    private String readFully(final String name) {
+        return new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(name)))
+                   .lines()
+                   .collect(java.util.stream.Collectors.joining("\n"));
+    }
+
+    @Test
+    @Ignore("pretend this isn't failing for now")
+    public void testSavedEntityFormat() {
+        ReferenceType entity = new ReferenceType(1, "I'm a field value");
+
+        entity.setReferenceType(new ReferenceType(42, "reference"));
+        entity.setEmbeddedType(new EmbeddedReferenceType(18, "embedded"));
+
+        entity.setEmbeddedSet(new HashSet<>(asList(new EmbeddedReferenceType(42, "Douglas Adams"),
+            new EmbeddedReferenceType(1, "Love"))));
+        entity.setEmbeddedList(asList(new EmbeddedReferenceType(42, "Douglas Adams"),
+            new EmbeddedReferenceType(1, "Love")));
+        entity.setEmbeddedArray(new EmbeddedReferenceType[]{new EmbeddedReferenceType(42, "Douglas Adams"),
+                                                            new EmbeddedReferenceType(1, "Love")});
+
+        entity.getMap().put("first", new EmbeddedReferenceType(42, "Douglas Adams"));
+        entity.getMap().put("second", new EmbeddedReferenceType(1, "Love"));
+
+        entity.getMapOfList().put("first", asList(new EmbeddedReferenceType(42, "Douglas Adams"),
+            new EmbeddedReferenceType(1, "Love")));
+        entity.getMapOfList().put("second", asList(new EmbeddedReferenceType(1, "Love"),
+            new EmbeddedReferenceType(42, "Douglas Adams")));
+
+
+        entity.getMapOfSet().put("first", new HashSet<>(asList(new EmbeddedReferenceType(42, "Douglas Adams"),
+            new EmbeddedReferenceType(1, "Love"))));
+        entity.getMapOfSet().put("second", new HashSet<>(asList(new EmbeddedReferenceType(42, "Douglas Adams"),
+            new EmbeddedReferenceType(1, "Love"))));
+
+        entity.setSelfReference(entity);
+        entity.setIdOnly(entity);
+
+        entity.setReferenceArray(new ReferenceType[]{new ReferenceType(2, "text 2"),
+                                                     new ReferenceType(3, "text 3")});
+        entity.setReferenceList(asList(new ReferenceType(2, "text 2"), new ReferenceType(3, "text 3")));
+        entity.setReferenceSet(new HashSet<>(asList(new ReferenceType(2, "text 2"),
+            new ReferenceType(3, "text 3"))));
+        entity.getReferenceMap().put("first", new ReferenceType(2, "text 2"));
+        entity.getReferenceMap().put("second", new ReferenceType(3, "text 3"));
+        entity.getReferenceMapOfList().put("first", asList(new ReferenceType(2, "text 2"),
+            new ReferenceType(3, "text 3")));
+        entity.getReferenceMapOfList().put("second", singletonList(new ReferenceType(3, "text 3")));
+
+        entity.setMixedTypeArray(new ReferenceType[]{new ReferenceType(2, "text 2"),
+                                                     new ClassNameReferenceType(3, "text 3")});
+        entity.setMixedTypeList(asList(new ReferenceType(2, "text 2"), new ClassNameReferenceType(3, "text 3")));
+        entity.setMixedTypeSet(new HashSet<>(asList(new ReferenceType(2, "text 2"),
+            new ClassNameReferenceType(3, "text 3"))));
+        entity.getMixedTypeMap().put("first", new ReferenceType(2, "text 2"));
+        entity.getMixedTypeMap().put("second", new ClassNameReferenceType(3, "text 3"));
+        entity.getMixedTypeMapOfList().put("first", asList(new ReferenceType(2, "text 2"),
+            new ClassNameReferenceType(3, "text 3")));
+        entity.getMixedTypeMapOfList().put("second", singletonList(new ClassNameReferenceType(3, "text 3")));
+
+        getDatastore().save(entity);
+
+        Document document = getMapper().toDocument(entity);
+        Assert.assertEquals(Document.parse(readFully("/ReferenceType.json")), document);
+        verifyCoverage(document);
     }
 
     private void verifyCoverage(final Document document) {
@@ -97,66 +169,6 @@ public class TestSerializedFormat extends TestBase {
             }
             assertTrue("Not found in document: " + name, found);
         }
-    }
-
-    @Test
-    @Ignore("pretend this isn't failing for now")
-    public void testSavedEntityFormat() {
-        ReferenceType entity = new ReferenceType(1, "I'm a field value");
-
-        entity.setReferenceType(new ReferenceType(42, "reference"));
-        entity.setEmbeddedType(new EmbeddedReferenceType(18, "embedded"));
-
-        entity.setEmbeddedSet(new HashSet<>(asList(new EmbeddedReferenceType(42, "Douglas Adams"),
-            new EmbeddedReferenceType(1, "Love"))));
-        entity.setEmbeddedList(asList(new EmbeddedReferenceType(42, "Douglas Adams"), new EmbeddedReferenceType(1, "Love")));
-        entity.setEmbeddedArray(new EmbeddedReferenceType[]{new EmbeddedReferenceType(42, "Douglas Adams"),
-            new EmbeddedReferenceType(1, "Love")});
-
-        entity.getMap().put("first", new EmbeddedReferenceType(42, "Douglas Adams"));
-        entity.getMap().put("second", new EmbeddedReferenceType(1, "Love"));
-
-        entity.getMapOfList().put("first", asList(new EmbeddedReferenceType(42, "Douglas Adams"), new EmbeddedReferenceType(1, "Love")));
-        entity.getMapOfList().put("second", asList(new EmbeddedReferenceType(1, "Love"), new EmbeddedReferenceType(42, "Douglas Adams")));
-
-
-        entity.getMapOfSet().put("first", new HashSet<>(asList(new EmbeddedReferenceType(42, "Douglas Adams"),
-            new EmbeddedReferenceType(1, "Love"))));
-        entity.getMapOfSet().put("second", new HashSet<>(asList(new EmbeddedReferenceType(42, "Douglas Adams"),
-            new EmbeddedReferenceType(1, "Love"))));
-
-        entity.setSelfReference(entity);
-        entity.setIdOnly(entity);
-
-        entity.setReferenceArray(new ReferenceType[]{new ReferenceType(2, "text 2"), new ReferenceType(3, "text 3")});
-        entity.setReferenceList(asList(new ReferenceType(2, "text 2"), new ReferenceType(3, "text 3")));
-        entity.setReferenceSet(new HashSet<>(asList(new ReferenceType(2, "text 2"), new ReferenceType(3, "text 3"))));
-        entity.getReferenceMap().put("first", new ReferenceType(2, "text 2"));
-        entity.getReferenceMap().put("second", new ReferenceType(3, "text 3"));
-        entity.getReferenceMapOfList().put("first", asList(new ReferenceType(2, "text 2"), new ReferenceType(3, "text 3")));
-        entity.getReferenceMapOfList().put("second", singletonList(new ReferenceType(3, "text 3")));
-
-        entity.setMixedTypeArray(new ReferenceType[]{new ReferenceType(2, "text 2"), new ClassNameReferenceType(3, "text 3")});
-        entity.setMixedTypeList(asList(new ReferenceType(2, "text 2"), new ClassNameReferenceType(3, "text 3")));
-        entity.setMixedTypeSet(new HashSet<>(asList(new ReferenceType(2, "text 2"),
-            new ClassNameReferenceType(3, "text 3"))));
-        entity.getMixedTypeMap().put("first", new ReferenceType(2, "text 2"));
-        entity.getMixedTypeMap().put("second", new ClassNameReferenceType(3, "text 3"));
-        entity.getMixedTypeMapOfList().put("first", asList(new ReferenceType(2, "text 2"),
-                                                           new ClassNameReferenceType(3, "text 3")));
-        entity.getMixedTypeMapOfList().put("second", singletonList(new ClassNameReferenceType(3, "text 3")));
-
-        getDatastore().save(entity);
-
-        Document document = getMapper().toDocument(entity);
-        Assert.assertEquals(Document.parse(readFully("/ReferenceType.json")), document);
-        verifyCoverage(document);
-    }
-
-    private String readFully(final String name) {
-        return new BufferedReader(new InputStreamReader(getClass().getResourceAsStream(name)))
-            .lines()
-            .collect(java.util.stream.Collectors.joining("\n"));
     }
 }
 

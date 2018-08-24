@@ -41,7 +41,7 @@ public class TestQueriesOnReferences extends TestBase {
 
         getDatastore().find(ContainsPic.class).asList();
     }
-    
+
     @Test(expected = MappingException.class)
     public void testMissingReferencesInList() {
         final FacebookUser user = new FacebookUser(100, "Big Guy");
@@ -49,7 +49,7 @@ public class TestQueriesOnReferences extends TestBase {
         for (int i = 0; i < 10; i++) {
             final FacebookUser friend = new FacebookUser(i, "Friend " + i);
             friends.add(friend);
-            if ( i % 2 == 0 ) {
+            if (i % 2 == 0) {
                 getDatastore().save(friend);
             }
         }

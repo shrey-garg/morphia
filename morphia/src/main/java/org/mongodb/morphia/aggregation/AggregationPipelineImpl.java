@@ -179,11 +179,11 @@ public class AggregationPipelineImpl implements AggregationPipeline {
 
     @Override
     public AggregationPipeline project(final Projection... projections) {
-        Document Document = new Document();
+        Document document = new Document();
         for (Projection projection : projections) {
-            Document.putAll(toDocument(projection));
+            document.putAll(toDocument(projection));
         }
-        stages.add(new Document("$project", Document));
+        stages.add(new Document("$project", document));
         return this;
     }
 
@@ -241,28 +241,28 @@ public class AggregationPipelineImpl implements AggregationPipeline {
     }
 
     private Document toDocument(final Group group) {
-        Document Document = new Document();
+        Document document = new Document();
 
         if (group.getAccumulator() != null) {
-            Document.put(group.getName(), group.getAccumulator().toDocument());
+            document.put(group.getName(), group.getAccumulator().toDocument());
         } else if (group.getProjections() != null) {
             final Document projection = new Document();
             for (Projection p : group.getProjections()) {
                 projection.putAll(toDocument(p));
             }
-            Document.put(group.getName(), projection);
+            document.put(group.getName(), projection);
         } else if (group.getNested() != null) {
-            Document.put(group.getName(), toDocument(group.getNested()));
+            document.put(group.getName(), toDocument(group.getNested()));
         } else {
-            Document.put(group.getName(), group.getSourceField());
+            document.put(group.getName(), group.getSourceField());
         }
 
-        return Document;
+        return document;
     }
 
-    private void putIfNull(final Document Document, final String name, final Object value) {
+    private void putIfNull(final Document document, final String name, final Object value) {
         if (value != null) {
-            Document.put(name, value);
+            document.put(name, value);
         }
     }
 

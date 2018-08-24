@@ -10,7 +10,6 @@ import org.mongodb.morphia.mapping.PropertyHandler;
 
 import java.util.List;
 
-import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 
 

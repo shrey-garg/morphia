@@ -2,7 +2,6 @@ package org.mongodb.morphia.query;
 
 import org.bson.Document;
 import org.bson.types.ObjectId;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

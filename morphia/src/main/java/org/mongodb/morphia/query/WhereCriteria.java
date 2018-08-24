@@ -2,7 +2,6 @@ package org.mongodb.morphia.query;
 
 
 import org.bson.Document;
-import org.bson.types.CodeWScope;
 import org.bson.types.CodeWithScope;
 
 /**

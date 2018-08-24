@@ -35,7 +35,6 @@ import org.mongodb.morphia.mapping.PropertyHandler;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static java.lang.String.format;
 import static org.mongodb.morphia.mapping.codec.Conversions.convert;
 
 @SuppressWarnings("unchecked")

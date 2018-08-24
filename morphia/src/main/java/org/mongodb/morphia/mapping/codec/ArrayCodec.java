@@ -15,8 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static org.bson.codecs.BsonValueCodecProvider.getBsonTypeClassMap;
-
 class ArrayCodec implements Codec<Object[]> {
 
     private Mapper mapper;

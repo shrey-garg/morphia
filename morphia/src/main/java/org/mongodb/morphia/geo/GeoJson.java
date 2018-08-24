@@ -1,5 +1,7 @@
 package org.mongodb.morphia.geo;
 
+import com.mongodb.client.model.geojson.Geometry;
+import com.mongodb.client.model.geojson.GeometryCollection;
 import com.mongodb.client.model.geojson.LineString;
 import com.mongodb.client.model.geojson.MultiLineString;
 import com.mongodb.client.model.geojson.MultiPoint;
@@ -8,14 +10,9 @@ import com.mongodb.client.model.geojson.Point;
 import com.mongodb.client.model.geojson.Polygon;
 import com.mongodb.client.model.geojson.PolygonCoordinates;
 import com.mongodb.client.model.geojson.Position;
-import com.mongodb.client.model.geojson.Geometry;
-import com.mongodb.client.model.geojson.GeometryCollection;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;

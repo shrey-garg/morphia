@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 public class MapImplTest extends TestBase {
 
@@ -76,7 +75,8 @@ public class MapImplTest extends TestBase {
         final ContainsMapOfEmbeddedInterfaces entity = new ContainsMapOfEmbeddedInterfaces();
         entity.values.put("first", g1);
         getDatastore().save(entity);
-        getDatastore().update(entity, getDatastore().createUpdateOperations(ContainsMapOfEmbeddedInterfaces.class).set("values.second", g2));
+        getDatastore().update(entity, getDatastore().createUpdateOperations(ContainsMapOfEmbeddedInterfaces.class)
+                                                    .set("values.second", g2));
         //check className in the map values.
         final MongoCollection<ContainsMapOfEmbeddedInterfaces> collection = getDatastore().getCollection(
             ContainsMapOfEmbeddedInterfaces.class);

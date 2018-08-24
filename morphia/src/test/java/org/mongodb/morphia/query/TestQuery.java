@@ -107,21 +107,30 @@ public class TestQuery extends TestBase {
         super.tearDown();
     }
 
+    private void turnOffProfilingAndDropProfileCollection() {
+        getDatabase().runCommand(new Document("profile", 0));
+        getDatabase().getCollection("system.profile").drop();
+    }
+
     @Test
     public void testAliasedFieldSort() {
-        getDatastore().saveMany(asList(new Rectangle(1, 10), new Rectangle(3, 8), new Rectangle(6, 10), new Rectangle(10, 10), new Rectangle(10, 1)));
+        getDatastore().saveMany(asList(new Rectangle(1, 10),
+            new Rectangle(3, 8),
+            new Rectangle(6, 10),
+            new Rectangle(10, 10),
+            new Rectangle(10, 1)));
 
         Rectangle r1 = getDatastore().find(Rectangle.class)
                                      .order("w")
                                      .get(new FindOptions()
-                                       .limit(1));
+                                              .limit(1));
         assertNotNull(r1);
         assertEquals(1, r1.getWidth(), 0);
 
         r1 = getDatastore().find(Rectangle.class)
                            .order("-w")
                            .get(new FindOptions()
-                             .limit(1));
+                                    .limit(1));
         assertNotNull(r1);
         assertEquals(10, r1.getWidth(), 0);
     }
@@ -173,7 +182,7 @@ public class TestQuery extends TestBase {
 
         getMapper().map(ContainsRenamedFields.class);
         getDatastore().saveMany(asList(new ContainsRenamedFields("first", "last"),
-                            new ContainsRenamedFields("First", "Last")));
+            new ContainsRenamedFields("First", "Last")));
 
         Query query = getDatastore().find(ContainsRenamedFields.class)
                                     .field("last_name").equal("last");
@@ -194,7 +203,11 @@ public class TestQuery extends TestBase {
 
     @Test
     public void testCombinationQuery() {
-        getDatastore().saveMany(asList(new Rectangle(1, 10), new Rectangle(4, 2), new Rectangle(6, 10), new Rectangle(8, 5), new Rectangle(10, 4)));
+        getDatastore().saveMany(asList(new Rectangle(1, 10),
+            new Rectangle(4, 2),
+            new Rectangle(6, 10),
+            new Rectangle(8, 5),
+            new Rectangle(10, 4)));
 
         Query<Rectangle> q = getDatastore().find(Rectangle.class);
         q.and(q.criteria("width").equal(10), q.criteria("height").equal(1));
@@ -218,17 +231,35 @@ public class TestQuery extends TestBase {
 
         getDatastore().find(Pic.class)
                       .asList(new FindOptions()
-                           .comment(expectedComment));
+                                  .comment(expectedComment));
 
         MongoCollection<Document> profileCollection = getDatabase().getCollection("system.profile");
         assertNotEquals(0, profileCollection.count());
         final Document query = new Document("op", "query")
-                                    .append("ns", getDatastore().getCollection(Pic.class).getNamespace().getFullName());
+                                   .append("ns", getDatastore().getCollection(Pic.class).getNamespace().getFullName());
         List<Document> profileRecord = profileCollection.find(query)
-                                                             .into(new ArrayList<>());
+                                                        .into(new ArrayList<>());
         assertEquals(profileRecord.toString(), expectedComment, getCommentFromProfileRecord(profileRecord.get(0)));
 
         turnOffProfilingAndDropProfileCollection();
+    }
+
+    private String getCommentFromProfileRecord(final Document profileRecord) {
+        if (profileRecord.containsKey("command")) {
+            Document commandDocument = ((Document) profileRecord.get("command"));
+            if (commandDocument.containsKey("comment")) {
+                return (String) commandDocument.get("comment");
+            }
+        }
+        if (profileRecord.containsKey("query")) {
+            Document queryDocument = ((Document) profileRecord.get("query"));
+            if (queryDocument.containsKey("comment")) {
+                return (String) queryDocument.get("comment");
+            } else if (queryDocument.containsKey("$comment")) {
+                return (String) queryDocument.get("$comment");
+            }
+        }
+        return null;
     }
 
     @Test
@@ -238,17 +269,17 @@ public class TestQuery extends TestBase {
         assertNull(getDatastore().find(PhotoWithKeywords.class)
                                  .field("keywords")
                                  .elemMatch(getDatastore()
-                                         .find(Keyword.class)
-                                         .filter("keyword = ", "Oscar")
-                                         .filter("score = ", 12))
+                                                .find(Keyword.class)
+                                                .filter("keyword = ", "Oscar")
+                                                .filter("score = ", 12))
                                  .get());
 
         List<PhotoWithKeywords> keywords = getDatastore().find(PhotoWithKeywords.class)
                                                          .field("keywords")
                                                          .elemMatch(getDatastore()
-                                                                 .find(Keyword.class)
-                                                                 .filter("score > ", 20)
-                                                                 .filter("score < ", 100))
+                                                                        .find(Keyword.class)
+                                                                        .filter("score > ", 20)
+                                                                        .filter("score < ", 100))
                                                          .asList();
         assertEquals(1, keywords.size());
         assertEquals(oscar, keywords.get(0).keywords.get(0));
@@ -286,7 +317,11 @@ public class TestQuery extends TestBase {
 
     @Test
     public void testComplexRangeQuery() {
-        getDatastore().saveMany(asList(new Rectangle(1, 10), new Rectangle(4, 2), new Rectangle(6, 10), new Rectangle(8, 5), new Rectangle(10, 4)));
+        getDatastore().saveMany(asList(new Rectangle(1, 10),
+            new Rectangle(4, 2),
+            new Rectangle(6, 10),
+            new Rectangle(8, 5),
+            new Rectangle(10, 4)));
 
         assertEquals(2, getDatastore().getCount(getDatastore().find(Rectangle.class)
                                                               .filter("height >", 3)
@@ -299,7 +334,11 @@ public class TestQuery extends TestBase {
 
     @Test
     public void testCompoundSort() {
-        getDatastore().saveMany(asList(new Rectangle(1, 10), new Rectangle(3, 8), new Rectangle(6, 10), new Rectangle(10, 10), new Rectangle(10, 1)));
+        getDatastore().saveMany(asList(new Rectangle(1, 10),
+            new Rectangle(3, 8),
+            new Rectangle(6, 10),
+            new Rectangle(10, 10),
+            new Rectangle(10, 1)));
 
         Rectangle r1 = getDatastore().find(Rectangle.class).order("width,-height").get();
         assertNotNull(r1);
@@ -315,34 +354,45 @@ public class TestQuery extends TestBase {
     @Test
     public void testCompoundSortWithSortBeans() {
         List<Rectangle> list =
-            asList(new Rectangle(1, 10), new Rectangle(3, 8), new Rectangle(6, 10), new Rectangle(10, 10), new Rectangle(10, 1));
+            asList(new Rectangle(1, 10),
+                new Rectangle(3, 8),
+                new Rectangle(6, 10),
+                new Rectangle(10, 10),
+                new Rectangle(10, 1));
         Collections.shuffle(list);
         getDatastore().saveMany(list);
 
         compareLists(list,
-                     getDatastore().find(Rectangle.class).order("width,-height"),
-                     getDatastore().find(Rectangle.class).order(ascending("width"), descending("height")),
-                     new RectangleComparator());
+            getDatastore().find(Rectangle.class).order("width,-height"),
+            getDatastore().find(Rectangle.class).order(ascending("width"), descending("height")),
+            new RectangleComparator());
         compareLists(list,
-                     getDatastore().find(Rectangle.class).order("-height,-width"),
-                     getDatastore().find(Rectangle.class).order(descending("height"), descending("width")),
-                     new RectangleComparator1());
+            getDatastore().find(Rectangle.class).order("-height,-width"),
+            getDatastore().find(Rectangle.class).order(descending("height"), descending("width")),
+            new RectangleComparator1());
         compareLists(list,
-                     getDatastore().find(Rectangle.class).order("width,height"),
-                     getDatastore().find(Rectangle.class).order(ascending("width"), ascending("height")),
-                     new RectangleComparator2());
+            getDatastore().find(Rectangle.class).order("width,height"),
+            getDatastore().find(Rectangle.class).order(ascending("width"), ascending("height")),
+            new RectangleComparator2());
         compareLists(list,
-                     getDatastore().find(Rectangle.class).order("width,height"),
-                     getDatastore().find(Rectangle.class).order("width, height"),
-                     new RectangleComparator3());
+            getDatastore().find(Rectangle.class).order("width,height"),
+            getDatastore().find(Rectangle.class).order("width, height"),
+            new RectangleComparator3());
+    }
+
+    private void compareLists(final List<Rectangle> list, final Query<Rectangle> query1, final Query<Rectangle> query2,
+                              final Comparator<Rectangle> comparator) {
+        list.sort(comparator);
+        assertEquals(query1.asList(), list);
+        assertEquals(query2.asList(), list);
     }
 
     @Test
     @SuppressWarnings("deprecation")
     public void testCorrectQueryForNotWithSizeEqIssue514() {
         Query<PhotoWithKeywords> query = getAds()
-            .find(PhotoWithKeywords.class)
-            .field("keywords").not().sizeEq(3);
+                                             .find(PhotoWithKeywords.class)
+                                             .field("keywords").not().sizeEq(3);
 
         assertEquals(new Document("keywords", new Document("$not", new Document("$size", 3))), query.getQueryDocument());
     }
@@ -388,10 +438,10 @@ public class TestQuery extends TestBase {
     @Test
     public void testDeleteQuery() {
         getDatastore().saveMany(asList(new Rectangle(1, 10),
-                            new Rectangle(1, 10),
-                            new Rectangle(1, 10),
-                            new Rectangle(10, 10),
-                            new Rectangle(10, 10)));
+            new Rectangle(1, 10),
+            new Rectangle(1, 10),
+            new Rectangle(10, 10),
+            new Rectangle(10, 10)));
 
         assertEquals(5, getDatastore().getCount(Rectangle.class));
         getDatastore().deleteMany(getDatastore().find(Rectangle.class).filter("height", 1D));
@@ -426,41 +476,41 @@ public class TestQuery extends TestBase {
         assertEquals(asList(key3, key4), getDatastore().find(PhotoWithKeywords.class)
                                                        .field("keywords")
                                                        .elemMatch(getDatastore().find(Keyword.class)
-                                                           .filter("keyword = ", "Scott"))
+                                                                                .filter("keyword = ", "Scott"))
                                                        .asKeyList());
 
         assertEquals(asList(key3, key4), getDatastore().find(PhotoWithKeywords.class)
                                                        .field("keywords")
                                                        .elemMatch(getDatastore()
-                                                               .find(Keyword.class)
-                                                               .field("keyword").equal("Scott"))
+                                                                      .find(Keyword.class)
+                                                                      .field("keyword").equal("Scott"))
                                                        .asKeyList());
 
         assertEquals(singletonList(key4), getDatastore().find(PhotoWithKeywords.class)
                                                         .field("keywords")
                                                         .elemMatch(getDatastore().find(Keyword.class)
-                                                            .filter("score = ", 14))
+                                                                                 .filter("score = ", 14))
                                                         .asKeyList());
 
         assertEquals(singletonList(key4), getDatastore().find(PhotoWithKeywords.class)
                                                         .field("keywords")
                                                         .elemMatch(getDatastore()
-                                                                .find(Keyword.class)
-                                                                .field("score").equal(14))
+                                                                       .find(Keyword.class)
+                                                                       .field("score").equal(14))
                                                         .asKeyList());
 
         assertEquals(asList(key1, key2), getDatastore().find(PhotoWithKeywords.class)
                                                        .field("keywords")
                                                        .not()
                                                        .elemMatch(getDatastore().find(Keyword.class)
-                                                           .filter("keyword = ", "Scott"))
+                                                                                .filter("keyword = ", "Scott"))
                                                        .asKeyList());
 
         assertEquals(asList(key1, key2), getDatastore().find(PhotoWithKeywords.class)
                                                        .field("keywords").not()
                                                        .elemMatch(getDatastore()
-                                                               .find(Keyword.class)
-                                                               .field("keyword").equal("Scott"))
+                                                                      .find(Keyword.class)
+                                                                      .field("keyword").equal("Scott"))
                                                        .asKeyList());
     }
 
@@ -524,7 +574,7 @@ public class TestQuery extends TestBase {
 
         final Query<PhotoWithKeywords> q = getAds().find(PhotoWithKeywords.class);
         q.and(q.criteria("keywords.keyword").hasThisOne("scott"),
-              q.criteria("keywords.keyword").hasAnyOf(asList("scott", "hernandez")));
+            q.criteria("keywords.keyword").hasAnyOf(asList("scott", "hernandez")));
 
         assertEquals(1, q.count());
         assertTrue(q.getQueryDocument().containsKey("$and"));
@@ -604,8 +654,8 @@ public class TestQuery extends TestBase {
         getDatastore().saveMany(asList(new PhotoWithKeywords(), new PhotoWithKeywords("Scott", "Joe", "Sarah")));
 
         final Query<PhotoWithKeywords> query = getDatastore()
-            .find(PhotoWithKeywords.class)
-            .field("keywords").in(asList(new Keyword("Scott"), new Keyword("Randy")));
+                                                   .find(PhotoWithKeywords.class)
+                                                   .field("keywords").in(asList(new Keyword("Scott"), new Keyword("Randy")));
         assertNotNull(query.get());
     }
 
@@ -803,14 +853,14 @@ public class TestQuery extends TestBase {
     public void testNegativeBatchSize() {
         getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
         getDatastore().saveMany(asList(new PhotoWithKeywords("scott", "hernandez"),
-                            new PhotoWithKeywords("scott", "hernandez"),
-                            new PhotoWithKeywords("scott", "hernandez"),
-                            new PhotoWithKeywords("1", "2"),
-                            new PhotoWithKeywords("3", "4"),
-                            new PhotoWithKeywords("5", "6")));
+            new PhotoWithKeywords("scott", "hernandez"),
+            new PhotoWithKeywords("scott", "hernandez"),
+            new PhotoWithKeywords("1", "2"),
+            new PhotoWithKeywords("3", "4"),
+            new PhotoWithKeywords("5", "6")));
         assertEquals(2, getDatastore().find(PhotoWithKeywords.class)
                                       .asList(new FindOptions()
-                                           .batchSize(-2))
+                                                  .batchSize(-2))
                                       .size());
     }
 
@@ -818,15 +868,15 @@ public class TestQuery extends TestBase {
     public void testNonSnapshottedQuery() {
         getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
         getDatastore().saveMany(asList(new PhotoWithKeywords("scott", "hernandez"),
-                            new PhotoWithKeywords("scott", "hernandez"),
-                            new PhotoWithKeywords("scott", "hernandez")));
+            new PhotoWithKeywords("scott", "hernandez"),
+            new PhotoWithKeywords("scott", "hernandez")));
         final Iterator<PhotoWithKeywords> it = getDatastore().find(PhotoWithKeywords.class)
                                                              .fetch(new FindOptions()
-                                                                 .snapshot(true)
-                                                                 .batchSize(2));
+                                                                        .snapshot(true)
+                                                                        .batchSize(2));
         getDatastore().saveMany(asList(new PhotoWithKeywords("1", "2"),
-                            new PhotoWithKeywords("3", "4"),
-                            new PhotoWithKeywords("5", "6")));
+            new PhotoWithKeywords("3", "4"),
+            new PhotoWithKeywords("5", "6")));
 
         assertNotNull(it.next());
         assertNotNull(it.next());
@@ -883,10 +933,10 @@ public class TestQuery extends TestBase {
         }
 
         Document fields = getDatastore()
-            .find(ContainsRenamedFields.class)
-            .project("_id", true)
-            .project("first_name", true)
-            .getFields();
+                              .find(ContainsRenamedFields.class)
+                              .project("_id", true)
+                              .project("first_name", true)
+                              .getFields();
         assertNull(fields.get(Mapper.CLASS_NAME_FIELDNAME));
     }
 
@@ -908,6 +958,10 @@ public class TestQuery extends TestBase {
         assertArrayEquals(copy(ints, ints.length - 12, 12), getDatastore().find(IntVector.class)
                                                                           .project("scalars", new ArraySlice(-12))
                                                                           .get().scalars);
+    }
+
+    private int[] copy(final int[] array, final int start, final int count) {
+        return copyOfRange(array, start, start + count);
     }
 
     @Test
@@ -937,10 +991,10 @@ public class TestQuery extends TestBase {
     @Test
     public void testQueryCount() {
         getDatastore().saveMany(asList(new Rectangle(1, 10),
-                            new Rectangle(1, 10),
-                            new Rectangle(1, 10),
-                            new Rectangle(10, 10),
-                            new Rectangle(10, 10)));
+            new Rectangle(1, 10),
+            new Rectangle(1, 10),
+            new Rectangle(10, 10),
+            new Rectangle(10, 10)));
 
         assertEquals(3, getDatastore().getCount(getDatastore().find(Rectangle.class).filter("height", 1D)));
         assertEquals(2, getDatastore().getCount(getDatastore().find(Rectangle.class).filter("height", 10D)));
@@ -987,11 +1041,17 @@ public class TestQuery extends TestBase {
 
     @Test
     public void testRangeQuery() {
-        getDatastore().saveMany(asList(new Rectangle(1, 10), new Rectangle(4, 2), new Rectangle(6, 10), new Rectangle(8, 5), new Rectangle(10, 4)));
+        getDatastore().saveMany(asList(new Rectangle(1, 10),
+            new Rectangle(4, 2),
+            new Rectangle(6, 10),
+            new Rectangle(8, 5),
+            new Rectangle(10, 4)));
 
         assertEquals(4, getDatastore().getCount(getDatastore().find(Rectangle.class).filter("height >", 3)));
-        assertEquals(3, getDatastore().getCount(getDatastore().find(Rectangle.class).filter("height >", 3).filter("height <", 10)));
-        assertEquals(1, getDatastore().getCount(getDatastore().find(Rectangle.class).filter("height >", 9).filter("width <", 5)));
+        assertEquals(3, getDatastore().getCount(getDatastore().find(Rectangle.class).filter("height >", 3)
+                                                              .filter("height <", 10)));
+        assertEquals(1, getDatastore().getCount(getDatastore().find(Rectangle.class).filter("height >", 9)
+                                                              .filter("width <", 5)));
         assertEquals(3, getDatastore().getCount(getDatastore().find(Rectangle.class).filter("height <", 7)));
     }
 
@@ -1053,7 +1113,11 @@ public class TestQuery extends TestBase {
 
     @Test
     public void testSimpleSort() {
-        getDatastore().saveMany(asList(new Rectangle(1, 10), new Rectangle(3, 8), new Rectangle(6, 10), new Rectangle(10, 10), new Rectangle(10, 1)));
+        getDatastore().saveMany(asList(new Rectangle(1, 10),
+            new Rectangle(3, 8),
+            new Rectangle(6, 10),
+            new Rectangle(10, 10),
+            new Rectangle(10, 1)));
 
         Rectangle r1 = getDatastore().find(Rectangle.class)
                                      .order("width")
@@ -1072,24 +1136,24 @@ public class TestQuery extends TestBase {
     @SuppressWarnings("deprecation")
     public void testSizeEqQuery() {
         assertEquals(new Document("keywords", new Document("$size", 3)), getDatastore().find(PhotoWithKeywords.class)
-                                                                                                 .field("keywords")
-                                                                                                 .sizeEq(3).getQueryDocument());
+                                                                                       .field("keywords")
+                                                                                       .sizeEq(3).getQueryDocument());
     }
 
     @Test
     public void testSnapshottedQuery() {
         getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
         getDatastore().saveMany(asList(new PhotoWithKeywords("scott", "hernandez"),
-                            new PhotoWithKeywords("scott", "hernandez"),
-                            new PhotoWithKeywords("scott", "hernandez")));
+            new PhotoWithKeywords("scott", "hernandez"),
+            new PhotoWithKeywords("scott", "hernandez")));
         final Iterator<PhotoWithKeywords> it = getDatastore().find(PhotoWithKeywords.class)
                                                              .filter("keywords.keyword", "scott")
                                                              .fetch(new FindOptions()
-                                                                 .snapshot(true)
-                                                                 .batchSize(2));
+                                                                        .snapshot(true)
+                                                                        .batchSize(2));
         getDatastore().saveMany(asList(new PhotoWithKeywords("1", "2"),
-                            new PhotoWithKeywords("3", "4"),
-                            new PhotoWithKeywords("5", "6")));
+            new PhotoWithKeywords("3", "4"),
+            new PhotoWithKeywords("5", "6")));
 
         assertNotNull(it.next());
         assertNotNull(it.next());
@@ -1121,11 +1185,12 @@ public class TestQuery extends TestBase {
         assertEquals(0, query.count());
 
         executorService.scheduleAtFixedRate(
-            () -> getDatastore().save(new CappedPic(System.currentTimeMillis() + "")), 0, 500, TimeUnit.MILLISECONDS);
+            () -> getDatastore().save(new CappedPic(System.currentTimeMillis() + "")), 0, 500,
+            TimeUnit.MILLISECONDS);
 
         final Iterator<CappedPic> tail = query
-            .fetch(new FindOptions()
-                       .cursorType(CursorType.Tailable));
+                                             .fetch(new FindOptions()
+                                                        .cursorType(CursorType.Tailable));
         Awaitility
             .await()
             .pollDelay(500, TimeUnit.MILLISECONDS)
@@ -1143,7 +1208,9 @@ public class TestQuery extends TestBase {
     @Test
     @SuppressWarnings("deprecation")
     public void testThatElemMatchQueriesOnlyChecksRequiredFields() {
-        final PhotoWithKeywords pwk1 = new PhotoWithKeywords(new Keyword("california"), new Keyword("nevada"), new Keyword("arizona"));
+        final PhotoWithKeywords pwk1 = new PhotoWithKeywords(new Keyword("california"),
+            new Keyword("nevada"),
+            new Keyword("arizona"));
         final PhotoWithKeywords pwk2 = new PhotoWithKeywords("Joe", "Sarah");
         pwk2.keywords.add(new Keyword("Scott", 14));
 
@@ -1232,15 +1299,6 @@ public class TestQuery extends TestBase {
 
         private String value1;
 
-    }
-
-    private int[] copy(final int[] array, final int start, final int count) {
-        return copyOfRange(array, start, start + count);
-    }
-
-    private void turnOffProfilingAndDropProfileCollection() {
-        getDatabase().runCommand(new Document("profile", 0));
-        getDatabase().getCollection("system.profile").drop();
     }
 
     @Entity
@@ -1559,30 +1617,5 @@ public class TestQuery extends TestBase {
             int compare = Double.compare(o1.getWidth(), o2.getWidth());
             return compare != 0 ? compare : Double.compare(o1.getHeight(), o2.getHeight());
         }
-    }
-
-    private void compareLists(final List<Rectangle> list, final Query<Rectangle> query1, final Query<Rectangle> query2,
-                              final Comparator<Rectangle> comparator) {
-        list.sort(comparator);
-        assertEquals(query1.asList(), list);
-        assertEquals(query2.asList(), list);
-    }
-
-    private String getCommentFromProfileRecord(final Document profileRecord) {
-        if (profileRecord.containsKey("command")) {
-            Document commandDocument = ((Document) profileRecord.get("command"));
-            if (commandDocument.containsKey("comment")) {
-                return (String) commandDocument.get("comment");
-            }
-        }
-        if (profileRecord.containsKey("query")) {
-            Document queryDocument = ((Document) profileRecord.get("query"));
-            if (queryDocument.containsKey("comment")) {
-                return (String) queryDocument.get("comment");
-            } else if (queryDocument.containsKey("$comment")) {
-                return (String) queryDocument.get("$comment");
-            }
-        }
-        return null;
     }
 }

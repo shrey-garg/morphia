@@ -9,8 +9,6 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Id;
 
-import java.io.Serializable;
-
 public class AnonymousClassTest extends TestBase {
 
     @Test

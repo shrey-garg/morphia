@@ -8,7 +8,6 @@ import org.mongodb.morphia.TestBase;
 import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.testutil.TestEntity;
 
-import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 

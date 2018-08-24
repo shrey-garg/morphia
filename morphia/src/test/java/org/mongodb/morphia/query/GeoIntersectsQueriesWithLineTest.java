@@ -1,7 +1,6 @@
 package org.mongodb.morphia.query;
 
 import com.mongodb.client.model.geojson.LineString;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;

@@ -109,7 +109,7 @@ public abstract class TestBase {
         return mongoClient.getDatabase("admin").runCommand(new Document("ismaster", 1));
     }
 
-    Document toDocument(Object entity) {
+    Document toDocument(final Object entity) {
         return getDatastore().getMapper().toDocument(entity);
     }
 

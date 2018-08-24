@@ -2,7 +2,6 @@ package org.mongodb.morphia.query;
 
 import com.mongodb.client.model.geojson.NamedCoordinateReferenceSystem;
 import com.mongodb.client.model.geojson.Polygon;
-import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.TestBase;

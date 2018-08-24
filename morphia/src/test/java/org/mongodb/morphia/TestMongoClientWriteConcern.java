@@ -45,7 +45,7 @@ public class TestMongoClientWriteConcern extends TestBase {
         @Id
         private int id;
 
-        public SimpleEntity() {
+        SimpleEntity() {
         }
 
         SimpleEntity(final int id) {
