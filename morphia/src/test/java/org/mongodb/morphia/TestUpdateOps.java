@@ -20,6 +20,7 @@ import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.annotations.Embedded;
@@ -892,6 +893,7 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     public void isolated() {
+        Assume.assumeTrue(serverIsAtMostVersion(3.6));
         UpdateOperations<Circle> updates = getDatastore().createUpdateOperations(Circle.class)
                                                          .inc("radius", 1D);
         assertFalse(updates.isIsolated());

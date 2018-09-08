@@ -97,6 +97,13 @@ public abstract class TestBase {
     protected boolean serverIsAtLeastVersion(final double version) {
         return Double.parseDouble(getServerVersion().substring(0, 3)) >= version;
     }
+    /**
+     * @param version must be a major version, e.g. 1.8, 2,0, 2.2
+     * @return true if server is at most specified version
+     */
+    protected boolean serverIsAtMostVersion(final double version) {
+        return Double.parseDouble(getServerVersion().substring(0, 3)) <= version;
+    }
 
     private String getServerVersion() {
         return (String) getMongoClient().getDatabase("admin")

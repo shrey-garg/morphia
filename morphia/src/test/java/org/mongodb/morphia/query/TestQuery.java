@@ -28,6 +28,7 @@ import org.bson.types.CodeWithScope;
 import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.Key;
@@ -866,6 +867,7 @@ public class TestQuery extends TestBase {
 
     @Test
     public void testNonSnapshottedQuery() {
+        Assume.assumeTrue(serverIsAtMostVersion(3.6));
         getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
         getDatastore().saveMany(asList(new PhotoWithKeywords("scott", "hernandez"),
             new PhotoWithKeywords("scott", "hernandez"),
@@ -1142,6 +1144,7 @@ public class TestQuery extends TestBase {
 
     @Test
     public void testSnapshottedQuery() {
+        Assume.assumeTrue(serverIsAtMostVersion(3.6));
         getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
         getDatastore().saveMany(asList(new PhotoWithKeywords("scott", "hernandez"),
             new PhotoWithKeywords("scott", "hernandez"),
