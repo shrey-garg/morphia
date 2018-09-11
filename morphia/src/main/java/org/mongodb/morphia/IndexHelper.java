@@ -94,8 +94,8 @@ final class IndexHelper {
 
     Index convert(final Text text, final String nameToStore) {
         return new IndexBuilder()
-            .options(text.options())
-            .fields(Collections.singletonList(new FieldBuilder()
+                   .options(text.options())
+                   .fields(Collections.singletonList(new FieldBuilder()
                                                          .value(nameToStore)
                                                          .type(IndexType.TEXT)
                                                          .weight(text.value())));
@@ -106,20 +106,20 @@ final class IndexHelper {
         final Map<String, Object> newOptions = extractOptions(indexed.options());
         if (!extractOptions(indexed).isEmpty() && !newOptions.isEmpty()) {
             throw new MappingException("Mixed usage of deprecated @Indexed values with the new @IndexOption values is not "
-                                           + "allowed.  Please migrate all settings to @IndexOptions");
+                                       + "allowed.  Please migrate all settings to @IndexOptions");
         }
 
         List<Field> fields = Collections.singletonList(new FieldBuilder()
-                                                                  .value(nameToStore)
-                                                                  .type(fromValue(indexed.value().toIndexValue())));
+                                                           .value(nameToStore)
+                                                           .type(fromValue(indexed.value().toIndexValue())));
         return newOptions.isEmpty()
                ? new IndexBuilder()
-                   .options(new IndexOptionsBuilder()
-                                .migrate(indexed))
-                   .fields(fields)
+                     .options(new IndexOptionsBuilder()
+                                  .migrate(indexed))
+                     .fields(fields)
                : new IndexBuilder()
-                   .options(indexed.options())
-                   .fields(fields);
+                     .options(indexed.options())
+                     .fields(fields);
     }
 
     @SuppressWarnings("deprecation")
@@ -231,7 +231,7 @@ final class IndexHelper {
 
     private Index replaceFields(final Index original, final List<Field> list) {
         return new IndexBuilder(original)
-            .fields(list);
+                   .fields(list);
     }
 
     @SuppressWarnings("unchecked")
@@ -253,7 +253,7 @@ final class IndexHelper {
             } catch (Exception e) {
                 path = field.value();
                 String message = format("The path '%s' can not be validated against '%s' and may represent an invalid index",
-                                        path, mc.getClazz().getName());
+                    path, mc.getClazz().getName());
                 if (!index.options().disableValidation()) {
                     throw new MappingException(message);
                 }
@@ -267,9 +267,9 @@ final class IndexHelper {
     @SuppressWarnings("deprecation")
     com.mongodb.client.model.IndexOptions convert(final IndexOptions options, final boolean background) {
         com.mongodb.client.model.IndexOptions indexOptions = new com.mongodb.client.model.IndexOptions()
-            .background(options.background() || background)
-            .sparse(options.sparse())
-            .unique(options.unique());
+                                                                 .background(options.background() || background)
+                                                                 .sparse(options.sparse())
+                                                                 .unique(options.unique());
 
         if (!options.language().equals("")) {
             indexOptions.defaultLanguage(options.language());
@@ -308,7 +308,7 @@ final class IndexHelper {
     }
 
     String findField(final MappedClass mc, final IndexOptions options, final List<String> path) {
-        if ( mc == null ) {
+        if (mc == null) {
             throw new MappingException("The MappedClass can not be null.");
         }
 

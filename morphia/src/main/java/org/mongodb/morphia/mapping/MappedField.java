@@ -25,6 +25,7 @@ import org.bson.codecs.pojo.PropertyModel;
 import org.bson.codecs.pojo.TypeData;
 import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Embedded;
+import org.mongodb.morphia.annotations.experimental.Handler;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.annotations.Reference;
@@ -32,6 +33,7 @@ import org.mongodb.morphia.annotations.Serialized;
 import org.mongodb.morphia.annotations.Transient;
 import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.mapping.codec.Conversions;
+import org.mongodb.morphia.mapping.experimental.PropertyHandler;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -268,18 +270,35 @@ public class MappedField {
         return property.getName();
     }
 
+    /**
+     * @return the {@link TypeData} for the field
+     */
     public TypeData<?> getTypeData() {
         return property.getTypeData();
     }
 
+    /**
+     * @return true if the field type is parameterized
+     */
     public boolean isParameterized() {
         return !getTypeData().getTypeParameters().isEmpty();
     }
 
+    /**
+     * @return the concrete type of the field with parameterized types taken in to consideration
+     */
     public Class getNormalizedType() {
         return !isParameterized() ? getTypeData().getType() : getTypeData().getTypeParameters().get(0).getType();
     }
 
+    /**
+     * Handlers can be defined to specialize the handling of serialization of fields.
+     *
+     * @return the handler or null if there is none defined
+     *
+     * @see Handler
+     * @see PropertyHandler
+     */
     public PropertyHandler getHandler() {
         final ClassModel<?> model = getDeclaringClass().getClassModel();
         final InstanceCreator<?> instanceCreator = model.getInstanceCreator();

@@ -25,6 +25,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
+/**
+ * An annotation indicating this type is an embedded type and doesn't need it's own {@code @Id} field
+ */
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)

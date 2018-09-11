@@ -43,9 +43,9 @@ public class MapReduceOptions<T> {
     private int limit;
     private long maxTimeMS;
     private Document scope;
-    private boolean jsMode;
-    private boolean verbose;
-    private boolean bypassDocumentValidation;
+    private Boolean jsMode;
+    private Boolean verbose;
+    private Boolean bypassDocumentValidation;
     private Collation collation;
     private Class<T> resultType;
 
@@ -234,10 +234,16 @@ public class MapReduceOptions<T> {
         return resultType;
     }
 
+    /**
+     * @return the map function
+     */
     public String getMap() {
         return map;
     }
 
+    /**
+     * @return the reduce function
+     */
     public String getReduce() {
         return reduce;
     }
@@ -252,10 +258,17 @@ public class MapReduceOptions<T> {
         switch (outputType) {
             case REPLACE:
                 iterable.action(MapReduceAction.REPLACE);
+                break;
             case MERGE:
                 iterable.action(MapReduceAction.MERGE);
+                break;
             case REDUCE:
                 iterable.action(MapReduceAction.REDUCE);
+                break;
+            case INLINE:
+                break;
+            default:
+                break;
         }
         iterable.bypassDocumentValidation(bypassDocumentValidation);
         iterable.collation(collation);

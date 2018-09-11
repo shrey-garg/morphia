@@ -27,6 +27,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
+/**
+ * Mark a field as transient and ignored by Morphia
+ */
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)

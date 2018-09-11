@@ -16,12 +16,12 @@ class BooleanArrayCodec implements Codec<boolean[]> {
     private Codec<Boolean> codec;
     private Mapper mapper;
 
-    BooleanArrayCodec(Mapper mapper) {
+    BooleanArrayCodec(final Mapper mapper) {
         this.mapper = mapper;
     }
 
     private Codec<Boolean> getCodec() {
-        if(codec == null) {
+        if (codec == null) {
             codec = mapper.getCodecRegistry().get(Boolean.class);
         }
         return codec;

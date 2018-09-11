@@ -29,7 +29,7 @@ public class FieldEndImpl<T extends CriteriaContainerImpl> implements FieldEnd<T
     private final QueryImpl<?> query;
     private final String field;
     private final T target;
-    private boolean not = false;
+    private boolean not;
 
     /**
      * Creates a FieldEnd for a particular field.

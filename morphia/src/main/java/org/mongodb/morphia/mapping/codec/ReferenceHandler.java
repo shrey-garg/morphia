@@ -18,7 +18,7 @@ import org.mongodb.morphia.Key;
 import org.mongodb.morphia.annotations.Reference;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.MappingException;
-import org.mongodb.morphia.mapping.PropertyHandler;
+import org.mongodb.morphia.mapping.experimental.PropertyHandler;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -26,6 +26,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Defines a {@code PropertyHandler} for references
+ */
 @SuppressWarnings("unchecked")
 public class ReferenceHandler extends PropertyHandler {
 
@@ -34,35 +37,23 @@ public class ReferenceHandler extends PropertyHandler {
     private BsonTypeClassMap bsonTypeClassMap = new BsonTypeClassMap();
     private DocumentToDBRefTransformer transformer = new DocumentToDBRefTransformer();
 
+    /**
+     * Creates a new Handler
+     * @param datastore the datastore to use
+     * @param field the field to use
+     * @param name the name of the property
+     * @param typeData the type data for the field
+     */
     public ReferenceHandler(final Datastore datastore, final Field field, final String name, final TypeData typeData) {
         super(datastore, field, name, typeData);
         annotation = field.getAnnotation(Reference.class);
-    }
-
-    private MappedField getIdField() {
-        if(idField == null) {
-            idField = getFieldMappedClass().getIdField();
-        }
-        return idField;
-    }
-
-    @Override
-    public <T, S> S decodeProperty(final BsonReader reader,
-                                   final DecoderContext decoderContext,
-                                   final InstanceCreator<T> instanceCreator,
-                                   final String name,
-                                   final PropertyModel<S> propertyModel) {
-
-        return (S) getDatastore().getMapper().getCodecRegistry()
-                                 .get(bsonTypeClassMap.get(reader.getCurrentBsonType()))
-                                 .decode(reader, decoderContext);
     }
 
     @Override
     public <S, E> void set(final E instance, final PropertyModel<S> propertyModel, final S value, final Datastore datastore,
                            final Map<Object, Object> entityCache) {
         S fetched = value;
-        if(value instanceof List) {
+        if (value instanceof List) {
             List<Object> ids = new ArrayList<>();
             for (Object o : (List) value) {
                 ids.add(extractId(o));
@@ -75,11 +66,11 @@ public class ReferenceHandler extends PropertyHandler {
             List list = new ArrayList();
             for (Object id : ids) {
                 final Object e = entityCache.get(id);
-                if(e != null) {
+                if (e != null) {
                     list.add(e);
                 }
             }
-            if(list.size() < ids.size() && !annotation.ignoreMissing()) {
+            if (list.size() < ids.size() && !annotation.ignoreMissing()) {
                 throw new MappingException("Referenced entities not found");
             }
             fetched = (S) list;
@@ -93,7 +84,19 @@ public class ReferenceHandler extends PropertyHandler {
                 throw new MappingException("Referenced entity not found");
             }
         }
-            propertyModel.getPropertyAccessor().set(instance, fetched);
+        propertyModel.getPropertyAccessor().set(instance, fetched);
+    }
+
+    @Override
+    public <T, S> S decodeProperty(final BsonReader reader,
+                                   final DecoderContext decoderContext,
+                                   final InstanceCreator<T> instanceCreator,
+                                   final String name,
+                                   final PropertyModel<S> propertyModel) {
+
+        return (S) getDatastore().getMapper().getCodecRegistry()
+                                 .get(bsonTypeClassMap.get(reader.getCurrentBsonType()))
+                                 .decode(reader, decoderContext);
     }
 
     @Override
@@ -121,16 +124,30 @@ public class ReferenceHandler extends PropertyHandler {
         return collectIdValues(value);
     }
 
+    private Object extractId(final Object o) {
+        if (annotation.idOnly()) {
+            return o;
+        }
+        return ((DBRef) transformer.transform(o)).getId();
+    }
+
+    private MappedField getIdField() {
+        if (idField == null) {
+            idField = getFieldMappedClass().getIdField();
+        }
+        return idField;
+    }
+
     private Object collectIdValues(final Object value) {
         List ids;
-        if(value instanceof Collection) {
-            ids = new ArrayList(((Collection)value).size());
-            for (Object o : (Collection)value) {
+        if (value instanceof Collection) {
+            ids = new ArrayList(((Collection) value).size());
+            for (Object o : (Collection) value) {
                 ids.add(collectIdValues(o));
             }
         } else if (value.getClass().isArray()) {
-            ids = new ArrayList(((Object[])value).length);
-            for (Object o : (Object[])value) {
+            ids = new ArrayList(((Object[]) value).length);
+            for (Object o : (Object[]) value) {
                 ids.add(collectIdValues(o));
             }
         } else {
@@ -142,24 +159,17 @@ public class ReferenceHandler extends PropertyHandler {
 
     private <S> Object encodeId(final S value) {
         Object idValue;
-        if(value instanceof Key) {
-            idValue = ((Key)value).getId();
+        if (value instanceof Key) {
+            idValue = ((Key) value).getId();
         } else {
             idValue = getIdField().getFieldValue(value);
         }
         if (!getField().getAnnotation(Reference.class).idOnly()) {
-            if(idValue == null) {
+            if (idValue == null) {
                 throw new MappingException("The ID value can not be null");
             }
             idValue = new DBRef(getFieldMappedClass().getCollectionName(), idValue);
         }
         return idValue;
-    }
-
-    private Object extractId(final Object o) {
-        if(annotation.idOnly()) {
-            return o;
-        }
-        return ((DBRef) transformer.transform(o)).getId();
     }
 }

@@ -13,6 +13,9 @@ import java.util.Set;
 
 import static java.lang.String.format;
 
+/**
+ * A constraint to check for duplicated attribute names
+ */
 public class DuplicatedAttributeNames implements ClassConstraint {
 
     @Override

@@ -42,7 +42,7 @@ public class PathTarget {
     private MappedClass context;
     private MappedClass root;
     private MappedField target;
-    private boolean resolved = false;
+    private boolean resolved;
 
     /**
      * Creates a resolution context for the given root and path.

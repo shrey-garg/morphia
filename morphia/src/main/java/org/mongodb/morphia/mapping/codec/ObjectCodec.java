@@ -8,11 +8,19 @@ import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.mongodb.morphia.mapping.Mapper;
 
+/**
+ * Defines a {@code Codec} for handling fields declared as {@code Object}s.
+ */
 public class ObjectCodec implements Codec<Object> {
 
     private Mapper mapper;
     private BsonTypeClassMap bsonTypeClassMap = new BsonTypeClassMap();
 
+    /**
+     * Creates a new codec
+     *
+     * @param mapper the mapper to use
+     */
     public ObjectCodec(final Mapper mapper) {
         this.mapper = mapper;
     }

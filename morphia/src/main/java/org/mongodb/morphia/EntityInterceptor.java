@@ -19,7 +19,7 @@ public interface EntityInterceptor {
      * @param mapper   the Mapper being used
      * @see PostLoad
      */
-    default void postLoad(Object ent, Document document, Mapper mapper) {
+    default void postLoad(final Object ent, final Document document, final Mapper mapper) {
 
     }
 
@@ -29,7 +29,7 @@ public interface EntityInterceptor {
      * @param mapper   the Mapper being used
      * @see PostPersist
      */
-    default void postPersist(Object ent, Document document, Mapper mapper) {
+    default void postPersist(final Object ent, final Document document, final Mapper mapper) {
 
     }
 
@@ -39,7 +39,7 @@ public interface EntityInterceptor {
      * @param mapper   the Mapper being used
      * @see PreLoad
      */
-    default void preLoad(Object ent, Document document, Mapper mapper) {
+    default void preLoad(final Object ent, final Document document, final Mapper mapper) {
 
     }
 
@@ -49,7 +49,7 @@ public interface EntityInterceptor {
      * @param mapper   the Mapper being used
      * @see PostPersist
      */
-    default void prePersist(Object ent, Document document, Mapper mapper) {
+    default void prePersist(final Object ent, final Document document, final Mapper mapper) {
 
     }
 
@@ -61,7 +61,7 @@ public interface EntityInterceptor {
      * @deprecated use {@link #prePersist(Object, Document, Mapper)} instead
      */
     @Deprecated
-    default void preSave(Object ent, Document document, Mapper mapper) {
+    default void preSave(final Object ent, final Document document, final Mapper mapper) {
         prePersist(ent, document, mapper);
     }
 }

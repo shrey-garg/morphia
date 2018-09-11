@@ -18,8 +18,8 @@ public interface ObjectFactory {
     <T> T createInstance(Class<T> clazz);
 
     /**
-     * Creates an instance of the class defined in the {@link Mapper#CLASS_NAME_FIELDNAME} field in the documentect passed in.  If that field
-     * is missing, the given Class is used instead.
+     * Creates an instance of the class defined in the {@link Mapper#CLASS_NAME_FIELDNAME} field in the document passed in.  If that
+     * field is missing, the given Class is used instead.
      *
      * @param clazz type class to instantiate
      * @param document the state to populate the new instance with
@@ -29,8 +29,8 @@ public interface ObjectFactory {
     <T> T createInstance(Class<T> clazz, Document document);
 
     /**
-     * Creates an instance of the class defined in the {@link Mapper#CLASS_NAME_FIELDNAME} field in the documentect passed in.  If that field
-     * is missing, morphia attempts to the MappedField to determine which concrete class to instantiate.
+     * Creates an instance of the class defined in the {@link Mapper#CLASS_NAME_FIELDNAME} field in the document passed in.  If that
+     * field is missing, morphia attempts to the MappedField to determine which concrete class to instantiate.
      *
      * @param mapper the Mapper to use
      * @param mf     the MappedField to consult when creating the instance

@@ -4,6 +4,9 @@ package org.mongodb.morphia.mapping.validation;
 import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 
+/**
+ * Defines a constraint violation
+ */
 public class ConstraintViolation {
     private final MappedClass clazz;
     private final Class<? extends ClassConstraint> validator;

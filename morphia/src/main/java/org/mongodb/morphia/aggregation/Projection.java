@@ -16,7 +16,7 @@ public final class  Projection {
     private final String source;
     private List<Projection> projections;
     private List<Object> arguments;
-    private boolean suppressed = false;
+    private boolean suppressed;
 
     private Projection(final String field, final String source) {
         this.target = field;

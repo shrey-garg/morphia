@@ -14,6 +14,9 @@ import java.util.Set;
 
 import static java.lang.String.format;
 
+/**
+ * A constraint to check for multiple ID fields defined
+ */
 public class MultipleId implements ClassConstraint {
 
     @Override

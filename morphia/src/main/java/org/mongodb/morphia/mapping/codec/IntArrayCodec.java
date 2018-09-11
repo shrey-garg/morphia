@@ -17,8 +17,17 @@ class IntArrayCodec implements Codec<int[]> {
     private Codec<Integer> codec;
     private Mapper mapper;
 
-    IntArrayCodec(Mapper mapper) {
+    IntArrayCodec(final Mapper mapper) {
         this.mapper = mapper;
+    }
+
+    @Override
+    public void encode(final BsonWriter writer, final int[] value, final EncoderContext encoderContext) {
+        writer.writeStartArray();
+        for (final int cur : value) {
+            getCodec().encode(writer, cur, encoderContext);
+        }
+        writer.writeEndArray();
     }
 
     @Override
@@ -27,19 +36,10 @@ class IntArrayCodec implements Codec<int[]> {
     }
 
     private Codec<Integer> getCodec() {
-        if(codec == null) {
+        if (codec == null) {
             codec = mapper.getCodecRegistry().get(Integer.class);
         }
         return codec;
-    }
-    
-    @Override
-    public void encode(final BsonWriter writer, final int[] value, final EncoderContext encoderContext) {
-        writer.writeStartArray();
-        for (final int cur : value) {
-            getCodec().encode(writer, cur, encoderContext);
-        }
-        writer.writeEndArray();
     }
 
     @Override

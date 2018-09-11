@@ -105,7 +105,7 @@ public final class PojoCodecProvider implements CodecProvider {
         private final Set<String> packages = new HashSet<String>();
         private final Map<Class<?>, ClassModel<?>> classModels = new HashMap<Class<?>, ClassModel<?>>();
         private final List<Class<?>> clazzes = new ArrayList<Class<?>>();
-        private List<Convention> conventions = null;
+        private List<Convention> conventions;
         private final List<PropertyCodecProvider> propertyCodecProviders = new ArrayList<PropertyCodecProvider>();
         private boolean automatic;
 

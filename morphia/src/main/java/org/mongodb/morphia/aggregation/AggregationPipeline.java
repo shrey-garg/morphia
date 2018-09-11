@@ -34,7 +34,7 @@ public interface AggregationPipeline {
      * @param <U>     type of the results
      * @return the computed results
      */
-    default <U> AggregateIterable<U> aggregate(Class<U> target, AggregationOptions options) {
+    default <U> AggregateIterable<U> aggregate(final Class<U> target, final AggregationOptions options) {
         return AggregationPipelineImpl.apply(aggregate(target), options);
     }
 
@@ -57,7 +57,8 @@ public interface AggregationPipeline {
      * @param <U>            type of the results
      * @return the computed results
      */
-    default <U> AggregateIterable<U> aggregate(Class<U> target, AggregationOptions options, ReadPreference readPreference) {
+    default <U> AggregateIterable<U> aggregate(final Class<U> target, final AggregationOptions options,
+                                               final ReadPreference readPreference) {
         return AggregationPipelineImpl.apply(aggregate(target, readPreference), options);
     }
 
@@ -71,7 +72,7 @@ public interface AggregationPipeline {
      * @deprecated use {@link #out(String, Class)} instead
      */
     @Deprecated
-    default <U> void aggregate(String collectionName, Class<U> target, ReadPreference readPreference) {
+    default <U> void aggregate(final String collectionName, final Class<U> target, final ReadPreference readPreference) {
         out(collectionName, target, AggregationOptions.builder().build(), readPreference);
     }
 
@@ -86,8 +87,8 @@ public interface AggregationPipeline {
      * @deprecated use {@link #out(String, Class, AggregationOptions)} instead
      */
     @Deprecated
-    default <U> void aggregate(String collectionName, Class<U> target, AggregationOptions options,
-                                               ReadPreference readPreference) {
+    default <U> void aggregate(final String collectionName, final Class<U> target, final AggregationOptions options,
+                               final ReadPreference readPreference) {
         out(collectionName, target, options, readPreference);
     }
 
@@ -192,7 +193,7 @@ public interface AggregationPipeline {
      * @return the computed results
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
-    default <U> MongoIterable<U> out(Class<U> target, AggregationOptions options) {
+    default <U> MongoIterable<U> out(final Class<U> target, final AggregationOptions options) {
         return out(target, options, ReadPreference.primary());
     }
 
@@ -229,7 +230,7 @@ public interface AggregationPipeline {
      * @param options        The options to apply to this aggregation
      * @mongodb.driver.manual reference/operator/aggregation/out $out
      */
-    default <U> void out(String collectionName, Class<U> target, AggregationOptions options) {
+    default <U> void out(final String collectionName, final Class<U> target, final AggregationOptions options) {
         out(collectionName, target, options, ReadPreference.primary());
     }
 

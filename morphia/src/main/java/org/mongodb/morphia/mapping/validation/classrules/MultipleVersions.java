@@ -14,6 +14,9 @@ import java.util.Set;
 
 import static java.lang.String.format;
 
+/**
+ * A constraint to check for multiple version fields defined
+ */
 public class MultipleVersions implements ClassConstraint {
 
     @Override

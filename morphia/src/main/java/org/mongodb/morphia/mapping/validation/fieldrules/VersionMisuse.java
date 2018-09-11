@@ -13,6 +13,9 @@ import java.util.Set;
 
 import static java.lang.String.format;
 
+/**
+ * A constraint checking for invalid {@code @Version} set up
+ */
 public class VersionMisuse extends FieldConstraint {
 
     private ObjectFactory creator;
@@ -32,7 +35,6 @@ public class VersionMisuse extends FieldConstraint {
             final Class<?> type = mf.getType();
             if (Long.class.equals(type) || long.class.equals(type)) {
 
-                //TODO: Replace this will a read ObjectFactory call -- requires Mapper instance.
                 final Object testInstance = creator.createInstance(mc.getClazz());
 
                 final Object value = mf.getFieldValue(testInstance);

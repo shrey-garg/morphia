@@ -241,11 +241,6 @@ public class TestMapping extends TestBase {
     }
 
     @Test
-    public void testIdFieldWithUnderscore() {
-        getMapper().map(StrangelyNamedIdField.class);
-    }
-
-    @Test
     public void testIntKeySetStringMap() {
         final ContainsIntKeySetStringMap map = new ContainsIntKeySetStringMap();
         map.values.put(1, Collections.singleton("I'm 1"));
@@ -547,13 +542,6 @@ public class TestMapping extends TestBase {
     @Embedded(value = "no-id", useDiscriminator = false)
     private static class RenamedEmbedded {
         private String name;
-    }
-
-    private static class StrangelyNamedIdField {
-        //CHECKSTYLE:OFF
-        @Id
-        private ObjectId id_ = new ObjectId();
-        //CHECKSTYLE:ON
     }
 
     private static class ContainsEmbeddedArray {

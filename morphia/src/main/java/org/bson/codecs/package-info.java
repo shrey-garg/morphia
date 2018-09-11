@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2008-2015 MongoDB, Inc.
+ * Copyright 2008-present MongoDB, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,6 @@
  */
 
 /**
- * Contains relocated packages from other libraries.  For internal usage only.
+ * This package contains all the default BSON codecs.
  */
-package relocated.morphia.org.apache.commons.collections;
+package org.bson.codecs;

@@ -132,7 +132,7 @@ public class ClassModelBuilder<T> {
         return annotations;
     }
 
-    public <A extends Annotation> A getAnnotation(Class<A> klass) {
+    public <A extends Annotation> A getAnnotation(final Class<A> klass) {
         for (Annotation annotation : annotations) {
             if (klass.equals(annotation.annotationType())) {
                 return klass.cast(annotation);
@@ -141,7 +141,7 @@ public class ClassModelBuilder<T> {
         return null;
     }
 
-    public boolean hasAnnotation(Class<? extends Annotation> klass) {
+    public boolean hasAnnotation(final Class<? extends Annotation> klass) {
         for (Annotation annotation : annotations) {
             if (klass.equals(annotation.annotationType())) {
                 return true;

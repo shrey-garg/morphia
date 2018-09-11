@@ -34,7 +34,8 @@ public final class EntityTypeAndIdValueValidator implements Validator {
      * @param mappedField        the MappedField
      * @param value              the value for the query
      * @param validationFailures the list to add any failures to. If validation passes or {@code appliesTo} returned false, this list will
-     *                           not change.    @return true if the validation was applied.
+     *                           not change.
+     * @return true if the validation was applied.
      */
     public boolean apply(final MappedClass mappedClass, final MappedField mappedField, final Object value,
                          final List<ValidationFailure> validationFailures) {

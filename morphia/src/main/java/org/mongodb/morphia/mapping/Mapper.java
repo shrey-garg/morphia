@@ -39,8 +39,9 @@ import static org.bson.codecs.configuration.CodecRegistries.fromRegistries;
 
 
 /**
- * <p>This is the heart of Morphia and takes care of mapping from/to POJOs/Documents<p> <p>This class is thread-safe and keeps various
- * "cached" data which should speed up processing.</p>
+ * This is the heart of Morphia and takes care of mapping from/to POJOs/Documents.  This class is thread-safe and keeps various
+ * "cached" data which should speed up processing.  This class should not be referenced outside of Morphia code to types that extend
+ * Morphia types.
  */
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class Mapper {
@@ -71,11 +72,16 @@ public class Mapper {
 
     //A general cache of instances of classes; used by MappedClass for EntityListener(s)
     private final Map<Class, Object> instanceCache = new ConcurrentHashMap();
+    private final Set<String> packages = new HashSet<>();
     private CodecRegistry codecRegistry;
     private DatastoreImpl datastore;
     private MapperOptions opts;
-    private final Set<String> packages = new HashSet<>();
 
+    /**
+     * Creates a new Mapper
+     * @param datastore the datastore to use
+     * @param codecRegistry the CodedRegistry from the Java driver
+     */
     public Mapper(final DatastoreImpl datastore, final CodecRegistry codecRegistry) {
         this(datastore, codecRegistry, new MapperOptions());
     }
@@ -83,8 +89,8 @@ public class Mapper {
     /**
      * Creates a Mapper with the given options.
      *
-     * @param datastore
-     * @param opts the options to use
+     * @param datastore the datastore to use
+     * @param opts      the options to use
      */
     Mapper(final DatastoreImpl datastore, final CodecRegistry codecRegistry, final MapperOptions opts) {
         this.datastore = datastore;
@@ -100,10 +106,16 @@ public class Mapper {
             fromProviders(new EnumCodecProvider(), typesCodecProvider, codecProvider));
     }
 
+    /**
+     * @return the codec registry
+     */
     public CodecRegistry getCodecRegistry() {
         return codecRegistry;
     }
 
+    /**
+     * @return the packages to scan
+     */
     public Set<String> getPackages() {
         return packages;
     }
@@ -117,6 +129,9 @@ public class Mapper {
         interceptors.add(ei);
     }
 
+    /**
+     * @return true if {@code EntityInterceptor}s have been defined
+     */
     public boolean hasInterceptors() {
         return !interceptors.isEmpty();
     }
@@ -146,6 +161,13 @@ public class Mapper {
         return new ArrayList<>(mappedClasses.values());
     }
 
+    /**
+     * Given a collection name, return the Class of the type mapped to that collection
+     * @param collection the name of the collection
+     * @param <T> type mapped type
+     *
+     * @return the class definiton
+     */
     public <T> Class<T> getClassFromCollection(final String collection) {
         final Set<MappedClass> mcs = mappedClassesByCollection.get(collection);
         if (mcs == null || mcs.isEmpty()) {
@@ -162,6 +184,12 @@ public class Mapper {
                   .orElse(null);
     }
 
+    /**
+     * Given a collection name, return the MappedClass of the types mapped to that collection
+     * @param collection the name of the collection
+     *
+     * @return the MappedClasses
+     */
     public List<MappedClass> getClassesMappedToCollection(final String collection) {
         final Set<MappedClass> mcs = mappedClassesByCollection.get(collection);
         if (mcs == null || mcs.isEmpty()) {
@@ -184,6 +212,10 @@ public class Mapper {
         return getCollectionName(classModel.getType());
     }
 
+    /**
+     * @param type the type to look up
+     * @return the mapped collection name
+     */
     public String getCollectionName(final Class type) {
         final MappedClass mc = getMappedClass(type);
         if (mc == null) {
@@ -215,6 +247,24 @@ public class Mapper {
             }
         }
         return mc;
+    }
+
+    /**
+     * @param clazz the class of the type to inspect
+     * @param <T> the type defintion
+     * @return true if the given class is mappable by Morphia
+     */
+    public <T> boolean isMappable(final Class<T> clazz) {
+        if (clazz.isEnum() || clazz.getPackage() == null) {
+            return false;
+        }
+        for (String restrictedPackage : restrictedPackages) {
+            if (clazz.getPackage().getName().startsWith(restrictedPackage + ".")) {
+                return false;
+            }
+        }
+
+        return clazz.getPackage() != null && (packages.isEmpty() || packages.contains(clazz.getPackage().getName()));
     }
 
     /**
@@ -380,6 +430,11 @@ public class Mapper {
         map(ReflectionUtils.getClasses(packageName, opts.isMapSubPackages()));
     }
 
+    /**
+     * Maps a set of classes
+     *
+     * @param entityClasses the classes to map
+     */
     public void map(final Set<Class> entityClasses) {
         if (entityClasses != null && !entityClasses.isEmpty()) {
             for (final Class entityClass : entityClasses) {
@@ -388,6 +443,13 @@ public class Mapper {
         }
     }
 
+    /**
+     * Converts an entity to a {@code Document}.  This is an internal Morphia method and it may change without notice.
+     *
+     * @param entity the entity to map
+     * @param <T> the type of the entity
+     * @return the Document
+     */
     public <T> Document toDocument(final T entity) {
         final Class<T> aClass = (Class<T>) entity.getClass();
         final DocumentWriter writer = new DocumentWriter();
@@ -396,29 +458,27 @@ public class Mapper {
         return writer.getRoot();
     }
 
+    /**
+     * @param clazz the class to inspect
+     * @param <T> the type
+     * @return true if the type has been Mapped
+     */
     public <T> boolean isMapped(final Class<T> clazz) {
         return mappedClasses.get(clazz) != null;
     }
 
-    public <T> boolean isMappable(final Class<T> clazz) {
-        if (clazz.isEnum() || clazz.getPackage() == null) {
-            return false;
-        }
-        for (String restrictedPackage : restrictedPackages) {
-            if (clazz.getPackage().getName().startsWith(restrictedPackage + ".")) {
-                return false;
-            }
-        }
-
-        return clazz.getPackage() != null && (packages.isEmpty() || packages.contains(clazz.getPackage().getName()));
-    }
-
+    /**
+     * Determines if the type of an instance is mappable by Morphia.
+     *
+     * @param value the value to inspect
+     * @return true if the type is mappable
+     */
     public boolean isMappable(final Object value) {
         boolean mappable;
         if (value == null) {
             mappable = false;
-        } else if(value instanceof Iterable) {
-            Iterator iterator = ((Iterable)value).iterator();
+        } else if (value instanceof Iterable) {
+            Iterator iterator = ((Iterable) value).iterator();
             mappable = iterator.hasNext() && isMappable(iterator.next());
         } else {
             mappable = isMappable(value.getClass());

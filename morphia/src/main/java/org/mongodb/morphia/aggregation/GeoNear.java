@@ -137,6 +137,9 @@ public final class GeoNear {
         return spherical;
     }
 
+    /**
+     * @return the location being used
+     */
     public Point getLocation() {
         return location;
     }

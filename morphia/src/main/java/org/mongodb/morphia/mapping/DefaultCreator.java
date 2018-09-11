@@ -8,12 +8,14 @@ import org.mongodb.morphia.logging.MorphiaLoggerFactory;
 
 import java.lang.reflect.Constructor;
 
-
+/**
+ * Factory class for creating various types.
+ */
 public class DefaultCreator implements ObjectFactory {
 
     private static final Logger LOG = MorphiaLoggerFactory.get(DefaultCreator.class);
 
-    private static <T> Constructor<T> getNoArgsConstructor(final Class<T> type) {
+    private <T> Constructor<T> getNoArgsConstructor(final Class<T> type) {
         try {
             final Constructor<T> constructor = type.getDeclaredConstructor();
             constructor.setAccessible(true);

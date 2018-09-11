@@ -6,11 +6,20 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.util.List;
 
+/**
+ * Accessor for array fields.  This is an internal class and not for use outside of Morphia.
+ */
 public class ArrayFieldAccessor extends FieldAccessor {
 
     private TypeData typeData;
     private Class<?> componentType;
 
+    /**
+     * Creates an Accessor for the given field
+     *
+     * @param typeData the type metadata
+     * @param field the field to access
+     */
     public ArrayFieldAccessor(final TypeData typeData, final Field field) {
         super(field);
         this.typeData = typeData;
@@ -44,7 +53,7 @@ public class ArrayFieldAccessor extends FieldAccessor {
 
 
     private Object convert(final Object o, final Class type) {
-        if(o instanceof List) {
+        if (o instanceof List) {
             List list = (List) o;
             final Object newArray = Array.newInstance(type.getComponentType(), list.size());
             for (int i = 0; i < list.size(); i++) {

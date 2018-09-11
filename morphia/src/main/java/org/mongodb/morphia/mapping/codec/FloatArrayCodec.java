@@ -16,8 +16,17 @@ class FloatArrayCodec implements Codec<float[]> {
     private Codec<Float> codec;
     private Mapper mapper;
 
-    FloatArrayCodec(Mapper mapper) {
+    FloatArrayCodec(final Mapper mapper) {
         this.mapper = mapper;
+    }
+
+    @Override
+    public void encode(final BsonWriter writer, final float[] value, final EncoderContext encoderContext) {
+        writer.writeStartArray();
+        for (final float cur : value) {
+            getCodec().encode(writer, cur, encoderContext);
+        }
+        writer.writeEndArray();
     }
 
     @Override
@@ -26,19 +35,10 @@ class FloatArrayCodec implements Codec<float[]> {
     }
 
     private Codec<Float> getCodec() {
-        if(codec == null) {
+        if (codec == null) {
             codec = mapper.getCodecRegistry().get(Float.class);
         }
         return codec;
-    }
-    
-    @Override
-    public void encode(final BsonWriter writer, final float[] value, final EncoderContext encoderContext) {
-        writer.writeStartArray();
-        for (final float cur : value) {
-            getCodec().encode(writer, cur, encoderContext);
-        }
-        writer.writeEndArray();
     }
 
     @Override

@@ -16,20 +16,8 @@ class StringArrayCodec implements Codec<String[]> {
     private Codec<String> codec;
     private Mapper mapper;
 
-    StringArrayCodec(Mapper mapper) {
+    StringArrayCodec(final Mapper mapper) {
         this.mapper = mapper;
-    }
-
-    @Override
-    public Class<String[]> getEncoderClass() {
-        return String[].class;
-    }
-  
-    private Codec<String> getCodec() {
-        if(codec == null) {
-            codec = mapper.getCodecRegistry().get(String.class);
-        }
-        return codec;
     }
 
     @Override
@@ -39,6 +27,18 @@ class StringArrayCodec implements Codec<String[]> {
             getCodec().encode(writer, cur, encoderContext);
         }
         writer.writeEndArray();
+    }
+
+    @Override
+    public Class<String[]> getEncoderClass() {
+        return String[].class;
+    }
+
+    private Codec<String> getCodec() {
+        if (codec == null) {
+            codec = mapper.getCodecRegistry().get(String.class);
+        }
+        return codec;
     }
 
     @Override

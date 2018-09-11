@@ -17,7 +17,9 @@ package org.mongodb.morphia;
 
 import com.mongodb.MongoClient;
 
-
+/**
+ * The entry point to using Morphia.
+ */
 public final class Morphia {
 
     private Morphia() {}
@@ -36,6 +38,7 @@ public final class Morphia {
      * It is best to use a Mongo singleton instance here.
      *
      * @param dbName the name of the database
+     * @param mongoClient the client to use
      * @return a Datastore that you can use to interact with MongoDB
      */
     public static Datastore createDatastore(final MongoClient mongoClient, final String dbName) {

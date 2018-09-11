@@ -6,10 +6,18 @@ import org.bson.codecs.configuration.CodecRegistry;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * A provider of Codecs for primitive types.
+ */
 @SuppressWarnings("unchecked")
 public class PrimitiveCodecProvider implements CodecRegistry {
     private Map<Class, Codec> primitiveCodecs = new HashMap<>();
 
+    /**
+     * Creates the provider
+     *
+     * @param codecRegistry the CodecRegistry to use
+     */
     public PrimitiveCodecProvider(final CodecRegistry codecRegistry) {
         primitiveCodecs.put(byte.class, codecRegistry.get(Byte.class));
         primitiveCodecs.put(short.class, codecRegistry.get(Short.class));

@@ -6,7 +6,7 @@ import org.bson.Document;
 import org.mongodb.morphia.internal.PathTarget;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
-import org.mongodb.morphia.mapping.PropertyHandler;
+import org.mongodb.morphia.mapping.experimental.PropertyHandler;
 
 import java.util.List;
 
@@ -55,47 +55,6 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
     }
 
     @Override
-    public UpdateOperations<T> push(final String field, final Object value) {
-        return push(field, value instanceof List ? (List<?>) value : singletonList(value), new PushOptions());
-    }
-
-    @Override
-    public UpdateOperations<T> push(final String field, final Object value, final PushOptions options) {
-        return push(field, value instanceof List ? (List<?>) value : singletonList(value), options);
-    }
-
-    @Override
-    public UpdateOperations<T> push(final String field, final List<?> values) {
-        return push(field, values, new PushOptions());
-    }
-
-    @Override
-    public UpdateOperations<T> push(final String field, final List<?> values, final PushOptions options) {
-        if (values == null || values.isEmpty()) {
-            throw new QueryException("Values cannot be null or empty.");
-        }
-
-        PathTarget pathTarget = new PathTarget(mapper, mapper.getMappedClass(clazz), field);
-        if (!validateNames) {
-            pathTarget.disableValidation();
-        }
-
-        final Document val = new Document(UpdateOperator.EACH.val(), mapValue(pathTarget, values));
-        append(val, "$position", options.getPosition());
-        append(val, "$slice", options.getSlice());
-        append(val, "$sort", options.getSortDocument());
-        addOperation(UpdateOperator.PUSH, pathTarget.translatedPath(), val);
-
-        return this;
-    }
-
-    private void append(final Document document, final String key, final Object value) {
-        if(value != null) {
-            document.put(key, value);
-        }
-    }
-
-    @Override
     public UpdateOperations<T> dec(final String field) {
         return inc(field, -1);
     }
@@ -109,7 +68,7 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
             return inc(field, (value.doubleValue() * -1));
         }
         throw new IllegalArgumentException(
-                "Currently only the following types are allowed: integer, long, double, float.");
+            "Currently only the following types are allowed: integer, long, double, float.");
     }
 
     @Override
@@ -144,6 +103,32 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
         return this;
     }
 
+    /**
+     * @return the operations listed
+     */
+    @Override
+    public Document getOperations() {
+        return new Document(operations);
+    }
+
+    /**
+     * Sets the operations for this UpdateOpsImpl
+     *
+     * @param operations the operations
+     */
+    @SuppressWarnings("unchecked")
+    public void setOperations(final Document operations) {
+        this.operations = operations;
+    }
+
+    /**
+     * @return true if isolated
+     */
+    @Override
+    public boolean isIsolated() {
+        return isolated;
+    }
+
     @Override
     public UpdateOperations<T> max(final String field, final Number value) {
         add(UpdateOperator.MAX, field, value);
@@ -153,6 +138,41 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
     @Override
     public UpdateOperations<T> min(final String field, final Number value) {
         add(UpdateOperator.MIN, field, value);
+        return this;
+    }
+
+    @Override
+    public UpdateOperations<T> push(final String field, final Object value) {
+        return push(field, value instanceof List ? (List<?>) value : singletonList(value), new PushOptions());
+    }
+
+    @Override
+    public UpdateOperations<T> push(final String field, final Object value, final PushOptions options) {
+        return push(field, value instanceof List ? (List<?>) value : singletonList(value), options);
+    }
+
+    @Override
+    public UpdateOperations<T> push(final String field, final List<?> values) {
+        return push(field, values, new PushOptions());
+    }
+
+    @Override
+    public UpdateOperations<T> push(final String field, final List<?> values, final PushOptions options) {
+        if (values == null || values.isEmpty()) {
+            throw new QueryException("Values cannot be null or empty.");
+        }
+
+        PathTarget pathTarget = new PathTarget(mapper, mapper.getMappedClass(clazz), field);
+        if (!validateNames) {
+            pathTarget.disableValidation();
+        }
+
+        final Document val = new Document(UpdateOperator.EACH.val(), mapValue(pathTarget, values));
+        append(val, "$position", options.getPosition());
+        append(val, "$slice", options.getSlice());
+        append(val, "$sort", options.getSortDocument());
+        addOperation(UpdateOperator.PUSH, pathTarget.translatedPath(), val);
+
         return this;
     }
 
@@ -211,30 +231,15 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
         return this;
     }
 
-    /**
-     * @return the operations listed
-     */
-    @Override
-    public Document getOperations() {
-        return new Document(operations);
+    protected UpdateOperations<T> remove(final String fieldExpr, final boolean firstNotLast) {
+        add(UpdateOperator.POP, fieldExpr, (firstNotLast) ? -1 : 1);
+        return this;
     }
 
-    /**
-     * Sets the operations for this UpdateOpsImpl
-     *
-     * @param operations the operations
-     */
-    @SuppressWarnings("unchecked")
-    public void setOperations(final Document operations) {
-        this.operations = operations;
-    }
-
-    /**
-     * @return true if isolated
-     */
-    @Override
-    public boolean isIsolated() {
-        return isolated;
+    private void append(final Document document, final String key, final Object value) {
+        if (value != null) {
+            document.put(key, value);
+        }
     }
 
     protected void add(final UpdateOperator op, final String f, final Object value) {
@@ -256,6 +261,18 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
         addOperation(op, pathTarget.translatedPath(), val);
     }
 
+    private Object mapValue(final PathTarget pathTarget, final Object value) {
+        final MappedField mappedField = pathTarget.getTarget();
+        Object mappedValue = value;
+        if (value != null && mapper.isMappable(value) && mappedField != null) {
+            PropertyHandler handler = mappedField.getHandler();
+            if (handler != null) {
+                mappedValue = handler.encodeValue(value);
+            }
+        }
+        return mappedValue;
+    }
+
     private void addOperation(final UpdateOperator op, final String fieldName, final Object val) {
         final String opString = op.val();
 
@@ -265,23 +282,6 @@ public class UpdateOpsImpl<T> implements UpdateOperations<T> {
             operations.put(opString, operation);
         }
         operation.put(fieldName, val);
-    }
-
-    private Object mapValue(final PathTarget pathTarget, final Object value) {
-        final MappedField mappedField = pathTarget.getTarget();
-        Object mappedValue = value;
-        if (value != null && mapper.isMappable(value) && mappedField != null) {
-            PropertyHandler handler = mappedField.getHandler();
-            if(handler != null) {
-                mappedValue = handler.encodeValue(value);
-            }
-        }
-        return mappedValue;
-    }
-
-    protected UpdateOperations<T> remove(final String fieldExpr, final boolean firstNotLast) {
-        add(UpdateOperator.POP, fieldExpr, (firstNotLast) ? -1 : 1);
-        return this;
     }
 
     @Override

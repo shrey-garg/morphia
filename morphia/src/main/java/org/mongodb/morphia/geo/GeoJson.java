@@ -76,6 +76,7 @@ public final class GeoJson {
      *
      * @param exterior an ordered series of Position that make up the polygon.  The first and last points should be the same to close the
      *               polygon
+     * @param holes the holes in the polygon
      * @return a Polygon as defined by the points.
      * @throws java.lang.IllegalArgumentException if the start and end points are not the same
      * @mongodb.server.release 2.4

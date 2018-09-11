@@ -4,7 +4,7 @@ package org.mongodb.morphia.query;
 import org.bson.Document;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
-import org.mongodb.morphia.mapping.PropertyHandler;
+import org.mongodb.morphia.mapping.experimental.PropertyHandler;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -36,7 +36,7 @@ class FieldCriteria extends AbstractCriteria {
         Object mappedValue = value;
         if (mapper.isMappable(value) && mappedField != null) {
             PropertyHandler handler = mappedField.getHandler();
-            if(handler != null) {
+            if (handler != null) {
                 mappedValue = handler.encodeValue(value);
             }
         }
@@ -49,8 +49,8 @@ class FieldCriteria extends AbstractCriteria {
 
     private boolean isMappable(final Object value, final Mapper mapper) {
         boolean mappable;
-        if(value instanceof Iterable) {
-            Iterator iterator = ((Iterable)value).iterator();
+        if (value instanceof Iterable) {
+            Iterator iterator = ((Iterable) value).iterator();
             mappable = iterator.hasNext() && isMappable(iterator.next(), mapper);
         } else {
             mappable = mapper.isMappable(value.getClass());

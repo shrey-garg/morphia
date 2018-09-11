@@ -10,6 +10,9 @@ import org.mongodb.morphia.mapping.validation.ConstraintViolation.Level;
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
+/**
+ * Defines a constraint in which two annotations can not both be applied to a field
+ */
 public class ContradictingFieldAnnotation extends FieldConstraint {
 
     private final Class<? extends Annotation> a1;

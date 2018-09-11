@@ -98,6 +98,9 @@ public interface UpdateOperations<T> {
      */
     UpdateOperations<T> isolated();
 
+    /**
+     * @return the {@code Document} holding the operations
+     */
     Document getOperations();
 
     /**
@@ -147,7 +150,7 @@ public interface UpdateOperations<T> {
      * @return this
      * @mongodb.driver.manual reference/operator/update/push/ $push
      */
-    UpdateOperations<T> push(String field, Object value, final PushOptions options);
+    UpdateOperations<T> push(String field, Object value, PushOptions options);
 
     /**
      * Adds new values to an array field.

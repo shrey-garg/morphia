@@ -9,6 +9,9 @@ import org.mongodb.morphia.mapping.validation.ConstraintViolation.Level;
 
 import java.util.Set;
 
+/**
+ * A constraint to check that an ID field has been specified
+ */
 public class NoId implements ClassConstraint {
 
     @Override

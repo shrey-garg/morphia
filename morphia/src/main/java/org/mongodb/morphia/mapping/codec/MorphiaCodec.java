@@ -30,13 +30,17 @@ import org.mongodb.morphia.mapping.MappedClass;
 import org.mongodb.morphia.mapping.MappedField;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.MorphiaInstanceCreator;
-import org.mongodb.morphia.mapping.PropertyHandler;
+import org.mongodb.morphia.mapping.experimental.PropertyHandler;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.mongodb.morphia.mapping.codec.Conversions.convert;
 
+/**
+ * A {@code Codec} for Morphia mapped types
+ * @param <T>
+ */
 @SuppressWarnings("unchecked")
 public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCodec<T> {
     private final Datastore datastore;
@@ -175,6 +179,9 @@ public class MorphiaCodec<T> extends PojoCodecImpl<T> implements CollectibleCode
         return field != null ?  field : mappedClass.getMappedFieldByJavaField(propertyModel.getName());
     }
 
+    /**
+     * @return the MappedClass this Codec handles
+     */
     public MappedClass getMappedClass() {
         return mappedClass;
     }

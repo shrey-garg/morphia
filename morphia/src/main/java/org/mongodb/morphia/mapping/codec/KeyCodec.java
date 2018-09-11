@@ -15,6 +15,9 @@ import org.mongodb.morphia.mapping.MappingException;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * A {@link Codec} for {@link Key}
+ */
 @SuppressWarnings("unchecked")
 public class KeyCodec implements Codec<Key> {
 
@@ -28,7 +31,7 @@ public class KeyCodec implements Codec<Key> {
     public void encode(final BsonWriter writer, final Key value, final EncoderContext encoderContext) {
         writer.writeStartDocument();
         String collection = value.getCollection();
-        if(collection == null) {
+        if (collection == null) {
             collection = mapper.getCollectionName(value.getType());
         }
         writer.writeString("$ref", collection);
@@ -49,12 +52,12 @@ public class KeyCodec implements Codec<Key> {
 
         final String ref = reader.readString("$ref");
         final List<MappedClass> classes = mapper.getClassesMappedToCollection(ref);
-        final String name = reader.readName();
+        reader.readName();
         final BsonReaderMark mark = reader.getMark();
         final Iterator<MappedClass> iterator = classes.iterator();
         Object idValue = null;
         MappedClass mappedClass = null;
-        while(idValue == null && iterator.hasNext()) {
+        while (idValue == null && iterator.hasNext()) {
             mappedClass = iterator.next();
             try {
                 final MappedField idField = mappedClass.getIdField();
@@ -62,12 +65,12 @@ public class KeyCodec implements Codec<Key> {
                     final Class<?> idType = idField.getTypeData().getType();
                     idValue = mapper.getCodecRegistry().get(idType).decode(reader, decoderContext);
                 }
-            } catch(Exception e) {
+            } catch (Exception e) {
                 mark.reset();
             }
         }
 
-        if(idValue == null) {
+        if (idValue == null) {
             throw new MappingException("Could not map the Key to a type.");
         }
         reader.readEndDocument();

@@ -13,6 +13,9 @@ import java.util.Set;
 
 import static java.lang.String.format;
 
+/**
+ * Checks that {@code @Entity} and {@code @Embedded} are not both on the same class.
+ */
 public class EntityAndEmbed implements ClassConstraint {
 
     @Override

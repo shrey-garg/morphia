@@ -17,7 +17,7 @@ public class MapperOptions {
     private boolean storeNulls;
     private boolean storeEmpties;
     private boolean useLowerCaseCollectionNames;
-    private boolean mapSubPackages = false;
+    private boolean mapSubPackages;
     private ObjectFactory objectFactory = new DefaultCreator();
 
     /**
@@ -144,13 +144,20 @@ public class MapperOptions {
         this.mapSubPackages = mapSubPackages;
     }
 
-    public void addPropertyHandler(Class<? extends Annotation> annotation) {
+    /**
+     * Adds an annotation to be handled by property handle.
+     *
+     * This method is experimental and its signature may change.
+     *
+     * @param annotation the
+     */
+    public void addPropertyHandler(final Class<? extends Annotation> annotation) {
         propertyHandlers.add(annotation);
     }
-    public void removePropertyHandler(Class<? extends Annotation> annotation) {
-        propertyHandlers.remove(annotation);
-    }
 
+    /**
+     * @return the annotations to be used by {@code PropertyHandler}s
+     */
     public List<Class<? extends Annotation>> getPropertyHandlers() {
         return propertyHandlers;
     }

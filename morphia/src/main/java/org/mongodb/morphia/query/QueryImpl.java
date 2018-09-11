@@ -46,8 +46,8 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     private boolean validateType = true;
     private Boolean includeFields;
     private Document baseQuery;
-    private Document projection = null;
-    private Document sort = null;
+    private Document projection;
+    private Document sort;
     private ReadConcern readConcern;
     private ReadPreference readPreference;
 

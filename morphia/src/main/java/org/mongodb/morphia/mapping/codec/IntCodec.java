@@ -7,6 +7,9 @@ import org.bson.codecs.Codec;
 import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 
+/**
+ * A {@link Codec} for Integer
+ */
 public class IntCodec implements Codec<Integer> {
     @Override
     public Integer decode(final BsonReader reader, final DecoderContext decoderContext) {

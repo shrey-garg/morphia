@@ -77,6 +77,7 @@ public interface Datastore {
      * @param clazz the type to delete
      * @param id    the ID of the entity to delete
      * @param options the options to use when deleting
+     * @param writeConcern the WriteConcern to apply
      * @param <T>   the type to delete
      * @param <V>   the type of the id
      * @return results of the delete
@@ -101,6 +102,7 @@ public interface Datastore {
      * @param clazz the type to delete
      * @param ids   the IDs of the entity to delete
      * @param options the options to use when deleting
+     * @param writeConcern the WriteConcern to apply
      * @param <T>   the type to delete
      * @param <V>   the type of the id
      * @return results of the delete
@@ -122,6 +124,7 @@ public interface Datastore {
      *
      * @param query   the query to use when finding documents to delete
      * @param options the options to apply to the delete
+     * @param writeConcern the WriteConcern to apply
      * @param <T>     the type to delete
      * @return results of the delete
      * @since 1.3
@@ -142,6 +145,7 @@ public interface Datastore {
      *
      * @param entity  the entity to delete
      * @param options the options to use when deleting
+     * @param writeConcern the WriteConcern to apply
      * @param <T>     the type to delete
      * @return results of the delete
      * @since 1.3
@@ -240,6 +244,7 @@ public interface Datastore {
      *
      * @param query the query to use when finding entities to delete
      * @param options the options to apply to the delete
+     * @param writeConcern the WriteConcern to apply
      * @param <T>   the type to query
      * @return the deleted Entity
      * @since 1.3
@@ -262,6 +267,7 @@ public interface Datastore {
      * @param query      the query to use when finding entities to update
      * @param operations the updates to apply to the matched documents
      * @param options    the options to apply to the update
+     * @param writeConcern the WriteConcern to apply
      * @param <T>        the type to query
      * @return The modified Entity (the result of the update)
      * @since 1.3
@@ -330,6 +336,7 @@ public interface Datastore {
 
     /**
      * @param clazz the class to use for mapping
+     * @param <T>  the type to lookup
      * @return the mapped collection for the collection
      */
     <T> MongoCollection<T> getCollection(Class<T> clazz);
@@ -434,7 +441,8 @@ public interface Datastore {
      * @deprecated use {@link #mapReduce(MapReduceOptions)} instead
      */
     @Deprecated
-    default <T> MapReduceIterable mapReduce(MapreduceType type, Query q, Class<T> outputType, MapReduceCommand baseCommand) {
+    default <T> MapReduceIterable mapReduce(final MapreduceType type, final Query q, final Class<T> outputType,
+                                            final MapReduceCommand baseCommand) {
         return mapReduce(new MapReduceOptions<T>()
                              .outputType(type.toOutputType())
                              .query(q)
@@ -464,9 +472,10 @@ public interface Datastore {
     /**
      * Work as if you did an update with each field in the entity doing a $set; Only at the top level of the entity.
      *
-     * @param <T>    the type of the entity
      * @param entity the entity to merge back in to the database
+     * @param options the options to apply
      * @param wc     the WriteConcern to use
+     * @param <T>    the type of the entity
      */
     <T> void merge(T entity, InsertOneOptions options, WriteConcern wc);
 
@@ -499,6 +508,7 @@ public interface Datastore {
      * @param entities the entities to save
      * @param <T>      the type of the entity
      * @param options  the options to apply to the save operation
+     * @param writeConcern the WriteConcern to apply
      * @return the keys of the entities
      */
     <T> List<Key<T>> saveMany(List<T> entities, InsertManyOptions options, WriteConcern writeConcern);
@@ -539,6 +549,8 @@ public interface Datastore {
      *
      * @param key        the key of entity to update
      * @param operations the update operations to perform
+     * @param options the options to apply
+     * @param writeConcern the WriteConcern to apply
      * @param <T>        the type of the entity
      * @return the update results
      * @see UpdateResult
@@ -584,6 +596,7 @@ public interface Datastore {
      * @param query      the query used to match the documents to update
      * @param operations the update operations to perform
      * @param options    the options to apply to the update
+     * @param writeConcern the WriteConcern to apply
      * @param <T>        the type of the entity
      * @return the results of the updates
      * @since 1.3

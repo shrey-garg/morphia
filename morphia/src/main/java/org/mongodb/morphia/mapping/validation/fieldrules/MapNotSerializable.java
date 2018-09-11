@@ -13,6 +13,9 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * A constraint to check for serializability of Map keys and values
+ */
 public class MapNotSerializable extends FieldConstraint {
 
     @Override

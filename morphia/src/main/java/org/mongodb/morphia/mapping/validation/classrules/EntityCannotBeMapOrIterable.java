@@ -10,6 +10,9 @@ import org.mongodb.morphia.mapping.validation.ConstraintViolation.Level;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Checks that the entity is neither a {@code Map} nor and {@code Iterable}
+ */
 public class EntityCannotBeMapOrIterable implements ClassConstraint {
 
     @Override

@@ -37,9 +37,7 @@ public class ShortFormatter extends Formatter {
             try {
                 final StringWriter sw = new StringWriter();
                 final PrintWriter pw = new PrintWriter(sw);
-                //CHECKSTYLE:OFF
                 record.getThrown().printStackTrace(pw);
-                //CHECKSTYLE:ON
                 pw.close();
                 sb.append(sw.toString());
             } catch (Exception ex) {

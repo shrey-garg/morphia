@@ -54,6 +54,7 @@ configure(subprojects.findAll { it.name != 'util' }) {
 
     checkstyle {
         configDir = rootConfig
+//        version = "8.12"
     }
 
     findbugs {
@@ -133,7 +134,7 @@ configure(subprojects.findAll { it.name != 'util' }) {
                                    .collect(toList())
         options.setTaglets(['taglets.ManualTaglet', 'taglets.ServerReleaseTaglet'])
         options.links 'http://docs.oracle.com/javase/6/docs/api/'
-        options.links 'http://api.mongodb.org/java/3.0/'
+        options.links 'http://mongodb.github.io/mongo-java-driver/3.7/javadoc/'
         title "Morphia ${majorVersion} API"
         options.encoding = 'UTF-8'
         options.charSet 'UTF-8'

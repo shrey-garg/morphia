@@ -21,6 +21,9 @@ import java.util.Map;
 import static java.util.Arrays.asList;
 import static org.bson.assertions.Assertions.notNull;
 
+/**
+ * {@code CodecProvider} for handling Morphia entities
+ */
 public class MorphiaCodecProvider implements CodecProvider {
     private final Map<Class<?>, ClassModel<?>> classModels = new HashMap<>();
     private final Map<Class<?>, MorphiaCodec<?>> codecs = new HashMap<>();
@@ -30,6 +33,13 @@ public class MorphiaCodecProvider implements CodecProvider {
     private final List<PropertyCodecProvider> propertyCodecProviders = new ArrayList<>();
     private Datastore datastore;
 
+    /**
+     * Creates a new provider
+     *
+     * @param datastore the datastore to use
+     * @param mapper the mapper to use
+     * @param conventions any conventions to apply
+     */
     public MorphiaCodecProvider(final Datastore datastore, final Mapper mapper, final List<Convention> conventions) {
         this.datastore = datastore;
         this.mapper = mapper;

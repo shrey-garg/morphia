@@ -17,6 +17,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Defines a provider for Morphia-specific collection handling
+ */
 @SuppressWarnings("unchecked")
 public class MorphiaCollectionPropertyCodecProvider extends MorphiaPropertyCodecProvider {
     @Override
@@ -49,7 +52,7 @@ public class MorphiaCollectionPropertyCodecProvider extends MorphiaPropertyCodec
 
         @Override
         public Collection<T> decode(final BsonReader reader, final DecoderContext decoderContext) {
-            if(reader.getCurrentBsonType().equals(BsonType.ARRAY)) {
+            if (reader.getCurrentBsonType().equals(BsonType.ARRAY)) {
                 return super.decode(reader, decoderContext);
             }
             final Collection<T> collection = getInstance();

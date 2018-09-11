@@ -9,10 +9,18 @@ import org.mongodb.morphia.mapping.Mapper;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Defines a {@code ValueCodecProvider} for common types used in entities.
+ */
 @SuppressWarnings("unchecked")
 public class MorphiaTypesCodecProvider extends ValueCodecProvider {
     private final Codec<?> arrayCodec;
 
+    /**
+     * Creates a new provider
+     *
+     * @param mapper the mapper to use
+     */
     public MorphiaTypesCodecProvider(final Mapper mapper) {
         addCodec(new KeyCodec(mapper));
         addCodec(new ClassCodec());
@@ -39,6 +47,30 @@ public class MorphiaTypesCodecProvider extends ValueCodecProvider {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+
+        final MorphiaTypesCodecProvider that = (MorphiaTypesCodecProvider) o;
+
+        return arrayCodec != null ? arrayCodec.equals(that.arrayCodec) : that.arrayCodec == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (arrayCodec != null ? arrayCodec.hashCode() : 0);
+        return result;
     }
 
     private static class HashMapCodec extends MapCodec {

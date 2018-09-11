@@ -10,6 +10,9 @@ import org.bson.codecs.EncoderContext;
 import java.net.MalformedURLException;
 import java.net.URI;
 
+/**
+ * Defines a {@code Codec} for URLs
+ */
 public class URICodec implements Codec<URI> {
     @Override
     public URI decode(final BsonReader reader, final DecoderContext decoderContext) {

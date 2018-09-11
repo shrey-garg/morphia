@@ -9,6 +9,9 @@ import org.mongodb.morphia.mapping.validation.ConstraintViolation;
 
 import java.util.Set;
 
+/**
+ * Defines a constraint for fields
+ */
 public abstract class FieldConstraint implements ClassConstraint {
     @Override
     public final void check(final Mapper mapper, final MappedClass mc, final Set<ConstraintViolation> ve) {
@@ -17,6 +20,6 @@ public abstract class FieldConstraint implements ClassConstraint {
         }
     }
 
-    protected abstract void check(final Mapper mapper, MappedClass mc, MappedField mf, Set<ConstraintViolation> ve);
+    protected abstract void check(Mapper mapper, MappedClass mc, MappedField mf, Set<ConstraintViolation> ve);
 
 }

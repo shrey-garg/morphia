@@ -99,8 +99,8 @@ public class MappedClass {
         type = classModel.getType();
         mapperOptions = mapper.getOptions();
 
-        if (LOG.isTraceEnabled()) {
-            LOG.trace("Creating MappedClass for " + type);
+        if (MappedClass.LOG.isTraceEnabled()) {
+            MappedClass.LOG.trace("Creating MappedClass for " + type);
         }
 
         if (!Modifier.isStatic(type.getModifiers()) && type.isMemberClass()) {
@@ -108,8 +108,8 @@ public class MappedClass {
         }
         discover(mapper);
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("MappedClass done: " + toString());
+        if (MappedClass.LOG.isDebugEnabled()) {
+            MappedClass.LOG.debug("MappedClass done: " + toString());
         }
     }
 
@@ -118,7 +118,7 @@ public class MappedClass {
             return new ArrayList<>();
         }
 
-        final List<Method> list = getDeclaredAndInheritedMethods(type.getSuperclass());
+        final List<Method> list = MappedClass.getDeclaredAndInheritedMethods(type.getSuperclass());
         for (final Method m : type.getDeclaredMethods()) {
             if (!Modifier.isStatic(m.getModifiers())) {
                 list.add(m);
@@ -185,8 +185,8 @@ public class MappedClass {
                         final Object inst = toCall.get(cm.clazz);
                         method.setAccessible(true);
 
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug(format("Calling lifecycle method(@%s %s) on %s", event.getSimpleName(), method, inst));
+                        if (MappedClass.LOG.isDebugEnabled()) {
+                            MappedClass.LOG.debug(format("Calling lifecycle method(@%s %s) on %s", event.getSimpleName(), method, inst));
                         }
 
                         if (inst == null) {
@@ -205,14 +205,22 @@ public class MappedClass {
                     }
                 }
 
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 throw new RuntimeException(e);
             }
             callGlobalInterceptors(event, entity, document, mapper);
         }
     }
 
-    public boolean hasLifecycle(Class<? extends Annotation> klass) {
+    /**
+     * Checks if this class has a particular lifecycle annotation.
+     * <p>
+     * This is an internal method
+     *
+     * @param klass the annotation to check for
+     * @return true if this annotation is present in this class
+     */
+    public boolean hasLifecycle(final Class<? extends Annotation> klass) {
         return lifecycleMethods.containsKey(klass);
     }
 
@@ -224,8 +232,8 @@ public class MappedClass {
         final Object o = mapper.getOptions().getObjectFactory().createInstance(clazz);
         final Object nullO = mapper.getInstanceCache().put(clazz, o);
         if (nullO != null) {
-            if (LOG.isErrorEnabled()) {
-                LOG.error("Race-condition, created duplicate class: " + clazz);
+            if (MappedClass.LOG.isErrorEnabled()) {
+                MappedClass.LOG.error("Race-condition, created duplicate class: " + clazz);
             }
         }
 
@@ -236,8 +244,8 @@ public class MappedClass {
     private void callGlobalInterceptors(final Class<? extends Annotation> event, final Object entity, final Document document,
                                         final Mapper mapper) {
         for (final EntityInterceptor ei : mapper.getInterceptors()) {
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Calling interceptor method " + event.getSimpleName() + " on " + ei);
+            if (MappedClass.LOG.isDebugEnabled()) {
+                MappedClass.LOG.debug("Calling interceptor method " + event.getSimpleName() + " on " + ei);
             }
 
             if (event.equals(PreLoad.class)) {
@@ -256,6 +264,7 @@ public class MappedClass {
      * Looks for an annotation of the type given
      *
      * @param clazz the type to search for
+     * @param <T>   the annotation instance
      * @return the instance if it was found, if more than one was found, the last one added
      */
     public <T> T getAnnotation(final Class<? extends Annotation> clazz) {
@@ -346,8 +355,8 @@ public class MappedClass {
      * @return the ID field for the class
      */
     public MappedField getMappedIdField() {
-        List<MappedField> fields = getFieldsAnnotatedWith(Id.class);
-        if(fields.isEmpty()) {
+        final List<MappedField> fields = getFieldsAnnotatedWith(Id.class);
+        if (fields.isEmpty()) {
             throw new MappingException(format("%s does not have an annotated ID field", classModel.getName()));
         }
         return fields.get(0);
@@ -373,7 +382,7 @@ public class MappedClass {
      * @return the ID field for the class
      */
     public MappedField getMappedVersionField() {
-        List<MappedField> fields = getFieldsAnnotatedWith(Version.class);
+        final List<MappedField> fields = getFieldsAnnotatedWith(Version.class);
         return fields.isEmpty() ? null : fields.get(0);
     }
 
@@ -444,16 +453,16 @@ public class MappedClass {
                                          annotation -> (Class<? extends Annotation>) annotation.annotationType()));
 
 
-        Class<?> superclass = type.getSuperclass();
+        final Class<?> superclass = type.getSuperclass();
         if (superclass != null && !superclass.equals(Object.class)) {
             superClass = mapper.getMappedClass(superclass);
         }
 
-        for (Class<?> aClass : type.getInterfaces()) {
-                final MappedClass mappedClass = mapper.getMappedClass(aClass);
-                if (mappedClass != null) {
-                    interfaces.add(mappedClass);
-                }
+        for (final Class<?> aClass : type.getInterfaces()) {
+            final MappedClass mappedClass = mapper.getMappedClass(aClass);
+            if (mappedClass != null) {
+                interfaces.add(mappedClass);
+            }
         }
 
         final List<Class<?>> lifecycleClasses = new ArrayList<>();
@@ -465,8 +474,8 @@ public class MappedClass {
         }
 
         for (final Class<?> cls : lifecycleClasses) {
-            for (final Method method : getDeclaredAndInheritedMethods(cls)) {
-                for (final Class<? extends Annotation> annotationClass : LIFECYCLE_ANNOTATIONS) {
+            for (final Method method : MappedClass.getDeclaredAndInheritedMethods(cls)) {
+                for (final Class<? extends Annotation> annotationClass : MappedClass.LIFECYCLE_ANNOTATIONS) {
                     if (method.isAnnotationPresent(annotationClass)) {
                         lifecycleMethods.computeIfAbsent(annotationClass, c -> new ArrayList<>())
                                         .add(new ClassMethodPair(cls.equals(type) ? null : cls, method));
@@ -490,12 +499,17 @@ public class MappedClass {
             if (!field.isTransient()) {
                 persistenceFields.add(field);
             } else {
-                LOG.warning(format("Ignoring (will not persist) field: %s.%s [type:%s]", type.getName(),
+                MappedClass.LOG.warning(format("Ignoring (will not persist) field: %s.%s [type:%s]", type.getName(),
                     field.getJavaFieldName(), field.getType().getName()));
             }
         });
     }
 
+    /**
+     * This is an internal method.
+     *
+     * @return the backing ClassModel for this MappedClass
+     */
     public ClassModel<?> getClassModel() {
         return classModel;
     }

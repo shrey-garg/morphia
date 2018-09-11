@@ -16,20 +16,8 @@ class DoubleArrayCodec implements Codec<double[]> {
     private Codec<Double> codec;
     private Mapper mapper;
 
-    DoubleArrayCodec(Mapper mapper) {
+    DoubleArrayCodec(final Mapper mapper) {
         this.mapper = mapper;
-    }
-
-    @Override
-    public Class<double[]> getEncoderClass() {
-        return double[].class;
-    }
-  
-    private Codec<Double> getCodec() {
-        if(codec == null) {
-            codec = mapper.getCodecRegistry().get(Double.class);
-        }
-        return codec;
     }
 
     @Override
@@ -42,17 +30,29 @@ class DoubleArrayCodec implements Codec<double[]> {
     }
 
     @Override
+    public Class<double[]> getEncoderClass() {
+        return double[].class;
+    }
+
+    private Codec<Double> getCodec() {
+        if (codec == null) {
+            codec = mapper.getCodecRegistry().get(Double.class);
+        }
+        return codec;
+    }
+
+    @Override
     public double[] decode(final BsonReader reader, final DecoderContext decoderContext) {
         reader.readStartArray();
 
-        List<Double> list = new ArrayList<>();
+        final List<Double> list = new ArrayList<>();
         while (reader.readBsonType() != BsonType.END_OF_DOCUMENT) {
             list.add(getCodec().decode(reader, decoderContext));
         }
 
         reader.readEndArray();
 
-        double[] array = new double[list.size()];
+        final double[] array = new double[list.size()];
         for (int i = 0; i < list.size(); i++) {
             array[i] = list.get(i);
         }

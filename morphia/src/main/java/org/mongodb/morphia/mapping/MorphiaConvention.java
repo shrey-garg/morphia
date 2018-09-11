@@ -10,7 +10,7 @@ import org.bson.codecs.pojo.TypeData;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
-import org.mongodb.morphia.annotations.Handler;
+import org.mongodb.morphia.annotations.experimental.Handler;
 import org.mongodb.morphia.annotations.Id;
 import org.mongodb.morphia.annotations.Property;
 import org.mongodb.morphia.annotations.Reference;
@@ -20,6 +20,7 @@ import org.mongodb.morphia.annotations.Version;
 import org.mongodb.morphia.mapping.codec.ArrayFieldAccessor;
 import org.mongodb.morphia.mapping.codec.FieldAccessor;
 import org.mongodb.morphia.mapping.codec.MorphiaPropertySerialization;
+import org.mongodb.morphia.mapping.experimental.PropertyHandler;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -33,6 +34,9 @@ import static java.lang.reflect.Modifier.isAbstract;
 import static java.lang.reflect.Modifier.isStatic;
 import static org.bson.codecs.pojo.PojoBuilderHelper.createPropertyModelBuilder;
 
+/**
+ * Defines a {@code Convention} to apply
+ */
 @SuppressWarnings("unchecked")
 public class MorphiaConvention implements Convention {
     private Datastore datastore;
@@ -50,9 +54,9 @@ public class MorphiaConvention implements Convention {
                          .discriminatorKey("className");
 
         final Entity entity = getAnnotation(classModelBuilder, Entity.class);
-        if(entity != null) {
+        if (entity != null) {
             classModelBuilder.enableDiscriminator(entity.useDiscriminator());
-        } else if(classModelBuilder.hasAnnotation(Embedded.class)) {
+        } else if (classModelBuilder.hasAnnotation(Embedded.class)) {
             classModelBuilder.enableDiscriminator(getAnnotation(classModelBuilder, Embedded.class).useDiscriminator());
         } else {
             classModelBuilder.enableDiscriminator(true);
@@ -111,47 +115,6 @@ public class MorphiaConvention implements Convention {
         classModelBuilder.instanceCreatorFactory(creatorFactory);
     }
 
-    private boolean hasHandler(final PropertyModelBuilder builder) {
-        final List<Annotation> readAnnotations = builder.getReadAnnotations();
-        for (Annotation annotation : readAnnotations) {
-            if(annotation.annotationType().getAnnotation(Handler.class) != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private PropertyHandler getHandler(final PropertyModelBuilder builder, final Field field) {
-        final List<Annotation> readAnnotations = builder.getReadAnnotations();
-        for (Annotation annotation : readAnnotations) {
-            final Handler handler = annotation.annotationType().getAnnotation(Handler.class);
-            if(handler != null) {
-                try {
-                    return handler.value()
-                                  .getDeclaredConstructor(Datastore.class, Field.class, String.class, TypeData.class)
-                                  .newInstance(datastore, field, builder.getName(), builder.getTypeData());
-                } catch (ReflectiveOperationException e) {
-                    throw new MappingException(e.getMessage(), e);
-                }
-            }
-        }
-        return null;
-    }
-
-
-    private PropertyAccessor getPropertyAccessor(final InstanceCreatorFactoryImpl creatorFactory,
-                                                 final Field field,
-                                                 final PropertyModelBuilder<?> property) {
-
-        if(hasHandler(property)) {
-            creatorFactory.register(getHandler(property, field));
-        }
-
-        return field.getType().isArray() && !field.getType().getComponentType().equals(byte.class)
-                          ? new ArrayFieldAccessor(property.getTypeData(), field)
-                          : new FieldAccessor(field);
-    }
-
     private <T extends Annotation> T getAnnotation(final ClassModelBuilder<?> classModelBuilder, final Class<T> klass) {
         final List<Annotation> annotations = classModelBuilder.getAnnotations();
         if (!annotations.isEmpty()) {
@@ -167,32 +130,13 @@ public class MorphiaConvention implements Convention {
         return null;
     }
 
-    private boolean isNotConcrete(final TypeData<?> typeData) {
-        Class type;
-        if(!typeData.getTypeParameters().isEmpty()) {
-            type = typeData.getTypeParameters().get(typeData.getTypeParameters().size() - 1).getType();
-        } else {
-            type = typeData.getType();
-        }
-
-        return isNotConcrete(type);
-    }
-
-    private boolean isNotConcrete(final Class type) {
-        Class componentType = type;
-        if(type.isArray()) {
-            componentType = type.getComponentType();
-        }
-        return componentType.isInterface() || isAbstract(componentType.getModifiers());
-    }
-
     private static boolean isTransient(final FieldModelBuilder<?> field) {
         return field.hasAnnotation(Transient.class)
                || field.hasAnnotation(java.beans.Transient.class)
                || Modifier.isTransient(field.getTypeData().getType().getModifiers());
     }
 
-    private static String getMappedFieldName(FieldModelBuilder<?> field) {
+    private static String getMappedFieldName(final FieldModelBuilder<?> field) {
         if (field.hasAnnotation(Id.class)) {
             return Mapper.ID_KEY;
         } else if (field.hasAnnotation(Property.class)) {
@@ -223,6 +167,65 @@ public class MorphiaConvention implements Convention {
         }
 
         return field.getName();
+    }
+
+    private PropertyAccessor getPropertyAccessor(final InstanceCreatorFactoryImpl creatorFactory,
+                                                 final Field field,
+                                                 final PropertyModelBuilder<?> property) {
+
+        if (hasHandler(property)) {
+            creatorFactory.register(getHandler(property, field));
+        }
+
+        return field.getType().isArray() && !field.getType().getComponentType().equals(byte.class)
+               ? new ArrayFieldAccessor(property.getTypeData(), field)
+               : new FieldAccessor(field);
+    }
+
+    private boolean isNotConcrete(final TypeData<?> typeData) {
+        Class type;
+        if (!typeData.getTypeParameters().isEmpty()) {
+            type = typeData.getTypeParameters().get(typeData.getTypeParameters().size() - 1).getType();
+        } else {
+            type = typeData.getType();
+        }
+
+        return isNotConcrete(type);
+    }
+
+    private boolean hasHandler(final PropertyModelBuilder builder) {
+        final List<Annotation> readAnnotations = builder.getReadAnnotations();
+        for (Annotation annotation : readAnnotations) {
+            if (annotation.annotationType().getAnnotation(Handler.class) != null) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private PropertyHandler getHandler(final PropertyModelBuilder builder, final Field field) {
+        final List<Annotation> readAnnotations = builder.getReadAnnotations();
+        for (Annotation annotation : readAnnotations) {
+            final Handler handler = annotation.annotationType().getAnnotation(Handler.class);
+            if (handler != null) {
+                try {
+                    return handler.value()
+                                  .getDeclaredConstructor(Datastore.class, Field.class, String.class, TypeData.class)
+                                  .newInstance(datastore, field, builder.getName(), builder.getTypeData());
+                } catch (ReflectiveOperationException e) {
+                    throw new MappingException(e.getMessage(), e);
+                }
+            }
+        }
+        return null;
+    }
+
+    private boolean isNotConcrete(final Class type) {
+        Class componentType = type;
+        if (type.isArray()) {
+            componentType = type.getComponentType();
+        }
+        return componentType.isInterface() || isAbstract(componentType.getModifiers());
     }
 
 }

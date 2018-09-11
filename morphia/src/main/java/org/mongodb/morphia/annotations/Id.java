@@ -22,7 +22,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-
+/**
+ * Marks a field as the ID for an entity.
+ */
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)

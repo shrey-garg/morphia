@@ -26,8 +26,18 @@ public interface Query<T> extends QueryResults<T>, Cloneable, MongoIterable<T> {
      */
     CriteriaContainer and(Criteria... criteria);
 
+    /**
+     * Set the {@code ReadConcern} to use
+     * @param readConcern the ReadConcern to use
+     * @return this
+     */
     Query<T> setReadConcern(ReadConcern readConcern);
 
+    /**
+     * Set the {@code ReadPreference} to use
+     * @param readPreference the ReadPreference to use
+     * @return this
+     */
     Query<T> setReadPreference(ReadPreference readPreference);
 
     /**
@@ -257,10 +267,12 @@ public interface Query<T> extends QueryResults<T>, Cloneable, MongoIterable<T> {
     Query<T> where(CodeWithScope js);
 
     /**
+     * @param js the CodeWScope
+     * @return this
      * @see #where(CodeWithScope)
      * @deprecated use #where(CodeWithScope) instead
      */
-    default Query<T> where(CodeWScope js) {
+    default Query<T> where(final CodeWScope js) {
         return where(new CodeWithScope(js.getCode(), new Document(js.getScope().toMap())));
     }
 }

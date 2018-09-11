@@ -5,9 +5,16 @@ import org.mongodb.morphia.mapping.MappingException;
 
 import java.lang.reflect.Field;
 
+/**
+ * Defines an accessor for a field
+ */
 public class FieldAccessor implements PropertyAccessor {
     private final Field field;
 
+    /**
+     * Creates a new accessor
+     * @param field the field
+     */
     public FieldAccessor(final Field field) {
         this.field = field;
     }

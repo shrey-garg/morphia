@@ -7,6 +7,9 @@ import org.bson.codecs.DecoderContext;
 import org.bson.codecs.EncoderContext;
 import org.mongodb.morphia.mapping.MappingException;
 
+/**
+ * A Codec for storing class definitions in the database
+ */
 public class ClassCodec implements Codec<Class> {
     @Override
     public Class decode(final BsonReader reader, final DecoderContext decoderContext) {

@@ -22,7 +22,7 @@ import java.util.Map;
 
 /**
  * Provides a taglet for linking to the MongoDB manual pages
- * 
+ *
  * @see <a href="http://docs.mongodb.org/manual/">the MongoDB manual</a>
  */
 public class ManualTaglet extends DocTaglet {

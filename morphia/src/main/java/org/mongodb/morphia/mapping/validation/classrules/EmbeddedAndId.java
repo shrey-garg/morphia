@@ -10,6 +10,9 @@ import org.mongodb.morphia.mapping.validation.ConstraintViolation.Level;
 
 import java.util.Set;
 
+/**
+ * A constraint to check that {@code @Embedded} types don't specify an {@code @Id} field
+ */
 public class EmbeddedAndId implements ClassConstraint {
 
     @Override

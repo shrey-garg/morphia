@@ -15,6 +15,7 @@
 package org.mongodb.morphia.annotations;
 
 
+import org.mongodb.morphia.annotations.experimental.Handler;
 import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.codec.ReferenceHandler;
 
@@ -26,6 +27,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 
+/**
+ * Marks a field as a reference to an external Document
+ */
 @Documented
 @Inherited
 @Retention(RetentionPolicy.RUNTIME)

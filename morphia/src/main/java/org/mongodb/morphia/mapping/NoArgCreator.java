@@ -2,6 +2,7 @@ package org.mongodb.morphia.mapping;
 
 import org.bson.codecs.pojo.PropertyModel;
 import org.mongodb.morphia.Datastore;
+import org.mongodb.morphia.mapping.experimental.PropertyHandler;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ class NoArgCreator<E> implements MorphiaInstanceCreator<E> {
     private Map<String, PropertyHandler> handlerMap;
     private List<BiConsumer<Datastore, Map<Object, Object>>> handlers = new ArrayList<>();
 
-    NoArgCreator(final Datastore datastore, final Constructor<E> noArgsConstructor, Map<String, PropertyHandler> handlerMap) {
+    NoArgCreator(final Datastore datastore, final Constructor<E> noArgsConstructor, final Map<String, PropertyHandler> handlerMap) {
         this.datastore = datastore;
         this.handlerMap = handlerMap;
         try {
@@ -29,21 +30,11 @@ class NoArgCreator<E> implements MorphiaInstanceCreator<E> {
     @Override
     public <S> void set(final S value, final PropertyModel<S> propertyModel) {
         final PropertyHandler propertyHandler = getHandler(propertyModel);
-        if(propertyHandler != null) {
+        if (propertyHandler != null) {
             defer((datastore, entityCache) -> propertyHandler.set(instance, propertyModel, value, datastore, entityCache));
         } else {
             propertyModel.getPropertyAccessor().set(instance, value);
         }
-    }
-
-    @Override
-    public <S> PropertyHandler getHandler(final PropertyModel<S> propertyModel) {
-        return handlerMap.get(propertyModel.getName());
-    }
-
-    @Override
-    public boolean hasHandler(final PropertyModel propertyModel) {
-        return handlerMap.get(propertyModel.getName()) != null;
     }
 
     @Override
@@ -58,6 +49,11 @@ class NoArgCreator<E> implements MorphiaInstanceCreator<E> {
     @Override
     public void defer(final BiConsumer<Datastore, Map<Object, Object>> function) {
         handlers.add(function);
+    }
+
+    @Override
+    public <S> PropertyHandler getHandler(final PropertyModel<S> propertyModel) {
+        return handlerMap.get(propertyModel.getName());
     }
 
 }

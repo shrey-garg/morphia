@@ -39,7 +39,7 @@ final class QueryValidator {
      * Validate the path, and value type, returning the mapped field for the field at the path
      */
     static MappedField validateQuery(final Class clazz, final Mapper mapper, final StringBuilder origProp, final FilterOperator op,
-                              final Object val, final boolean validateNames, final boolean validateTypes) {
+                                     final Object val, final boolean validateNames, final boolean validateTypes) {
         MappedField mf = null;
         final String prop = origProp.toString();
         boolean hasTranslations = false;
@@ -52,7 +52,8 @@ final class QueryValidator {
 
             MappedClass mc = mapper.getMappedClass(clazz);
             //CHECKSTYLE:OFF
-            for (int i = 0; ; ) {
+            int i = 0;
+            while (true) {
                 //CHECKSTYLE:ON
                 final String part = parts[i];
                 boolean fieldIsArrayOperator = part.equals("$") || part.matches("[0-9]+");
@@ -65,7 +66,7 @@ final class QueryValidator {
                     if (validateNames && mf == null) {
                         throw new ValidationException(format("The path '%s' is not a valid path for %s; if "
                                                              + "you wish to continue please disable validation.", origProp,
-                                                             clazz));
+                            clazz));
                     }
                     hasTranslations = true;
                     if (mf != null) {
@@ -102,9 +103,9 @@ final class QueryValidator {
             if (hasTranslations) {
                 origProp.setLength(0); // clear existing content
                 origProp.append(parts[0]);
-                for (int i = 1; i < parts.length; i++) {
+                for (int index = 1; index < parts.length; index++) {
                     origProp.append('.');
-                    origProp.append(parts[i]);
+                    origProp.append(parts[index]);
                 }
             }
 
@@ -119,7 +120,7 @@ final class QueryValidator {
                     if (LOG.isWarningEnabled()) {
                         LOG.warning(format("The type(s) for the query/update may be inconsistent; using an instance of type '%s' "
                                            + "for the field '%s.%s' which is declared as '%s'", val.getClass().getName(),
-                                           mf.getDeclaringClass().getClazz().getName(), mf.getJavaFieldName(), mf.getType().getName()));
+                            mf.getDeclaringClass().getClazz().getName(), mf.getJavaFieldName(), mf.getType().getName()));
                         LOG.warning("Validation warnings: \n" + failures);
                     }
                 }

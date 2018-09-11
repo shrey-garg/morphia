@@ -63,12 +63,60 @@ public interface AdvancedDatastore extends Datastore {
      */
     <T> UpdateOperations<T> createUpdateOperations(Class<T> type, Document operations);
 
+    /**
+     * Delete one document
+     *
+     * @param collectionName the document's collection
+     * @param clazz the document type
+     * @param id the ID of the document to delete
+     * @param <T> the document type
+     * @param <V> the ID type
+     *
+     * @return the results of the delete operation
+     */
     <T, V> DeleteResult deleteOne(String collectionName, Class<T> clazz, V id);
 
+    /**
+     * Delete one document
+     *
+     * @param collectionName the document's collection
+     * @param clazz the document type
+     * @param id the ID of the document to delete
+     * @param options the options to apply
+     * @param writeConcern the WriteConcern to apply
+     * @param <T> the document type
+     * @param <V> the ID type
+     *
+     * @return the results of the delete operation
+     */
     <T, V> DeleteResult deleteOne(String collectionName, Class<T> clazz, V id, DeleteOptions options, WriteConcern writeConcern);
 
+    /**
+     * Delete multiple documents
+     *
+     * @param collectionName the document's collection
+     * @param clazz the document type
+     * @param ids the IDs of the documents to delete
+     * @param <T> the document type
+     * @param <V> the ID type
+     *
+     * @return the results of the delete operation
+     */
     <T, V> DeleteResult deleteMany(String collectionName, Class<T> clazz, List<V> ids);
 
+    /**
+     * Delete many documents
+     *
+     * @param collectionName the document's collection
+     * @param clazz the document type
+     * @param ids the IDs of the documents to delete
+     * @param options the options to apply
+     * @param writeConcern the WriteConcern to apply
+     * @param <T> the document type
+     * @param <V> the ID type
+     *
+     * @return the results of the delete operation
+     */
     <T, V> DeleteResult deleteMany(String collectionName, Class<T> clazz, List<V> ids, DeleteOptions options, WriteConcern writeConcern);
 
     /**
@@ -137,6 +185,7 @@ public interface AdvancedDatastore extends Datastore {
      *
      * @param entity  the entity to insert
      * @param options the options to apply to the insert operation
+     * @param writeConcern the WriteConcern to apply
      * @param <T>     the type of the entity
      * @return the new key of the inserted entity
      * @since 1.3
@@ -159,6 +208,7 @@ public interface AdvancedDatastore extends Datastore {
      * @param collection the collection to update
      * @param entity     the entity to insert
      * @param options    the options to apply to the insert operation
+     * @param writeConcern the WriteConcern to apply
      * @param <T>        the type of the entity
      * @return the new key of the inserted entity
      * @since 1.3
@@ -179,6 +229,7 @@ public interface AdvancedDatastore extends Datastore {
      *
      * @param entities the entities to insert
      * @param options  the options to apply to the insert operation
+     * @param writeConcern the WriteConcern to apply
      * @param <T>      the type of the entity
      * @return the new keys of the inserted entities
      * @since 1.3
@@ -202,6 +253,7 @@ public interface AdvancedDatastore extends Datastore {
      * @param collection the collection to update
      * @param entities   the entities to insert
      * @param options    the options to apply to the insert operation
+     * @param writeConcern the WriteConcern to apply
      * @param <T>        the type of the entity
      * @return the new keys of the inserted entities
      * @since 1.3
@@ -234,6 +286,7 @@ public interface AdvancedDatastore extends Datastore {
      * @param collection the collection to update
      * @param entity     the entity to save
      * @param options    the options to apply to the save operation
+     * @param writeConcern the WriteConcern to apply
      * @param <T>        the type of the entity
      * @return the new key of the inserted entity
      */

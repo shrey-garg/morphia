@@ -4,6 +4,9 @@ import org.mongodb.morphia.mapping.MappingException;
 
 import java.util.Collection;
 
+/**
+ * Thrown when constraint violations are found
+ */
 public class ConstraintViolationException extends MappingException {
 
     private static final long serialVersionUID = 1L;

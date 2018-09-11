@@ -18,21 +18,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-@SuppressWarnings("unchecked")
+/**
+ * Specialized writer for serializing a Document.
+ * <p>
+ * This is an internal class and is not for use outside Morphia.
+ */
+@SuppressWarnings({"unchecked"})
 public class DocumentWriter implements BsonWriter {
     private Stack<Object> state = new Stack<>();
     private Object root;
 
+    /**
+     * Creates a new Writer
+     */
     public DocumentWriter() {
         push(new RootSlab());
     }
 
-    public <T> T getRoot() {
-        return (T) root;
-    }
-
     private void push(final Object o) {
         state.push(o);
+    }
+
+    /**
+     * @param <T> the type of the root
+     * @return the root
+     */
+    public <T> T getRoot() {
+        return (T) root;
     }
 
     @Override
@@ -173,7 +185,7 @@ public class DocumentWriter implements BsonWriter {
 
     @Override
     public void writeName(final String name) {
-        Document document = peek();
+        final Document document = peek();
         final ValueSlab value = new ValueSlab(name);
         document.put(name, value);
         push(value);
@@ -294,7 +306,7 @@ public class DocumentWriter implements BsonWriter {
         return (T) state.peek();
     }
 
-    private void value(Object value) {
+    private void value(final Object value) {
         ((ValueSlab) pop()).apply(value);
     }
 
@@ -302,7 +314,7 @@ public class DocumentWriter implements BsonWriter {
         final Object pop = state.pop();
         try {
             return (T) pop;
-        } catch (ClassCastException e) {
+        } catch (final ClassCastException e) {
             throw new IllegalStateException("Tried to end the wrong state.  The current state is: " + pop.getClass(), e);
         }
     }
@@ -319,7 +331,7 @@ public class DocumentWriter implements BsonWriter {
             this.name = name;
         }
 
-        public void apply(Object value) {
+        public void apply(final Object value) {
             document().put(name, value);
         }
 
@@ -343,7 +355,7 @@ public class DocumentWriter implements BsonWriter {
     private class ListSlab extends ValueSlab {
         private List<Object> list;
 
-        private ListSlab(List<Object> list) {
+        private ListSlab(final List<Object> list) {
             super(null);
             this.list = list;
         }

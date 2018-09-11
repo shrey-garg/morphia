@@ -103,7 +103,7 @@ public final class FieldModel<T> {
      * @param <A> the class type
      * @return the annotation instance or null
      */
-    public <A extends Annotation> A getAnnotation(Class<A> klass) {
+    public <A extends Annotation> A getAnnotation(final Class<A> klass) {
         for (Annotation annotation : annotations) {
             if (klass.equals(annotation.annotationType())) {
                 return klass.cast(annotation);

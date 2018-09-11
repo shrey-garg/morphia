@@ -1,6 +1,9 @@
 package org.mongodb.morphia.query;
 
 
+/**
+ * The set of update operators
+ */
 public enum UpdateOperator {
     SET("$set"),
     SET_ON_INSERT("$setOnInsert"),

@@ -17,8 +17,9 @@ public class MorphiaKeyIterator<T> implements MongoCursor<Key<T>> {
 
     /**
      * Create
-     * @param cursor     the cursor to use
-     * @param mapper     the Mapper to use
+     *
+     * @param cursor the cursor to use
+     * @param mapper the Mapper to use
      */
     MorphiaKeyIterator(final MongoCursor<T> cursor, final Mapper mapper) {
         this.cursor = cursor;
@@ -42,7 +43,8 @@ public class MorphiaKeyIterator<T> implements MongoCursor<Key<T>> {
 
     @Override
     public Key<T> tryNext() {
-        return mapper.getKey(cursor.tryNext()) ;
+        final T entity = cursor.tryNext();
+        return entity != null ? mapper.getKey(entity) : null;
     }
 
     @Override

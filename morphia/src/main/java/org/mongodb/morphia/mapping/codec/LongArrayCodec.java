@@ -16,8 +16,17 @@ class LongArrayCodec implements Codec<long[]> {
     private Codec<Long> codec;
     private Mapper mapper;
 
-    LongArrayCodec(Mapper mapper) {
+    LongArrayCodec(final Mapper mapper) {
         this.mapper = mapper;
+    }
+
+    @Override
+    public void encode(final BsonWriter writer, final long[] value, final EncoderContext encoderContext) {
+        writer.writeStartArray();
+        for (final long cur : value) {
+            getCodec().encode(writer, cur, encoderContext);
+        }
+        writer.writeEndArray();
     }
 
     @Override
@@ -26,19 +35,10 @@ class LongArrayCodec implements Codec<long[]> {
     }
 
     private Codec<Long> getCodec() {
-        if(codec == null) {
+        if (codec == null) {
             codec = mapper.getCodecRegistry().get(Long.class);
         }
         return codec;
-    }
-    
-    @Override
-    public void encode(final BsonWriter writer, final long[] value, final EncoderContext encoderContext) {
-        writer.writeStartArray();
-        for (final long cur : value) {
-            getCodec().encode(writer, cur, encoderContext);
-        }
-        writer.writeEndArray();
     }
 
     @Override

@@ -12,7 +12,6 @@ import org.mongodb.morphia.mapping.Mapper;
 import org.mongodb.morphia.mapping.validation.ConstraintViolation.Level;
 import org.mongodb.morphia.mapping.validation.classrules.DuplicatedAttributeNames;
 import org.mongodb.morphia.mapping.validation.classrules.EmbeddedAndId;
-import org.mongodb.morphia.mapping.validation.classrules.EmbeddedAndValue;
 import org.mongodb.morphia.mapping.validation.classrules.EntityAndEmbed;
 import org.mongodb.morphia.mapping.validation.classrules.EntityCannotBeMapOrIterable;
 import org.mongodb.morphia.mapping.validation.classrules.MultipleId;
@@ -32,7 +31,9 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.sort;
 import static java.util.Comparator.comparingInt;
 
-
+/**
+ * Validates the mapping information on classes.
+ */
 public class MappingValidator {
 
     private static final Logger LOG = MorphiaLoggerFactory.get(MappingValidator.class);
@@ -106,7 +107,6 @@ public class MappingValidator {
         constraints.add(new NoId());
         constraints.add(new EmbeddedAndId());
         constraints.add(new EntityAndEmbed());
-        constraints.add(new EmbeddedAndValue());
         constraints.add(new EntityCannotBeMapOrIterable());
         constraints.add(new DuplicatedAttributeNames());
         // constraints.add(new ContainsEmbeddedWithId());
