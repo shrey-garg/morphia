@@ -60,6 +60,7 @@ import static org.mongodb.morphia.aggregation.Projection.projection;
 import static org.mongodb.morphia.geo.GeoJson.point;
 import static org.mongodb.morphia.query.Sort.ascending;
 
+@SuppressWarnings("unused")
 public class AggregationTest extends TestBase {
 
     @Test
@@ -291,7 +292,7 @@ public class AggregationTest extends TestBase {
         getDatastore().createAggregation(Book.class)
                                                    .group("author", grouping("books", push("title")))
                                                    .out(Author.class);
-        assertEquals(2, getDatastore().getCollection(Author.class).count());
+        assertEquals(2, getDatastore().getCollection(Author.class).countDocuments());
         Author author = getDatastore().find(Author.class).get();
         assertEquals("Homer", author.name);
         assertEquals(asList("The Odyssey", "Iliad"), author.books);
@@ -300,7 +301,7 @@ public class AggregationTest extends TestBase {
                       .group("author", grouping("books", push("title")))
                       .out("different", Author.class);
 
-        assertEquals(2, getDatabase().getCollection("different").count());
+        assertEquals(2, getDatabase().getCollection("different").countDocuments());
     }
 
     @Test

@@ -272,6 +272,7 @@ public interface Query<T> extends QueryResults<T>, Cloneable, MongoIterable<T> {
      * @see #where(CodeWithScope)
      * @deprecated use #where(CodeWithScope) instead
      */
+    @SuppressWarnings("unchecked")
     default Query<T> where(final CodeWScope js) {
         return where(new CodeWithScope(js.getCode(), new Document(js.getScope().toMap())));
     }

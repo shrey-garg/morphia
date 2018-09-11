@@ -37,6 +37,7 @@ import static org.mongodb.morphia.query.QueryValidator.validateQuery;
  *
  * @param <T> The type we will be querying for, and returning.
  */
+@SuppressWarnings("deprecation")
 public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
     private static final Logger LOG = MorphiaLoggerFactory.get(QueryImpl.class);
     private final DatastoreImpl ds;
@@ -436,12 +437,12 @@ public class QueryImpl<T> extends CriteriaContainerImpl implements Query<T> {
 
     @Override
     public long count() {
-        return collection.count(getQueryDocument());
+        return collection.countDocuments(getQueryDocument());
     }
 
     @Override
     public long count(final CountOptions options) {
-        return collection.count(getQueryDocument(), options);
+        return collection.countDocuments(getQueryDocument(), options);
     }
 
     @Override

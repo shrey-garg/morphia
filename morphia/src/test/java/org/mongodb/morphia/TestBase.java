@@ -49,6 +49,7 @@ public abstract class TestBase {
         return mongoClient;
     }
 
+    @SuppressWarnings("unchecked")
     boolean isReplicaSet() {
         final Document document = runIsMaster();
         final List<String> hosts = (List<String>) document.get("hosts");

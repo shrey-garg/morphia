@@ -15,6 +15,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Can't inherit HashSet : generic is lost...
  */
+@SuppressWarnings("unused")
 public class CollectionInheritanceTest extends TestBase {
 
     private static Book newBook() {
@@ -48,7 +49,7 @@ public class CollectionInheritanceTest extends TestBase {
         // Test saving
         getDatastore().save(newBook());
 
-        assertEquals(1, getDatastore().getCollection(Book.class).count());
+        assertEquals(1, getDatastore().getCollection(Book.class).countDocuments());
     }
 
     private static class Author {

@@ -52,6 +52,7 @@ public class GeoIntersectsQueriesWithPolygonTest extends TestBase {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void shouldFindAreasThatAPolygonIntersects() {
         // given
         Area sevilla = new Area("Spain",

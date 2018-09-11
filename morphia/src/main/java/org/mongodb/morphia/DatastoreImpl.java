@@ -442,12 +442,12 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     @Override
     public <T> long getCount(final T entity) {
-        return getCollection(entity.getClass()).count();
+        return getCollection(entity.getClass()).countDocuments();
     }
 
     @Override
     public <T> long getCount(final Class<T> clazz) {
-        return getCollection(clazz).count();
+        return getCollection(clazz).countDocuments();
     }
 
     @Override
@@ -729,7 +729,7 @@ public class DatastoreImpl implements AdvancedDatastore {
 
     @Override
     public long getCount(final String collection) {
-        return getCollection(collection, Document.class).count();
+        return getCollection(collection, Document.class).countDocuments();
     }
 
     @Override

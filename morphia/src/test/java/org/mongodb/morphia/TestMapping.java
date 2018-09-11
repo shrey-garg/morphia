@@ -71,13 +71,6 @@ public class TestMapping extends TestBase {
         }
 
         try {
-            getMapper().map(RenamedEmbedded.class);
-            fail("Validation: @Embedded(\"name\") not caught on Class");
-        } catch (MappingException e) {
-            // good
-        }
-
-        try {
             getMapper().map(MissingIdRenamed.class);
             fail("Validation: Missing @Id field not not caught");
         } catch (MappingException e) {

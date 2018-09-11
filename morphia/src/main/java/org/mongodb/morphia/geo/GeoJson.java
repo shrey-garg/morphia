@@ -23,6 +23,7 @@ import static java.util.stream.Collectors.toList;
  * .org/manual/applications/geospatial-indexes/#geojson-objects">the
  * documentation</a> for all the types.
  */
+@SuppressWarnings("unchecked")
 public final class GeoJson {
     private GeoJson() {
     }

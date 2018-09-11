@@ -267,6 +267,7 @@ public class MappedClass {
      * @param <T>   the annotation instance
      * @return the instance if it was found, if more than one was found, the last one added
      */
+    @SuppressWarnings("unchecked")
     public <T> T getAnnotation(final Class<? extends Annotation> clazz) {
         final List<Annotation> found = annotations.get(clazz);
         return found == null || found.isEmpty() ? null : (T) found.get(found.size() - 1);

@@ -25,6 +25,7 @@ public class GeoJsonTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void shouldNotErrorIfPolygonIsEmpty() {
         // expect
         assertThat(polygon(emptyList()), is(notNullValue()));

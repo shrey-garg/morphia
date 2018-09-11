@@ -235,7 +235,7 @@ public class TestQuery extends TestBase {
                                   .comment(expectedComment));
 
         MongoCollection<Document> profileCollection = getDatabase().getCollection("system.profile");
-        assertNotEquals(0, profileCollection.count());
+        assertNotEquals(0, profileCollection.countDocuments());
         final Document query = new Document("op", "query")
                                    .append("ns", getDatastore().getCollection(Pic.class).getNamespace().getFullName());
         List<Document> profileRecord = profileCollection.find(query)
@@ -866,6 +866,7 @@ public class TestQuery extends TestBase {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testNonSnapshottedQuery() {
         Assume.assumeTrue(serverIsAtMostVersion(3.6));
         getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
@@ -1143,6 +1144,7 @@ public class TestQuery extends TestBase {
     }
 
     @Test
+    @SuppressWarnings("deprecation")
     public void testSnapshottedQuery() {
         Assume.assumeTrue(serverIsAtMostVersion(3.6));
         getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
@@ -1469,7 +1471,7 @@ public class TestQuery extends TestBase {
     }
 
     @Entity
-    public static class PicWithObjectId {
+    private static class PicWithObjectId {
         @Id
         private ObjectId id;
         private String name;
@@ -1481,7 +1483,7 @@ public class TestQuery extends TestBase {
         private ObjectId id;
         @Indexed
         private String name;
-        private boolean prePersist = false;
+        private boolean prePersist;
 
         public Pic() {
         }
