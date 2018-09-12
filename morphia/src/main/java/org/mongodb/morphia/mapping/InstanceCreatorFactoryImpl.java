@@ -4,6 +4,7 @@ import org.bson.codecs.pojo.ClassModelBuilder;
 import org.bson.codecs.pojo.InstanceCreatorFactory;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.mapping.experimental.PropertyHandler;
+import org.mongodb.morphia.utils.ReflectionUtils;
 
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
@@ -25,7 +26,9 @@ public class InstanceCreatorFactoryImpl<T> implements InstanceCreatorFactory<T> 
             noArgsConstructor = builder.getType().getDeclaredConstructor();
             noArgsConstructor.setAccessible(true);
         } catch (NoSuchMethodException e) {
-            throw new MappingException(builder.getType().getName() + " must have a 0 argument constructor");
+            if (ReflectionUtils.isConcrete(builder.getType())) {
+                throw new MappingException(builder.getType().getName() + " must have a 0 argument constructor");
+            }
         }
     }
 

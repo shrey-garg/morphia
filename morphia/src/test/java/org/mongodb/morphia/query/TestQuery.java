@@ -28,7 +28,6 @@ import org.bson.types.CodeWithScope;
 import org.bson.types.ObjectId;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.Key;
@@ -868,26 +867,27 @@ public class TestQuery extends TestBase {
     @Test
     @SuppressWarnings("deprecation")
     public void testNonSnapshottedQuery() {
-        Assume.assumeTrue(serverIsAtMostVersion(3.6));
-        getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
-        getDatastore().saveMany(asList(new PhotoWithKeywords("scott", "hernandez"),
-            new PhotoWithKeywords("scott", "hernandez"),
-            new PhotoWithKeywords("scott", "hernandez")));
-        final Iterator<PhotoWithKeywords> it = getDatastore().find(PhotoWithKeywords.class)
-                                                             .fetch(new FindOptions()
-                                                                        .snapshot(true)
-                                                                        .batchSize(2));
-        getDatastore().saveMany(asList(new PhotoWithKeywords("1", "2"),
-            new PhotoWithKeywords("3", "4"),
-            new PhotoWithKeywords("5", "6")));
+        if (serverIsAtMostVersion(3.6)) {
+            getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
+            getDatastore().saveMany(asList(new PhotoWithKeywords("scott", "hernandez"),
+                new PhotoWithKeywords("scott", "hernandez"),
+                new PhotoWithKeywords("scott", "hernandez")));
+            final Iterator<PhotoWithKeywords> it = getDatastore().find(PhotoWithKeywords.class)
+                                                                 .fetch(new FindOptions()
+                                                                            .snapshot(true)
+                                                                            .batchSize(2));
+            getDatastore().saveMany(asList(new PhotoWithKeywords("1", "2"),
+                new PhotoWithKeywords("3", "4"),
+                new PhotoWithKeywords("5", "6")));
 
-        assertNotNull(it.next());
-        assertNotNull(it.next());
-        //okay, now we should getMore...
-        assertTrue(it.hasNext());
-        assertNotNull(it.next());
-        assertTrue(it.hasNext());
-        assertNotNull(it.next());
+            assertNotNull(it.next());
+            assertNotNull(it.next());
+            //okay, now we should getMore...
+            assertTrue(it.hasNext());
+            assertNotNull(it.next());
+            assertTrue(it.hasNext());
+            assertNotNull(it.next());
+        }
     }
 
     @Test
@@ -1146,26 +1146,27 @@ public class TestQuery extends TestBase {
     @Test
     @SuppressWarnings("deprecation")
     public void testSnapshottedQuery() {
-        Assume.assumeTrue(serverIsAtMostVersion(3.6));
-        getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
-        getDatastore().saveMany(asList(new PhotoWithKeywords("scott", "hernandez"),
-            new PhotoWithKeywords("scott", "hernandez"),
-            new PhotoWithKeywords("scott", "hernandez")));
-        final Iterator<PhotoWithKeywords> it = getDatastore().find(PhotoWithKeywords.class)
-                                                             .filter("keywords.keyword", "scott")
-                                                             .fetch(new FindOptions()
-                                                                        .snapshot(true)
-                                                                        .batchSize(2));
-        getDatastore().saveMany(asList(new PhotoWithKeywords("1", "2"),
-            new PhotoWithKeywords("3", "4"),
-            new PhotoWithKeywords("5", "6")));
+        if (serverIsAtMostVersion(3.6)) {
+            getDatastore().deleteMany(getDatastore().find(PhotoWithKeywords.class));
+            getDatastore().saveMany(asList(new PhotoWithKeywords("scott", "hernandez"),
+                new PhotoWithKeywords("scott", "hernandez"),
+                new PhotoWithKeywords("scott", "hernandez")));
+            final Iterator<PhotoWithKeywords> it = getDatastore().find(PhotoWithKeywords.class)
+                                                                 .filter("keywords.keyword", "scott")
+                                                                 .fetch(new FindOptions()
+                                                                            .snapshot(true)
+                                                                            .batchSize(2));
+            getDatastore().saveMany(asList(new PhotoWithKeywords("1", "2"),
+                new PhotoWithKeywords("3", "4"),
+                new PhotoWithKeywords("5", "6")));
 
-        assertNotNull(it.next());
-        assertNotNull(it.next());
-        //okay, now we should getMore...
-        assertTrue(it.hasNext());
-        assertNotNull(it.next());
-        assertTrue(!it.hasNext());
+            assertNotNull(it.next());
+            assertNotNull(it.next());
+            //okay, now we should getMore...
+            assertTrue(it.hasNext());
+            assertNotNull(it.next());
+            assertTrue(!it.hasNext());
+        }
     }
 
     @Test

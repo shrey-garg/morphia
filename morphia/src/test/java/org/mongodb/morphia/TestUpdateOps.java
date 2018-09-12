@@ -20,7 +20,6 @@ import com.mongodb.client.result.UpdateResult;
 import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Test;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
@@ -891,19 +890,20 @@ public class TestUpdateOps extends TestBase {
 
     @Test
     public void isolated() {
-        Assume.assumeTrue(serverIsAtMostVersion(3.6));
-        UpdateOperations<Circle> updates = getDatastore().createUpdateOperations(Circle.class)
-                                                         .inc("radius", 1D);
-        assertFalse(updates.isIsolated());
-        updates.isolated();
-        assertTrue(updates.isIsolated());
+        if (serverIsAtMostVersion(3.6)) {
+            UpdateOperations<Circle> updates = getDatastore().createUpdateOperations(Circle.class)
+                                                             .inc("radius", 1D);
+            assertFalse(updates.isIsolated());
+            updates.isolated();
+            assertTrue(updates.isIsolated());
 
-        getDatastore().updateMany(getDatastore().find(Circle.class)
-                                                .field("radius").equal(0),
-            updates,
-            new UpdateOptions()
-                .upsert(true),
-            WriteConcern.ACKNOWLEDGED);
+            getDatastore().updateMany(getDatastore().find(Circle.class)
+                                                    .field("radius").equal(0),
+                updates,
+                new UpdateOptions()
+                    .upsert(true),
+                WriteConcern.ACKNOWLEDGED);
+        }
     }
 
     private static class ContainsIntArray {

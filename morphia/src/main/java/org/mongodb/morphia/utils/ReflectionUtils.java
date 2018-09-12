@@ -10,6 +10,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
@@ -282,4 +283,15 @@ public final class ReflectionUtils {
         return typeArgumentsAsClasses;
     }
 
+    /**
+     * @param type the class to check
+     * @return true is the class is not a concrete type
+     */
+    public static boolean isConcrete(final Class type) {
+        Class componentType = type;
+        if (type.isArray()) {
+            componentType = type.getComponentType();
+        }
+        return !componentType.isInterface() && !Modifier.isAbstract(componentType.getModifiers());
+    }
 }

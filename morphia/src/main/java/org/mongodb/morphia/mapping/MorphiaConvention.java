@@ -21,6 +21,7 @@ import org.mongodb.morphia.mapping.codec.ArrayFieldAccessor;
 import org.mongodb.morphia.mapping.codec.FieldAccessor;
 import org.mongodb.morphia.mapping.codec.MorphiaPropertySerialization;
 import org.mongodb.morphia.mapping.experimental.PropertyHandler;
+import org.mongodb.morphia.utils.ReflectionUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -30,7 +31,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.stream.Collectors;
 
-import static java.lang.reflect.Modifier.isAbstract;
 import static java.lang.reflect.Modifier.isStatic;
 import static org.bson.codecs.pojo.PojoBuilderHelper.createPropertyModelBuilder;
 
@@ -190,7 +190,7 @@ public class MorphiaConvention implements Convention {
             type = typeData.getType();
         }
 
-        return isNotConcrete(type);
+        return !ReflectionUtils.isConcrete(type);
     }
 
     private boolean hasHandler(final PropertyModelBuilder builder) {
@@ -218,14 +218,6 @@ public class MorphiaConvention implements Convention {
             }
         }
         return null;
-    }
-
-    private boolean isNotConcrete(final Class type) {
-        Class componentType = type;
-        if (type.isArray()) {
-            componentType = type.getComponentType();
-        }
-        return componentType.isInterface() || isAbstract(componentType.getModifiers());
     }
 
 }
