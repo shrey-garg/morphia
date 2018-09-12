@@ -16,6 +16,7 @@ import org.mongodb.morphia.mapping.validation.classrules.EntityAndEmbed;
 import org.mongodb.morphia.mapping.validation.classrules.EntityCannotBeMapOrIterable;
 import org.mongodb.morphia.mapping.validation.classrules.MultipleId;
 import org.mongodb.morphia.mapping.validation.classrules.MultipleVersions;
+import org.mongodb.morphia.mapping.validation.classrules.MustHaveNoArgConstructor;
 import org.mongodb.morphia.mapping.validation.classrules.NoId;
 import org.mongodb.morphia.mapping.validation.fieldrules.ContradictingFieldAnnotation;
 import org.mongodb.morphia.mapping.validation.fieldrules.MapNotSerializable;
@@ -102,6 +103,7 @@ public class MappingValidator {
         // another dependency ;)
 
         // class-level
+        constraints.add(new MustHaveNoArgConstructor());
         constraints.add(new MultipleId());
         constraints.add(new MultipleVersions());
         constraints.add(new NoId());

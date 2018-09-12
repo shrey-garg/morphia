@@ -21,11 +21,11 @@ public class InstanceCreatorFactoryImpl<T> implements InstanceCreatorFactory<T> 
 
     InstanceCreatorFactoryImpl(final Datastore datastore, final ClassModelBuilder builder) {
         this.datastore = datastore;
-        for (Constructor<?> constructor : builder.getType().getDeclaredConstructors()) {
-            if (constructor.getParameterTypes().length == 0) {
-                noArgsConstructor = (Constructor<T>) constructor;
-                noArgsConstructor.setAccessible(true);
-            }
+        try {
+            noArgsConstructor = builder.getType().getDeclaredConstructor();
+            noArgsConstructor.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new MappingException(builder.getType().getName() + " must have a 0 argument constructor");
         }
     }
 

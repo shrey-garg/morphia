@@ -21,7 +21,6 @@ import org.bson.Document;
 import org.bson.types.ObjectId;
 import org.junit.Assert;
 import org.junit.Assume;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mongodb.morphia.annotations.Embedded;
 import org.mongodb.morphia.annotations.Entity;
@@ -595,7 +594,6 @@ public class TestUpdateOps extends TestBase {
     }
 
     @Test
-    @Ignore("mapping in WriteResult needs to be resolved")
     public void testRemoveWithNoData() {
         DumbColl dumbColl = new DumbColl("ID");
         dumbColl.fromArray = singletonList(new DumbArrayElement("something"));
@@ -1032,6 +1030,7 @@ public class TestUpdateOps extends TestBase {
     }
 
     private static final class DumbColl {
+        @Id
         private String opaqueId;
         private List<DumbArrayElement> fromArray;
 
@@ -1045,6 +1044,9 @@ public class TestUpdateOps extends TestBase {
 
     private static final class DumbArrayElement {
         private String whereId;
+
+        private DumbArrayElement() {
+        }
 
         private DumbArrayElement(final String whereId) {
             this.whereId = whereId;

@@ -43,7 +43,7 @@ class DraftReleaseNotesTask extends DefaultTask {
         def log = getLog()
         project.subprojects { subproject ->
             subproject.jar.destinationDir.eachFile { jarFile ->
-                if (jarFile.name.endsWith("-${releaseVersion}.jar")){
+                if (jarFile.name.endsWith("-${releaseVersion}.jar")) {
                     log.info "Uploading ${jarFile.name}"
                     ghRelease.uploadAsset(jarFile, "application/jar")
                 }

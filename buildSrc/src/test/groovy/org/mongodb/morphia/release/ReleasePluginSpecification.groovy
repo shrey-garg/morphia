@@ -8,7 +8,7 @@ class ReleasePluginSpecification extends Specification {
     def 'should be able to add release plugin to a project and have it recognised'() {
         given:
         Project project = ProjectBuilder.builder().build()
-        
+
         when:
         project.apply plugin: 'release'
 
