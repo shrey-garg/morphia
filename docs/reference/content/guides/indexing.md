@@ -5,8 +5,6 @@ title = "Indexing"
   pre = "<i class='fa fa-file-text-o'></i>"
 +++
 
-# Indexing
-
 Morphia provides annotations that allow developers to define indexes for a collection to be defined alongside the other mapping data on
 an entity's source.  In addition to the familiar ascending/descending index types, Morphia and MongoDB support [TTL]({{< docsref
 "core/index-ttl/" >}}), [text]({{< docsref "core/index-text/" >}}), and [geospatial]({{< docsref "applications/geospatial-indexes/" >}})
