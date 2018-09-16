@@ -7,8 +7,6 @@ title = "Getting Started"
   pre = "<i class='fa fa-road'></i>"
 +++
 
-## Getting Started
-
 To help you get started quickly with Morphia follow:
 
   * [Installation]({{< ref "/getting-started/installation-guide.md" >}})

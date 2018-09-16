@@ -6,10 +6,8 @@ type = "index"
 
 ## Morphia Documentation
 
-Welcome to the Morphia documentation.
-
 Morphia is built upon the
-[`MongoDB Java Driver`](https://github.com/mongodb/mongo-java-driver/).
+[MongoDB Java Driver](https://github.com/mongodb/mongo-java-driver/).
 For reference documentation please see the driver documentation.
 
 

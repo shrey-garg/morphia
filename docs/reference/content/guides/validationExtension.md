@@ -5,11 +5,9 @@ title = "Validation Extension"
   pre = "<i class='fa fa-file-text-o'></i>"
 +++
 
-# Introduction
-
 This is a simple extension to Morphia to process JSR 303 Validation Annotations.
 
-# Using
+## Using
 Add this at the start of your application (or wherever you create your morphia instances).
 
 `````java
@@ -33,7 +31,7 @@ public class Userlike {
 
 ```
 
-# Implementation
+## Implementation
 
 This is a lightweight wrapper around the JSR 303 API. It installs a simple global entity interceptor which listens to all 
 [life cycle methods]({{< relref "guides/lifeCycleMethods.md" >}}) needed for validation. You can use any implementation of JSR 303 by
