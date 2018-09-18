@@ -4,6 +4,10 @@ title = "Morphia"
 theme = "learn"
 canonifyurls = false
 
+[params]
+    disableBreadcrumb = true
+    disableNextPrev = true
+
 [[menu.main]]
 
 [[Languages.en.menu.shortcuts]]
