@@ -6,7 +6,7 @@ body {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   background-color: #f3f4eb;
-  padding-top: 50px;
+  /*padding-top: 50px;*/
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -29,6 +29,9 @@ dt {
   font-size: 18px;
 }
 
+.logo {
+    vertical-align: middle;
+}
 /* Header styles */
 
 #header-db {
