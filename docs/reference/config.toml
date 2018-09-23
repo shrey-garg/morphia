@@ -1,7 +1,7 @@
 baseurl = "/morphia/1.4"
 languageCode = "en-us"
 title = "Morphia"
-theme = "learn"
+theme = "hugo-theme-learn"
 canonifyurls = false
 
 [params]

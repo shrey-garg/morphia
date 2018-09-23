@@ -82,11 +82,11 @@ There are a few things here to discuss and others we'll defer to later sections.
 so we know that it will be a top level document.  In the annotation, you'll see __"employees"__.  By default, Morphia will use the class 
 name as the collection name.  If you pass a String instead, it will use that value for the collection name.  In this case, all 
 __Employee__ instances will be saved in to the __employees__ collection instead.  There is a little more to this annotation but the 
-[annotations guide]({{< relref "guides/annotations.md#entity" >}}) covers those details.
+[annotations guide]({{< relref "/guides/annotations.md#entity" >}}) covers those details.
 
 The __@Indexes__ annotation lists which indexes Morphia should create.  In this instance, we're defining an index named __salary__ on the
  field salary with the default ordering of ascending.  More information on indexing can found
-  [here]({{< relref "guides/annotations.md#indexes" >}}).
+  [here]({{< relref "/guides/annotations.md#indexes" >}}).
  
 We've marked the __id__ field to be used as our primary key (the ___id__ field in the document).  In this instance we're using the Java driver 
 type of __ObjectId__ as the ID type.  The ID can be any type you'd like but is generally something like __ObjectId__ or __Long__.  There are 

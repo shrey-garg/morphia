@@ -8,15 +8,15 @@ title = "Indexing"
 Morphia provides annotations that allow developers to define indexes for a collection to be defined alongside the other mapping data on
 an entity's source.  In addition to the familiar ascending/descending index types, Morphia and MongoDB support [TTL]({{< docsref
 "core/index-ttl/" >}}), [text]({{< docsref "core/index-text/" >}}), and [geospatial]({{< docsref "applications/geospatial-indexes/" >}})
- indexes.   When defining [text]({{< ref "#text-indexing" >}}) indexes there are certain restrictions which will be covered below.  Full
+ indexes.   When defining [text]({{< relref "#text-indexing" >}}) indexes there are certain restrictions which will be covered below.  Full
   details for all these types are available in the [manual]({{< docsref "indexes" >}}).
 
 There are two ways to define indexes:  at the class level and at the field level.
 
 ## Class Level Indexes
 
-Class level indexing begins with the [__@Indexes__]({{< ref "guides/annotations.md#indexes" >}}) annotation.  This is a container
-annotation whose sole purpose is to hold a number of [__@Index__]({{< ref "guides/annotations.md#index" >}}) annotations.  This annotation
+Class level indexing begins with the [__@Indexes__]({{< ref "/guides/annotations.md#indexes" >}}) annotation.  This is a container
+annotation whose sole purpose is to hold a number of [__@Index__]({{< ref "/guides/annotations.md#index" >}}) annotations.  This annotation
 has two primary components to cover here:  __fields__ and __options__.  An index definition would take the following form:
 
 ```java
@@ -41,14 +41,14 @@ public class IndexExample {
 
 ### Fields
 
-The fields to use in an index definition are defined with the [__@Field__]({{< ref "guides/annotations.md#field" >}}) annotation. An
+The fields to use in an index definition are defined with the [__@Field__]({{< ref "/guides/annotations.md#field" >}}) annotation. An
 arbitrary number of __@Field__s can be given but at least one must be present.
 
 #### value()
 Indicates which field to use for indexing.  The name used for the field can be either the Java field name or the mapped document field
-name as defined in the class's mapping via, e.g.,  the [__@Property__]({{< ref "guides/annotations.md#property" >}}) or
- [__@Embedded__]({{< ref "guides/annotations.md#embedded" >}}) annotations.  For most index types, this value is validated by default.  An
-  exception is made for [text indexes]({{< ref "#text-indexing" >}}) as discussed below.
+name as defined in the class's mapping via, e.g.,  the [__@Property__]({{< ref "/guides/annotations.md#property" >}}) or
+ [__@Embedded__]({{< ref "/guides/annotations.md#embedded" >}}) annotations.  For most index types, this value is validated by default.  An
+  exception is made for [text indexes]({{< relref "#text-indexing" >}}) as discussed below.
 
 #### type()
 *Default: IndexType.ASC*
@@ -64,7 +64,7 @@ Specifies the weight to use when creating a text index.  This value only makes s
 
 ### Index Options
 
-Options for an index are defined on the [__@IndexOptions__]({{< ref "guides/annotations.md#indexoptions" >}}).  More complete coverage can
+Options for an index are defined on the [__@IndexOptions__]({{< ref "/guides/annotations.md#indexoptions" >}}).  More complete coverage can
 be found in the [manual]({{< docsref "reference/method/db.collection.createIndex/#options" >}}) but we'll provide some basic coverage
 here as well.
 
@@ -86,7 +86,8 @@ mapped document names.  Setting this to __true__ disables this validation.
 #### dropDups()
 *Default: false*
 
-When defining a [unique]({{< ref "#unique" >}}) index, if there are duplicate values found, the index creation will.  Setting this value to
+When defining a [unique]({{< relref "#unique" >}}) index, if there are duplicate values found, the index creation will.  Setting this 
+value to
 true will instruct MongoDB to drop the documents with duplicate values.
 
 {{% note class="important" %}}
@@ -102,7 +103,7 @@ this collection.  The field listed must contain values that are dates.
 #### language()
 *Optional*
 
-For [text indexes]({{< ref "#text-indexing" >}}), the language that determines the list of stop words and the rules for the stemmer and
+For [text indexes]({{< relref "#text-indexing" >}}), the language that determines the list of stop words and the rules for the stemmer and
 tokenizer. See [Text Search Languages]({{< docsref "reference/text-search-languages/" >}}) for the available languages and [Specify a
 Language for Text Index]({{< docsref "tutorial/specify-language-for-text-index" >}}) for more information and examples. The default value
  is **english**.
@@ -110,7 +111,7 @@ Language for Text Index]({{< docsref "tutorial/specify-language-for-text-index" 
 #### languageOverride()
 *Optional*
 
-For [text indexes]({{< ref "#text-indexing" >}}), the name of the field in the collection’s documents that contains the
+For [text indexes]({{< relref "#text-indexing" >}}), the name of the field in the collection’s documents that contains the
 override language for the document. The default value is **language**. See [Use any Field to Specify the Language for a Document]({{<
 docsref "tutorial/specify-language-for-text-index/#specify-language-field-text-index-example" >}}) for an example.
 
@@ -152,15 +153,15 @@ New in MongoDB 3.2, [partial indexes](https://docs.mongodb.com/v3.2/core/index-p
 *Optional*
 
 Collation allows users to specify language-specific rules for string comparison, such as rules for lettercase and accent marks.  A collation
-can be defined using the __collation()__ property on __@IndexOptions__ and takes an [__@Collation__]({{< ref "guides/annotations.md#collation" >}})
+can be defined using the __collation()__ property on __@IndexOptions__ and takes an [__@Collation__]({{< ref "/guides/annotations.md#collation" >}})
 instance.
 
 ## Field Level Indexes
 
 Field level indexing is a simpler approach to defining a basic, single key index.  These indexes are defined by applying the
-[__@Indexed__] ({{< ref "guides/annotations.md#indexed" >}}) annotation to a particular field on a class.  Because the index definition is
-applied at the field level, the index is created using only that field and so the [__@Field__]({{< ref "guides/annotations.md#field" >}})
-annotations are unnecessary.  The options for the index are the same as defined [above]({{< ref "#options" >}}).  A field level index
+[__@Indexed__] ({{< ref "/guides/annotations.md#indexed" >}}) annotation to a particular field on a class.  Because the index definition is
+applied at the field level, the index is created using only that field and so the [__@Field__]({{< ref "/guides/annotations.md#field" >}})
+annotations are unnecessary.  The options for the index are the same as defined [above]({{< relref "#options" >}}).  A field level index
 definition would look like this:
 
 ```java
