@@ -1,6 +1,6 @@
 {{ $version := .Get "version"}}
 <section class="maven">
-<pre><code class="ini">
+<pre><code>
 &lt;dependencies&gt;
     &lt;dependency&gt;
         &lt;groupId&gt;org.morphia&lt;/groupId&gt;
@@ -8,15 +8,13 @@
         &lt;version&gt;{{$version}}&lt;/version&gt;
     &lt;/dependency&gt;
 &lt;/dependencies&gt;
-
 </code></pre>
 </section>
 <section class="gradle hidden">
 <pre><code>
   dependencies {
-      compile 'org.morphiaorg.morphia:morphia:{{$version}}'
+      compile 'org.morphia:morphia:{{$version}}'
   }
-
 </code></pre>
 </section>
 <section class="downloadInfo">
