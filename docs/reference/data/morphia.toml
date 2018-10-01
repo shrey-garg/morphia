@@ -1,0 +1,7 @@
+githubUser = "MorphiaOrg"
+githubRepo = "morphia"
+githubBranch = "mapper"
+currentVersion = "2.0-SNAPSHOT"
+highlightTheme = "idea.css"
+apiUrl = "/javadoc"
+coreApiUrl = "http://api.mongodb.org/java/3.8/"

@@ -4,7 +4,7 @@ ext.rootConfig = new File(rootDir, 'config')
 ext.git = find('git')
 ext.majorVersion = major(version)
 
-ext.latest = gitVersion() == 'master' ? version : latest_release
+ext.latest = isSnapshotBranch() ? version : latest_release
 
 buildscript {
     repositories {
@@ -149,7 +149,7 @@ def buildingWith(n) {
 
 def major(fullVersion) {
     fullVersion.split('\\.').dropRight(1).join('.') +
-        (gitVersion() == 'master' && fullVersion.contains('-SNAPSHOT') ? '-SNAPSHOT' : '')
+        (isSnapshotBranch() && fullVersion.contains('-SNAPSHOT') ? '-SNAPSHOT' : '')
 }
 
 def gitVersion() {
@@ -171,6 +171,11 @@ def find(executable) {
             exec.absolutePath
         }
     } ?: executable
+}
+
+private boolean isSnapshotBranch() {
+    String name = gitVersion()
+    name == 'master' || name == 'mapper'
 }
 
 apply from: 'gradle/osgi-compatibility.gradle'
