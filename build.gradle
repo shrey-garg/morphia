@@ -54,7 +54,6 @@ configure(subprojects.findAll { it.name != 'util' }) {
 
     checkstyle {
         configDir = rootConfig
-//        version = "8.12"
     }
 
     findbugs {
@@ -119,16 +118,17 @@ configure(subprojects.findAll { it.name != 'util' }) {
         maxHeapSize = "512m"
     }
 
-    task quickCheck(dependsOn: ['checkstyleMain', 'checkstyleTest', 'findbugsMain']) {}
+    task quickCheck(dependsOn: ['revapi', 'checkstyleMain', 'checkstyleTest', 'findbugsMain']) {}
 
     javadoc {
         exclude "**/internal/**"
+        exclude "**/org/bson/**"
 
-        dependsOn project.project(':util').compileJava //We need taglets to be compiled
+        dependsOn project(':util').compileJava //We need taglets to be compiled
 
         options.author = true
         options.version = true
-        options.tagletPath project.project(":util").sourceSets.main.output.files
+        options.tagletPath project(":util").sourceSets.main.output.files
                                    .stream()
                                    .map { file(it) }
                                    .collect(toList())
