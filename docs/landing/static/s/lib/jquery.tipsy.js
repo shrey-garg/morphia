@@ -7,22 +7,19 @@
     
     function maybeCall(thing, ctx) {
         return (typeof thing == 'function') ? (thing.call(ctx)) : thing;
-    };
-    
+    }
     function isElementInDOM(ele) {
       while (ele = ele.parentNode) {
         if (ele == document) return true;
       }
       return false;
-    };
-    
+    }
     function Tipsy(element, options) {
         this.$element = $(element);
         this.options = options;
         this.enabled = true;
         this.fixTitle();
-    };
-    
+    }
     Tipsy.prototype = {
         show: function() {
             var title = this.getTitle();
@@ -159,8 +156,7 @@
                 tipsy.fixTitle();
                 setTimeout(function() { if (tipsy.hoverState == 'in') tipsy.show(); }, options.delayIn);
             }
-        };
-        
+        }
         function leave() {
             var tipsy = get(this);
             tipsy.hoverState = 'out';
@@ -169,8 +165,7 @@
             } else {
                 setTimeout(function() { if (tipsy.hoverState == 'out') tipsy.hide(); }, options.delayOut);
             }
-        };
-        
+        }
         if (!options.live) this.each(function() { get(this); });
         
         if (options.trigger != 'manual') {
