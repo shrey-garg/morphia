@@ -38,6 +38,7 @@ configure(subprojects.findAll { it.name != 'util' }) {
     apply plugin: 'findbugs'
     apply plugin: 'jacoco'
     apply plugin: 'optional-base'
+    apply plugin: 'maven-publish'
 
     group = 'org.mongodb.morphia'
     sourceCompatibility = JavaVersion.VERSION_1_6
@@ -134,6 +135,19 @@ configure(subprojects.findAll { it.name != 'util' }) {
         options.encoding = 'UTF-8'
         options.charSet 'UTF-8'
         options.docEncoding 'UTF-8'
+    }
+
+    publishing {
+        repositories {
+            maven {
+                url 'http://10.85.59.116/artifactory/v1.0/artifacts/libs-release-local'
+            }
+        }
+        publications { 
+            mavenJava(MavenPublication) { 
+                from components.java
+            } 
+        }
     }
 }
 
